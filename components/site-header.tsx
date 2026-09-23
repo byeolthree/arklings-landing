@@ -104,13 +104,7 @@ export function SiteHeader() {
             <Link href="/" className="text-[15px] text-title" onClick={() => setOpen(false)}>
               홈
             </Link>
-            <Link
-              href="/studio"
-              className="text-[15px] text-title"
-              onClick={() => setOpen(false)}
-            >
-              스튜디오
-            </Link>
+            <span className="text-[15px] text-body">스튜디오</span>
             <Link
               href="/apply"
               className="text-[15px] font-bold text-jaju"
