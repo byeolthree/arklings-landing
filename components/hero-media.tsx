@@ -2,7 +2,7 @@ export function HeroMedia() {
   return (
     <div className="w-full">
       <video
-        className="hidden h-[719px] w-full object-cover md:block"
+        className="hidden h-auto w-full md:block"
         autoPlay
         loop
         muted
@@ -17,7 +17,7 @@ export function HeroMedia() {
         브라우저가 영상을 지원하지 않습니다.
       </video>
       <video
-        className="aspect-[3840/2156] w-full object-cover md:hidden"
+        className="h-auto w-full md:hidden"
         autoPlay
         loop
         muted

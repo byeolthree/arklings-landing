@@ -25,7 +25,7 @@ const relatedMobile = relatedDesktop.slice(0, 2).map((item, index) =>
 export default function HomePage() {
   return (
     <main className="flex w-full flex-col">
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-20 px-4 pt-10 md:gap-40 md:px-20">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-20 px-4 pt-10 md:gap-40 md:px-10 lg:px-20">
       <section aria-labelledby="collab-heading" className="flex flex-col gap-4 md:gap-5">
         <div className="flex flex-col gap-px md:gap-1">
           <h1
@@ -60,11 +60,11 @@ export default function HomePage() {
             <p className="leading-[18px] text-body">대본 · 영상 · 자료</p>
           </div>
         </div>
-        <ul className="flex flex-col gap-2 md:flex-row md:gap-3">
+        <ul className="flex flex-col gap-2 md:flex-row md:flex-wrap md:gap-3">
           {roles.map((role) => (
             <li
               key={role}
-              className="flex items-center gap-2 rounded-[20px] border border-border bg-background px-3.5 py-2 text-xs leading-[18px] text-body"
+              className="flex w-fit items-center gap-2 whitespace-nowrap rounded-[20px] border border-border bg-background px-3.5 py-2 text-xs leading-[18px] text-body"
             >
               <span className="size-2 shrink-0 rounded-full bg-teal" aria-hidden />
               {role}
@@ -120,12 +120,12 @@ export default function HomePage() {
             </div>
             <div className="mt-2.5 flex flex-col gap-2.5 md:mt-auto">
               <p className="text-[11px] font-bold text-title md:translate-y-2">관련 자료</p>
-              <ul className="flex gap-1.5 md:gap-2">
+              <ul className="flex flex-wrap gap-1.5 md:gap-2">
                 {relatedDesktop.map((item) => (
                   <li
                     key={item.label}
                     className={cn(
-                      "hidden rounded-full px-3 py-1.5 text-[11px] md:inline-flex",
+                      "hidden whitespace-nowrap rounded-full px-3 py-1.5 text-[11px] md:inline-flex",
                       item.className,
                     )}
                   >
@@ -136,7 +136,7 @@ export default function HomePage() {
                   <li
                     key={item.label}
                     className={cn(
-                      "inline-flex rounded-full px-3 py-1.5 text-[11px] md:hidden",
+                      "inline-flex whitespace-nowrap rounded-full px-3 py-1.5 text-[11px] md:hidden",
                       item.className,
                     )}
                   >
@@ -172,7 +172,7 @@ export default function HomePage() {
         >
           아클링스 소개
         </div>
-        <div className="mx-auto w-full max-w-[1440px] px-4 pb-10 md:px-20">
+        <div className="mx-auto w-full max-w-[1440px] px-4 pb-10 md:px-10 lg:px-20">
           <HeroCopy />
         </div>
       </section>

@@ -22,7 +22,7 @@ export function CollaborationMedia() {
     <div className="overflow-hidden rounded-lg">
       <video
         ref={videoRef}
-        className="aspect-[343/147] w-full object-cover md:aspect-auto md:h-[549px]"
+        className="h-auto w-full"
         autoPlay
         loop
         muted

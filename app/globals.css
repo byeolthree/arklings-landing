@@ -132,6 +132,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    word-break: keep-all;
   }
   html {
     @apply font-sans;

@@ -1,7 +1,7 @@
 export function SiteFooter() {
   return (
     <footer className="mt-auto border-t border-teal bg-background">
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-1 px-4 py-4 md:flex-row md:items-start md:justify-between md:px-20 md:pb-3 md:pt-4">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-1 px-4 py-4 md:flex-row md:items-start md:justify-between md:px-10 md:pb-3 md:pt-4 lg:px-20">
         <div className="flex max-w-[560px] flex-col gap-0.5">
           <p className="text-sm font-bold text-title md:text-lg">Arklings</p>
           <p className="hidden text-xs leading-normal text-body md:block">
