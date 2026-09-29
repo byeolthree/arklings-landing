@@ -40,3 +40,7 @@ npm run dev
 ```
 
 브라우저에서 http://localhost:3000 을 연다. 배포용 확인은 `npm run build`다.
+
+## 배포 흐름
+
+작업은 `dev`에서 진행하고, 검수한 미션 5 변경만 `main`에 반영한다. Vercel 프로젝트 `arklings-main-deploy`는 GitHub 저장소의 `main` 브랜치를 Production으로 추적한다. `main`에 새 커밋을 푸시한 뒤 Vercel의 배포 상태와 공개 주소를 확인한다.
