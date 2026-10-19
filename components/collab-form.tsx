@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import type { FormState } from "@/app/actions/collab";
 import { CardHeading, PaperCard, primaryBtn } from "@/components/paper-card";
 import {
@@ -63,7 +63,6 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
   const initialRoles = state.values
     ? (state.values.roles ?? "").split(",").filter(Boolean)
     : (initial?.roles ?? []);
-  const [target, setTarget] = useState(v("source_work_id", initial?.source_work_id ?? ""));
   const editing = !!initial;
 
   return (
@@ -99,7 +98,8 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
 
         <Field label="신청 대상" required error={e.source_work_id} htmlFor="source_work_id">
           <div className="relative">
-            <select id="source_work_id" name="source_work_id" value={target} onChange={(ev) => setTarget(ev.target.value)} disabled={pending} className={`${inputCls.replace("text-[#292126]", target ? "text-[#292126]" : "text-[#8c8c8c]")} h-10 appearance-none pr-9 md:h-11`}>
+            {/* 서버 액션 뒤 React가 폼을 초기화하므로, 직전 입력값을 key로 다시 마운트해 선택을 유지한다 */}
+            <select key={v("source_work_id", initial?.source_work_id ?? "")} id="source_work_id" name="source_work_id" defaultValue={v("source_work_id", initial?.source_work_id ?? "")} disabled={pending} className={`${inputCls} h-10 appearance-none pr-9 has-[option[value='']:checked]:text-[#8c8c8c] md:h-11`}>
               <option value="">{NO_TARGET_LABEL}</option>
               {works.map((w) => (
                 <option key={w.id} value={w.id}>
@@ -151,7 +151,7 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
 
         {editing && (
           <Field label="상태" required error={e.status} htmlFor="status">
-            <select id="status" name="status" defaultValue={v("status", initial?.status)} disabled={pending} className={`${inputCls} h-10 md:h-11`}>
+            <select key={v("status", initial?.status)} id="status" name="status" defaultValue={v("status", initial?.status)} disabled={pending} className={`${inputCls} h-10 md:h-11`}>
               {Object.entries(STATUSES).map(([k, label]) => (
                 <option key={k} value={k}>
                   {label}
