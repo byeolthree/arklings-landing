@@ -149,3 +149,36 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 ## 승인 필요 작업
 
 새 패키지 설치, 외부 서비스 연결, 환경 변수 추가, 개인정보 처리, 결제 또는 비용 발생 작업은 사용자 승인 없이 진행하지 않는다.
+
+## 미션 6 — 협업 신청 CRUD (Supabase)
+
+이 프로젝트는 미션5와 별개의 새 저장소다. 첫 화면(`/`)은 v14 랜딩(`public/landing.html`)을 그대로 보여 주며, 위 미션 5 규칙 중 홈·신청 폼·스튜디오 화면 관련 내용은 더 이상 이 프로젝트에 해당하지 않는다.
+
+스택: Next.js Server Actions + Supabase(DB, Storage). 로그인·RLS는 이번 미션 범위 밖(미션 7). 실제 개인정보는 받지 않고 테스트 값만 쓴다.
+
+### 테이블 (전체 SQL은 `supabase/schema.sql`)
+
+- `source_works`: id, title(unique), sort_order, created_at. 신청 대상 3건(악의 꽃, 사다함의 꿈, 단 하나의 꿈).
+- `collab_requests`: id(uuid), applicant_name, contact(이메일 또는 전화번호), sns_handle, source_work_id(→source_works, 비면 "특정 이야기 아님"), roles(text[], 1개 이상), idea(10~1000자), portfolio_url(http/https), consent(true만 허용), attachment_path·attachment_name(선택), status, created_at, updated_at(트리거 자동 갱신).
+- `roles` 값: video / script / art_director / history_advisor / producer / other
+- `status` 값: received(접수, 기본) / reviewing(검토 중) / accepted(수락) / rejected(거절)
+- 화면은 Figma 「미션5 아클링스 웹·모바일」 파일의 협업 신청 시안(노드 346:2, 346:539, 355:16, 355:49)을 따른다. 칸을 바꾸려면 시안과 SQL을 함께 고친다.
+
+### Storage
+
+- 버킷 `collab-attachments`: 공개 읽기, PDF·JPG·PNG, 4MB 이하 (Vercel 요청 크기 한도 4.5MB 때문). 파일 경로는 `collab_requests.attachment_path`에 저장. 신청을 삭제하면 파일도 함께 지운다.
+
+### 환경 변수 (이름만 기록, 값은 `.env.local`과 Vercel에만)
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+### 화면 경로
+
+`/collab`(목록, 10개씩), `/collab/new`, `/collab/done`(접수 완료), `/collab/[id]`, `/collab/[id]/edit`. `/apply`는 `/collab/new`로 이동. 없는 id는 404.
+
+### 규칙
+
+- 저장은 Server Actions로만 한다. mock 데이터·localStorage를 최종 저장소로 쓰지 않는다.
+- 저장 중 버튼 잠금, 입력 오류는 칸 아래 표시, 로딩·오류·빈 상태를 모두 만든다.
+- 비밀 키·서비스 롤 키는 코드와 GitHub에 넣지 않는다.

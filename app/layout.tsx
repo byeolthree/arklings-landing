@@ -18,15 +18,11 @@ const notoSerif = Noto_Serif_KR({
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: "Arklings",
-    template: "%s | Arklings",
-  },
-  description:
-    "한국 신화·고대사 기반 IP를 여러 크리에이터가 함께 만드는 참여형 제작 스튜디오, 아클링스.",
+  title: { default: "아클링스", template: "%s | 아클링스" },
+  description: "한국 신화·고대사 기반 IP 스튜디오, 아클링스의 협업 신청.",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="ko"
@@ -34,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="flex min-h-full flex-col bg-background font-sans text-body">
         <SiteHeader />
-        {children}
+        <main className="flex flex-1 flex-col">{children}</main>
         <SiteFooter />
       </body>
     </html>

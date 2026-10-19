@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>아클링스 — 기획안 만들기 v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --jaju: #a61e5c; --jaju-deep: #861349; --teal: #1f5a66; --dusty: #5f7c99; --sage: #6f8a7a; --gold: #d89a24;
+    --bg: #faf7f8; --line: #e8dfe3; --body: #574a50; --title: #2a2025; --paper: #ffffff; --tint: #f5ecf0;
+    --hero-bg: color-mix(in srgb, var(--bg) 55%, var(--line));
+    --ease: cubic-bezier(.2, .8, .2, 1); --max: 1440px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--body);
+    font-family: "Noto Sans KR", -apple-system, "Apple SD Gothic Neo", sans-serif;
+    font-size: 14px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+    overflow-x: hidden; word-break: keep-all; overflow-wrap: break-word;
+  }
+  h1, h2, h3 { color: var(--title); margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+  p { margin: 0; text-wrap: pretty; }
+  .wrap { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 16px; }
+  @media (min-width: 768px) { .wrap { padding: 0 40px; } }
+  @media (min-width: 1024px) { .wrap { padding: 0 80px; } }
+
+  .btn {
+    position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 40px; padding: 0 20px; border-radius: 999px;
+    font: inherit; font-weight: 700; font-size: 14px; cursor: pointer;
+    border: 1.5px solid var(--jaju); text-decoration: none; white-space: nowrap;
+    transition: transform .35s var(--ease), background .3s, color .3s, box-shadow .35s, opacity .3s;
+  }
+  .btn-primary { background: var(--jaju); color: #fff; box-shadow: 0 8px 24px -10px rgba(166,30,92,.55); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(166,30,92,.65); }
+  .btn-ghost { background: transparent; color: var(--jaju); }
+  .btn-ghost:hover { background: var(--jaju); color: #fff; transform: translateY(-2px); }
+  .btn[disabled] { opacity: .35; pointer-events: none; }
+  .btn .arrow { transition: transform .35s var(--ease); }
+  .btn:hover .arrow { transform: translateX(4px); }
+  .btn:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+  header.site { position: sticky; top: 0; z-index: 50; background: rgba(250,247,248,.9); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--line); }
+  .nav { display: flex; align-items: center; gap: 28px; height: 68px; }
+  .logo { font-weight: 700; font-size: 22px; color: var(--jaju); text-decoration: none; letter-spacing: -0.02em; }
+  .nav-links { display: none; gap: 22px; font-size: 15px; }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: 15px; }
+  .nav-right .mypage { display: none; }
+  .nav .btn { min-height: 36px; padding: 0 16px; font-size: 13px; }
+  @media (min-width: 768px) { .logo { font-size: 24px; } }
+  @media (min-width: 900px) { .nav-links, .nav-right .mypage { display: flex; } }
+
+  /* ---------- 상단 ---------- */
+  .plan-top { background: linear-gradient(180deg, var(--hero-bg), var(--bg)); padding: 40px 0 28px; text-align: center; }
+  @media (min-width: 768px) { .plan-top { padding: 56px 0 36px; } }
+  .plan-top h1 { font-size: 24px; font-weight: 700; }
+  .plan-top p { margin-top: 8px; font-size: 14px; }
+  @media (min-width: 768px) { .plan-top h1 { font-size: 32px; } .plan-top p { font-size: 16px; } }
+
+  /* 01 02 03 탭 */
+  .tabs {
+    display: inline-flex; gap: 4px; margin-top: 24px; padding: 6px; border-radius: 999px;
+    background: color-mix(in srgb, var(--line) 70%, var(--bg)); position: relative;
+  }
+  @media (min-width: 768px) { .tabs { margin-top: 32px; } }
+  .tab {
+    position: relative; z-index: 1; border: 0; background: transparent; cursor: pointer;
+    font: inherit; font-size: 14px; font-weight: 700; color: var(--body);
+    padding: 10px 16px; border-radius: 999px; white-space: nowrap; transition: color .3s;
+  }
+  @media (min-width: 768px) { .tab { font-size: 16px; padding: 12px 28px; } }
+  .tab .n { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-weight: 500; color: color-mix(in srgb, var(--body) 60%, transparent); margin-right: 6px; }
+  .tab[aria-selected="true"] { color: var(--title); }
+  .tab[aria-selected="true"] .n { color: var(--jaju); }
+  .tab-pill {
+    position: absolute; z-index: 0; top: 6px; bottom: 6px; left: 0; width: 0; border-radius: 999px; background: #fff;
+    box-shadow: 0 6px 18px -10px rgba(42,32,37,.35); transition: transform .5s var(--ease), width .5s var(--ease);
+  }
+
+  /* ---------- 슬라이드 ---------- */
+  .stage { padding-bottom: 80px; }
+  .deck {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 28px;
+    box-shadow: 0 30px 60px -40px rgba(42,32,37,.35); overflow: hidden;
+  }
+  .track { display: flex; transition: transform .7s var(--ease); touch-action: pan-y; }
+  .slide { flex: 0 0 100%; min-width: 0; }
+  .crumb {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 16px 20px; border-bottom: 1px solid var(--line); font-size: 13px;
+  }
+  @media (min-width: 768px) { .crumb { padding: 18px 28px; font-size: 14px; } }
+  .crumb b { color: var(--title); }
+  .crumb .count { font-size: 12px; font-weight: 700; color: var(--teal); }
+  .slide-body { display: grid; gap: 24px; padding: 20px; }
+  @media (min-width: 768px) { .slide-body { padding: 28px; } }
+  @media (min-width: 980px) { .slide-body { grid-template-columns: 360px 1fr; gap: 40px; padding: 36px; } }
+
+  .dummy-img {
+    position: relative; aspect-ratio: 4 / 3; border-radius: 18px; overflow: hidden;
+    background: repeating-linear-gradient(135deg, var(--tint) 0 14px, #fff 14px 28px);
+    border: 1px dashed var(--line); display: grid; place-items: center; text-align: center;
+  }
+  @media (min-width: 980px) { .dummy-img { aspect-ratio: 4 / 5; } }
+  .dummy-img span { font-size: 13px; font-weight: 700; color: var(--body); background: #fff; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); }
+  .dummy-img .sw { position: absolute; left: 0; top: 0; bottom: 0; width: 6px; padding: 0; border: 0; border-radius: 0; }
+  .slide-intro { margin-top: 14px; }
+  .slide-intro h2 { font-size: 20px; }
+  @media (min-width: 768px) { .slide-intro h2 { font-size: 24px; } }
+  .slide-intro p { margin-top: 6px; font-size: 14px; }
+
+  .qs { display: grid; gap: 0; }
+  .qitem { padding: 22px 0; border-bottom: 1px solid var(--line); }
+  .qitem:first-child { padding-top: 0; }
+  .qitem:last-child { border-bottom: 0; }
+  .qitem .k { font-size: 12px; font-weight: 700; color: var(--teal); letter-spacing: .06em; }
+  .qitem h3 { margin-top: 6px; font-size: 16px; }
+  @media (min-width: 768px) { .qitem h3 { font-size: 18px; } }
+  .qitem .hint { margin-top: 4px; font-size: 13px; }
+  .opts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .opt {
+    min-height: 38px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff;
+    font: inherit; font-size: 14px; font-weight: 500; color: var(--title); cursor: pointer;
+    transition: border-color .25s, background .25s, color .25s, transform .25s var(--ease);
+  }
+  .opt:hover { border-color: var(--teal); transform: translateY(-2px); }
+  .opt[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .opt.unknown { border-style: dashed; color: var(--body); }
+  .answer {
+    display: block; width: 100%; margin-top: 14px; min-height: 96px; resize: vertical;
+    padding: 14px 16px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--bg);
+    font: inherit; font-size: 14px; line-height: 1.7; color: var(--title);
+  }
+  .answer:focus { outline: none; border-color: var(--teal); background: #fff; }
+
+  .deck-foot {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 16px 20px; border-top: 1px solid var(--line); background: var(--bg);
+  }
+  @media (min-width: 768px) { .deck-foot { padding: 18px 28px; } }
+  .dots { display: flex; gap: 8px; }
+  .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line); transition: background .3s, width .3s var(--ease); }
+  .dots i.on { width: 22px; border-radius: 4px; background: var(--jaju); }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="logo" href="/">Arklings</a>
+    <nav class="nav-links" aria-label="주요 메뉴">
+      <span>킹덤</span><span>스튜디오</span><span>크리에이터</span><span>라이브러리</span><span>커뮤니티</span>
+    </nav>
+    <div class="nav-right">
+      <span class="mypage">마이페이지</span>
+      <a class="btn btn-ghost" href="/collab/new">협업 문의하기</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="plan-top">
+    <div class="wrap">
+      <h1>기획안 만들기</h1>
+      <p>인물, 스토리, 세계관 순서로 질문에 답해 보세요.</p>
+      <div class="tabs" role="tablist" aria-label="기획안 단계">
+        <span class="tab-pill" id="pill"></span>
+        <button class="tab" role="tab" aria-selected="true" aria-controls="s0" id="t0"><span class="n">01</span>인물</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="s1" id="t1"><span class="n">02</span>스토리</button>
+        <button class="tab" role="tab" aria-selected="false" aria-controls="s2" id="t2"><span class="n">03</span>세계관</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="stage">
+    <div class="wrap">
+      <div class="deck">
+        <div class="track" id="track">
+
+          <!-- 01 인물 -->
+          <article class="slide" id="s0" role="tabpanel" aria-labelledby="t0">
+            <div class="crumb"><span>기획안 만들기 / <b>인물</b></span><span class="count">01 / 03</span></div>
+            <div class="slide-body">
+              <div>
+                <div class="dummy-img"><span class="sw" style="background:var(--jaju)"></span><span>더미 이미지</span></div>
+                <div class="slide-intro">
+                  <h2>인물에 대해서</h2>
+                  <p>인물 페이지 설명 더미 텍스트가 들어갑니다.</p>
+                </div>
+              </div>
+              <div class="qs">
+                <div class="qitem">
+                  <span class="k">Q1</span>
+                  <h3>인물 질문 1 더미 텍스트가 들어갑니다.</h3>
+                  <p class="hint">질문 도움말 더미 텍스트</p>
+                  <div class="opts"><button class="opt" aria-pressed="false">보기 1</button><button class="opt" aria-pressed="false">보기 2</button><button class="opt" aria-pressed="false">보기 3</button><button class="opt unknown" aria-pressed="false">아직 모름</button></div>
+                </div>
+                <div class="qitem">
+                  <span class="k">Q2</span>
+                  <h3>인물 질문 2 더미 텍스트가 들어갑니다.</h3>
+                  <p class="hint">질문 도움말 더미 텍스트</p>
+                  <div class="opts"><button class="opt" aria-pressed="false">보기 1</button><button class="opt" aria-pressed="false">보기 2</button><button class="opt" aria-pressed="false">보기 3</button><button class="opt unknown" aria-pressed="false">아직 모름</button></div>
+                </div>
+                <div class="qitem">
+                  <span class="k">Q3</span>
+                  <h3>인물 질문 3 더미 텍스트가 들어갑니다.</h3>
+                  <p class="hint">질문 도움말 더미 텍스트</p>
+                  <textarea class="answer" placeholder="답변 입력 더미 텍스트"></textarea>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 02 스토리 -->
+          <article class="slide" id="s1" role="tabpanel" aria-labelledby="t1">
+            <div class="crumb"><span>기획안 만들기 / <b>스토리</b></span><span class="count">02 / 03</span></div>
+            <div class="slide-body">
+              <div>
+                <div class="dummy-img"><span class="sw" style="background:var(--gold)"></span><span>더미 이미지</span></div>
+                <div class="slide-intro">
+                  <h2>스토리에 대해서</h2>
+                  <p>스토리 페이지 설명 더미 텍스트가 들어갑니다.</p>
+                </div>
+              </div>
+              <div class="qs">
+                <div class="qitem">
+                  <span class="k">Q1</span>
+                  <h3>스토리 질문 1 더미 텍스트가 들어갑니다.</h3>
+                  <p class="hint">질문 도움말 더미 텍스트</p>
+                  <div class="opts"><button class="opt" aria-pressed="false">보기 1</button><button class="opt" aria-pressed="false">보기 2</button><button class="opt" aria-pressed="false">보기 3</button><button class="opt unknown" aria-pressed="false">아직 모름</button></div>
+                </div>
+                <div class="qitem">
+                  <span class="k">Q2</span>
+                  <h3>스토리 질문 2 더미 텍스트가 들어갑니다.</h3>
+                  <p class="hint">질문 도움말 더미 텍스트</p>
+                  <div class="opts"><button class="opt" aria-pressed="false">보기 1</button><button class="opt" aria-pressed="false">보기 2</button><button class="opt" aria-pressed="false">보기 3</button><button class="opt unknown" aria-pressed="false">아직 모름</button></div>
+                </div>
+                <div class="qitem">
+                  <span class="k">Q3</span>
+                  <h3>스토리 질문 3 더미 텍스트가 들어갑니다.</h3>
+                  <p class="hint">질문 도움말 더미 텍스트</p>
+                  <textarea class="answer" placeholder="답변 입력 더미 텍스트"></textarea>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 03 세계관 -->
+          <article class="slide" id="s2" role="tabpanel" aria-labelledby="t2">
+            <div class="crumb"><span>기획안 만들기 / <b>세계관</b></span><span class="count">03 / 03</span></div>
+            <div class="slide-body">
+              <div>
+                <div class="dummy-img"><span class="sw" style="background:var(--teal)"></span><span>더미 이미지</span></div>
+                <div class="slide-intro">
+                  <h2>세계관에 대해서</h2>
+                  <p>세계관 페이지 설명 더미 텍스트가 들어갑니다.</p>
+                </div>
+              </div>
+              <div class="qs">
+                <div class="qitem">
+                  <span class="k">Q1</span>
+                  <h3>세계관 질문 1 더미 텍스트가 들어갑니다.</h3>
+                  <p class="hint">질문 도움말 더미 텍스트</p>
+                  <div class="opts"><button class="opt" aria-pressed="false">보기 1</button><button class="opt" aria-pressed="false">보기 2</button><button class="opt" aria-pressed="false">보기 3</button><button class="opt unknown" aria-pressed="false">아직 모름</button></div>
+                </div>
+                <div class="qitem">
+                  <span class="k">Q2</span>
+                  <h3>세계관 질문 2 더미 텍스트가 들어갑니다.</h3>
+                  <p class="hint">질문 도움말 더미 텍스트</p>
+                  <div class="opts"><button class="opt" aria-pressed="false">보기 1</button><button class="opt" aria-pressed="false">보기 2</button><button class="opt" aria-pressed="false">보기 3</button><button class="opt unknown" aria-pressed="false">아직 모름</button></div>
+                </div>
+                <div class="qitem">
+                  <span class="k">Q3</span>
+                  <h3>세계관 질문 3 더미 텍스트가 들어갑니다.</h3>
+                  <p class="hint">질문 도움말 더미 텍스트</p>
+                  <textarea class="answer" placeholder="답변 입력 더미 텍스트"></textarea>
+                </div>
+              </div>
+            </div>
+          </article>
+
+        </div>
+        <div class="deck-foot">
+          <button class="btn btn-ghost" id="prev" disabled>← 이전</button>
+          <div class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+          <button class="btn btn-primary" id="next">다음 <span class="arrow">→</span></button>
+          <button class="btn btn-primary" id="finish" hidden>기획안 만들기 완료</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
+  var pill = document.getElementById("pill");
+  var track = document.getElementById("track");
+  var dots = document.querySelectorAll(".dots i");
+  var prev = document.getElementById("prev"), next = document.getElementById("next"), finish = document.getElementById("finish");
+  var slides = document.querySelectorAll(".slide");
+  var cur = 0, N = tabs.length;
+
+  function placePill() {
+    var t = tabs[cur];
+    pill.style.width = t.offsetWidth + "px";
+    pill.style.transform = "translateX(" + t.offsetLeft + "px)";
+  }
+  function go(i) {
+    cur = Math.max(0, Math.min(N - 1, i));
+    track.style.transform = "translateX(" + (-100 * cur) + "%)";
+    tabs.forEach(function (t, k) { t.setAttribute("aria-selected", k === cur ? "true" : "false"); t.tabIndex = k === cur ? 0 : -1; });
+    slides.forEach(function (s, k) { s.setAttribute("aria-hidden", k === cur ? "false" : "true"); s.inert = k !== cur; });
+    dots.forEach(function (d, k) { d.classList.toggle("on", k === cur); });
+    prev.disabled = cur === 0;
+    next.hidden = cur === N - 1; finish.hidden = cur !== N - 1;
+    placePill();
+  }
+  tabs.forEach(function (t, k) {
+    t.addEventListener("click", function () { go(k); });
+    t.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight") { go(cur + 1); tabs[cur].focus(); }
+      if (e.key === "ArrowLeft") { go(cur - 1); tabs[cur].focus(); }
+    });
+  });
+  prev.addEventListener("click", function () { go(cur - 1); });
+  next.addEventListener("click", function () { go(cur + 1); window.scrollTo({ top: 0, behavior: "smooth" }); });
+
+  // 보기 선택 (질문 안에서 하나만)
+  document.querySelectorAll(".opts").forEach(function (g) {
+    g.addEventListener("click", function (e) {
+      var b = e.target.closest(".opt"); if (!b) return;
+      g.querySelectorAll(".opt").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+    });
+  });
+
+  // 좌우로 밀어서 넘기기
+  var sx = null, sy = null;
+  track.addEventListener("pointerdown", function (e) { if (e.pointerType === "mouse") return; sx = e.clientX; sy = e.clientY; });
+  track.addEventListener("pointerup", function (e) {
+    if (sx === null) return;
+    var dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(cur + (dx < 0 ? 1 : -1));
+  });
+
+  window.addEventListener("resize", placePill);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(placePill);
+  go(0);
+})();
+</script>
+</body>
+</html>
