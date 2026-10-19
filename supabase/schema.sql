@@ -61,6 +61,10 @@ on conflict (id) do update
 drop policy if exists "collab attachments insert" on storage.objects;
 create policy "collab attachments insert" on storage.objects
   for insert to anon, authenticated with check (bucket_id = 'collab-attachments');
+-- 파일을 지울 때 Supabase가 먼저 파일 목록을 읽어야 해서 읽기 허용도 필요하다
+drop policy if exists "collab attachments select" on storage.objects;
+create policy "collab attachments select" on storage.objects
+  for select to anon, authenticated using (bucket_id = 'collab-attachments');
 drop policy if exists "collab attachments delete" on storage.objects;
 create policy "collab attachments delete" on storage.objects
   for delete to anon, authenticated using (bucket_id = 'collab-attachments');
