@@ -154,10 +154,9 @@
   .tmpl { font-size: 15px; line-height: 1.9; color: var(--body); }
   @media (min-width: 768px) { .tmpl { font-size: 17px; } }
   .tmpl b { font-weight: 700; color: color-mix(in srgb, var(--jaju) 55%, var(--body)); }
-  .tmpl b.cur { color: var(--jaju); background: #fff; padding: 2px 6px; border-radius: 6px; }
+  .tmpl b.cur { color: var(--jaju); }
   .tmpl b.filled { color: var(--title); }
-  .tmpl-note { margin-top: 14px; padding-top: 14px; border-top: 1px solid color-mix(in srgb, var(--jaju) 18%, transparent); font-size: 13px; }
-  .len { margin-top: 6px; font-size: 12px; color: var(--body); }
+    .len { margin-top: 6px; font-size: 12px; color: var(--body); }
   .len.ok .cnt { color: var(--teal); font-weight: 700; }
   .len.over .cnt { color: var(--jaju); font-weight: 700; }
   .bad { margin-top: 16px; padding: 14px 16px; border-radius: 12px; border: 1px dashed var(--line); }
@@ -205,11 +204,10 @@
     <div class="wrap">
       <div class="deck" role="tabpanel" aria-labelledby="t0">
         <div class="track" id="track">
-
-          <article class="slide" id="s0" aria-label="사건">
-            <div class="crumb"><span>기획안 만들기 / 로그라인 / <b>사건</b></span><span class="count">01 / 06</span></div>
+          <article class="slide" id="s0" aria-label="로그라인">
+            <div class="crumb"><span>기획안 만들기 / <b>로그라인</b></span></div>
             <div class="slide-body">
-              <div class="side"><p class="tmpl"><b data-slot="0" class="cur">(사건)</b>이 벌어진 후, <b data-slot="1">(주인공)</b>은 <b data-slot="2">(장애물)</b>을 극복해야 <b data-slot="3">(목표)</b>를 달성할 수 있다. 그렇지 않으면 <b data-slot="4">(위험)</b>이 닥친다.</p><p class="tmpl-note">칸마다 한 문장, 사건 하나, 손실 하나로 써 주세요. 사랑·성장·진실·상처·운명·행복 같은 말이 들어가면 대부분 다시 써야 해요.</p></div>
+              <div class="side"><p class="tmpl"><b data-slot="0">(사건)</b>이 벌어진 후, <b data-slot="1">(주인공)</b>은 <b data-slot="2">(장애물)</b>을 극복해야 <b data-slot="3">(목표)</b>를 달성할 수 있다. 그렇지 않으면 <b data-slot="4">(위험)</b>이 닥친다.</p></div>
               <div class="qs">
                 <div class="qitem">
                   <span class="k">01 사건</span>
@@ -217,105 +215,60 @@
                   <p class="hint">이야기를 시작시키는, 주인공 바깥에서 일어난 사건이에요. 어느 날 한 번 일어나고, 그 전과 후로 주인공의 일상이 갈라져야 해요.</p>
                   <textarea class="answer slot" data-slot="0" data-min="20" data-max="35" rows="2" aria-label="사건"></textarea>
                   <p class="len"><span class="cnt">0</span>자 · 20~35자로 써 주세요</p>
-                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“어릴 때부터 상처가 있었다” <span>→ 배경이에요</span></li><li>“세상은 부조리하다” <span>→ 주제예요</span></li><li>“이 도시에서 살아간다” <span>→ 설정이에요</span></li></ul></div>
+                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“어릴 때부터 상처가 있었다” <span>→ 배경이에요</span></li><li>“세상은 부조리하다” <span>→ 주제예요</span></li><li>“이 도시에서 살아간다” <span>→ 설정이에요</span></li><li>“사랑에 빠진다”, “운명이 시작된다” <span>→ 추상어예요. 실제로 일어난 일로 써 주세요</span></li><li>“전쟁이 나고 아버지가 죽었다” <span>→ 사건이 둘이에요. 하나만 고르세요</span></li></ul></div>
                 </div>
                 <div class="qitem">
                   <span class="k">확인</span>
                   <div class="check"><p>‘어느 날 일어난 사건 하나’로 말할 수 있나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>이 사건 전과 후로 주인공의 일상이 확실히 갈라지나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>주인공 바깥에서 일어난 일인가요? (마음속 깨달음이면 다시 써 주세요)</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div>
                 </div>
-              </div>
-            </div>
-          </article>
-
-          <article class="slide" id="s1" aria-label="주인공">
-            <div class="crumb"><span>기획안 만들기 / 로그라인 / <b>주인공</b></span><span class="count">02 / 06</span></div>
-            <div class="slide-body">
-              <div class="side"><p class="tmpl"><b data-slot="0">(사건)</b>이 벌어진 후, <b data-slot="1" class="cur">(주인공)</b>은 <b data-slot="2">(장애물)</b>을 극복해야 <b data-slot="3">(목표)</b>를 달성할 수 있다. 그렇지 않으면 <b data-slot="4">(위험)</b>이 닥친다.</p><p class="tmpl-note">칸마다 한 문장, 사건 하나, 손실 하나로 써 주세요. 사랑·성장·진실·상처·운명·행복 같은 말이 들어가면 대부분 다시 써야 해요.</p></div>
-              <div class="qs">
                 <div class="qitem">
                   <span class="k">02 주인공</span>
                   <h3>주인공은 어떤 사람인가요? 이름 말고, 하는 일이나 처지, 관계로 써 주세요.</h3>
                   <p class="hint">이야기에서 결정을 내리고 움직이는 사람이에요. 정체성 하나와 약점 하나가 보이면 좋아요.</p>
                   <textarea class="answer slot" data-slot="1" data-min="15" data-max="30" rows="2" aria-label="주인공"></textarea>
                   <p class="len"><span class="cnt">0</span>자 · 15~30자로 써 주세요</p>
-                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“한 소녀는…” <span>→ 정체성이 없어요</span></li><li>“평범한 남자는…” <span>→ 정보가 없어요</span></li><li>“천재 과학자는…” <span>→ 약점이 없어요</span></li></ul></div>
+                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“한 소녀는…” <span>→ 정체성이 없어요</span></li><li>“평범한 남자는…” <span>→ 정보가 없어요</span></li><li>“천재 과학자는…” <span>→ 약점이 없어요</span></li><li>“쌍둥이 남매는…” <span>→ 주인공이 둘이에요. 한 사람만 써 주세요</span></li></ul></div>
                 </div>
                 <div class="qitem">
                   <span class="k">확인</span>
                   <div class="check"><p>직업, 지위, 관계 중 하나가 드러나나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>이야기에서 결정을 직접 내리나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>약점이 갈등에 실제로 영향을 주나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div>
                 </div>
-              </div>
-            </div>
-          </article>
-
-          <article class="slide" id="s2" aria-label="장애물">
-            <div class="crumb"><span>기획안 만들기 / 로그라인 / <b>장애물</b></span><span class="count">03 / 06</span></div>
-            <div class="slide-body">
-              <div class="side"><p class="tmpl"><b data-slot="0">(사건)</b>이 벌어진 후, <b data-slot="1">(주인공)</b>은 <b data-slot="2" class="cur">(장애물)</b>을 극복해야 <b data-slot="3">(목표)</b>를 달성할 수 있다. 그렇지 않으면 <b data-slot="4">(위험)</b>이 닥친다.</p><p class="tmpl-note">칸마다 한 문장, 사건 하나, 손실 하나로 써 주세요. 사랑·성장·진실·상처·운명·행복 같은 말이 들어가면 대부분 다시 써야 해요.</p></div>
-              <div class="qs">
                 <div class="qitem">
                   <span class="k">03 장애물</span>
                   <h3>무엇이 주인공을 막나요? 누가, 어떻게 막는지 써 주세요.</h3>
                   <p class="hint">단순한 어려움이 아니라 주인공과 반대 방향으로 미는 힘이에요. 갈수록 세져야 해요.</p>
                   <textarea class="answer slot" data-slot="2" data-min="15" data-max="30" rows="2" aria-label="장애물"></textarea>
                   <p class="len"><span class="cnt">0</span>자 · 15~30자로 써 주세요</p>
-                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“사랑은 어렵다” <span>→ 추상적이에요</span></li><li>“가난과 싸운다” <span>→ 너무 넓어요</span></li><li>“트라우마를 극복한다” <span>→ 속마음 갈등만 있어요</span></li></ul></div>
+                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“사랑은 어렵다” <span>→ 추상적이에요</span></li><li>“가난과 싸운다” <span>→ 너무 넓어요</span></li><li>“트라우마를 극복한다” <span>→ 속마음 갈등만 있어요</span></li><li>“적도 많고 날씨도 나쁘다” <span>→ 장애물이 여럿이에요. 가장 큰 것 하나만 써 주세요</span></li></ul></div>
                 </div>
                 <div class="qitem">
                   <span class="k">확인</span>
                   <div class="check"><p>장애물이 주인공을 직접 방해하나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>갈수록 강해지거나 압박이 쌓이나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>이게 없으면 목표를 너무 쉽게 이루게 되나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div>
                 </div>
-              </div>
-            </div>
-          </article>
-
-          <article class="slide" id="s3" aria-label="목표">
-            <div class="crumb"><span>기획안 만들기 / 로그라인 / <b>목표</b></span><span class="count">04 / 06</span></div>
-            <div class="slide-body">
-              <div class="side"><p class="tmpl"><b data-slot="0">(사건)</b>이 벌어진 후, <b data-slot="1">(주인공)</b>은 <b data-slot="2">(장애물)</b>을 극복해야 <b data-slot="3" class="cur">(목표)</b>를 달성할 수 있다. 그렇지 않으면 <b data-slot="4">(위험)</b>이 닥친다.</p><p class="tmpl-note">칸마다 한 문장, 사건 하나, 손실 하나로 써 주세요. 사랑·성장·진실·상처·운명·행복 같은 말이 들어가면 대부분 다시 써야 해요.</p></div>
-              <div class="qs">
                 <div class="qitem">
                   <span class="k">04 목표</span>
                   <h3>주인공은 결국 무엇을 해내야 하나요?</h3>
                   <p class="hint">하고 싶은 마음이 아니라, 끝에서 성공과 실패가 갈리는 결과예요. 구한다, 훔친다, 막는다, 탈출한다처럼 동사로 써 주세요.</p>
                   <textarea class="answer slot" data-slot="3" data-min="15" data-max="30" rows="2" aria-label="목표"></textarea>
                   <p class="len"><span class="cnt">0</span>자 · 15~30자로 써 주세요</p>
-                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“행복해지고 싶다”, “진짜 사랑을 찾는다”, “성장한다” <span>→ 목표가 아니라 주제나 변화예요</span></li></ul></div>
+                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“행복해지고 싶다”, “진짜 사랑을 찾는다”, “성장한다” <span>→ 목표가 아니라 주제나 변화예요</span></li><li>“왕이 되고 나라도 구한다” <span>→ 목표가 둘이에요. 하나만 써 주세요</span></li></ul></div>
                 </div>
                 <div class="qitem">
                   <span class="k">확인</span>
                   <div class="check"><p>마지막 장면에서 성공했는지 1초 만에 알 수 있나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>기한이나 조건이 있나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>이야기 끝까지 바뀌지 않나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div>
                 </div>
-              </div>
-            </div>
-          </article>
-
-          <article class="slide" id="s4" aria-label="위험">
-            <div class="crumb"><span>기획안 만들기 / 로그라인 / <b>위험</b></span><span class="count">05 / 06</span></div>
-            <div class="slide-body">
-              <div class="side"><p class="tmpl"><b data-slot="0">(사건)</b>이 벌어진 후, <b data-slot="1">(주인공)</b>은 <b data-slot="2">(장애물)</b>을 극복해야 <b data-slot="3">(목표)</b>를 달성할 수 있다. 그렇지 않으면 <b data-slot="4" class="cur">(위험)</b>이 닥친다.</p><p class="tmpl-note">칸마다 한 문장, 사건 하나, 손실 하나로 써 주세요. 사랑·성장·진실·상처·운명·행복 같은 말이 들어가면 대부분 다시 써야 해요.</p></div>
-              <div class="qs">
                 <div class="qitem">
                   <span class="k">05 위험</span>
                   <h3>실패하면 주인공은 무엇을 잃나요?</h3>
                   <p class="hint">아쉬움이 아니라 대가예요. 직업, 자유, 가족, 생명, 신분처럼 구체적인 것 하나로 써 주세요.</p>
                   <textarea class="answer slot" data-slot="4" data-min="15" data-max="30" rows="2" aria-label="위험"></textarea>
                   <p class="len"><span class="cnt">0</span>자 · 15~30자로 써 주세요</p>
-                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“후회하게 된다”, “슬퍼진다”, “인생이 힘들어진다” <span>→ 감정이지 위험이 아니에요</span></li></ul></div>
+                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“후회하게 된다”, “슬퍼진다”, “인생이 힘들어진다” <span>→ 감정이지 위험이 아니에요</span></li><li>“가족도 잃고 직업도 잃는다” <span>→ 잃는 것이 여럿이에요. 하나만 써 주세요</span></li></ul></div>
                 </div>
                 <div class="qitem">
                   <span class="k">확인</span>
                   <div class="check"><p>잃는 것을 한 단어로 말할 수 있나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>한 번 잃으면 되돌릴 수 없나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>주인공이 지금 당장 움직여야 할 이유가 되나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div>
                 </div>
-              </div>
-            </div>
-          </article>
-
-          <article class="slide" id="s5" aria-label="로그라인 완성">
-            <div class="crumb"><span>기획안 만들기 / 로그라인 / <b>완성</b></span><span class="count">06 / 06</span></div>
-            <div class="slide-body">
-              <div class="side"><p class="tmpl"><b data-slot="0">(사건)</b>이 벌어진 후, <b data-slot="1">(주인공)</b>은 <b data-slot="2">(장애물)</b>을 극복해야 <b data-slot="3">(목표)</b>를 달성할 수 있다. 그렇지 않으면 <b data-slot="4">(위험)</b>이 닥친다.</p><p class="tmpl-note">칸마다 한 문장, 사건 하나, 손실 하나로 써 주세요. 사랑·성장·진실·상처·운명·행복 같은 말이 들어가면 대부분 다시 써야 해요.</p></div>
-              <div class="qs">
                 <div class="qitem">
                   <span class="k">06 로그라인 완성</span>
                   <h3>다섯 칸이 한 문장으로 모였어요. 직접 다듬어 보세요.</h3>
@@ -334,13 +287,10 @@
               </div>
             </div>
           </article>
-
         </div>
         <div class="deck-foot">
-          <button class="btn btn-ghost" id="prev" disabled>← 이전</button>
-          <div class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
-          <button class="btn btn-primary" id="next">다음 <span class="arrow">→</span></button>
-          <button class="btn btn-primary" id="finish" hidden>기획안 만들기 완료</button>
+          <span></span>
+          <button class="btn btn-primary" id="finish">기획안 만들기 완료</button>
         </div>
       </div>
     </div>
@@ -351,29 +301,11 @@
 (function () {
   var tabs = Array.prototype.slice.call(document.querySelectorAll(".tab"));
   var pill = document.getElementById("pill");
-  var track = document.getElementById("track");
-  var dots = document.querySelectorAll(".dots i");
-  var prev = document.getElementById("prev"), next = document.getElementById("next"), finish = document.getElementById("finish");
-  var slides = document.querySelectorAll(".slide");
-  var cur = 0, N = slides.length;
-
   function placePill() {
     var t = tabs[0];
     pill.style.width = t.offsetWidth + "px";
     pill.style.transform = "translateX(" + t.offsetLeft + "px)";
   }
-  function go(i) {
-    cur = Math.max(0, Math.min(N - 1, i));
-    track.style.transform = "translateX(" + (-100 * cur) + "%)";
-    slides.forEach(function (s, k) { s.setAttribute("aria-hidden", k === cur ? "false" : "true"); s.inert = k !== cur; });
-    dots.forEach(function (d, k) { d.classList.toggle("on", k === cur); });
-    prev.disabled = cur === 0;
-    next.hidden = cur === N - 1; finish.hidden = cur !== N - 1;
-    if (cur === N - 1) buildLogline();
-    placePill();
-  }
-  prev.addEventListener("click", function () { go(cur - 1); });
-  next.addEventListener("click", function () { go(cur + 1); window.scrollTo({ top: 0, behavior: "smooth" }); });
 
   // 글자 수 표시
   function count(t) {
@@ -382,7 +314,11 @@
     len.classList.toggle("ok", n >= +t.dataset.min && n <= +t.dataset.max);
     len.classList.toggle("over", n > +t.dataset.max);
   }
-  document.querySelectorAll("textarea.answer").forEach(function (t) { t.addEventListener("input", function () { count(t); if (t.classList.contains("slot")) fillTmpl(); }); });
+  document.querySelectorAll("textarea.answer").forEach(function (t) { t.addEventListener("input", function () { count(t); if (t.classList.contains("slot")) { fillTmpl(); buildLogline(); } });
+    if (t.classList.contains("slot")) {
+      t.addEventListener("focus", function () { document.querySelectorAll(".tmpl b").forEach(function (b) { b.classList.toggle("cur", +b.dataset.slot === +t.dataset.slot); }); });
+    }
+  });
 
   // 왼쪽 양식 문장에 쓴 내용 채우기
   var labels = ["사건", "주인공", "장애물", "목표", "위험"];
@@ -415,18 +351,10 @@
     });
   });
 
-  // 좌우로 밀어서 넘기기
-  var sx = null, sy = null;
-  track.addEventListener("pointerdown", function (e) { if (e.pointerType === "mouse") return; sx = e.clientX; sy = e.clientY; });
-  track.addEventListener("pointerup", function (e) {
-    if (sx === null) return;
-    var dx = e.clientX - sx, dy = e.clientY - sy; sx = null;
-    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(cur + (dx < 0 ? 1 : -1));
-  });
-
   window.addEventListener("resize", placePill);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(placePill);
-  go(0);
+  placePill();
+  buildLogline();
 })();
 </script>
 </body>
