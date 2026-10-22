@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>아클링스 — 기획안 만들기 v1</title>
+<title>아클링스 — 기획안 만들기</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;900&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet" />
@@ -39,6 +39,7 @@
   .btn-ghost { background: transparent; color: var(--jaju); }
   .btn-ghost:hover { background: var(--jaju); color: #fff; transform: translateY(-2px); }
   .btn[disabled] { opacity: .35; pointer-events: none; }
+  .btn[hidden] { display: none; }
   .btn .arrow { transition: transform .35s var(--ease); }
   .btn:hover .arrow { transform: translateX(4px); }
   .btn:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
@@ -146,6 +147,31 @@
   .dots i.on { width: 22px; border-radius: 4px; background: var(--jaju); }
 
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+  /* ---------- 로그라인 ---------- */
+  .side { background: var(--tint); border-radius: 18px; padding: 20px; align-self: start; }
+  @media (min-width: 980px) { .side { position: sticky; top: 96px; padding: 24px; } }
+  .tmpl { font-size: 15px; line-height: 1.9; color: var(--body); }
+  @media (min-width: 768px) { .tmpl { font-size: 17px; } }
+  .tmpl b { font-weight: 700; color: color-mix(in srgb, var(--jaju) 55%, var(--body)); }
+  .tmpl b.cur { color: var(--jaju); background: #fff; padding: 2px 6px; border-radius: 6px; }
+  .tmpl b.filled { color: var(--title); }
+  .tmpl-note { margin-top: 14px; padding-top: 14px; border-top: 1px solid color-mix(in srgb, var(--jaju) 18%, transparent); font-size: 13px; }
+  .len { margin-top: 6px; font-size: 12px; color: var(--body); }
+  .len.ok .cnt { color: var(--teal); font-weight: 700; }
+  .len.over .cnt { color: var(--jaju); font-weight: 700; }
+  .bad { margin-top: 16px; padding: 14px 16px; border-radius: 12px; border: 1px dashed var(--line); }
+  .bad p { font-size: 12px; font-weight: 700; color: var(--body); }
+  .bad ul { margin: 6px 0 0; padding-left: 18px; font-size: 13px; color: var(--title); }
+  .bad li + li { margin-top: 2px; }
+  .bad li span { color: var(--body); }
+  .check { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .check:last-of-type { border-bottom: 0; }
+  .qitem .k + .check { margin-top: 6px; }
+  .check p { flex: 1 1 260px; font-size: 14px; color: var(--title); }
+  .opts.yn { margin-top: 0; gap: 6px; }
+  .opts.yn .opt { min-height: 34px; padding: 0 14px; font-size: 13px; }
+  .warn { margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--gold) 16%, #fff); color: var(--title); font-size: 13px; }
 </style>
 </head>
 <body>
@@ -167,118 +193,143 @@
   <section class="plan-top">
     <div class="wrap">
       <h1>기획안 만들기</h1>
-      <p>인물, 스토리, 세계관 순서로 질문에 답해 보세요.</p>
+      <p>로그라인부터 써 볼까요? 다섯 칸을 채우면 이야기를 한 문장으로 말할 수 있어요.</p>
       <div class="tabs" role="tablist" aria-label="기획안 단계">
         <span class="tab-pill" id="pill"></span>
-        <button class="tab" role="tab" aria-selected="true" aria-controls="s0" id="t0"><span class="n">01</span>인물</button>
-        <button class="tab" role="tab" aria-selected="false" aria-controls="s1" id="t1"><span class="n">02</span>스토리</button>
-        <button class="tab" role="tab" aria-selected="false" aria-controls="s2" id="t2"><span class="n">03</span>세계관</button>
+        <button class="tab" role="tab" aria-selected="true" id="t0"><span class="n">01</span>로그라인</button>
       </div>
     </div>
   </section>
 
   <section class="stage">
     <div class="wrap">
-      <div class="deck">
+      <div class="deck" role="tabpanel" aria-labelledby="t0">
         <div class="track" id="track">
 
-          <!-- 01 인물 -->
-          <article class="slide" id="s0" role="tabpanel" aria-labelledby="t0">
-            <div class="crumb"><span>기획안 만들기 / <b>인물</b></span><span class="count">01 / 03</span></div>
+          <article class="slide" id="s0" aria-label="사건">
+            <div class="crumb"><span>기획안 만들기 / 로그라인 / <b>사건</b></span><span class="count">01 / 06</span></div>
             <div class="slide-body">
-              <div>
-                <div class="dummy-img"><span class="sw" style="background:var(--jaju)"></span><span>더미 이미지</span></div>
-                <div class="slide-intro">
-                  <h2>인물에 대해서</h2>
-                  <p>인물 페이지 설명 더미 텍스트가 들어갑니다.</p>
-                </div>
-              </div>
+              <div class="side"><p class="tmpl"><b data-slot="0" class="cur">(사건)</b>이 벌어진 후, <b data-slot="1">(주인공)</b>은 <b data-slot="2">(장애물)</b>을 극복해야 <b data-slot="3">(목표)</b>를 달성할 수 있다. 그렇지 않으면 <b data-slot="4">(위험)</b>이 닥친다.</p><p class="tmpl-note">칸마다 한 문장, 사건 하나, 손실 하나로 써 주세요. 사랑·성장·진실·상처·운명·행복 같은 말이 들어가면 대부분 다시 써야 해요.</p></div>
               <div class="qs">
                 <div class="qitem">
-                  <span class="k">Q1</span>
-                  <h3>인물 질문 1 더미 텍스트가 들어갑니다.</h3>
-                  <p class="hint">질문 도움말 더미 텍스트</p>
-                  <div class="opts"><button class="opt" aria-pressed="false">보기 1</button><button class="opt" aria-pressed="false">보기 2</button><button class="opt" aria-pressed="false">보기 3</button><button class="opt unknown" aria-pressed="false">아직 모름</button></div>
+                  <span class="k">01 사건</span>
+                  <h3>주인공이 가만히 있을 수 없게 만든 사건은 뭔가요?</h3>
+                  <p class="hint">이야기를 시작시키는, 주인공 바깥에서 일어난 사건이에요. 어느 날 한 번 일어나고, 그 전과 후로 주인공의 일상이 갈라져야 해요.</p>
+                  <textarea class="answer slot" data-slot="0" data-min="20" data-max="35" rows="2" aria-label="사건"></textarea>
+                  <p class="len"><span class="cnt">0</span>자 · 20~35자로 써 주세요</p>
+                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“어릴 때부터 상처가 있었다” <span>→ 배경이에요</span></li><li>“세상은 부조리하다” <span>→ 주제예요</span></li><li>“이 도시에서 살아간다” <span>→ 설정이에요</span></li></ul></div>
                 </div>
                 <div class="qitem">
-                  <span class="k">Q2</span>
-                  <h3>인물 질문 2 더미 텍스트가 들어갑니다.</h3>
-                  <p class="hint">질문 도움말 더미 텍스트</p>
-                  <div class="opts"><button class="opt" aria-pressed="false">보기 1</button><button class="opt" aria-pressed="false">보기 2</button><button class="opt" aria-pressed="false">보기 3</button><button class="opt unknown" aria-pressed="false">아직 모름</button></div>
-                </div>
-                <div class="qitem">
-                  <span class="k">Q3</span>
-                  <h3>인물 질문 3 더미 텍스트가 들어갑니다.</h3>
-                  <p class="hint">질문 도움말 더미 텍스트</p>
-                  <textarea class="answer" placeholder="답변 입력 더미 텍스트"></textarea>
+                  <span class="k">확인</span>
+                  <div class="check"><p>‘어느 날 일어난 사건 하나’로 말할 수 있나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>이 사건 전과 후로 주인공의 일상이 확실히 갈라지나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>주인공 바깥에서 일어난 일인가요? (마음속 깨달음이면 다시 써 주세요)</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div>
                 </div>
               </div>
             </div>
           </article>
 
-          <!-- 02 스토리 -->
-          <article class="slide" id="s1" role="tabpanel" aria-labelledby="t1">
-            <div class="crumb"><span>기획안 만들기 / <b>스토리</b></span><span class="count">02 / 03</span></div>
+          <article class="slide" id="s1" aria-label="주인공">
+            <div class="crumb"><span>기획안 만들기 / 로그라인 / <b>주인공</b></span><span class="count">02 / 06</span></div>
             <div class="slide-body">
-              <div>
-                <div class="dummy-img"><span class="sw" style="background:var(--gold)"></span><span>더미 이미지</span></div>
-                <div class="slide-intro">
-                  <h2>스토리에 대해서</h2>
-                  <p>스토리 페이지 설명 더미 텍스트가 들어갑니다.</p>
-                </div>
-              </div>
+              <div class="side"><p class="tmpl"><b data-slot="0">(사건)</b>이 벌어진 후, <b data-slot="1" class="cur">(주인공)</b>은 <b data-slot="2">(장애물)</b>을 극복해야 <b data-slot="3">(목표)</b>를 달성할 수 있다. 그렇지 않으면 <b data-slot="4">(위험)</b>이 닥친다.</p><p class="tmpl-note">칸마다 한 문장, 사건 하나, 손실 하나로 써 주세요. 사랑·성장·진실·상처·운명·행복 같은 말이 들어가면 대부분 다시 써야 해요.</p></div>
               <div class="qs">
                 <div class="qitem">
-                  <span class="k">Q1</span>
-                  <h3>스토리 질문 1 더미 텍스트가 들어갑니다.</h3>
-                  <p class="hint">질문 도움말 더미 텍스트</p>
-                  <div class="opts"><button class="opt" aria-pressed="false">보기 1</button><button class="opt" aria-pressed="false">보기 2</button><button class="opt" aria-pressed="false">보기 3</button><button class="opt unknown" aria-pressed="false">아직 모름</button></div>
+                  <span class="k">02 주인공</span>
+                  <h3>주인공은 어떤 사람인가요? 이름 말고, 하는 일이나 처지, 관계로 써 주세요.</h3>
+                  <p class="hint">이야기에서 결정을 내리고 움직이는 사람이에요. 정체성 하나와 약점 하나가 보이면 좋아요.</p>
+                  <textarea class="answer slot" data-slot="1" data-min="15" data-max="30" rows="2" aria-label="주인공"></textarea>
+                  <p class="len"><span class="cnt">0</span>자 · 15~30자로 써 주세요</p>
+                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“한 소녀는…” <span>→ 정체성이 없어요</span></li><li>“평범한 남자는…” <span>→ 정보가 없어요</span></li><li>“천재 과학자는…” <span>→ 약점이 없어요</span></li></ul></div>
                 </div>
                 <div class="qitem">
-                  <span class="k">Q2</span>
-                  <h3>스토리 질문 2 더미 텍스트가 들어갑니다.</h3>
-                  <p class="hint">질문 도움말 더미 텍스트</p>
-                  <div class="opts"><button class="opt" aria-pressed="false">보기 1</button><button class="opt" aria-pressed="false">보기 2</button><button class="opt" aria-pressed="false">보기 3</button><button class="opt unknown" aria-pressed="false">아직 모름</button></div>
-                </div>
-                <div class="qitem">
-                  <span class="k">Q3</span>
-                  <h3>스토리 질문 3 더미 텍스트가 들어갑니다.</h3>
-                  <p class="hint">질문 도움말 더미 텍스트</p>
-                  <textarea class="answer" placeholder="답변 입력 더미 텍스트"></textarea>
+                  <span class="k">확인</span>
+                  <div class="check"><p>직업, 지위, 관계 중 하나가 드러나나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>이야기에서 결정을 직접 내리나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>약점이 갈등에 실제로 영향을 주나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div>
                 </div>
               </div>
             </div>
           </article>
 
-          <!-- 03 세계관 -->
-          <article class="slide" id="s2" role="tabpanel" aria-labelledby="t2">
-            <div class="crumb"><span>기획안 만들기 / <b>세계관</b></span><span class="count">03 / 03</span></div>
+          <article class="slide" id="s2" aria-label="장애물">
+            <div class="crumb"><span>기획안 만들기 / 로그라인 / <b>장애물</b></span><span class="count">03 / 06</span></div>
             <div class="slide-body">
-              <div>
-                <div class="dummy-img"><span class="sw" style="background:var(--teal)"></span><span>더미 이미지</span></div>
-                <div class="slide-intro">
-                  <h2>세계관에 대해서</h2>
-                  <p>세계관 페이지 설명 더미 텍스트가 들어갑니다.</p>
-                </div>
-              </div>
+              <div class="side"><p class="tmpl"><b data-slot="0">(사건)</b>이 벌어진 후, <b data-slot="1">(주인공)</b>은 <b data-slot="2" class="cur">(장애물)</b>을 극복해야 <b data-slot="3">(목표)</b>를 달성할 수 있다. 그렇지 않으면 <b data-slot="4">(위험)</b>이 닥친다.</p><p class="tmpl-note">칸마다 한 문장, 사건 하나, 손실 하나로 써 주세요. 사랑·성장·진실·상처·운명·행복 같은 말이 들어가면 대부분 다시 써야 해요.</p></div>
               <div class="qs">
                 <div class="qitem">
-                  <span class="k">Q1</span>
-                  <h3>세계관 질문 1 더미 텍스트가 들어갑니다.</h3>
-                  <p class="hint">질문 도움말 더미 텍스트</p>
-                  <div class="opts"><button class="opt" aria-pressed="false">보기 1</button><button class="opt" aria-pressed="false">보기 2</button><button class="opt" aria-pressed="false">보기 3</button><button class="opt unknown" aria-pressed="false">아직 모름</button></div>
+                  <span class="k">03 장애물</span>
+                  <h3>무엇이 주인공을 막나요? 누가, 어떻게 막는지 써 주세요.</h3>
+                  <p class="hint">단순한 어려움이 아니라 주인공과 반대 방향으로 미는 힘이에요. 갈수록 세져야 해요.</p>
+                  <textarea class="answer slot" data-slot="2" data-min="15" data-max="30" rows="2" aria-label="장애물"></textarea>
+                  <p class="len"><span class="cnt">0</span>자 · 15~30자로 써 주세요</p>
+                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“사랑은 어렵다” <span>→ 추상적이에요</span></li><li>“가난과 싸운다” <span>→ 너무 넓어요</span></li><li>“트라우마를 극복한다” <span>→ 속마음 갈등만 있어요</span></li></ul></div>
                 </div>
                 <div class="qitem">
-                  <span class="k">Q2</span>
-                  <h3>세계관 질문 2 더미 텍스트가 들어갑니다.</h3>
-                  <p class="hint">질문 도움말 더미 텍스트</p>
-                  <div class="opts"><button class="opt" aria-pressed="false">보기 1</button><button class="opt" aria-pressed="false">보기 2</button><button class="opt" aria-pressed="false">보기 3</button><button class="opt unknown" aria-pressed="false">아직 모름</button></div>
+                  <span class="k">확인</span>
+                  <div class="check"><p>장애물이 주인공을 직접 방해하나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>갈수록 강해지거나 압박이 쌓이나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>이게 없으면 목표를 너무 쉽게 이루게 되나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="slide" id="s3" aria-label="목표">
+            <div class="crumb"><span>기획안 만들기 / 로그라인 / <b>목표</b></span><span class="count">04 / 06</span></div>
+            <div class="slide-body">
+              <div class="side"><p class="tmpl"><b data-slot="0">(사건)</b>이 벌어진 후, <b data-slot="1">(주인공)</b>은 <b data-slot="2">(장애물)</b>을 극복해야 <b data-slot="3" class="cur">(목표)</b>를 달성할 수 있다. 그렇지 않으면 <b data-slot="4">(위험)</b>이 닥친다.</p><p class="tmpl-note">칸마다 한 문장, 사건 하나, 손실 하나로 써 주세요. 사랑·성장·진실·상처·운명·행복 같은 말이 들어가면 대부분 다시 써야 해요.</p></div>
+              <div class="qs">
+                <div class="qitem">
+                  <span class="k">04 목표</span>
+                  <h3>주인공은 결국 무엇을 해내야 하나요?</h3>
+                  <p class="hint">하고 싶은 마음이 아니라, 끝에서 성공과 실패가 갈리는 결과예요. 구한다, 훔친다, 막는다, 탈출한다처럼 동사로 써 주세요.</p>
+                  <textarea class="answer slot" data-slot="3" data-min="15" data-max="30" rows="2" aria-label="목표"></textarea>
+                  <p class="len"><span class="cnt">0</span>자 · 15~30자로 써 주세요</p>
+                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“행복해지고 싶다”, “진짜 사랑을 찾는다”, “성장한다” <span>→ 목표가 아니라 주제나 변화예요</span></li></ul></div>
                 </div>
                 <div class="qitem">
-                  <span class="k">Q3</span>
-                  <h3>세계관 질문 3 더미 텍스트가 들어갑니다.</h3>
-                  <p class="hint">질문 도움말 더미 텍스트</p>
-                  <textarea class="answer" placeholder="답변 입력 더미 텍스트"></textarea>
+                  <span class="k">확인</span>
+                  <div class="check"><p>마지막 장면에서 성공했는지 1초 만에 알 수 있나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>기한이나 조건이 있나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>이야기 끝까지 바뀌지 않나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="slide" id="s4" aria-label="위험">
+            <div class="crumb"><span>기획안 만들기 / 로그라인 / <b>위험</b></span><span class="count">05 / 06</span></div>
+            <div class="slide-body">
+              <div class="side"><p class="tmpl"><b data-slot="0">(사건)</b>이 벌어진 후, <b data-slot="1">(주인공)</b>은 <b data-slot="2">(장애물)</b>을 극복해야 <b data-slot="3">(목표)</b>를 달성할 수 있다. 그렇지 않으면 <b data-slot="4" class="cur">(위험)</b>이 닥친다.</p><p class="tmpl-note">칸마다 한 문장, 사건 하나, 손실 하나로 써 주세요. 사랑·성장·진실·상처·운명·행복 같은 말이 들어가면 대부분 다시 써야 해요.</p></div>
+              <div class="qs">
+                <div class="qitem">
+                  <span class="k">05 위험</span>
+                  <h3>실패하면 주인공은 무엇을 잃나요?</h3>
+                  <p class="hint">아쉬움이 아니라 대가예요. 직업, 자유, 가족, 생명, 신분처럼 구체적인 것 하나로 써 주세요.</p>
+                  <textarea class="answer slot" data-slot="4" data-min="15" data-max="30" rows="2" aria-label="위험"></textarea>
+                  <p class="len"><span class="cnt">0</span>자 · 15~30자로 써 주세요</p>
+                  <div class="bad"><p>이렇게 쓰면 다시 생각해 보세요</p><ul><li>“후회하게 된다”, “슬퍼진다”, “인생이 힘들어진다” <span>→ 감정이지 위험이 아니에요</span></li></ul></div>
+                </div>
+                <div class="qitem">
+                  <span class="k">확인</span>
+                  <div class="check"><p>잃는 것을 한 단어로 말할 수 있나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>한 번 잃으면 되돌릴 수 없나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>주인공이 지금 당장 움직여야 할 이유가 되나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="slide" id="s5" aria-label="로그라인 완성">
+            <div class="crumb"><span>기획안 만들기 / 로그라인 / <b>완성</b></span><span class="count">06 / 06</span></div>
+            <div class="slide-body">
+              <div class="side"><p class="tmpl"><b data-slot="0">(사건)</b>이 벌어진 후, <b data-slot="1">(주인공)</b>은 <b data-slot="2">(장애물)</b>을 극복해야 <b data-slot="3">(목표)</b>를 달성할 수 있다. 그렇지 않으면 <b data-slot="4">(위험)</b>이 닥친다.</p><p class="tmpl-note">칸마다 한 문장, 사건 하나, 손실 하나로 써 주세요. 사랑·성장·진실·상처·운명·행복 같은 말이 들어가면 대부분 다시 써야 해요.</p></div>
+              <div class="qs">
+                <div class="qitem">
+                  <span class="k">06 로그라인 완성</span>
+                  <h3>다섯 칸이 한 문장으로 모였어요. 직접 다듬어 보세요.</h3>
+                  <textarea class="answer" id="logline" data-min="120" data-max="180" rows="5" aria-label="로그라인"></textarea>
+                  <p class="len"><span class="cnt">0</span>자 · 120~180자로 써 주세요</p>
+                </div>
+                <div class="qitem" id="finalChecks">
+                  <span class="k">마지막 확인</span>
+                  <div class="check"><p>목표는 성공과 실패가 확실히 갈리나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>장애물이 주인공을 적극적으로 방해하나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>“실패해도 괜찮다”고 말하기 어렵나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div>
+                  <p class="warn" id="warn" hidden>다 채운 것 같아도, 아직 빠진 부품이 있을 가능성이 커요. ‘아니오’라고 답한 칸을 다시 봐 주세요.</p>
+                </div>
+                <div class="qitem">
+                  <span class="k">줄여서 확인</span>
+                  <div class="check"><p>세계관 설명을 빼도 갈등이 남나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>주제를 직접 말하지 않아도 이야기가 이해되나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div><div class="check"><p>15단어로 줄여도 핵심이 남나요?</p><div class="opts yn"><button class="opt" aria-pressed="false" data-v="yes">예</button><button class="opt" aria-pressed="false" data-v="no">아니오</button></div></div>
                 </div>
               </div>
             </div>
@@ -287,7 +338,7 @@
         </div>
         <div class="deck-foot">
           <button class="btn btn-ghost" id="prev" disabled>← 이전</button>
-          <div class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+          <div class="dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
           <button class="btn btn-primary" id="next">다음 <span class="arrow">→</span></button>
           <button class="btn btn-primary" id="finish" hidden>기획안 만들기 완료</button>
         </div>
@@ -304,38 +355,63 @@
   var dots = document.querySelectorAll(".dots i");
   var prev = document.getElementById("prev"), next = document.getElementById("next"), finish = document.getElementById("finish");
   var slides = document.querySelectorAll(".slide");
-  var cur = 0, N = tabs.length;
+  var cur = 0, N = slides.length;
 
   function placePill() {
-    var t = tabs[cur];
+    var t = tabs[0];
     pill.style.width = t.offsetWidth + "px";
     pill.style.transform = "translateX(" + t.offsetLeft + "px)";
   }
   function go(i) {
     cur = Math.max(0, Math.min(N - 1, i));
     track.style.transform = "translateX(" + (-100 * cur) + "%)";
-    tabs.forEach(function (t, k) { t.setAttribute("aria-selected", k === cur ? "true" : "false"); t.tabIndex = k === cur ? 0 : -1; });
     slides.forEach(function (s, k) { s.setAttribute("aria-hidden", k === cur ? "false" : "true"); s.inert = k !== cur; });
     dots.forEach(function (d, k) { d.classList.toggle("on", k === cur); });
     prev.disabled = cur === 0;
     next.hidden = cur === N - 1; finish.hidden = cur !== N - 1;
+    if (cur === N - 1) buildLogline();
     placePill();
   }
-  tabs.forEach(function (t, k) {
-    t.addEventListener("click", function () { go(k); });
-    t.addEventListener("keydown", function (e) {
-      if (e.key === "ArrowRight") { go(cur + 1); tabs[cur].focus(); }
-      if (e.key === "ArrowLeft") { go(cur - 1); tabs[cur].focus(); }
-    });
-  });
   prev.addEventListener("click", function () { go(cur - 1); });
   next.addEventListener("click", function () { go(cur + 1); window.scrollTo({ top: 0, behavior: "smooth" }); });
 
-  // 보기 선택 (질문 안에서 하나만)
+  // 글자 수 표시
+  function count(t) {
+    var n = t.value.trim().length, len = t.parentNode.querySelector(".len");
+    len.querySelector(".cnt").textContent = n;
+    len.classList.toggle("ok", n >= +t.dataset.min && n <= +t.dataset.max);
+    len.classList.toggle("over", n > +t.dataset.max);
+  }
+  document.querySelectorAll("textarea.answer").forEach(function (t) { t.addEventListener("input", function () { count(t); if (t.classList.contains("slot")) fillTmpl(); }); });
+
+  // 왼쪽 양식 문장에 쓴 내용 채우기
+  var labels = ["사건", "주인공", "장애물", "목표", "위험"];
+  function val(k) { return document.querySelector('textarea.slot[data-slot="' + k + '"]').value.trim(); }
+  function fillTmpl() {
+    document.querySelectorAll(".tmpl b").forEach(function (b) {
+      var k = +b.dataset.slot, v = val(k);
+      b.textContent = v || "(" + labels[k] + ")"; b.classList.toggle("filled", !!v);
+    });
+  }
+  // 06 완성: 비어 있을 때만 다섯 칸을 이어 붙여 채움 (직접 다듬은 내용은 덮어쓰지 않음)
+  var logline = document.getElementById("logline"), edited = false;
+  logline.addEventListener("input", function () { edited = true; });
+  function buildLogline() {
+    if (edited) return;
+    var v = [0, 1, 2, 3, 4].map(function (k) { return val(k) || "(" + labels[k] + ")"; });
+    logline.value = v[0] + "이 벌어진 후, " + v[1] + "은 " + v[2] + "을 극복해야 " + v[3] + "를 달성할 수 있다. 그렇지 않으면 " + v[4] + "이 닥친다.";
+    count(logline);
+  }
+
+  // 예/아니오 선택
   document.querySelectorAll(".opts").forEach(function (g) {
     g.addEventListener("click", function (e) {
       var b = e.target.closest(".opt"); if (!b) return;
       g.querySelectorAll(".opt").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      if (g.closest("#finalChecks")) {
+        var no = document.querySelectorAll('#finalChecks .opt[data-v="no"][aria-pressed="true"]').length;
+        document.getElementById("warn").hidden = no < 2;
+      }
     });
   });
 
