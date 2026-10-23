@@ -145,8 +145,8 @@
   @media (min-width: 1024px) { .hero h1 { font-size: 40px; line-height: 1.25; } }
 
   /* ---------- 2. 지금 만들어지고 있는 이야기 ---------- */
-  .work { background: var(--bg); padding: 24px 0 84px; }
-  @media (min-width: 768px) { .work { padding: 32px 0 120px; } }
+  .work { background: var(--bg); padding: 84px 0; }
+  @media (min-width: 768px) { .work { padding: 120px 0; } }
   .work .h2 { margin-top: 0; }
   .now-chips { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
   @media (min-width: 768px) { .now-chips { flex-direction: row; flex-wrap: wrap; gap: 12px; margin-top: 20px; } }
@@ -938,6 +938,100 @@
   .pv-logline { margin-top: 16px; padding: 14px 16px; border-radius: 12px; background: #fff; border: 1px solid var(--line); font-size: 14px; line-height: 1.75; color: var(--title); }
   .pv-final { margin-top: 14px; }
   @media (min-width: 768px) { .pv-template, .pv-ans, .pv-logline { font-size: 15px; } }
+
+  /* 3·4번 섹션 분리: 이웃 섹션끼리 배경이 다르게 */
+  section#shorts.shorts.pv3 { background: var(--paper); }
+  section#problem.problem.pv3 { background: #e8eff1; }
+  .pv3-sub { margin: 12px 0 0; text-align: center; font-size: 15px; font-weight: 500; color: var(--body); }
+  @media (min-width: 768px) { .pv3-sub { font-size: 18px; margin-top: 14px; } }
+  .shorts .wrap { display: flex; flex-direction: column; align-items: center; }
+  /* 폰: 1섹션 빼고 모든 섹션 제목이 같은 크기, 한 줄 */
+  @media (max-width: 767px) { section:not(#hero) h2.h2 { font-size: clamp(11px, calc((100vw - 40px) / 23.2), 22px); white-space: nowrap; } }
+  #method .method-sub { font-size: 13px; font-weight: 400; margin-top: 10px; }
+  @media (min-width: 768px) { #method .method-sub { font-size: 16px; } }
+  .shorts .pv3-sub { font-size: 13px; font-weight: 400; margin-top: 10px; }
+  @media (min-width: 768px) { .shorts .pv3-sub { font-size: 14px; } }
+  .shorts-track { margin-top: 28px; width: 100%; display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
+  .shorts-track:focus-visible { outline: 2px solid var(--jaju, #A61E5C); outline-offset: 4px; }
+  .shorts-track > .shorts-slot:first-child { margin-left: auto; }
+  .shorts-track > .shorts-slot:last-child { margin-right: auto; }
+  .shorts-slot { flex: 0 0 auto; width: min(240px, 62vw); scroll-snap-align: center; aspect-ratio: 9 / 16; border: 1.5px dashed rgba(31,90,102,.4); border-radius: 16px; display: grid; place-items: center; color: var(--body); font-size: 13px; }
+    /* 2섹션 높이: 다른 섹션과 비슷하게 */
+  section#try { padding-top: 72px; padding-bottom: 72px; }
+  #try .pv-card { margin-top: 16px; }
+  #try .pv-row { padding: 8px 0; }
+  #try .pv-logline { margin-top: 12px; padding: 12px 14px; line-height: 1.65; }
+  #try .pv-slide { padding: 18px 22px; }
+  #try .pv-q + .pv-q { margin-top: 18px; padding-top: 18px; }
+  @media (min-width: 768px) { section#try { padding-top: 88px; padding-bottom: 88px; } }
+    /* 8섹션: 제목(큰 글씨)이 위, 영상, 지금 만들어지고 있어요가 아래 */
+  .work .work-title { margin-top: 0; }
+  .work .work-kicker { margin-top: 10px; }
+  /* 4섹션 제목: 화면 너비에 비례해 줄어들어 항상 한 줄 */
+  .work .work-title { font-size: clamp(11px, calc((100vw - 40px) / 23.2), 32px); line-height: 1.3; white-space: nowrap; }
+  @media (min-width: 768px) { .work .work-title { font-size: clamp(11px, calc((100vw - 100px) / 23.2), 32px); } }
+  .work .stage { margin-top: 28px; }
+  .work .who-line { margin: 20px 0 0; }
+  @media (min-width: 768px) { .work .stage { margin-top: 36px; } .work .who-line { margin-top: 24px; } }
+  /* 4섹션 그래픽: 2·5섹션처럼 실제 예시가 든 카드 + 창 모양 화면 */
+  .ipg { margin: 32px auto 0; max-width: 1120px; background: #fff; border-radius: 24px; box-shadow: 0 24px 60px rgba(42,32,37,.10); overflow: hidden; display: grid; }
+  .ipg-l { padding: 28px 22px 8px; }
+  .ipg-l h3 { font-size: 18px; line-height: 1.35; color: var(--title); }
+  .ipg-list { list-style: none; margin: 18px 0 0; padding: 0; display: grid; }
+  .ipg-list li { display: flex; gap: 14px; padding: 16px 0; border-top: 1px solid #ece4e8; border-left: 0; }
+  .ipg-list .n { flex: none; width: 24px; font: 500 12px/1.9 ui-monospace, Menlo, monospace; color: var(--c); }
+  .ipg-list b { font-size: 16px; color: var(--title); }
+  .ipg-list p { margin: 2px 0 0; font-size: 13px; color: var(--body); }
+  .ipg-list em { display: inline-block; margin-top: 8px; padding: 6px 10px; font-style: normal; font-size: 12px; line-height: 1.4; color: var(--title); background: color-mix(in srgb, var(--c) 10%, #fff); border-left: 3px solid var(--c); border-radius: 6px; }
+  .ipg-r { padding: 20px 14px; background-color: #f7f4f5; background-image: linear-gradient(#ebe4e7 1px, transparent 1px), linear-gradient(90deg, #ebe4e7 1px, transparent 1px); background-size: 28px 28px; }
+  .ipg-win { background: #fff; border: 1px solid #e8dfe3; border-radius: 14px; box-shadow: 0 10px 28px rgba(42,32,37,.12); overflow: hidden; }
+  .ipg-bar { display: flex; align-items: center; gap: 6px; padding: 12px 14px; border-bottom: 1px solid #efe8eb; }
+  .ipg-bar span { width: 9px; height: 9px; border-radius: 50%; background: #e4dadf; }
+  .ipg-bar b { margin-left: 8px; font-size: 12px; color: var(--title); }
+  .ipg-body { padding: 16px 14px 18px; display: grid; gap: 10px; }
+  .ipg-one { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1.5px dashed #cdbfc6; border-radius: 12px; }
+  .ipg-one > div { flex: 1; min-width: 0; }
+  .ipg-one b { display: block; font-size: 14px; color: var(--title); }
+  .ipg-one small { font-size: 12px; color: var(--body); }
+  .ipg-dot { flex: none; width: 14px; height: 14px; border-radius: 50%; background: #9c8f95; }
+  .ipg-tag { flex: none; font-size: 11px; padding: 4px 9px; border-radius: 999px; background: #efe8eb; color: var(--body); }
+  .ipg-arrow { justify-self: center; width: 2px; height: 22px; background: repeating-linear-gradient(to bottom, var(--teal) 0 5px, transparent 5px 9px); position: relative; }
+  .ipg-arrow::after { content: ""; position: absolute; left: -4px; bottom: -3px; border: 5px solid transparent; border-top: 7px solid var(--teal); border-bottom: 0; }
+  .ipg-season { padding: 12px; border-radius: 12px; background: #eef4f5; display: grid; gap: 8px; }
+  .ipg-season > b { font-size: 12px; color: var(--teal); }
+  .ipg-eps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .ipg-eps i { font-style: normal; font-size: 12px; font-weight: 700; color: var(--title); padding: 9px 8px; background: #fff; border: 1px solid #cfe0e3; border-radius: 8px; opacity: 0; transform: translateY(6px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+  .ipg-eps i small { display: block; margin-top: 2px; font-size: 11px; font-weight: 400; line-height: 1.35; color: var(--body); }
+  .ipg-eps i:nth-child(1) { transition-delay: .3s; } .ipg-eps i:nth-child(2) { transition-delay: .45s; } .ipg-eps i:nth-child(3) { transition-delay: .6s; }
+  .ipg-season:nth-of-type(2) .ipg-eps i { transition-delay: .9s; }
+  .ipg.in .ipg-eps i { opacity: 1; transform: none; }
+  @media (min-width: 768px) {
+    .ipg { margin-top: 40px; grid-template-columns: 1fr 1.1fr; }
+    .ipg-l { padding: 40px 40px 32px; }
+    .ipg-l h3 { font-size: 22px; }
+    .ipg-list { margin-top: 24px; }
+    .ipg-list p { font-size: 14px; } .ipg-list em { font-size: 13px; }
+    .ipg-r { padding: 40px 36px; display: grid; align-items: center; }
+    .ipg-eps i { font-size: 13px; padding: 10px 10px; }
+  }
+  .shorts-row { width: 100%; }
+  .shorts-nav { display: none; }
+  @media (min-width: 768px) {
+    .shorts-row { margin-top: 36px; display: flex; align-items: center; justify-content: center; gap: 20px; }
+    .shorts-track { margin-top: 0; width: auto; overflow: visible; padding-bottom: 0; scroll-snap-type: none; }
+    .shorts-track > .shorts-slot:first-child, .shorts-track > .shorts-slot:last-child { margin: 0; }
+    .shorts-slot { width: 240px; }
+    .shorts-nav { display: grid; place-items: center; flex: 0 0 auto; width: 44px; height: 44px; border-radius: 999px; border: 1.5px solid var(--jaju, #A61E5C); background: transparent; color: var(--jaju, #A61E5C); font-size: 20px; cursor: pointer; }
+    .shorts-nav:hover { background: rgba(166,30,92,.08); }
+    .shorts-nav:focus-visible { outline: 2px solid var(--jaju, #A61E5C); outline-offset: 3px; }
+  }
+  /* 7·8섹션 부제목·본문: 다른 섹션과 같은 크기 (부제목 16/13, 본문 14/13) */
+  #portfolio .sec-desc, #collab .sec-desc { font-size: 13px; line-height: 1.6; }
+  #portfolio .pf-lead, #portfolio .pf-sub, #collab .proof-lead { font-size: 13px; line-height: 1.7; }
+  @media (min-width: 768px) {
+    #portfolio .sec-desc, #collab .sec-desc { font-size: 16px; }
+    #portfolio .pf-lead, #portfolio .pf-sub, #collab .proof-lead { font-size: 14px; }
+  }
 </style>
 </head>
 <body>
@@ -950,7 +1044,7 @@
     </nav>
     <div class="nav-right">
       <span class="mypage">마이페이지</span>
-      <a class="btn btn-primary nav-cta" href="/planner.html">지금 시작하기</a>
+      <a class="btn btn-primary nav-cta" href="planner.html">지금 시작하기</a>
       <button class="nav-burger" id="navBurger" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="navMenu"><i></i><i></i><i></i></button>
     </div>
   </div>
@@ -967,19 +1061,137 @@
       <h1 class="split" data-split>한국형 판타지를 만들고 싶은데<br />어떻게 시작해야 할까?</h1>
       <p class="lead reveal" data-delay="2"><span class="nb"><span class="nw">머릿속에만 머물던 그 아이디어,</span> <span class="nw">아클링스와 함께 정돈해보세요.</span></span><br /><span class="nb">근사한 시리즈IP가 탄생할 거예요!</span></p>
       <div class="ctas reveal" data-delay="3">
-        <a class="btn btn-primary" href="/planner.html">지금 시작하기 <span class="arrow">→</span></a>
+        <a class="btn btn-primary" href="planner.html">지금 시작하기 <span class="arrow">→</span></a>
         <a class="btn btn-ghost" href="/collab/new">협업 문의하기</a>
       </div>
     </div>
   </section>
 
-  <!-- 2. 지금 만들어지고 있어요 (히어로 아래 영상) -->
+  <!-- 기획안 만들기 미리보기 (CTA로 가는 페이지의 예시: 인물·스토리·세계관 슬라이드) -->
+  <section class="block try" id="try">
+    <div class="wrap">
+      <h2 class="h2 split ctr-title" data-split><span class="nw">하나씩 답변하다 보면</span> <span class="nw">어느새 시리즈 기획안 완성!</span></h2>
+      <p class="pv-sub ctr-sub reveal" data-delay="1"><span class="nw">아클링스의 질문지에 답변하면서</span> <span class="nw">시리즈 요건을 충족해나가세요</span></p>
+
+      <div class="pv-tabs reveal" role="tablist" aria-label="기획안 만들기 단계 예시">
+        <span class="pv-pill" id="pvPill"></span>
+        <button class="pv-tab" role="tab" aria-selected="true" data-i="0"><span class="n">01</span>로그라인</button>
+        <button class="pv-tab" role="tab" aria-selected="false" data-i="1"><span class="n">02</span>장르&amp;패턴</button>
+        <button class="pv-tab" role="tab" aria-selected="false" data-i="2"><span class="n">03</span>세계관</button>
+      </div>
+
+      <div class="pv-card reveal" data-delay="1" id="pvCard">
+        <div class="pv-crumb"><span>기획안 만들기 / <b id="pvCrumb">로그라인</b></span><span class="pv-ex">예시</span></div>
+        <div class="pv-body">
+          <div class="pv-main">
+            <div class="pv-track" id="pvTrack">
+              <div class="pv-slide" aria-label="로그라인">
+                <div class="pv-q">
+                  <span class="k">01 사건</span>
+                  <h3>주인공이 가만히 있을 수 없게 만든 사건은 뭔가요?</h3>
+                  <div class="pv-ans">이웃 나라가 그녀를 볼모로 지목한 날</div>
+                  <div class="pv-check"><span class="pv-check-q">이 사건을 ‘어느 날 일어난 사건 하나’로 말할 수 있나요?</span><span class="pv-opts"><span class="on">예</span><span>아니오</span></span></div>
+                </div>
+                <div class="pv-q">
+                  <span class="k">02 주인공</span>
+                  <h3>주인공은 어떤 사람인가요?</h3>
+                  <div class="pv-ans">소리만 듣고 쇠를 가려내는 대장장이의 딸</div>
+                  <div class="pv-check"><span class="pv-check-q">직업, 지위, 관계 중 하나로 설명되나요?</span><span class="pv-opts"><span class="on">예</span><span>아니오</span></span></div>
+                </div>
+              </div>
+              <!-- 02 장르&패턴 (비워 둠) -->
+              <div class="pv-slide" aria-label="장르&amp;패턴"></div>
+              <!-- 03 세계관 -->
+              <div class="pv-slide" aria-label="세계관">
+                <div class="pv-q">
+                  <span class="k">Q1</span>
+                  <h3>이야기 속 대립 구조를 구현하는 데 꼭 필요한 것은?</h3>
+                  <div class="pv-opts"><span>제도적 이념</span><span>신분적 갈등</span><span class="on">다민족 사회</span><span>재난 및 멸망에 대한 예고</span><span class="unk">아직 모름</span></div>
+                </div>
+                <div class="pv-q">
+                  <span class="k">근거 자료</span>
+                  <div class="pv-src"><b>변진 · 철</b><span>나라에서 철이 나고, 이웃 나라들이 가져다 쓴다 — 『삼국지』 동이전</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <aside class="pv-side">
+            <div class="pv-side-head"><b>내 기획안</b><span id="pvState">1 / 3</span></div>
+            <dl>
+              <div class="pv-row on" data-step="0"><dt>사건</dt><dd>이웃 나라가 그녀를 볼모로 지목한 날</dd></div>
+              <div class="pv-row on" data-step="0"><dt>주인공</dt><dd>소리만 듣고 쇠를 가려내는 대장장이의 딸</dd></div>
+              <div class="pv-row on" data-step="0"><dt>장애물</dt><dd>그녀의 기술을 탐내 놓아주지 않는 이웃 나라 왕</dd></div>
+              <div class="pv-row on" data-step="0"><dt>목표</dt><dd>봄 교역선이 떠나기 전에 고향으로 달아나기</dd></div>
+              <div class="pv-row on" data-step="0"><dt>위험</dt><dd>그녀가 벼린 칼이 고향을 치는 데 쓰인다</dd></div>
+            </dl>
+            <p class="pv-logline">이웃 나라가 그녀를 볼모로 지목한 날 이후, 소리만 듣고 쇠를 가려내는 대장장이의 딸은 그녀의 기술을 탐내는 이웃 나라 왕을 따돌려야 봄 교역선이 떠나기 전에 고향으로 달아날 수 있다. 그러지 못하면 그녀가 벼린 칼이 고향을 치는 데 쓰인다.</p>
+          </aside>
+        </div>
+      </div>
+
+      <div class="try-cta reveal">
+        <a class="btn btn-primary" href="planner.html">지금 시작하기 <span class="arrow">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. 좋은 소재가 있나요? (쇼츠 영상) -->
+  <section class="shorts pv3" id="shorts">
+    <div class="wrap">
+      <h2 class="h2 split pv3-title" data-split><span class="nw">좋은 소재가 있나요?</span> <span class="nw">좋은 장면?</span></h2>
+      <p class="pv3-sub reveal"><span class="nw">아니면 이미 조회수가 폭발하는</span> <span class="nw">AI 쇼츠 영상을 만들었나요?</span></p>
+      <div class="shorts-row reveal">
+        <button type="button" class="shorts-nav" id="shortsPrev" aria-label="쇼츠 순서를 왼쪽으로 한 칸 돌리기">&lt;</button>
+        <div class="shorts-track" role="group" aria-label="쇼츠 영상 3개">
+          <div class="shorts-slot" role="img" aria-label="쇼츠 영상 1이 들어갈 자리"><span>쇼츠 1</span></div>
+          <div class="shorts-slot" role="img" aria-label="쇼츠 영상 2가 들어갈 자리"><span>쇼츠 2</span></div>
+          <div class="shorts-slot" role="img" aria-label="쇼츠 영상 3이 들어갈 자리"><span>쇼츠 3</span></div>
+        </div>
+        <button type="button" class="shorts-nav" id="shortsNext" aria-label="쇼츠 순서를 오른쪽으로 한 칸 돌리기">&gt;</button>
+      </div>
+      <script>
+      (function () {
+        var t = document.querySelector('.shorts-track'); if (!t) return;
+        document.getElementById('shortsPrev').addEventListener('click', function () { t.insertBefore(t.lastElementChild, t.firstElementChild); });
+        document.getElementById('shortsNext').addEventListener('click', function () { t.appendChild(t.firstElementChild); });
+      })();
+      </script>
+    </div>
+  </section>
+  <!-- 4. 하지만 그것만으로는 IP가 성립하지 않았을 거예요 -->
+  <section class="problem pv3" id="problem">
+    <div class="wrap">
+      <h2 class="h2 split pv3-title" data-split><span class="nw">하지만 그것만으로는</span> <span class="nw">IP가 성립하지 않았을 거예요</span></h2>
+      <p class="pv3-sub reveal"><span class="nw">시리즈가 되려면</span> <span class="nw">1화 다음 이야기와,</span> <span class="nw">시즌을 버틸 인물·세계관이 필요해요.</span></p>
+      <div class="ipg reveal" id="ipGraphic">
+        <div class="ipg-l">
+          <h3>시즌을 버티게 하는 세 가지</h3>
+          <ol class="ipg-list">
+            <li style="--c:var(--jaju)"><span class="n">01</span><div><b>인물</b><p>시즌이 바뀌어도 원하는 것이 이어져요</p><em>소리만 듣고 쇠를 가려내는 대장장이의 딸</em></div></li>
+            <li style="--c:var(--gold)"><span class="n">02</span><div><b>스토리</b><p>다음 화가 궁금해져요</p><em>그녀가 벼린 칼이 고향을 치는 데 쓰인다</em></div></li>
+            <li style="--c:var(--teal)"><span class="n">03</span><div><b>세계관</b><p>시즌이 달라도 규칙은 그대로예요</p><em>다민족 사회 · 변진의 철</em></div></li>
+          </ol>
+        </div>
+        <div class="ipg-r" role="img" aria-label="한 장면은 거기서 끝나지만, 시리즈는 시즌 1과 시즌 2의 여러 화로 이어집니다.">
+          <div class="ipg-win">
+            <div class="ipg-bar"><span></span><span></span><span></span><b>시리즈 구조</b></div>
+            <div class="ipg-body">
+              <div class="ipg-one"><i class="ipg-dot"></i><div><b>한 장면</b><small>칼을 벼리는 대장장이의 딸</small></div><span class="ipg-tag">여기서 끝</span></div>
+              <div class="ipg-arrow" aria-hidden="true"></div>
+              <div class="ipg-season"><b>시즌 1</b><div class="ipg-eps"><i>1화<small>볼모로 지목된 날</small></i><i>2화<small>쇠 소리를 듣는 아이</small></i><i>3화<small>봄 교역선</small></i></div></div>
+              <div class="ipg-season"><b>시즌 2</b><div class="ipg-eps"><i>1화<small>…</small></i><i>2화<small>…</small></i><i>3화<small>…</small></i></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 4. 아클링스는 한국 신화·고대사 기반 IP 스튜디오입니다 (영상) -->
   <section class="work">
     <div class="wrap">
-      <div class="who who-line" id="whoWork">
-        <svg class="avs" viewBox="0 0 136 56" aria-hidden="true"><circle cx="28" cy="28" r="26.5" fill="#A61E5C" style="--i:0"/><circle cx="68" cy="28" r="26.5" fill="#1F5A66" style="--i:1"/><circle cx="108" cy="28" r="26.5" fill="#5F7C99" style="--i:2"/></svg>
-        <p data-soft><b>지금 만들어지고 있어요</b><span class="who-tags"><span class="wt" style="--c:var(--jaju)">하삘라</span><span class="wt" style="--c:var(--teal)">별뜨리</span><span class="wt" style="--c:var(--dusty)">아클링스</span></span></p>
-      </div>
+      <h2 class="h2 split ctr-title work-title" data-split>아클링스는 <span class="nw">한국 신화·고대사</span> <span class="nw">기반 IP 스튜디오입니다</span></h2>
       <div class="stage">
         <div class="stage-frame" id="stage">
           <video autoplay muted loop playsinline preload="auto" poster="assets/collaboration-desktop.png" aria-label="악의 꽃 1화 작업물">
@@ -987,8 +1199,10 @@
           </video>
           <div class="caption"><span class="live"><i></i>제작 중</span>악의 꽃 · 1화</div>
         </div>
-      <p class="work-kicker reveal">아클링스는 <span class="nw">한국 신화·고대사 기반 IP 스튜디오입니다</span></p>
-      <h2 class="h2 split ctr-title work-title" data-split>당신의 킹덤을 아클링스 위에 펼치세요</h2>
+      </div>
+      <div class="who who-line" id="whoWork">
+        <svg class="avs" viewBox="0 0 136 56" aria-hidden="true"><circle cx="28" cy="28" r="26.5" fill="#A61E5C" style="--i:0"/><circle cx="68" cy="28" r="26.5" fill="#1F5A66" style="--i:1"/><circle cx="108" cy="28" r="26.5" fill="#5F7C99" style="--i:2"/></svg>
+        <p data-soft><b>지금 만들어지고 있어요</b><span class="who-tags"><span class="wt" style="--c:var(--jaju)">하삘라</span><span class="wt" style="--c:var(--teal)">별뜨리</span><span class="wt" style="--c:var(--dusty)">아클링스</span></span></p>
       </div>
     </div>
   </section>
@@ -997,8 +1211,8 @@
   <section class="block" id="method">
     <div class="wrap">
       <div class="sec-head">
-        <h2 class="h2 split" data-split>부여, 삼한, 옥저, 동예, 고구려, 백제, 신라...</h2>
-        <p class="sec-sub reveal" data-delay="2"><span class="nw">아클링스는 삼국시대 이전 시기를 중심으로</span> <span class="nw">장편 시리즈 대본을 써왔습니다.</span></p>
+        <h2 class="h2 split" data-split>당신의 킹덤을 실제 역사 위에 세우세요</h2>
+        <p class="sec-sub reveal method-sub" data-delay="2">부여, 삼한, 옥저, 동예, 고구려, 백제, 신라… 기록 속 나라들이 당신의 세계관이 됩니다</p>
       </div>
 
       <div class="panel flowcard reveal" id="flowcard">
@@ -1043,105 +1257,6 @@
     </div>
   </section>
 
-  <!-- 4. 좋은 소재가 있나요? -->
-  <section class="problem pv3" id="problem">
-    <div class="wrap">
-      <p class="pv3-kicker reveal"><span class="nw">좋은 소재가 있나요?</span> <span class="nw">아니면 이미</span> <span class="nw">조회수가 폭발하는</span> <span class="nw">쇼츠 영상을 만들었나요?</span></p>
-      <h2 class="h2 split pv3-title" data-split><span class="nw">하지만 그것만으로는</span> <span class="nw">IP가 성립하지 않았을 거예요</span></h2>
-      <div class="pv3-grid">
-        <div class="mf-card reveal" id="lackCard">
-          <ul class="mf-list">
-            <li class="have" style="--d:0"><i>✓</i>좋은 소재</li>
-            <li class="have" style="--d:1"><i>✓</i>멋진 장면</li>
-            <li class="have" style="--d:2"><i>✓</i>조회수가 터진 쇼츠</li>
-            <li class="lack" style="--d:3"><i>✕</i>1화 다음으로 이어질 이야기</li>
-            <li class="lack" style="--d:4"><i>✕</i>시즌을 버틸 인물과 세계관</li>
-          </ul>
-        </div>
-
-        <div class="mf-card reveal" data-delay="1" id="threadCard">
-          <div class="mf-thread mf-check">
-            <div class="mf-row" style="--c:var(--jaju);--d:0"><span class="cbx" aria-hidden="true"></span><b>인물</b><span class="mq">무엇을 원하는가</span></div>
-            <div class="mf-row" style="--c:var(--gold);--d:1"><span class="cbx" aria-hidden="true"></span><b>스토리</b><span class="mq">어떤 화두를 <span class="nw">던질 것인가</span></span></div>
-            <div class="mf-row" style="--c:var(--teal);--d:2"><span class="cbx" aria-hidden="true"></span><b>세계관</b><span class="mq">어떻게 규정할 것인가</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 기획안 만들기 미리보기 (CTA로 가는 페이지의 예시: 인물·스토리·세계관 슬라이드) -->
-  <section class="block try" id="try">
-    <div class="wrap">
-      <h2 class="h2 split ctr-title" data-split><span class="nw">하나씩 답변하다 보면</span> <span class="nw">어느새 시리즈 기획안 완성!</span></h2>
-      <p class="pv-sub ctr-sub reveal" data-delay="1"><span class="nw">아클링스의 질문지에 답변하면서</span> <span class="nw">시리즈 요건을 충족해나가세요</span></p>
-
-      <div class="pv-tabs reveal" role="tablist" aria-label="기획안 만들기 단계 예시">
-        <span class="pv-pill" id="pvPill"></span>
-        <button class="pv-tab" role="tab" aria-selected="true" data-i="0"><span class="n">01</span>로그라인</button>
-      </div>
-
-      <div class="pv-card reveal" data-delay="1" id="pvCard">
-        <div class="pv-crumb"><span>기획안 만들기 / <b id="pvCrumb">로그라인</b></span><span class="pv-ex">예시</span></div>
-        <div class="pv-body">
-          <div class="pv-main">
-            <div class="pv-track" id="pvTrack">
-              <div class="pv-slide" aria-label="로그라인">
-                <p class="pv-template"><b>(사건)</b>이 벌어진 후, <b>(주인공)</b>은 <b>(장애물)</b>을 극복해야 <b>(목표)</b>를 달성할 수 있다. 그렇지 않으면 <b>(위험)</b>이 닥친다.</p>
-                <div class="pv-q">
-                  <span class="k">01 사건</span>
-                  <h3>주인공이 가만히 있을 수 없게 만든 사건은 뭔가요?</h3>
-                  <div class="pv-ans">이웃 나라가 그녀를 볼모로 지목한 날</div>
-                  <div class="pv-check"><span class="pv-check-q">이 사건을 ‘어느 날 일어난 사건 하나’로 말할 수 있나요?</span><span class="pv-opts"><span class="on">예</span><span>아니오</span></span></div>
-                </div>
-                <div class="pv-q">
-                  <span class="k">02 주인공</span>
-                  <h3>주인공은 어떤 사람인가요?</h3>
-                  <div class="pv-ans">남을 믿지 못하는 대장장이의 딸</div>
-                  <div class="pv-check"><span class="pv-check-q">직업, 지위, 관계 중 하나로 설명되나요?</span><span class="pv-opts"><span class="on">예</span><span>아니오</span></span></div>
-                </div>
-                <div class="pv-q">
-                  <span class="k">03 장애물</span>
-                  <h3>무엇이 주인공을 막나요?</h3>
-                  <div class="pv-ans">그녀의 기술을 탐내 놓아주지 않는 이웃 나라 왕</div>
-                  <div class="pv-check"><span class="pv-check-q">장애물이 주인공을 직접 방해하나요?</span><span class="pv-opts"><span class="on">예</span><span>아니오</span></span></div>
-                </div>
-                <div class="pv-q">
-                  <span class="k">04 목표</span>
-                  <h3>주인공은 무엇을 해내야 하나요?</h3>
-                  <div class="pv-ans">봄 교역선이 떠나기 전에 고향으로 달아나기</div>
-                  <div class="pv-check"><span class="pv-check-q">마지막 장면에서 성공했는지 1초 만에 알 수 있나요?</span><span class="pv-opts"><span class="on">예</span><span>아니오</span></span></div>
-                </div>
-                <div class="pv-q">
-                  <span class="k">05 위험</span>
-                  <h3>실패하면 무엇을 잃나요?</h3>
-                  <div class="pv-ans">그녀가 벼린 칼이 고향을 치는 데 쓰인다</div>
-                  <div class="pv-check"><span class="pv-check-q">잃는 것을 한 단어로 말할 수 있나요?</span><span class="pv-opts"><span class="on">예</span><span>아니오</span></span></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <aside class="pv-side">
-            <div class="pv-side-head"><b>내 로그라인</b></div>
-            <dl>
-              <div class="pv-row on" data-step="0"><dt>사건</dt><dd>이웃 나라가 그녀를 볼모로 지목한 날</dd></div>
-              <div class="pv-row on" data-step="0"><dt>주인공</dt><dd>남을 믿지 못하는 대장장이의 딸</dd></div>
-              <div class="pv-row on" data-step="0"><dt>장애물</dt><dd>그녀의 기술을 탐내 놓아주지 않는 이웃 나라 왕</dd></div>
-              <div class="pv-row on" data-step="0"><dt>목표</dt><dd>봄 교역선이 떠나기 전에 고향으로 달아나기</dd></div>
-              <div class="pv-row on" data-step="0"><dt>위험</dt><dd>그녀가 벼린 칼이 고향을 치는 데 쓰인다</dd></div>
-            </dl>
-            <p class="pv-logline">이웃 나라가 그녀를 볼모로 지목한 날 이후, 남을 믿지 못하는 대장장이의 딸은 그녀의 기술을 탐내는 이웃 나라 왕을 따돌려야 봄 교역선이 떠나기 전에 고향으로 달아날 수 있다. 그러지 못하면 그녀가 벼린 칼이 고향을 치는 데 쓰인다.</p>
-            <div class="pv-check pv-final"><span class="pv-check-q">세계관 설명을 빼도 갈등이 남나요?</span><span class="pv-opts"><span class="on">예</span><span>아니오</span></span></div>
-          </aside>
-        </div>
-      </div>
-
-      <div class="try-cta reveal">
-        <a class="btn btn-primary" href="/planner.html">지금 시작하기 <span class="arrow">→</span></a>
-      </div>
-    </div>
-  </section>
-
   <!-- 6. 포트폴리오 -->
   <section class="block portfolio" id="portfolio">
     <div class="wrap">
@@ -1157,7 +1272,7 @@
             <span class="pf-form" style="--c:var(--teal)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>아웃라인</span>
             <span class="pf-form" style="--c:var(--dusty)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>파일럿</span>
           </div>
-          <div class="ctas pf-ctas reveal" data-delay="4"><a class="btn btn-primary" href="/planner.html">지금 시작하기 <span class="arrow">→</span></a></div>
+          <div class="ctas pf-ctas reveal" data-delay="4"><a class="btn btn-primary" href="planner.html">지금 시작하기 <span class="arrow">→</span></a></div>
         </div>
         <div>
           <div class="panel pf-card reveal" data-delay="1">
@@ -1175,18 +1290,18 @@
     </div>
   </section>
 
-  <!-- 6. 연결 -->
+  <!-- 8. 스토리만 아이디어가 아니니까 -->
   <section class="block collab" id="collab">
     <div class="wrap">
-      <h2 class="h2 split ctr-title" data-split>스토리만 아이디어가 아니니까</h2>
-      <p class="sec-desc reveal" data-delay="2"><span class="nw">그림으로, 영상으로,</span> <span class="nw">손끝의 공예로</span> <span class="nw">함께 세계관을 만들어가요</span></p>
+      <h2 class="h2 split ctr-title" data-split>스케치 한 장도 이야기의 시작이 돼요</h2>
+      <p class="sec-desc reveal" data-delay="2"><span class="nw">티저의 한 컷,</span> <span class="nw">공방에서 빚은 재현품 하나도요.</span> <span class="nw">완성되기 전의 작업도</span> <span class="nw">이 세계의 첫 장면이 될 수 있어요</span></p>
       <div class="proof-grid sec-grid">
         <div>
-          <p class="proof-lead reveal" data-delay="2"><span class="nw">아클링스는 다양한 분야의</span> <span class="nw">아티스트와 함께</span><br class="dbr" /> <span class="nw">한국의 고대 문화 유산을</span> <span class="nw">발전시키고자 합니다.</span></p>
-          <p class="proof-lead reveal" data-delay="3"><span class="nw">다음 세대에 전설을 물려줄</span> <span class="nw">아티스트들의</span><br /><span class="nw">많은 지원을 바랍니다</span></p>
+          <p class="proof-lead reveal" data-delay="2"><span class="nw">아클링스의 장편 시리즈에서</span> <span class="nw">마음이 가는 장면 하나를 골라 보세요.</span><br class="dbr" /> <span class="nw">그 장면 속 옷 한 벌, 칼 한 자루,</span> <span class="nw">떠나는 배 한 척을</span> <span class="nw">당신의 방식으로 옮기면 돼요.</span></p>
+          <p class="proof-lead reveal" data-delay="3"><span class="nw">무엇을 어떻게 만들지 막힐 때는</span> <span class="nw">라이브러리의 사료가 근거가 되어 줍니다.</span><br class="dbr" /> <span class="nw">지금 이 순간에도</span> <span class="nw">이 세계의 장면들이</span> <span class="nw">여러 사람의 손을 거쳐</span> <span class="nw">만들어지고 있어요.</span></p>
           <div class="who reveal" data-delay="3">
             <svg class="avs" viewBox="0 0 136 56" aria-hidden="true"><circle cx="28" cy="28" r="26.5" fill="#A61E5C"/><circle cx="68" cy="28" r="26.5" fill="#1F5A66"/><circle cx="108" cy="28" r="26.5" fill="#5F7C99"/></svg>
-            <p><b><span class="nw">포트폴리오를 등록하고</span> <span class="nw">아티스트와 연결되세요.</span></b></p>
+            <p><b><span class="nw">포트폴리오를 등록하고</span> <span class="nw">필요한 아티스트와 연결되세요.</span></b></p>
           </div>
           <div class="ctas reveal" data-delay="4"><a class="btn btn-ghost" href="/collab/new">협업 문의하기 <span class="arrow">→</span></a></div>
         </div>
@@ -1249,7 +1364,7 @@
   </div>
 </footer>
 
-<div class="mcta" id="mcta"><a class="btn btn-primary" href="/planner.html">지금 시작하기 <span class="arrow">→</span></a></div>
+<div class="mcta" id="mcta"><a class="btn btn-primary" href="planner.html">지금 시작하기 <span class="arrow">→</span></a></div>
 
 <script>
 (function () {
