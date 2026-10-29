@@ -13,7 +13,7 @@ export default async function NewCollabPage() {
   if (error) throw new Error(error.message);
   return (
     <PaperPage>
-      <CollabForm action={createCollab} works={(data ?? []) as SourceWork[]} cancelHref="/collab" />
+      <CollabForm action={createCollab} works={(data ?? []) as SourceWork[]} cancelHref="/" />
     </PaperPage>
   );
 }

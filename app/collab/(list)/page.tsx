@@ -2,15 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PaperCard, PaperPage, primaryBtn } from "@/components/paper-card";
 import { StatusBadge } from "@/components/status-badge";
+import { requireGateAccess } from "@/lib/admin-gate";
 import { getSupabase } from "@/lib/supabase";
+import { formatKstDate } from "@/lib/time";
 import { PAGE_SIZE, ROLES, STATUSES, type CollabRequest, type Status } from "@/lib/collab";
 
-export const metadata: Metadata = { title: "협업 신청 목록" };
+export const metadata: Metadata = { title: "협업 신청 목록", robots: { index: false, follow: false } };
+export const dynamic = "force-dynamic"; // 운영자 확인과 최신 목록을 요청 때마다 확인한다
 
 type SP = Promise<Record<string, string | string[] | undefined>>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 export default async function CollabListPage({ searchParams }: { searchParams: SP }) {
+  await requireGateAccess("/collab");
   const sp = await searchParams;
   const page = Math.max(1, parseInt(one(sp.page) ?? "1", 10) || 1);
   const statusParam = one(sp.status);
@@ -80,7 +84,7 @@ export default async function CollabListPage({ searchParams }: { searchParams: S
                   <div>
                     <p className="text-[15px] font-medium text-[#292126]">{r.applicant_name}</p>
                     <p className="text-[12px] text-[#574a4f]">
-                      {r.source_works?.title ?? "전체 협업 제안"} · {r.roles.map((x) => ROLES[x]).join(", ")} · {new Date(r.created_at).toLocaleDateString("ko-KR")}
+                      {r.source_works?.title ?? "전체 협업 제안"} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)}
                     </p>
                   </div>
                   <StatusBadge status={r.status} />

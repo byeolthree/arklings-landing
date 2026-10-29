@@ -3,8 +3,11 @@
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { hasGateAccess } from "@/lib/admin-gate";
 import { getSupabase, BUCKET } from "@/lib/supabase";
 import { parseForm, UUID_RE, type FieldErrors } from "@/lib/collab";
+
+const GATE_MESSAGE = "운영자 확인이 필요합니다. 협업 신청 목록 화면에서 비밀번호를 다시 입력해 주세요.";
 
 export type FormState = {
   errors?: FieldErrors;
@@ -66,6 +69,7 @@ export async function updateCollab(
   _prev: FormState,
   fd: FormData,
 ): Promise<FormState> {
+  if (!(await hasGateAccess())) return { message: GATE_MESSAGE };
   if (!UUID_RE.test(id)) return { message: "찾을 수 없는 신청입니다." };
   const { values, roles, file, removeFile: wantRemove, errors } = parseForm(fd, { withStatus: true });
   if (Object.keys(errors).length) return { errors, values };
@@ -123,6 +127,7 @@ export async function updateCollab(
 }
 
 export async function deleteCollab(id: string): Promise<FormState> {
+  if (!(await hasGateAccess())) return { message: GATE_MESSAGE };
   if (!UUID_RE.test(id)) return { message: "찾을 수 없는 신청입니다." };
   const sb = getSupabase();
   const { data: current } = await sb

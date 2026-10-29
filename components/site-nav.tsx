@@ -23,9 +23,6 @@ export function SiteNav() {
         </nav>
         <div className="flex-1" />
         <div className="hidden items-center gap-8 md:flex">
-          <Link href="/collab" className="text-[15px] text-[#574a4f] hover:text-jaju">
-            협업 신청 목록
-          </Link>
           <Link href="/collab/new" className="rounded-lg bg-jaju px-5 py-2 text-[13px] font-bold text-white hover:opacity-90">
             협업 신청
           </Link>
@@ -46,11 +43,6 @@ export function SiteNav() {
             {MENU.map((m) => (
               <li key={m}>{m}</li>
             ))}
-            <li>
-              <Link href="/collab" onClick={() => setOpen(false)} className="text-jaju">
-                협업 신청 목록
-              </Link>
-            </li>
             <li>
               <Link href="/collab/new" onClick={() => setOpen(false)} className="font-bold text-jaju">
                 협업 신청
