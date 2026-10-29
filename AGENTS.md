@@ -8,43 +8,35 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# 아클링스 미션 5 작업 규칙
+# 아클링스 작업 규칙 (미션 7 기준)
 
 ## 아클링스 목적
 
 아클링스는 한국 고대사 기반 IP를 여러 크리에이터가 함께 만드는 참여형 제작 스튜디오다.
-이번 미션에서는 아클링스 브랜드 랜딩 페이지를 구현한다.
-홈 CTA는 「협업 신청」이며, 목적지는 협업 신청 페이지다.
+미션 7에서는 로그인(유저 기능)과 기획안 서버 저장을 붙여, 기획안을 아클링스 포트폴리오에 올리고 작업을 이어 갈 수 있게 한다.
+홈 CTA는 「협업 신청」이며 목적지는 협업 신청 페이지다. 기획안 질문이 실제 내용으로 채워지기 전까지는 홈의 「지금 시작하기」 버튼도 협업 신청(`/collab/new`)으로 보낸다.
 
 ## 기술 스택
 
-Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui를 사용한다.
+Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase(DB·Storage·로그인), Server Actions. 배포는 Vercel.
 
-## 이번 미션 범위
+## 미션 7 범위
 
-다음을 구현한다.
+만든다 (단계 순서는 아래 「미션 7 단계」):
 
-- 히어로
-- 제작 중인 협업 사례
-- 홈 CTA 「협업 신청」 (목적지는 협업 신청 페이지)
-- 협업 신청 페이지
-- 반응형 레이아웃
-- 목적에 맞는 JavaScript 인터랙션 1개(예: 모바일 메뉴)
-- 기본 메타데이터와 접근성
+- 로그인: 이메일, 구글, 카카오. 이메일 소유가 확인된 같은 이메일은 같은 계정으로 이어 준다.
+- 마이페이지, 기획안 서버 저장·임시저장 이력·PDF 내려받기·메일 받기, 포트폴리오 공개 화면
+- 협업 신청: 로그인 없이 접수, 받는 사람(아클링스 또는 기획안 주인)만 목록·상세·수정·삭제
+- 개인정보 동의 문구와 `/privacy`, 알림·확인 메일, 탈퇴와 3개월 자동 삭제
 
-## 이번 미션 제외 범위
+만들지 않는다:
 
-다음을 구현하지 않는다.
-
-- 로그인, 회원가입
-- 실제 데이터 저장
-- Supabase
+- OpenAI·AI 평가 (나중에 붙일 수 있게 구조만 막지 않는다)
 - 결제, 후원
-- OpenAI API
-- 관리자 기능
-- 실제 제작 상태 집계
+- 별도 운영자 계정 (아키텍터의 평소 계정에 서버 내부 표시만 달아 운영자로 취급한다)
+- 첫 화면 용량 줄이기, 링크 미리보기 이미지, 방문자 분석 도구 (미션 7이 끝난 뒤)
 - 정적 스튜디오 피드와 스튜디오 화면 (나중에 별도로 추가)
-- SNS에서 아클링스 콘텐츠를 보고 들어온 사용자가 홈을 거치지 않고 스튜디오의 해당 콘텐츠로 직접 접속하는 흐름 (홈 CTA와 연결하지 않음)
+- SNS에서 들어온 사용자가 홈을 거치지 않고 스튜디오 콘텐츠로 직접 접속하는 흐름
 
 ## Figma 원칙
 
@@ -132,53 +124,77 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 
 기능마다 모바일과 데스크톱에서 확인한다.
 이미지 alt, 링크와 버튼의 역할, 깨진 링크, 누락 이미지, Console 오류를 확인한다.
-배포 전 `npm run build`를 실행한다.
+커밋·배포 전에 `npm run build`와 `npm run lint`를 실행한다. (테스트 도구는 아직 없다.)
+시험에는 가짜 이메일·가짜 값만 쓴다. 실제 운영 전에는 전문가 확인을 한 번 받는다.
 
 ## Git 작업 흐름
 
 일상 구현과 검수는 `dev`에서만 한다.
-승인된 작업 범위 안에서는 `dev`에 기능·수정 단위로 커밋하고 푸시할 수 있다. 커밋마다 사용자 승인을 다시 받지 않아도 된다.
+`dev`에는 기능·수정 단위로 커밋하고, 승인 없이 올린 뒤에 결과를 보고한다.
 커밋 전에는 변경 파일과 검수 결과를 확인하고, 범위 밖 파일이나 비밀값을 포함하지 않는다.
-`main` 병합, `main` 푸시, Vercel 배포는 사용자의 명시적 승인 전에는 하지 않는다.
+`main` 병합, `main` 푸시, 강제 푸시, Vercel 배포는 사용자가 명시적으로 승인할 때만 한다.
+`dev`에만 있는 `.claude/settings.json`(훅)과 `CLAUDE.md`의 형식 검증 정책은 미션 7과 무관하므로 `main`에 반영하지 않는다.
 
 ## 작업 시작 원칙
 
-구현 전에는 Plan 모드에서 현재 프로젝트, 미션 요구사항, Figma 시안, 수정할 파일, 검수 방법을 먼저 확인한다.
-사용자 승인 전에는 코드나 설정을 수정하지 않는다.
+새 기능이나 큰 변경은 현재 프로젝트, 요구사항, Figma 시안, 수정할 파일, 검수 방법을 먼저 확인해 계획을 세우고 사용자 승인을 받은 뒤 구현한다.
+승인된 계획 범위 안의 수정, 서버 실행, 검수, 로컬 커밋은 다시 묻지 않고 진행한다.
+작업 보고 끝에는 남은 위험을 적는다.
 
 ## 승인 필요 작업
 
 새 패키지 설치, 외부 서비스 연결, 환경 변수 추가, 개인정보 처리, 결제 또는 비용 발생 작업은 사용자 승인 없이 진행하지 않는다.
+파일 삭제는 훅이 막는다. 지울 파일과 이유를 먼저 설명하고 허락받은 뒤에만 한다.
 
-## 미션 6 — 협업 신청 CRUD (Supabase)
+## 협업 신청과 로그인 (미션 6~7, Supabase)
 
-이 프로젝트는 미션5와 별개의 새 저장소다. 첫 화면(`/`)은 v14 랜딩(`public/landing.html`)을 그대로 보여 주며, 위 미션 5 규칙 중 홈·신청 폼·스튜디오 화면 관련 내용은 더 이상 이 프로젝트에 해당하지 않는다.
+스택: Next.js Server Actions + Supabase(DB, Storage, 로그인). 실제 개인정보는 받지 않고 테스트 값만 쓴다(실제 운영 전 전문가 확인).
 
-스택: Next.js Server Actions + Supabase(DB, Storage). 로그인·RLS는 이번 미션 범위 밖(미션 7). 실제 개인정보는 받지 않고 테스트 값만 쓴다.
+### 미션 7 단계
 
-### 테이블 (전체 SQL은 `supabase/schema.sql`)
+0. 준비·임시 조치: 규칙 파일 정리, 협업 신청 목록 임시 비밀번호, 첨부 보관함 비공개, 검색엔진 차단, 시각 KST, 메인 버튼
+1. 이메일 로그인·프로필·동의 문구·`/privacy`
+2. 협업 신청: 받는 사람 구조·RLS·알림 메일·봇 방지·파일 검사
+3. 기획안: 서버 저장·이력·Ctrl+Z·PDF·메일·공개 여부
+4. 구글·카카오 로그인·계정 이어주기 (아키텍터의 콘솔 설정이 끝나면)
+5. 포트폴리오 페이지 (Figma 링크를 받은 뒤)
+6. 탈퇴·3개월 자동 삭제·정리 작업
+7. README·QA·배포 점검
+
+### 테이블
 
 - `source_works`: id, title(unique), sort_order, created_at. 신청 대상 3건(악의 꽃, 사다함의 꿈, 단 하나의 꿈).
-- `collab_requests`: id(uuid), applicant_name, contact(이메일 또는 전화번호), sns_handle, source_work_id(→source_works, 비면 "특정 이야기 아님"), roles(text[], 1개 이상), idea(10~1000자), portfolio_url(http/https), consent(true만 허용), attachment_path·attachment_name(선택), status, created_at, updated_at(트리거 자동 갱신).
+- `collab_requests`: id(uuid), applicant_name, contact(이메일 또는 전화번호), sns_handle, source_work_id(→source_works, 비면 "특정 이야기 아님"), roles(text[], 1개 이상), idea(10~1000자), portfolio_url(http/https), consent(true만 허용), attachment_path·attachment_name(선택), status, created_at, updated_at(트리거 자동 갱신). 단계 2에서 받는 사람 칸(`recipient_kind`, `recipient_id`, `plan_id`)이 더해진다.
 - `roles` 값: video / script / art_director / history_advisor / producer / other
 - `status` 값: received(접수, 기본) / reviewing(검토 중) / accepted(수락) / rejected(거절)
 - 화면은 Figma 「미션5 아클링스 웹·모바일」 파일의 협업 신청 시안(노드 346:2, 346:539, 355:16, 355:49)을 따른다. 칸을 바꾸려면 시안과 SQL을 함께 고친다.
+- 새 표(`profiles`, `admins`, `plans`, `plan_revisions` 등)는 단계가 진행되면서 `supabase/migrations/`에 추가한다.
+
+### SQL 변경 규칙
+
+- `supabase/schema.sql`은 미션 6 최초 구조다. 다시 실행하면 `collab_requests`를 지우므로 **다시 실행하지 않는다.**
+- 구조 변경은 `supabase/migrations/000N_이름.sql` 새 파일로 만든다. 기존 데이터를 지우지 않고 여러 번 실행해도 안전하게 쓴다. 아키텍터가 Supabase SQL Editor에서 번호 순서대로 실행한다.
 
 ### Storage
 
-- 버킷 `collab-attachments`: 공개 읽기, PDF·JPG·PNG, 4MB 이하 (Vercel 요청 크기 한도 4.5MB 때문). 파일 경로는 `collab_requests.attachment_path`에 저장. 신청을 삭제하면 파일도 함께 지운다.
+- 버킷 `collab-attachments`: **비공개**(마이그레이션 `0001`), PDF·JPG·PNG, 4MB 이하 (Vercel 요청 크기 한도 4.5MB 때문). 파일 경로는 `collab_requests.attachment_path`에 저장하고, 화면에는 서버가 만든 **5분짜리 임시 주소**로만 보여 준다. 신청을 삭제하면 파일도 함께 지운다.
 
 ### 환경 변수 (이름만 기록, 값은 `.env.local`과 Vercel에만)
 
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `ADMIN_TEMP_PASSWORD` (임시 조치용. 단계 2에서 로그인·받는 사람 규칙으로 바뀌면 없앤다)
+
+단계가 진행되면 `SUPABASE_SERVICE_ROLE_KEY`, 메일 SMTP 설정(`MAIL_*`, `ADMIN_NOTIFY_EMAIL`) 등이 더해진다. 새 변수는 사용자 승인 후 추가한다.
 
 ### 화면 경로
 
-`/collab`(목록, 10개씩), `/collab/new`, `/collab/done`(접수 완료), `/collab/[id]`, `/collab/[id]/edit`. `/apply`는 `/collab/new`로 이동. 없는 id는 404.
+`/collab`(목록, 10개씩, 임시로 운영자 비밀번호 필요), `/collab/gate`(비밀번호 입력), `/collab/new`, `/collab/done`(접수 안내만), `/collab/[id]`, `/collab/[id]/edit`. `/apply`는 `/collab/new`로 이동. 없는 id는 404. 메뉴에는 협업 신청 목록 링크를 두지 않는다.
 
 ### 규칙
 
-- 저장은 Server Actions로만 한다. mock 데이터·localStorage를 최종 저장소로 쓰지 않는다.
+- 저장은 Server Actions로만 한다. mock 데이터·localStorage를 최종 저장소로 쓰지 않는다(기획안의 브라우저 임시 저장은 비로그인 사용자용 임시 보관일 뿐이다).
+- Server Action은 따로 열려 있는 입구이므로, 화면에서 막았더라도 **각 Action 안에서 다시 권한을 확인한다.**
 - 저장 중 버튼 잠금, 입력 오류는 칸 아래 표시, 로딩·오류·빈 상태를 모두 만든다.
+- 화면에 보이는 시각은 `lib/time.ts`(한국 시간, KST)를 거친다.
 - 비밀 키·서비스 롤 키는 코드와 GitHub에 넣지 않는다.
