@@ -1,0 +1,24 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.skill // empty' | grep -Eq '^/?proof-skills:' && echo '{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"ask\", \"permissionDecisionReason\": \"형식 검증(proof-skills 스킬)은 승인 후에만 실행합니다\"}}' || true"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command // empty' | grep -Eq '(^|[^A-Za-z0-9_-])(doctor\\.sh|setup_tla\\.sh|setup_lean\\.sh|tla2tools|tlc|elan|lake|proof-skills)([^A-Za-z0-9_-]|$)' && echo '{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"ask\", \"permissionDecisionReason\": \"형식 검증 관련 명령은 승인 후에만 실행합니다\"}}' || true"
+          }
+        ]
+      }
+    ]
+  }
+}
