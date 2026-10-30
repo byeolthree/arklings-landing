@@ -59,7 +59,7 @@ export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
             </Link>
           )}
           <Link className="lk-btn lk-btn-primary lk-nav-cta" href="/planner">
-            지금 시작하기
+            기획안 만들기
           </Link>
           <button
             className="lk-burger"
@@ -99,7 +99,7 @@ export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
           </Link>
         )}
         <Link href="/planner" onClick={close} tabIndex={open ? 0 : -1} style={{ color: "var(--jaju)", fontWeight: 700 }}>
-          지금 시작하기
+          기획안 만들기
         </Link>
       </nav>
     </header>
