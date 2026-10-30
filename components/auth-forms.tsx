@@ -193,7 +193,7 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
 
   return (
     <PaperCard>
-      <CardHeading title="로그인" lines={["가입할 때 쓴 이메일과 비밀번호를 입력해 주세요."]} />
+      <CardHeading noIcon title="로그인" lines={["가입할 때 쓴 이메일과 비밀번호를 입력해 주세요."]} />
       <form action={action} noValidate className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5">
         <input type="hidden" name="next" value={returnTo} />
         <ErrorBox message={state.message} />
