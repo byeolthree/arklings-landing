@@ -408,6 +408,8 @@
   footer.site b { color: var(--title); font-size: 18px; }
   footer.site p { font-size: 13px; }
   footer.site .links { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: 12px; }
+  footer.site .links a { color: inherit; text-decoration: none; }
+  footer.site .links a:hover { text-decoration: underline; }
   @media (max-width: 640px) { footer.site .links { align-items: flex-start; } }
 
   /* sticky mobile CTA */
@@ -1374,7 +1376,7 @@
       <p>한국 신화·고대사 기반 IP 스튜디오. 다양한 창작자가 함께 고유 세계관을 만들어갑니다.</p>
       <p>© 2026 Arklings. All rights reserved.</p>
     </div>
-    <div class="links"><span>이용약관</span><span>개인정보처리방침</span><span>hello@arklings.kr</span></div>
+    <div class="links"><span>이용약관</span><a href="/privacy">개인정보처리방침</a><span>hello@arklings.kr</span></div>
   </div>
 </footer>
 

@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import type { FormState } from "@/app/actions/collab";
+import { ConsentDetails } from "@/components/consent-details";
 import { CardHeading, PaperCard, primaryBtn } from "@/components/paper-card";
+import { CONSENT_LABEL } from "@/lib/consent";
 import {
   NO_TARGET_LABEL,
   ROLES,
@@ -164,10 +166,9 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
         <div className="flex flex-col gap-1.5">
           <label className="flex items-start gap-2 text-[12px] font-medium text-[#6f6469] md:text-[13px]">
             <input type="checkbox" name="consent" defaultChecked={v("consent", editing ? "on" : "") === "on"} disabled={pending} className="mt-0.5 size-4 shrink-0 accent-[#a61e5c]" />
-            <span>
-              신청 내용은 연락 및 검토 목적으로만 보관됩니다.<span className="block md:inline"> 개인정보 수집·이용에 동의합니다.</span>
-            </span>
+            <span>{CONSENT_LABEL}</span>
           </label>
+          <ConsentDetails />
           {e.consent && <p role="alert" className="text-[12px] text-destructive">{e.consent}</p>}
         </div>
 

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function SiteFooter() {
   return (
     <footer className="border-t border-teal">
@@ -16,7 +18,9 @@ export function SiteFooter() {
           </div>
           <div className="flex flex-col items-end gap-1.5 text-[11px] text-[#574a4f]">
             <span>이용약관</span>
-            <span>개인정보처리방침</span>
+            <Link href="/privacy" className="hover:text-jaju">
+              개인정보처리방침
+            </Link>
             <span>hello@arklings.kr</span>
           </div>
         </div>
