@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth-forms";
-import { LkPage } from "@/components/landing-kit";
+import { PaperPage } from "@/components/paper-card";
 import { getCurrentUser } from "@/lib/auth";
 import { safeNext } from "@/lib/safe-next";
 
@@ -17,8 +17,8 @@ export default async function LoginPage({
   // 이미 로그인한 사람은 원래 가려던 화면으로 보낸다.
   if (await getCurrentUser()) redirect(returnTo);
   return (
-    <LkPage title="로그인" lead="가입할 때 쓴 이메일과 비밀번호를 입력해 주세요.">
+    <PaperPage>
       <LoginForm returnTo={returnTo} />
-    </LkPage>
+    </PaperPage>
   );
 }

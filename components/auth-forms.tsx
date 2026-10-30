@@ -7,7 +7,6 @@ import { ConsentDetails } from "@/components/consent-details";
 import { authInputCls, FormField } from "@/components/form-field";
 import { CardHeading, PaperCard, primaryBtn, outlineBtn } from "@/components/paper-card";
 import { CONSENT_LABEL } from "@/lib/consent";
-import { LkCard, LkField } from "@/components/landing-kit";
 import { SocialButtons } from "@/components/social-buttons";
 
 const withNext = (path: string, next: string) => `${path}?next=${encodeURIComponent(next)}`;
@@ -193,15 +192,12 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
   const v = state.values ?? {};
 
   return (
-    <LkCard>
-      <form action={action} noValidate className="lk-stack">
+    <PaperCard>
+      <CardHeading title="로그인" lines={["가입할 때 쓴 이메일과 비밀번호를 입력해 주세요."]} />
+      <form action={action} noValidate className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5">
         <input type="hidden" name="next" value={returnTo} />
-        {state.message && (
-          <p role="alert" className="lk-alert">
-            {state.message}
-          </p>
-        )}
-        <LkField id="login-email" label="이메일" error={e.email}>
+        <ErrorBox message={state.message} />
+        <FormField id="login-email" label="이메일" error={e.email}>
           <input
             id="login-email"
             name="email"
@@ -211,10 +207,10 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
             disabled={pending}
             aria-invalid={e.email ? true : undefined}
             aria-describedby={e.email ? "login-email-error" : undefined}
-            className="lk-input"
+            className={authInputCls}
           />
-        </LkField>
-        <LkField id="login-password" label="비밀번호" error={e.password}>
+        </FormField>
+        <FormField id="login-password" label="비밀번호" error={e.password}>
           <input
             id="login-password"
             name="password"
@@ -223,27 +219,27 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
             disabled={pending}
             aria-invalid={e.password ? true : undefined}
             aria-describedby={e.password ? "login-password-error" : undefined}
-            className="lk-input"
+            className={authInputCls}
           />
-        </LkField>
-        <button type="submit" disabled={pending} className="lk-btn lk-btn-primary lk-btn-block">
+        </FormField>
+        <button type="submit" disabled={pending} className={`${primaryBtn} w-full`}>
           {pending ? "로그인 중…" : "로그인"}
         </button>
       </form>
 
       {state.needsConfirm && (
-        <div className="lk-stack" style={{ marginTop: 16 }}>
+        <div className="mt-4">
           <ResendBox email={state.needsConfirm} returnTo={state.returnTo ?? returnTo} />
         </div>
       )}
 
       {state.message && (
-        <div className="lk-details" style={{ marginTop: 16 }}>
-          <p style={{ margin: 0 }}>구글·카카오로 가입했거나 비밀번호를 정한 적이 없다면 아래 방법을 써 보세요.</p>
-          <ul style={{ margin: "6px 0 0", paddingLeft: 16 }}>
+        <div className="mt-4 rounded-lg bg-[#faf7f8] px-4 py-3 text-[12px] leading-normal text-[#574a4f] md:text-[13px]">
+          <p>구글·카카오로 가입했거나 비밀번호를 정한 적이 없다면 아래 방법을 써 보세요.</p>
+          <ul className="mt-1.5 list-disc pl-4">
             <li>아래 「구글로 계속」「카카오로 계속」 버튼</li>
             <li>
-              <Link href={`/forgot-password${v.email ? `?email=${encodeURIComponent(v.email)}` : ""}`} className="lk-link">
+              <Link href={`/forgot-password${v.email ? `?email=${encodeURIComponent(v.email)}` : ""}`} className="text-jaju underline">
                 비밀번호 설정 메일 받기
               </Link>
             </li>
@@ -251,19 +247,19 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
         </div>
       )}
 
-      <p className="lk-note lk-center" style={{ marginTop: 20 }}>
+      <p className="mt-5 text-center text-[12px] text-[#6f6469]">
         비밀번호가 기억나지 않나요?{" "}
-        <Link href="/forgot-password" className="lk-link">
+        <Link href="/forgot-password" className="text-jaju underline">
           비밀번호 설정·재설정
         </Link>
       </p>
-      <p className="lk-note lk-center" style={{ marginTop: 8 }}>
+      <p className="mt-2 text-center text-[12px] text-[#6f6469]">
         아직 계정이 없나요?{" "}
-        <Link href={withNext("/signup", returnTo)} className="lk-link">
+        <Link href={withNext("/signup", returnTo)} className="text-jaju underline">
           가입하기
         </Link>
       </p>
       <SocialButtons returnTo={returnTo} />
-    </LkCard>
+    </PaperCard>
   );
 }
