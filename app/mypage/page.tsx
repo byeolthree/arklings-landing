@@ -121,6 +121,14 @@ export default async function MyPage() {
             로그아웃
           </button>
         </form>
+
+        <p className="mt-6 text-[12px] text-[#574a4f]">
+          더 이상 쓰지 않으신다면{" "}
+          <Link href="/mypage/withdraw" className="underline hover:text-jaju">
+            회원 탈퇴
+          </Link>
+          를 할 수 있어요.
+        </p>
       </PaperCard>
     </PaperPage>
   );

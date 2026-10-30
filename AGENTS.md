@@ -189,8 +189,9 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 - `RATE_LIMIT_SALT` (선택): 봇 방지용 접속 주소 해시에 섞는 글자
 - `MAIL_SMTP_HOST`, `MAIL_SMTP_PORT`, `MAIL_SMTP_USER`, `MAIL_SMTP_PASS`, `MAIL_FROM`: 메일 발송 설정(아키텍터의 기존 네이버 메일). 코드에 직접 쓰지 않는다.
 - `ADMIN_NOTIFY_EMAIL`: 아클링스 앞 새 신청 알림을 받을 주소
+- `CRON_SECRET`: 정기 정리 작업(`/api/cron/cleanup`)을 부를 때 확인하는 비밀값. 없으면 누구도 실행할 수 없다(항상 401). Vercel 예약 작업이 이 값을 자동으로 실어 보낸다.
 
-단계가 진행되면 `CRON_SECRET` 등이 더해진다. 새 변수는 사용자 승인 후 추가한다.
+새 변수는 사용자 승인 후 추가한다.
 
 ### 기획안 (단계 3)
 
@@ -199,6 +200,11 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 - 서버 동작은 `app/actions/plans.ts`(저장·이력 불러오기·고치기·삭제·공개·PDF·메일). 모든 동작이 맨 위에서 로그인을 다시 확인하고, 로그인한 본인의 권한(RLS)으로 실행한다. PDF는 Route Handler가 아니라 Server Action이 만들어(Server Action은 출처 검사가 기본으로 붙는다) 화면이 내려받게 한다. 메일은 받는 주소를 요청에서 받지 않고 로그인 계정의 확인된 이메일만 쓴다.
 - PDF: `pdfkit` + `assets/fonts/NotoSansKR-*.otf`(SIL OFL 1.1, 라이선스 `assets/fonts/OFL.txt`). `next.config.ts`에서 `pdfkit`을 번들에서 빼고(`serverExternalPackages`) 글꼴을 `/planner` 화면에 실어 보낸다(`outputFileTracingIncludes`).
 - 되돌리기(Ctrl+Z)는 `components/planner/use-undo.ts`의 자체 기록이다(자동으로 채워지는 문장 때문에 브라우저 기본 되돌리기는 어긋난다).
+
+### 탈퇴와 정리 작업 (단계 6)
+
+- 탈퇴: `/mypage/withdraw`(안내 → 체크 + 「탈퇴합니다」 입력 → `app/actions/account.ts`) → `/withdrawn`. 서버 전용 열쇠로 계정을 지우면 프로필·동의 기록·기획안·이력·메일 횟수가 DB의 연쇄 삭제로 함께 지워진다. 내 앞 협업 신청은 `recipient_id`가 비워져 아무도 못 보다가 3개월 뒤 지워진다. 운영자 표시(`admins`)가 있는 계정은 표시를 옮기기 전에는 탈퇴할 수 없다.
+- 정리 작업: `vercel.json`이 하루 한 번(UTC 18:17 = KST 03:17) `/api/cron/cleanup`을 부른다. `CRON_SECRET`이 맞을 때만 `lib/cleanup.ts`의 `runCleanup()`이 실행된다: ① 접수 3개월 지난 협업 신청과 첨부 파일 삭제(파일을 먼저 지우고, 파일 삭제가 실패하면 신청을 남겨 다음 실행에 다시 시도) ② 신청과 연결 안 된 하루 넘은 짝 없는 파일 삭제 ③ 48시간 지난 봇 방지 기록·3일 지난 메일 횟수 기록 삭제. 결과는 `cleanup_runs`(0005, 서버 전용)에 남으며, 실패하면 `ok=false`와 오류 종류가 적힌다.
 
 ### 화면 경로
 
