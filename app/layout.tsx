@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
+import "@/components/landing-kit.css";
 
 const notoSans = Noto_Sans_KR({
   variable: "--font-noto-sans",

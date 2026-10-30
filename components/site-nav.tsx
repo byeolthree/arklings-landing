@@ -2,109 +2,106 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signOut } from "@/app/actions/auth";
 
+// 랜딩(public/landing.html)의 상단 메뉴와 같은 모양. 가운데 메뉴 글자는 랜딩처럼 아직 연결된 화면이 없어 글자로만 둔다.
 const MENU = ["킹덤", "스튜디오", "크리에이터", "라이브러리", "커뮤니티"];
 
 export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   // 로그인 화면에서 돌아올 곳. 로그인·가입 화면 자체에서는 붙이지 않는다.
   const loginHref =
     pathname === "/login" || pathname === "/signup" || pathname.startsWith("/auth/")
       ? "/login"
       : `/login?next=${encodeURIComponent(pathname)}`;
+
+  // 랜딩처럼 아래로 내리면 메뉴 아래에 옅은 선이 생긴다.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const close = () => setOpen(false);
   return (
-    <header className="border-b border-teal bg-background">
-      <div className="mx-auto flex max-w-[1440px] items-center gap-8 px-4 py-4 md:px-20 md:py-6">
-        <a href="/" className="text-[22px] font-bold leading-normal text-jaju md:text-[24px]">
+    <header className={`lk-header${scrolled ? " scrolled" : ""}`} id="top">
+      <div className="lk-wrap lk-nav">
+        <Link className="lk-logo" href="/">
           Arklings
-        </a>
-        {/* 데스크톱 메뉴 (시안의 킹덤·스튜디오 등은 아직 연결된 화면이 없어 글자로만 둔다) */}
-        <nav className="hidden items-center gap-8 md:flex" aria-label="주 메뉴">
+        </Link>
+        <nav className="lk-nav-links" aria-label="주요 메뉴">
           {MENU.map((m) => (
-            <span key={m} className="text-[15px] text-[#574a4f]">
-              {m}
-            </span>
+            <span key={m}>{m}</span>
           ))}
         </nav>
-        <div className="flex-1" />
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="lk-nav-right">
           {loggedIn ? (
             <>
-              <Link href="/collab" className="text-[15px] text-[#574a4f] hover:text-jaju">
+              <Link href="/collab" className="lk-textlink">
                 받은 협업 신청
               </Link>
-              <Link href="/mypage" className="text-[15px] text-[#574a4f] hover:text-jaju">
+              <Link href="/mypage" className="lk-textlink">
                 마이페이지
               </Link>
-              <form action={signOut}>
-                <button type="submit" className="text-[15px] text-[#574a4f] hover:text-jaju">
+              <form action={signOut} style={{ display: "contents" }}>
+                <button type="submit" className="lk-textlink">
                   로그아웃
                 </button>
               </form>
             </>
           ) : (
-            <Link href={loginHref} className="text-[15px] text-[#574a4f] hover:text-jaju">
+            <Link href={loginHref} className="lk-textlink">
               로그인
             </Link>
           )}
-          <Link href="/collab/new" className="rounded-lg bg-jaju px-5 py-2 text-[13px] font-bold text-white hover:opacity-90">
-            협업 신청
+          <Link className="lk-btn lk-btn-primary lk-nav-cta" href="/planner">
+            지금 시작하기
           </Link>
+          <button
+            className="lk-burger"
+            type="button"
+            aria-label={open ? "메뉴 닫기" : "메뉴 열기"}
+            aria-expanded={open}
+            aria-controls="lk-menu"
+            onClick={() => setOpen((v) => !v)}
+          >
+            <i />
+            <i />
+            <i />
+          </button>
         </div>
-        <button
-          type="button"
-          className="text-[18px] text-[#292126] md:hidden"
-          aria-label="메뉴 열기"
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-        >
-          ☰
-        </button>
       </div>
-      {open && (
-        <div className="border-t border-[#e8dfe3] px-4 py-3 md:hidden">
-          <ul className="space-y-3 text-[15px] text-[#574a4f]">
-            {MENU.map((m) => (
-              <li key={m}>{m}</li>
-            ))}
-            {loggedIn ? (
-              <>
-                <li>
-                  <Link href="/collab" onClick={() => setOpen(false)} className="text-jaju">
-                    받은 협업 신청
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/mypage" onClick={() => setOpen(false)} className="text-jaju">
-                    마이페이지
-                  </Link>
-                </li>
-                <li>
-                  <form action={signOut}>
-                    <button type="submit" className="text-[#574a4f]">
-                      로그아웃
-                    </button>
-                  </form>
-                </li>
-              </>
-            ) : (
-              <li>
-                <Link href={loginHref} onClick={() => setOpen(false)} className="text-jaju">
-                  로그인
-                </Link>
-              </li>
-            )}
-            <li>
-              <Link href="/collab/new" onClick={() => setOpen(false)} className="font-bold text-jaju">
-                협업 신청
-              </Link>
-            </li>
-          </ul>
-        </div>
-      )}
+      <nav className={`lk-menu${open ? " open" : ""}`} id="lk-menu" aria-label="모바일 메뉴" aria-hidden={!open}>
+        {MENU.map((m) => (
+          <span key={m}>{m}</span>
+        ))}
+        {loggedIn ? (
+          <>
+            <Link href="/collab" onClick={close} tabIndex={open ? 0 : -1}>
+              받은 협업 신청
+            </Link>
+            <Link href="/mypage" onClick={close} tabIndex={open ? 0 : -1}>
+              마이페이지
+            </Link>
+            <form action={signOut} style={{ display: "contents" }}>
+              <button type="submit" tabIndex={open ? 0 : -1}>
+                로그아웃
+              </button>
+            </form>
+          </>
+        ) : (
+          <Link href={loginHref} onClick={close} tabIndex={open ? 0 : -1}>
+            로그인
+          </Link>
+        )}
+        <Link href="/planner" onClick={close} tabIndex={open ? 0 : -1} style={{ color: "var(--jaju)", fontWeight: 700 }}>
+          지금 시작하기
+        </Link>
+      </nav>
     </header>
   );
 }
