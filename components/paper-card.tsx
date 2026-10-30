@@ -17,17 +17,13 @@ export function PaperCard({ children, className = "" }: { children: React.ReactN
   );
 }
 
-export function CardHeading({ title, lines, noIcon }: { title: string; lines?: string[]; noIcon?: boolean }) {
+export function CardHeading({ title, lines }: { title: string; lines?: string[] }) {
   return (
     <div className="flex flex-col items-center gap-2 text-center md:gap-2.5">
-      {!noIcon && (
-        <>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/apply-envelope-desktop.svg" alt="" width={44} height={33} className="hidden md:block" />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/apply-envelope-mobile.svg" alt="" width={36} height={27} className="md:hidden" />
-        </>
-      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/images/apply-envelope-desktop.svg" alt="" width={44} height={33} className="hidden md:block" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/images/apply-envelope-mobile.svg" alt="" width={36} height={27} className="md:hidden" />
       <h1 className="text-[20px] font-bold text-[#292126] md:text-[24px]">{title}</h1>
       {lines && (
         <p className="text-[12px] leading-normal text-[#574a4f] md:text-[13px]">
