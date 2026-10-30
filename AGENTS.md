@@ -168,7 +168,9 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 - `roles` 값: video / script / art_director / history_advisor / producer / other
 - `status` 값: received(접수, 기본) / reviewing(검토 중) / accepted(수락) / rejected(거절)
 - 화면은 Figma 「미션5 아클링스 웹·모바일」 파일의 협업 신청 시안(노드 346:2, 346:539, 355:16, 355:49)을 따른다. 칸을 바꾸려면 시안과 SQL을 함께 고친다.
-- 새 표(`profiles`, `admins`, `plans`, `plan_revisions` 등)는 단계가 진행되면서 `supabase/migrations/`에 추가한다.
+- `profiles`(공개 이름만, 이메일은 복사하지 않음)와 `profile_consents`(동의 기록, 본인만 읽기)는 `0002_profiles.sql`이 만든다. 가입하면 트리거가 자동으로 채운다.
+- 새 표(`admins`, `plans`, `plan_revisions` 등)는 단계가 진행되면서 `supabase/migrations/`에 추가한다.
+- 동의 문구는 `lib/consent.ts` 한 곳에서만 쓴다(가입·협업 신청·`/privacy`가 같은 글). 문구를 고치면 `CONSENT_VERSION`도 올린다.
 
 ### SQL 변경 규칙
 
@@ -190,6 +192,8 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 ### 화면 경로
 
 `/collab`(목록, 10개씩, 임시로 운영자 비밀번호 필요), `/collab/gate`(비밀번호 입력), `/collab/new`, `/collab/done`(접수 안내만), `/collab/[id]`, `/collab/[id]/edit`. `/apply`는 `/collab/new`로 이동. 없는 id는 404. 메뉴에는 협업 신청 목록 링크를 두지 않는다.
+
+로그인(단계 1): `/signup`(가입), `/login`, `/mypage`(로그인 필요), `/auth/confirm`(이메일 확인 링크가 들어오는 곳), `/auth/link-expired`(링크 만료 안내), `/privacy`(개인정보처리방침). 로그인 뒤 돌아갈 주소(`next`)는 `lib/safe-next.ts`로 같은 사이트 안 경로만 허용한다. 로그인 쿠키는 `proxy.ts`가 새로고침하고, 서버 코드는 `lib/supabase/server.ts`의 `createAuthClient()`와 `lib/auth.ts`의 `getCurrentUser()`·`requireUser()`로 확인한다. 기존 협업 신청 코드는 로그인 없는 연결(`lib/supabase.ts`)을 그대로 쓴다.
 
 ### 규칙
 
