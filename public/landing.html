@@ -75,7 +75,10 @@
   .nav-links { display: none; gap: 22px; font-size: 15px; }
   .nav-links span { color: var(--body); }
   .nav-right { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: 15px; }
-  .nav-right .mypage { display: none; }
+  .nav-right .mypage { display: none; color: var(--body); text-decoration: none; }
+  .nav-right .mypage:hover { color: var(--jaju); }
+  .auth-slot { visibility: hidden; }
+  .auth-slot.ready { visibility: visible; }
   .nav .btn { min-height: 36px; padding: 0 16px; font-size: 13px; }
   @media (min-width: 768px) { .logo { font-size: 24px; } }
   @media (min-width: 900px) { .nav-links, .nav-right .mypage { display: flex; } }
@@ -907,8 +910,8 @@
       background: rgba(250,247,248,.98); border-bottom: 1px solid var(--line); box-shadow: 0 18px 30px -24px rgba(42,32,37,.4);
       opacity: 0; visibility: hidden; transform: translateY(-8px); transition: opacity .25s var(--ease), transform .25s var(--ease), visibility .25s; }
     .nav-menu.open { opacity: 1; visibility: visible; transform: none; }
-    .nav-menu span { padding: 14px 4px; font-size: 16px; color: var(--title); border-bottom: 1px solid var(--line); cursor: pointer; }
-    .nav-menu span:last-child { border-bottom: 0; }
+    .nav-menu span, .nav-menu a { display: block; text-decoration: none; padding: 14px 4px; font-size: 16px; color: var(--title); border-bottom: 1px solid var(--line); cursor: pointer; }
+    .nav-menu span:last-child, .nav-menu a:last-child { border-bottom: 0; }
   }
 
   /* ===== v14: 줄바꿈 개선 ===== */
@@ -1059,13 +1062,13 @@
       <span>킹덤</span><span>스튜디오</span><span>크리에이터</span><span>라이브러리</span><span>커뮤니티</span>
     </nav>
     <div class="nav-right">
-      <span class="mypage">마이페이지</span>
+      <a class="mypage auth-slot" id="navAuth" href="/login">로그인</a>
       <a class="btn btn-primary nav-cta" href="/planner">지금 시작하기</a>
       <button class="nav-burger" id="navBurger" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="navMenu"><i></i><i></i><i></i></button>
     </div>
   </div>
   <nav class="nav-menu" id="navMenu" aria-label="모바일 메뉴">
-    <span>킹덤</span><span>스튜디오</span><span>크리에이터</span><span>라이브러리</span><span>커뮤니티</span><span>마이페이지</span>
+    <span>킹덤</span><span>스튜디오</span><span>크리에이터</span><span>라이브러리</span><span>커뮤니티</span><a class="auth-slot" id="navAuthM" href="/login">로그인</a>
   </nav>
 </header>
 
@@ -1571,6 +1574,24 @@
     heroEl.addEventListener("pointerdown", function (e) { var p = pos(e); spawn(p.x, p.y); last = p; });
     heroEl.addEventListener("pointerleave", function () { last = null; });
   })();
+})();
+</script>
+<script>
+/* 로그인 여부에 따라 메뉴의 「로그인」/「마이페이지」를 바꾼다. 확인이 끝나기 전에는 글자를 숨겨 깜빡임을 막는다. */
+(function () {
+  var a = document.getElementById("navAuth"), m = document.getElementById("navAuthM");
+  function show(loggedIn) {
+    [a, m].forEach(function (el) {
+      if (!el) return;
+      el.textContent = loggedIn ? "마이페이지" : "로그인";
+      el.setAttribute("href", loggedIn ? "/mypage" : "/login");
+      el.classList.add("ready");
+    });
+  }
+  fetch("/api/session", { credentials: "same-origin", cache: "no-store" })
+    .then(function (r) { return r.ok ? r.json() : { loggedIn: false }; })
+    .then(function (d) { show(!!(d && d.loggedIn)); })
+    .catch(function () { show(false); });
 })();
 </script>
 <script>
