@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
-import { getCurrentUser } from "@/lib/auth";
+import { CONFIRM_FIRST_MESSAGE, getCurrentUser, isConfirmed } from "@/lib/auth";
 import { verifyAttachment } from "@/lib/collab-file";
 import { notifyNewRequest } from "@/lib/collab-notify";
 import { parseForm, UUID_RE, type FieldErrors } from "@/lib/collab";
@@ -23,6 +23,24 @@ export type FormState = {
 const LOGIN_MESSAGE = "로그인이 풀렸어요. 다시 로그인한 뒤 시도해 주세요.";
 const NOT_FOUND = "찾을 수 없는 신청입니다.";
 const UNAVAILABLE = "지금은 저장할 수 없어요. 잠시 뒤에 다시 시도해 주세요.";
+const PLAN_GONE = "이 기획안은 더 이상 공개되어 있지 않아 신청할 수 없어요. 포트폴리오에서 다른 기획안을 찾아 주세요.";
+
+// 기획안으로 들어온 신청의 받는 사람은 서버가 plan_id로 기획안을 찾아 정한다(화면에서 받는 사람 번호를 받지 않는다).
+// 공개 중인 기획안이고, 주인이 이메일 확인을 마쳤을 때만 받을 수 있다. DB도 같은 규칙을 저장 순간에 한 번 더 확인한다.
+async function findPlanRecipient(planId: string): Promise<{ ownerId: string } | "gone" | "error"> {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin.from("plans").select("owner_id, is_public").eq("id", planId).maybeSingle();
+    if (error) return "error";
+    if (!data || !data.is_public) return "gone";
+    const { data: owner, error: ownerError } = await admin.auth.admin.getUserById(data.owner_id as string);
+    if (ownerError || !owner.user) return "error";
+    if (!owner.user.email || !owner.user.email_confirmed_at) return "gone";
+    return { ownerId: data.owner_id as string };
+  } catch {
+    return "error";
+  }
+}
 
 type Verified = Extract<Awaited<ReturnType<typeof verifyAttachment>>, { ok: true }>["kind"];
 
@@ -71,7 +89,18 @@ export async function createCollab(_prev: FormState, fd: FormData): Promise<Form
     return { message: UNAVAILABLE, values };
   }
 
-  // 4) 파일 올리기 → 저장. id는 앱에서 미리 만든다(저장 뒤에 읽어 올 권한이 필요 없게).
+  // 4) 기획안으로 온 신청이면 받는 사람(기획안 주인)을 서버가 찾는다. 아니면 아클링스(운영자)가 받는다.
+  const planId = String(fd.get("plan_id") ?? "").trim();
+  let ownerId: string | null = null;
+  if (planId) {
+    if (!UUID_RE.test(planId)) return { message: PLAN_GONE, values };
+    const found = await findPlanRecipient(planId);
+    if (found === "error") return { message: UNAVAILABLE, values };
+    if (found === "gone") return { message: PLAN_GONE, values };
+    ownerId = found.ownerId;
+  }
+
+  // 5) 파일 올리기 → 저장. id는 앱에서 미리 만든다(저장 뒤에 읽어 올 권한이 필요 없게).
   let attachment_path: string | null = null;
   try {
     if (file && kind) {
@@ -87,18 +116,21 @@ export async function createCollab(_prev: FormState, fd: FormData): Promise<Form
         applicant_name: values.applicant_name,
         contact: values.contact,
         sns_handle: values.sns_handle,
-        source_work_id: values.source_work_id || null,
+        source_work_id: ownerId ? null : values.source_work_id || null,
         roles,
         idea: values.idea,
         portfolio_url: values.portfolio_url,
         consent: true,
         attachment_path,
         attachment_name: file ? file.name : null,
-        recipient_kind: "arklings",
-        recipient_id: null,
+        recipient_kind: ownerId ? "user" : "arklings",
+        recipient_id: ownerId,
+        plan_id: ownerId ? planId : null,
       });
     if (error) {
       await removeFile(attachment_path);
+      // 확인과 저장 사이에 주인이 공개를 끈 경우(DB가 막았다)
+      if (error.message.includes("plan_not_public")) return { message: PLAN_GONE, values };
       return { message: "저장하지 못했습니다. 잠시 후 다시 시도해 주세요.", values };
     }
   } catch {
@@ -106,13 +138,13 @@ export async function createCollab(_prev: FormState, fd: FormData): Promise<Form
     return { message: UNAVAILABLE, values };
   }
 
-  // 5) 메일은 응답을 보낸 뒤에 보낸다. 메일이 실패해도 접수는 이미 끝나 있다.
+  // 6) 메일은 응답을 보낸 뒤에 보낸다. 받는 사람(기획안 주인 또는 아클링스)에게 알린다. 메일이 실패해도 접수는 이미 끝나 있다.
   const origin = await getOrigin();
   after(() =>
     notifyNewRequest({
       origin,
-      recipientKind: "arklings",
-      recipientId: null,
+      recipientKind: ownerId ? "user" : "arklings",
+      recipientId: ownerId,
       applicantName: values.applicant_name,
       contact: values.contact,
     }),
@@ -125,6 +157,7 @@ export async function createCollab(_prev: FormState, fd: FormData): Promise<Form
 export async function updateCollab(id: string, _prev: FormState, fd: FormData): Promise<FormState> {
   const user = await getCurrentUser();
   if (!user) return { message: LOGIN_MESSAGE };
+  if (!isConfirmed(user)) return { message: CONFIRM_FIRST_MESSAGE };
   if (!UUID_RE.test(id)) return { message: NOT_FOUND };
 
   const { values, roles, file, removeFile: wantRemove, errors } = parseForm(fd, { withStatus: true });
@@ -198,6 +231,7 @@ export async function updateCollab(id: string, _prev: FormState, fd: FormData): 
 export async function deleteCollab(id: string): Promise<FormState> {
   const user = await getCurrentUser();
   if (!user) return { message: LOGIN_MESSAGE };
+  if (!isConfirmed(user)) return { message: CONFIRM_FIRST_MESSAGE };
   if (!UUID_RE.test(id)) return { message: NOT_FOUND };
 
   let path: string | null = null;

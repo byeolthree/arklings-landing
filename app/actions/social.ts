@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { AuthFormState } from "@/app/actions/auth";
 import { describeAuthError } from "@/lib/auth-messages";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, isConfirmed } from "@/lib/auth";
 import { CONSENT_VERSION } from "@/lib/consent";
 import { getOrigin } from "@/lib/origin";
 import { isOAuthProvider, oauthOptions, type OAuthProviderId } from "@/lib/providers";
@@ -57,6 +57,7 @@ export async function startOAuth(_prev: AuthFormState, fd: FormData): Promise<Au
 export async function startLinkIdentity(fd: FormData): Promise<void> {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Fmypage");
+  if (!isConfirmed(user)) redirect("/auth/add-email?next=%2Fmypage");
   const provider = text(fd, "provider");
   if (!isOAuthProvider(provider)) redirect("/mypage?msg=link_failed");
   let url: string | undefined;
@@ -79,6 +80,7 @@ export async function startLinkIdentity(fd: FormData): Promise<void> {
 export async function unlinkProvider(fd: FormData): Promise<void> {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=%2Fmypage");
+  if (!isConfirmed(user)) redirect("/auth/add-email?next=%2Fmypage");
   const provider = text(fd, "provider");
   let result = "unlinked";
   try {

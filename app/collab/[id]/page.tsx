@@ -38,7 +38,7 @@ export default async function CollabDetailPage({ params, searchParams }: Props) 
 
   // 로그인한 본인의 권한으로 읽는다. 남에게 온 신청은 DB 규칙(RLS)이 돌려주지 않아 "없는 신청"(404)처럼 보인다.
   const sb = await createAuthClient();
-  const { data, error } = await sb.from("collab_requests").select("*, source_works(title)").eq("id", id).maybeSingle();
+  const { data, error } = await sb.from("collab_requests").select("*, source_works(title), plans(title)").eq("id", id).maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) notFound();
   const r = data as CollabRequest;
@@ -68,7 +68,11 @@ export default async function CollabDetailPage({ params, searchParams }: Props) 
         <dl className="mt-4 divide-y divide-[#e8dfe3] border-y border-[#e8dfe3]">
           <Row k="연락처">{r.contact}</Row>
           <Row k="SNS 아이디">{r.sns_handle}</Row>
-          <Row k="신청 대상">{r.source_works?.title ?? "특정 이야기 아님 (전체적인 협업 제안)"}</Row>
+          {r.plan_id ? (
+            <Row k="신청 기획안">{r.plans?.title ?? "제목을 불러오지 못했어요"}</Row>
+          ) : (
+            <Row k="신청 대상">{r.source_works?.title ?? "특정 이야기 아님 (전체적인 협업 제안)"}</Row>
+          )}
           <Row k="역할">{r.roles.map((x) => ROLES[x]).join(" · ")}</Row>
           <Row k="하고 싶은 일 / 아이디어"><span className="whitespace-pre-wrap">{r.idea}</span></Row>
           <Row k="작업 링크">

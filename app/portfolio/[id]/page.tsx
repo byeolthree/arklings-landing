@@ -66,10 +66,12 @@ export default async function PortfolioDetailPage({ params }: Props) {
           </article>
 
           <div className="pf-actions">
-            {/* 1단계: 협업 신청 연결(받는 사람 = 기획안 주인)은 2단계에서 붙인다. */}
-            <span className="btn btn-primary" aria-disabled="true">이 기획안에 협업 신청</span>
+            {/* 받는 사람은 서버가 기획안 번호로 주인을 찾아 정한다. 주소에는 기획안 번호만 싣는다. */}
+            <Link href={`/collab/new?plan=${plan.id}`} className="btn btn-primary">
+              이 기획안에 협업 신청 <span className="arrow">→</span>
+            </Link>
             <CopyLinkButton />
-            <p className="note">협업 신청 버튼은 다음 단계에서 연결돼요.</p>
+            <p className="note">신청은 {plan.authorName}님께 전달돼요. 로그인하지 않아도 보낼 수 있어요.</p>
           </div>
         </div>
       </section>

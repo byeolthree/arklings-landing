@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import type { AuthFormState } from "@/app/actions/auth";
 import { describeAuthError } from "@/lib/auth-messages";
-import { getCurrentUser } from "@/lib/auth";
+import { CONFIRM_FIRST_MESSAGE, getCurrentUser, isConfirmed } from "@/lib/auth";
 import { getOrigin } from "@/lib/origin";
 import { createAuthClient } from "@/lib/supabase/server";
 
@@ -39,6 +39,7 @@ export async function requestPasswordReset(_prev: AuthFormState, fd: FormData): 
 export async function updatePassword(_prev: AuthFormState, fd: FormData): Promise<AuthFormState> {
   const user = await getCurrentUser();
   if (!user) return { message: "링크가 만료되었어요. 비밀번호 설정 메일을 다시 받아 주세요.", nextStep: "resend" };
+  if (!isConfirmed(user)) return { message: CONFIRM_FIRST_MESSAGE };
   const password = text(fd, "password");
   const confirm = text(fd, "passwordConfirm");
   const errors: AuthFormState["errors"] = {};

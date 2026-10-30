@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { describeAuthError, type AuthIssue } from "@/lib/auth-messages";
-import { getCurrentUser } from "@/lib/auth";
+import { CONFIRM_FIRST_MESSAGE, getCurrentUser, isConfirmed } from "@/lib/auth";
 import { CONSENT_VERSION } from "@/lib/consent";
 import { getOrigin } from "@/lib/origin";
 import { safeNext } from "@/lib/safe-next";
@@ -170,6 +170,7 @@ export async function signOut(): Promise<void> {
 export async function updateDisplayName(_prev: AuthFormState, fd: FormData): Promise<AuthFormState> {
   const user = await getCurrentUser();
   if (!user) return { message: "로그인이 풀렸어요. 다시 로그인해 주세요.", nextStep: "retry" };
+  if (!isConfirmed(user)) return { message: CONFIRM_FIRST_MESSAGE };
   const name = validateName(text(fd, "displayName"));
   if (name.error) return { errors: { displayName: name.error }, values: { displayName: name.value } };
   try {
