@@ -21,6 +21,9 @@ export default async function PlannerPage({ searchParams }: { searchParams: Sear
     return <PlannerEditor loggedIn={false} displayName="" panel={null} />;
   }
 
+  // 이메일 확인을 마치지 않은 계정(카카오 등)은 먼저 이메일을 확인한다.
+  if (!user.email || !user.emailConfirmed) redirect(`/auth/add-email?next=${encodeURIComponent(planParam ? `/planner?plan=${planParam}` : "/planner")}`);
+
   let displayName = "";
   try {
     const sb = await createAuthClient();

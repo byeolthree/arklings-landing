@@ -36,5 +36,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
 export async function requireUser(returnPath: string): Promise<CurrentUser> {
   const user = await getCurrentUser();
   if (!user) redirect(`/login?next=${encodeURIComponent(safeNext(returnPath))}`);
+  // 카카오처럼 이메일 없이 들어온 계정은 이메일 확인을 마칠 때까지 다른 화면을 쓸 수 없다.
+  if (!user.email || !user.emailConfirmed) redirect(`/auth/add-email?next=${encodeURIComponent(safeNext(returnPath))}`);
   return user;
 }

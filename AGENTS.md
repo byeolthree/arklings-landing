@@ -156,7 +156,7 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 1. 이메일 로그인·프로필·동의 문구·`/privacy`
 2. 협업 신청: 받는 사람 구조·RLS·알림 메일·봇 방지·파일 검사
 3. 기획안: 서버 저장·이력·Ctrl+Z·PDF·메일·공개 여부
-4. 구글·카카오 로그인·계정 이어주기 (아키텍터의 콘솔 설정이 끝나면)
+4. 구글·카카오 로그인·계정 이어주기 (구현 완료, 진짜 서비스 확인 대기)
 5. 포트폴리오 페이지 (Figma 링크를 받은 뒤)
 6. 탈퇴·3개월 자동 삭제·정리 작업
 7. README·QA·배포 점검
@@ -206,6 +206,15 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 - 탈퇴: `/mypage/withdraw`(안내 → 체크 + 「탈퇴합니다」 입력 → `app/actions/account.ts`) → `/withdrawn`. 서버 전용 열쇠로 계정을 지우면 프로필·동의 기록·기획안·이력·메일 횟수가 DB의 연쇄 삭제로 함께 지워진다. 내 앞 협업 신청은 `recipient_id`가 비워져 아무도 못 보다가 3개월 뒤 지워진다. 운영자 표시(`admins`)가 있는 계정은 표시를 옮기기 전에는 탈퇴할 수 없다.
 - 정리 작업: `vercel.json`이 하루 한 번(UTC 18:17 = KST 03:17) `/api/cron/cleanup`을 부른다. `CRON_SECRET`이 맞을 때만 `lib/cleanup.ts`의 `runCleanup()`이 실행된다: ① 접수 3개월 지난 협업 신청과 첨부 파일 삭제(파일을 먼저 지우고, 파일 삭제가 실패하면 신청을 남겨 다음 실행에 다시 시도) ② 신청과 연결 안 된 하루 넘은 짝 없는 파일 삭제 ③ 48시간 지난 봇 방지 기록·3일 지난 메일 횟수 기록 삭제. 결과는 `cleanup_runs`(0005, 서버 전용)에 남으며, 실패하면 `ok=false`와 오류 종류가 적힌다.
 
+### 소셜 로그인과 계정 이어주기 (단계 4)
+
+- 로그인 방식 목록·표시 이름·요청 옵션은 `lib/providers.ts` 한 곳(나중에 네이버 같은 방식은 여기에 한 줄 더하고 Supabase 설정을 켠다). 버튼은 `components/social-buttons.tsx`(동의 체크 뒤에만 작동), 시작은 `app/actions/social.ts`의 `startOAuth`, 돌아오는 곳은 `/auth/callback`(실패·취소는 `/auth/social-failed` 안내 화면). 카카오에는 `profile_nickname profile_image` 권한만 요청한다. 동의한 문구 버전은 쿠키로 들고 와 callback에서 기록한다.
+- 이메일 소유가 확인된 같은 이메일(구글 등)은 Supabase 자동 연결에 맡긴다. 이메일 없이 들어온 계정(카카오)은 확인 전까지 `requireUser`가 `/auth/add-email`로 보낸다(기획안 저장 동작도 막는다).
+  - 아무도 안 쓰는 이메일: `updateUser({email})` → 확인 메일 → `/auth/confirm`(type=email_change) → 계정에 이메일이 붙는다.
+  - 이미 다른 계정이 쓰는 이메일: 화면은 똑같은 안내만 보이고(존재 여부 비공개), 그 이메일로 로그인 링크를 보낸다. 주인이 링크를 누르면 `/auth/link-social`에서 요청한 이름·시각을 보고 **직접 승인**해야만(`finishSocialLink`) 빈 임시 계정을 지우고 소셜 로그인을 그 계정에 붙인다(이메일 없음·기획안 없음일 때만 지우고, 확인하지 못하면 지우지 않는다). 요청 기록은 `pending_identity_links`(0006, 1시간 유효).
+- 마이페이지에서 방법 추가·해제(`startLinkIdentity`/`unlinkProvider`, 항상 1개 이상 남김). 비밀번호 설정·재설정은 `/forgot-password` → 메일 → `/reset-password`(소셜 전용 계정도 이 길로 이메일 로그인을 추가). 정리 작업이 이메일 없이 7일 지난 빈 계정을 지운다.
+- Supabase 설정 확인표와 진짜 서비스에서 확인할 항목: `supabase/social-setup.md`. 이메일 템플릿: `supabase/email-templates.md`.
+
 ### 화면 경로
 
 `/collab/new`(누구나 접수), `/collab/done`(접수 안내만), `/collab`(**받은 협업 신청** 목록, 10개씩, 로그인 필요), `/collab/[id]`, `/collab/[id]/edit`(받는 사람만). `/apply`는 `/collab/new`로 이동. 남에게 온 신청이나 없는 id는 404. `/collab/gate`는 로그인 화면으로 보낸다(예전 임시 비밀번호 화면은 없어졌다).
@@ -214,7 +223,7 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 
 마이페이지 `/mypage`에는 내 기획안 목록(공개 여부·수정 시각)이 있다.
 
-로그인(단계 1): `/signup`(가입), `/login`, `/mypage`(로그인 필요), `/auth/confirm`(이메일 확인 링크가 들어오는 곳), `/auth/link-expired`(링크 만료 안내), `/privacy`(개인정보처리방침). 로그인 뒤 돌아갈 주소(`next`)는 `lib/safe-next.ts`로 같은 사이트 안 경로만 허용한다. 로그인 쿠키는 `proxy.ts`가 새로고침하고, 서버 코드는 `lib/supabase/server.ts`의 `createAuthClient()`와 `lib/auth.ts`의 `getCurrentUser()`·`requireUser()`로 확인한다. 기존 협업 신청 코드는 로그인 없는 연결(`lib/supabase.ts`)을 그대로 쓴다.
+로그인(단계 1): `/signup`(가입), `/login`, `/forgot-password`, `/reset-password`, `/auth/callback`, `/auth/add-email`, `/auth/link-social`, `/auth/social-failed`, `/mypage`(로그인 필요), `/auth/confirm`(이메일 확인 링크가 들어오는 곳), `/auth/link-expired`(링크 만료 안내), `/privacy`(개인정보처리방침). 로그인 뒤 돌아갈 주소(`next`)는 `lib/safe-next.ts`로 같은 사이트 안 경로만 허용한다. 로그인 쿠키는 `proxy.ts`가 새로고침하고, 서버 코드는 `lib/supabase/server.ts`의 `createAuthClient()`와 `lib/auth.ts`의 `getCurrentUser()`·`requireUser()`로 확인한다. 기존 협업 신청 코드는 로그인 없는 연결(`lib/supabase.ts`)을 그대로 쓴다.
 
 ### 규칙
 

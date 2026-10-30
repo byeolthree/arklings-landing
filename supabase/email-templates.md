@@ -55,4 +55,49 @@ Supabase 화면 → Authentication → Emails(Email Templates)에서 아래 문�
 </p>
 ```
 
-> 이 템플릿은 단계 4에서 실제 흐름을 시험하면서 문구와 링크 모양을 한 번 더 확인합니다.
+> 카카오처럼 이메일 없이 들어온 사람이 이메일을 입력하면 이 메일이 갑니다. 링크를 누르면 그 이메일이 계정에 확인된 이메일로 붙습니다.
+
+## 3. Magic Link (로그인 링크) — 단계 4: 이미 있는 이메일로 이어주기 확인
+
+제목: `[아클링스] 로그인 링크를 보내드려요`
+
+```html
+<h2 style="margin:0 0 12px;color:#2a2025">로그인 링크를 보내드려요</h2>
+<p style="margin:0 0 16px;color:#574a50;line-height:1.6">
+  아래 버튼을 누르면 아클링스에 로그인돼요. 소셜 로그인(카카오 등)을 이 계정에 이어 달라는 요청이 있었다면,
+  로그인한 뒤 화면에서 직접 이어 줄지 한 번 더 물어봐요.
+</p>
+<p style="margin:0 0 20px">
+  <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=magiclink"
+     style="display:inline-block;background:#a61e5c;color:#ffffff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700">
+    로그인하기
+  </a>
+</p>
+<p style="margin:0;color:#8c8c8c;font-size:12px;line-height:1.6">
+  요청한 적이 없다면 이 메일은 무시해 주세요. 링크를 누르지 않으면 아무 일도 일어나지 않아요.
+</p>
+```
+
+## 4. Reset password (비밀번호 설정·재설정) — 단계 4
+
+제목: `[아클링스] 비밀번호를 정해 주세요`
+
+```html
+<h2 style="margin:0 0 12px;color:#2a2025">비밀번호를 정해 주세요</h2>
+<p style="margin:0 0 16px;color:#574a50;line-height:1.6">
+  아래 버튼을 누르면 새 비밀번호를 정할 수 있어요. 구글·카카오로 가입한 계정도 이 링크로 비밀번호를 정하면
+  이메일로 로그인할 수 있어요.
+</p>
+<p style="margin:0 0 20px">
+  <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery"
+     style="display:inline-block;background:#a61e5c;color:#ffffff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700">
+    비밀번호 정하기
+  </a>
+</p>
+<p style="margin:0;color:#8c8c8c;font-size:12px;line-height:1.6">
+  요청한 적이 없다면 이 메일은 무시해 주세요. 비밀번호는 바뀌지 않아요.
+</p>
+```
+
+> 세 템플릿(2·3·4) 모두 링크 모양이 `{{ .RedirectTo }}&token_hash=…&type=…`로 같아야 `/auth/confirm`이 처리합니다.
+> Supabase 화면의 Authentication → Emails(Email Templates)에서 각각 붙여 넣습니다.

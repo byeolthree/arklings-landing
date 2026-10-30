@@ -35,6 +35,12 @@ export function describeAuthError(error: ErrorLike, context: "signup" | "login" 
     case "flow_state_not_found":
     case "bad_code_verifier":
       return { message: "확인 링크가 만료되었거나 이미 사용됐어요. 새 확인 메일을 받아 주세요.", next: "resend" };
+    case "identity_already_exists":
+      return { message: "이 계정은 이미 다른 아클링스 계정에 연결돼 있어요. 그 계정으로 로그인해 주세요.", next: "retry" };
+    case "manual_linking_disabled":
+      return { message: "로그인 방법 추가는 지금 준비 중이에요. 잠시 뒤에 다시 시도해 주세요.", next: "later" };
+    case "single_identity_not_deletable":
+      return { message: "로그인 방법이 하나뿐이라 해제할 수 없어요. 다른 방법을 먼저 추가해 주세요.", next: "retry" };
     case "user_banned":
       return { message: "이 계정은 지금 사용할 수 없어요.", next: "later" };
     default:

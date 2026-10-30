@@ -5,11 +5,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 //  1) 접수한 지 3개월이 지난 협업 신청과 첨부 파일 삭제 (탈퇴한 사람 앞 신청 포함)
 //  2) 신청과 연결되지 않은 짝 없는 파일 삭제(하루 이상 지난 것만 → 방금 올리는 중인 파일은 건드리지 않는다)
 //  3) 오래된 봇 방지 기록·메일 횟수 기록 삭제
+//  4) 이메일 확인을 끝내지 않은 반쪽 계정(7일)·만료된 이어주기 요청 삭제
 export const RETENTION_MONTHS = 3;
 const BATCH = 200;
 const MAX_BATCHES = 25;
 const ORPHAN_MIN_AGE_MS = 24 * 60 * 60 * 1000;
 const MAX_ORPHAN_DELETES = 500;
+const STALE_ACCOUNT_DAYS = 7;
 
 export type CleanupResult = {
   deletedRequests: number;
@@ -93,6 +95,24 @@ export async function runCleanup(now: Date = new Date()): Promise<CleanupResult>
     r.deletedOther += m.data?.length ?? 0;
   } catch (e) {
     fail("오래된 기록 정리", e);
+  }
+
+  // 4) 이메일 확인을 끝내지 않고 떠난 「반쪽 계정」(카카오 등으로 들어왔지만 이메일이 없고 기획안도 없는 계정, 7일 지남)과
+  //    승인되지 않은 채 하루가 지난 이어주기 요청 삭제
+  try {
+    const { data: stale, error: staleErr } = await sb.rpc("list_stale_emailless_users", { p_days: STALE_ACCOUNT_DAYS });
+    if (staleErr) throw staleErr;
+    for (const id of (stale ?? []) as string[]) {
+      const { error: delErr } = await sb.auth.admin.deleteUser(id);
+      if (delErr) fail("반쪽 계정 삭제", delErr);
+      else r.deletedOther += 1;
+    }
+    const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+    const pend = await sb.from("pending_identity_links").delete().lt("created_at", dayAgo).select("source_user_id");
+    if (pend.error) throw pend.error;
+    r.deletedOther += pend.data?.length ?? 0;
+  } catch (e) {
+    fail("반쪽 계정·이어주기 요청 정리", e);
   }
 
   // 실행 기록(실패해도 정리 결과는 응답으로 돌려준다)

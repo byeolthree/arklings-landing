@@ -71,7 +71,7 @@ export async function signUp(_prev: AuthFormState, fd: FormData): Promise<AuthFo
 
   try {
     const supabase = await createAuthClient();
-    const { error } = await supabase.auth.signUp({
+    const { data: signed, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -82,11 +82,17 @@ export async function signUp(_prev: AuthFormState, fd: FormData): Promise<AuthFo
     if (error) {
       // 이미 가입된 이메일이어도 "이미 있다"고 알려 주지 않고 같은 안내로 이어 간다(계정 존재 여부가 새지 않게).
       if (error.code === "user_already_exists" || error.code === "email_exists") {
+        await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${await getOrigin()}/auth/confirm?next=${encodeURIComponent("/reset-password")}` }).catch(() => null);
         return { sentTo: email, values, returnTo };
       }
       const issue = describeAuthError(error, "signup");
       if (issue.field) return { errors: { [issue.field]: issue.message }, nextStep: issue.next, values, returnTo };
       return { message: issue.message, nextStep: issue.next, values, returnTo };
+    }
+    // 이미 확인이 끝난 계정의 이메일이면(가입 정보가 비어 돌아옴) 가입 메일 대신 비밀번호 설정 메일을 보낸다.
+    // 구글·카카오로 먼저 가입한 사람이 같은 이메일로 이메일 로그인도 쓰려는 경우에 이 링크로 비밀번호를 정한다.
+    if (signed?.user && Array.isArray(signed.user.identities) && signed.user.identities.length === 0) {
+      await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${await getOrigin()}/auth/confirm?next=${encodeURIComponent("/reset-password")}` }).catch(() => null);
     }
   } catch {
     return { message: UNAVAILABLE, nextStep: "retry", values, returnTo };

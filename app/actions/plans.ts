@@ -30,6 +30,7 @@ const NOT_FOUND = "찾을 수 없는 기획안이에요.";
 async function needUser(): Promise<{ user: CurrentUser } | Fail> {
   const user = await getCurrentUser();
   if (!user) return { ok: false, error: LOGIN_MESSAGE, needLogin: true };
+  if (!user.email || !user.emailConfirmed) return { ok: false, error: "이메일 확인을 먼저 마쳐 주세요. 확인이 끝나면 저장할 수 있어요." };
   return { user };
 }
 

@@ -7,6 +7,7 @@ import { ConsentDetails } from "@/components/consent-details";
 import { authInputCls, FormField } from "@/components/form-field";
 import { CardHeading, PaperCard, primaryBtn, outlineBtn } from "@/components/paper-card";
 import { CONSENT_LABEL } from "@/lib/consent";
+import { SocialButtons } from "@/components/social-buttons";
 
 const withNext = (path: string, next: string) => `${path}?next=${encodeURIComponent(next)}`;
 
@@ -79,7 +80,7 @@ export function CheckEmailCard({ email, returnTo }: { email: string; returnTo: s
       <div className="mt-6 flex flex-col gap-4 md:mt-8">
         <ul className="flex flex-col gap-1.5 rounded-lg bg-[#faf7f8] px-4 py-3 text-[12px] leading-normal text-[#574a4f] md:text-[13px]">
           <li>메일이 안 보이면 스팸함도 확인해 주세요. 발신 주소가 임시라 스팸함으로 갈 수 있어요.</li>
-          <li>이미 가입한 이메일이라면 새 메일이 오지 않을 수 있어요. 그때는 로그인해 주세요.</li>
+          <li>이미 가입한 이메일이라면 가입 확인 메일 대신 비밀번호 설정 메일이 가요. 그 링크로 비밀번호를 정하면 로그인할 수 있어요.</li>
         </ul>
         <ResendBox email={email} returnTo={returnTo} />
         <Link href={withNext("/login", returnTo)} className={`${primaryBtn} w-full`}>
@@ -180,6 +181,7 @@ export function SignupForm({ returnTo }: { returnTo: string }) {
           </Link>
         </p>
       </form>
+      <SocialButtons returnTo={returnTo} heading="또는 구글·카카오로 바로 가입하기" />
     </PaperCard>
   );
 }
@@ -231,12 +233,33 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
         </div>
       )}
 
+      {state.message && (
+        <div className="mt-4 rounded-lg bg-[#faf7f8] px-4 py-3 text-[12px] leading-normal text-[#574a4f] md:text-[13px]">
+          <p>구글·카카오로 가입했거나 비밀번호를 정한 적이 없다면 아래 방법을 써 보세요.</p>
+          <ul className="mt-1.5 list-disc pl-4">
+            <li>아래 「구글로 계속」「카카오로 계속」 버튼</li>
+            <li>
+              <Link href={`/forgot-password${v.email ? `?email=${encodeURIComponent(v.email)}` : ""}`} className="text-jaju underline">
+                비밀번호 설정 메일 받기
+              </Link>
+            </li>
+          </ul>
+        </div>
+      )}
+
       <p className="mt-5 text-center text-[12px] text-[#6f6469]">
+        비밀번호가 기억나지 않나요?{" "}
+        <Link href="/forgot-password" className="text-jaju underline">
+          비밀번호 설정·재설정
+        </Link>
+      </p>
+      <p className="mt-2 text-center text-[12px] text-[#6f6469]">
         아직 계정이 없나요?{" "}
         <Link href={withNext("/signup", returnTo)} className="text-jaju underline">
           가입하기
         </Link>
       </p>
+      <SocialButtons returnTo={returnTo} />
     </PaperCard>
   );
 }
