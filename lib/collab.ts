@@ -91,7 +91,7 @@ export function parseForm(fd: FormData, opts: { withStatus: boolean }): ParsedFo
   const file = f instanceof File && f.size > 0 ? f : null;
   if (file) {
     if (!ALLOWED_TYPES.includes(file.type)) errors.attachment = "PDF, JPG, PNG 파일만 올릴 수 있습니다.";
-    else if (file.size > MAX_FILE_BYTES) errors.attachment = "파일 크기는 4MB 이하여야 합니다.";
+    else if (file.size > MAX_FILE_BYTES) errors.attachment = "파일 크기는 4MB 이하여야 합니다. 더 큰 파일은 「작업 링크」 칸에 링크로 남겨 주세요.";
   }
   return { values, roles, file, removeFile: fd.get("remove_attachment") === "on", errors };
 }
