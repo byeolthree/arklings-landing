@@ -21,7 +21,15 @@ export function isMailConfigured(): boolean {
   return readConfig() !== null;
 }
 
-export async function sendMail(input: { to: string; subject: string; text: string; html: string }): Promise<MailResult> {
+export type MailAttachment = { filename: string; content: Buffer; contentType: string };
+
+export async function sendMail(input: {
+  to: string;
+  subject: string;
+  text: string;
+  html: string;
+  attachments?: MailAttachment[];
+}): Promise<MailResult> {
   const c = readConfig();
   if (!c) {
     console.warn("[mail] 메일 설정(MAIL_*)이 없어 메일을 보내지 않았습니다.");
@@ -43,6 +51,7 @@ export async function sendMail(input: { to: string; subject: string; text: strin
       subject: input.subject,
       text: input.text,
       html: input.html,
+      attachments: input.attachments,
     });
     return { ok: true };
   } catch (e) {

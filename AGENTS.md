@@ -169,7 +169,8 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 - `status` 값: received(접수, 기본) / reviewing(검토 중) / accepted(수락) / rejected(거절)
 - 화면은 Figma 「미션5 아클링스 웹·모바일」 파일의 협업 신청 시안(노드 346:2, 346:539, 355:16, 355:49)을 따른다. 칸을 바꾸려면 시안과 SQL을 함께 고친다.
 - `profiles`(공개 이름만, 이메일은 복사하지 않음)와 `profile_consents`(동의 기록, 본인만 읽기)는 `0002_profiles.sql`이 만든다. 가입하면 트리거가 자동으로 채운다.
-- 새 표(`admins`, `plans`, `plan_revisions` 등)는 단계가 진행되면서 `supabase/migrations/`에 추가한다.
+- 기획안(`0004_plans.sql`): `plans`(주인·제목·공개 여부·공개용 사본 `public_content`. 공개된 것만 누구나 읽고 쓰기는 주인만, 사람당 30건), `plan_revisions`(「임시저장」 한 번 = 한 건. 고른 선택지 `selections` / 아클링스 제안 문장 `suggested`(만든 방식 `method` 포함) / 사용자가 고친 문장 `edited`를 따로 담는다. 주인만 읽고 쓰고 지우며 기획안당 100건), `mail_usage`(기획안 PDF 메일 하루 3번 제한, 앱이 직접 못 만지고 `reserve_plan_mail()`·`release_plan_mail()` 함수로만 센다). `collab_requests.plan_id`는 `plans`를 가리키고, 기획안이 지워지면 신청은 남고 연결만 비워진다.
+- 새 표는 단계가 진행되면서 `supabase/migrations/`에 추가한다.
 - 동의 문구는 `lib/consent.ts` 한 곳에서만 쓴다(가입·협업 신청·`/privacy`가 같은 글). 문구를 고치면 `CONSENT_VERSION`도 올린다.
 
 ### SQL 변경 규칙
@@ -191,11 +192,21 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 
 단계가 진행되면 `CRON_SECRET` 등이 더해진다. 새 변수는 사용자 승인 후 추가한다.
 
+### 기획안 (단계 3)
+
+- 화면 `/planner`(`?plan=<id>`로 내 기획안 열기). 로그인 없이도 쓸 수 있고 이 기기 브라우저에만 자동 보관된다. 서버 저장·PDF·메일은 로그인해야 하며, 로그인 안 한 내용은 서버에 저장하지 않는다. 옛 주소 `/planner.html`은 `next.config.ts`가 `/planner`로 보낸다(`public/planner.html` 파일은 삭제 허락을 받기 전까지 남겨 둔다).
+- 내용의 모양과 검사 규칙은 `lib/plans.ts` 한 곳(화면·서버 공통). 「아클링스가 제안한 문장」은 `buildSuggestion()` 한 함수에서만 만든다(나중에 AI 문장도 이 자리와 `method` 값으로). 서버는 화면이 보낸 제안 문장을 믿지 않고 칸 내용에서 다시 만든다.
+- 서버 동작은 `app/actions/plans.ts`(저장·이력 불러오기·고치기·삭제·공개·PDF·메일). 모든 동작이 맨 위에서 로그인을 다시 확인하고, 로그인한 본인의 권한(RLS)으로 실행한다. PDF는 Route Handler가 아니라 Server Action이 만들어(Server Action은 출처 검사가 기본으로 붙는다) 화면이 내려받게 한다. 메일은 받는 주소를 요청에서 받지 않고 로그인 계정의 확인된 이메일만 쓴다.
+- PDF: `pdfkit` + `assets/fonts/NotoSansKR-*.otf`(SIL OFL 1.1, 라이선스 `assets/fonts/OFL.txt`). `next.config.ts`에서 `pdfkit`을 번들에서 빼고(`serverExternalPackages`) 글꼴을 `/planner` 화면에 실어 보낸다(`outputFileTracingIncludes`).
+- 되돌리기(Ctrl+Z)는 `components/planner/use-undo.ts`의 자체 기록이다(자동으로 채워지는 문장 때문에 브라우저 기본 되돌리기는 어긋난다).
+
 ### 화면 경로
 
 `/collab/new`(누구나 접수), `/collab/done`(접수 안내만), `/collab`(**받은 협업 신청** 목록, 10개씩, 로그인 필요), `/collab/[id]`, `/collab/[id]/edit`(받는 사람만). `/apply`는 `/collab/new`로 이동. 남에게 온 신청이나 없는 id는 404. `/collab/gate`는 로그인 화면으로 보낸다(예전 임시 비밀번호 화면은 없어졌다).
 
 받는 사람 규칙(0003): 신청마다 `recipient_kind`(`arklings`/`user`)와 `recipient_id`가 있다. 읽기·수정·삭제는 받는 사람만 하고, 아클링스 앞 신청은 `admins` 표에 UUID가 있는 계정(운영자 표시, 화면에는 안 보임)이 본다. 접수(INSERT)는 DB에 열려 있지 않고 서버가 검사 뒤 서버 전용 열쇠로 저장한다. 봇 방지는 숨은 칸(`extra_note`)과 접속 주소 해시 기준 횟수 제한(1시간 5건·하루 20건, `lib/ratelimit.ts`)이다. 새 신청 알림·접수 확인 메일은 `lib/collab-notify.ts`가 응답 뒤에(`after`) 보내며, 실패해도 접수에는 영향이 없다.
+
+마이페이지 `/mypage`에는 내 기획안 목록(공개 여부·수정 시각)이 있다.
 
 로그인(단계 1): `/signup`(가입), `/login`, `/mypage`(로그인 필요), `/auth/confirm`(이메일 확인 링크가 들어오는 곳), `/auth/link-expired`(링크 만료 안내), `/privacy`(개인정보처리방침). 로그인 뒤 돌아갈 주소(`next`)는 `lib/safe-next.ts`로 같은 사이트 안 경로만 허용한다. 로그인 쿠키는 `proxy.ts`가 새로고침하고, 서버 코드는 `lib/supabase/server.ts`의 `createAuthClient()`와 `lib/auth.ts`의 `getCurrentUser()`·`requireUser()`로 확인한다. 기존 협업 신청 코드는 로그인 없는 연결(`lib/supabase.ts`)을 그대로 쓴다.
 

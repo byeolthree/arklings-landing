@@ -7,6 +7,8 @@ import { safeNext } from "@/lib/safe-next";
 export type CurrentUser = {
   id: string;
   email: string | null;
+  // 이메일 소유가 확인됐는지(확인 메일 링크를 눌렀거나, 구글처럼 확인된 이메일을 준 경우)
+  emailConfirmed: boolean;
   providers: string[];
 };
 
@@ -24,7 +26,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     const providers = Array.from(
       new Set((data.user.identities ?? []).map((i) => i.provider).concat(data.user.app_metadata?.provider ?? [])),
     ).filter(Boolean) as string[];
-    return { id: data.user.id, email: data.user.email ?? null, providers };
+    return { id: data.user.id, email: data.user.email ?? null, emailConfirmed: Boolean(data.user.email_confirmed_at), providers };
   } catch {
     return null;
   }
