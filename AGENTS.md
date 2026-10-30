@@ -14,7 +14,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 아클링스는 한국 고대사 기반 IP를 여러 크리에이터가 함께 만드는 참여형 제작 스튜디오다.
 미션 7에서는 로그인(유저 기능)과 기획안 서버 저장을 붙여, 기획안을 아클링스 포트폴리오에 올리고 작업을 이어 갈 수 있게 한다.
-홈 CTA는 「협업 신청」이며 목적지는 협업 신청 페이지다. 「지금 시작하기」는 기획안 페이지(`/planner`)로 간다.
+홈의 주 버튼 「지금 시작하기」(상단 메뉴 오른쪽 끝을 포함한 5곳)는 기획안 페이지(`/planner`)로 가고, 보조 버튼 「협업 문의하기」(2곳)는 협업 신청 페이지(`/collab/new`)로 간다.
 
 ## 기술 스택
 
@@ -38,15 +38,15 @@ Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase(DB·Storage·�
 - 정적 스튜디오 피드와 스튜디오 화면 (나중에 별도로 추가)
 - SNS에서 들어온 사용자가 홈을 거치지 않고 스튜디오 콘텐츠로 직접 접속하는 흐름
 
-## Figma 원칙
+## 디자인 기준
 
-Figma MCP는 자동 구현 도구가 아니라 디자인 근거를 읽는 도구로 사용한다.
-시안에서 색상, 타이포그래피, 간격, 모서리, 이미지, 배치를 확인하고, 구현 결과를 Figma와 비교해 차이가 큰 부분을 보정한다.
-Figma 시안과 제품 요구가 충돌하면 임의로 결정하지 않고 먼저 보고한다.
+모든 화면의 디자인 기준은 랜딩(`public/landing.html`)이다. 새 화면과 고치는 화면은 랜딩의 상단 메뉴·하단, 버튼, 제목, 배경, 카드, 구분선을 그대로 따른다. 기본 부품(shadcn) 모양으로 만들어 두고 나중에 바꾸지 않는다.
+Figma 시안은 초안이다. 시안과 랜딩이 다르면 랜딩을 따른다. Figma MCP는 랜딩에 없는 값을 찾을 때만 참고용으로 읽는다.
+디자인 기준과 제품 요구가 충돌하면 임의로 결정하지 않고 먼저 보고한다.
 
-## 디자인 토큰 (Figma 조회 없이 우선 참고)
+## 디자인 토큰 (랜딩과 같은 값)
 
-Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값이 안 맞거나 새 화면에 없는 값이 필요할 때만 Figma MCP로 확인한다.
+아래 표는 랜딩과 같은 값이다. 표와 랜딩이 다르면 랜딩을 따르고 표를 고친다.
 아래 수치는 스타일 가이드 변수와 미션5 화면(홈 `205:3`/`205:33`, 협업 신청 `332:2`/`332:26`)을 2026-09-23 기준으로 다시 읽은 값이다.
 
 ### 컬러
@@ -115,7 +115,7 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 - **입력창**: `border: 1px solid neutral/border`, `border-radius: 6px`, 높이 데스크톱 48px / 모바일 44px (원하는 것은 데스크톱 120px / 모바일 100px).
 - **배지(국가·상태, 관련 자료)**: 채움. 관련 자료는 `border-radius: 999px`. 스튜디오 유닛 배지는 시안 `12px` 모서리. gold/sage/일부 국가 배지는 어두운 글자.
 - **역할 칩 (홈 협업)**: 페이지 배경 + `1px solid neutral/border`, `border-radius: 20px`, 12px 본문색. 채워진 semantic 배지와 모양이 다르다.
-- **내비게이션 바**: 페이지와 같은 `neutral/background`. 하단 `1px solid secondary/teal`. 좌측 로고, 우측 끝에 Primary 「협업 신청」. 데스크톱 메뉴 간격 32px, 세로 패딩 24px. 모바일은 로고+햄버거, 세로 패딩 16px.
+- **내비게이션 바**: 페이지와 같은 `neutral/background`. 하단 `1px solid secondary/teal`. 좌측 로고, 우측 끝에 Primary 「지금 시작하기」(→ `/planner`). 데스크톱 메뉴 간격 32px, 세로 패딩 24px. 모바일은 로고+햄버거, 세로 패딩 16px.
 - **푸터**: 상단 `1px solid secondary/teal`.
 - **이미지 자리**: 실제 이미지 없을 때(스튜디오 썸네일) `neutral/background` + `1px solid #8C8C8C`, 진한 회색 박스로 채우지 않는다. 모서리 8px. 데스크톱 높이 200px / 모바일 160px.
 - **필터 칩 (스튜디오)**: 테두리 `#8C8C8C`, `border-radius: 20px`, 데스크톱 13px / 모바일 12px. 펼침 동작은 시안에 없음.
@@ -167,7 +167,7 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 - `collab_requests`: id(uuid), applicant_name, contact(이메일 또는 전화번호), sns_handle, source_work_id(→source_works, 비면 "특정 이야기 아님"), roles(text[], 1개 이상), idea(10~1000자), portfolio_url(http/https), consent(true만 허용), attachment_path·attachment_name(선택), status, created_at, updated_at(트리거 자동 갱신). 단계 2에서 받는 사람 칸(`recipient_kind`, `recipient_id`, `plan_id`)이 더해진다.
 - `roles` 값: video / script / art_director / history_advisor / producer / other
 - `status` 값: received(접수, 기본) / reviewing(검토 중) / accepted(수락) / rejected(거절)
-- 화면은 Figma 「미션5 아클링스 웹·모바일」 파일의 협업 신청 시안(노드 346:2, 346:539, 355:16, 355:49)을 따른다. 칸을 바꾸려면 시안과 SQL을 함께 고친다.
+- 칸 구성은 Figma 「미션5 아클링스 웹·모바일」 파일의 협업 신청 시안(노드 346:2, 346:539, 355:16, 355:49)에서 왔다. 칸을 바꾸려면 SQL을 함께 고친다. 디자인은 위 「디자인 기준」대로 랜딩을 따른다.
 - `profiles`(공개 이름만, 이메일은 복사하지 않음)와 `profile_consents`(동의 기록, 본인만 읽기)는 `0002_profiles.sql`이 만든다. 가입하면 트리거가 자동으로 채운다.
 - 기획안(`0004_plans.sql`): `plans`(주인·제목·공개 여부·공개용 사본 `public_content`. 공개된 것만 누구나 읽고 쓰기는 주인만, 사람당 30건), `plan_revisions`(「임시저장」 한 번 = 한 건. 고른 선택지 `selections` / 아클링스 제안 문장 `suggested`(만든 방식 `method` 포함) / 사용자가 고친 문장 `edited`를 따로 담는다. 주인만 읽고 쓰고 지우며 기획안당 100건), `mail_usage`(기획안 PDF 메일 하루 3번 제한, 앱이 직접 못 만지고 `reserve_plan_mail()`·`release_plan_mail()` 함수로만 센다). `collab_requests.plan_id`는 `plans`를 가리키고, 기획안이 지워지면 신청은 남고 연결만 비워진다.
 - 포트폴리오(`0007_portfolio.sql`): `plans.first_published_at`(처음 공개한 시각. DB 트리거가 처음 공개할 때 한 번만 찍고 앱이 못 바꾼다. 기존 `published_at`은 다시 공개할 때마다 덮어써지는 「마지막 공개 시각」으로 둔다), 보기(view) `portfolio_items`(공개된 기획안의 id·제목·처음 공개한 시각·공개 이름·공개용 사본만. 주인 번호·이메일·임시저장 이력은 없다. 호출한 사람의 권한(RLS)으로 읽는다), `is_email_confirmed()`(이메일 확인을 마친 계정인지), 기획안 신청 때 받는 사람을 기획안 주인으로 정하는 트리거. 화면에 보이는 날짜는 포트폴리오 목록·상세 모두 「게시일」(처음 공개한 날) 하나이고, 만든 시각·고친 시각은 포트폴리오에 띄우지 않는다.
@@ -178,6 +178,7 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 
 - `supabase/schema.sql`은 미션 6 최초 구조다. 다시 실행하면 `collab_requests`를 지우므로 **다시 실행하지 않는다.**
 - 구조 변경은 `supabase/migrations/000N_이름.sql` 새 파일로 만든다. 기존 데이터를 지우지 않고 여러 번 실행해도 안전하게 쓴다. 아키텍터가 Supabase SQL Editor에서 번호 순서대로 실행한다. (`0007`은 `0004`가 만든 기획안 표를 쓰므로 반드시 `0006` 다음에 실행한다.)
+- `0001`과 `0003`부터는 새 코드를 `main`에 배포하고 `SUPABASE_SERVICE_ROLE_KEY`를 넣은 **뒤에** 실행한다. 먼저 실행하면 예전 코드의 첨부 파일 보기와 협업 신청 접수·목록이 멈춘다(`0001`·`0003` 맨 위 설명).
 
 ### Storage
 
@@ -205,7 +206,7 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 ### 탈퇴와 정리 작업 (단계 6)
 
 - 탈퇴: `/mypage/withdraw`(안내 → 체크 + 「탈퇴합니다」 입력 → `app/actions/account.ts`) → `/withdrawn`. 서버 전용 열쇠로 계정을 지우면 프로필·동의 기록·기획안·이력·메일 횟수가 DB의 연쇄 삭제로 함께 지워진다. 내 앞 협업 신청은 `recipient_id`가 비워져 아무도 못 보다가 3개월 뒤 지워진다. 운영자 표시(`admins`)가 있는 계정은 표시를 옮기기 전에는 탈퇴할 수 없다.
-- 정리 작업: `vercel.json`이 하루 한 번(UTC 18:17 = KST 03:17) `/api/cron/cleanup`을 부른다. `CRON_SECRET`이 맞을 때만 `lib/cleanup.ts`의 `runCleanup()`이 실행된다: ① 접수 3개월 지난 협업 신청과 첨부 파일 삭제(파일을 먼저 지우고, 파일 삭제가 실패하면 신청을 남겨 다음 실행에 다시 시도) ② 신청과 연결 안 된 하루 넘은 짝 없는 파일 삭제 ③ 48시간 지난 봇 방지 기록·3일 지난 메일 횟수 기록 삭제. 결과는 `cleanup_runs`(0005, 서버 전용)에 남으며, 실패하면 `ok=false`와 오류 종류가 적힌다.
+- 정리 작업: `vercel.json`이 하루 한 번(UTC 18:17 = KST 03:17) `/api/cron/cleanup`을 부른다. `CRON_SECRET`이 맞을 때만 `lib/cleanup.ts`의 `runCleanup()`이 실행된다: ① 접수 3개월 지난 협업 신청과 첨부 파일 삭제(파일을 먼저 지우고, 파일 삭제가 실패하면 신청을 남겨 다음 실행에 다시 시도) ② 신청과 연결 안 된 하루 넘은 짝 없는 파일 삭제 ③ 48시간 지난 봇 방지 기록·3일 지난 메일 횟수 기록 삭제 ④ 이메일 확인을 끝내지 않고 7일 지난 반쪽 계정(이메일·기획안 없음)과 만료된 계정 이어주기 요청 삭제. 결과는 `cleanup_runs`(0005, 서버 전용)에 남으며, 실패하면 `ok=false`와 오류 종류가 적힌다.
 
 ### 소셜 로그인과 계정 이어주기 (단계 4)
 
@@ -235,9 +236,9 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 
 받는 사람 규칙(0003, 0007): 신청마다 `recipient_kind`(`arklings`/`user`)와 `recipient_id`가 있다. 읽기·수정·삭제는 받는 사람만 하고, 아클링스 앞 신청은 `admins` 표에 UUID가 있는 계정(운영자 표시, 화면에는 안 보임)이 본다. 접수(INSERT)는 DB에 열려 있지 않고 서버가 검사 뒤 서버 전용 열쇠로 저장한다. 봇 방지는 숨은 칸(`extra_note`)과 접속 주소 해시 기준 횟수 제한(1시간 5건·하루 20건, `lib/ratelimit.ts`)이다. 새 신청 알림·접수 확인 메일은 `lib/collab-notify.ts`가 응답 뒤에(`after`) 보내며, 실패해도 접수에는 영향이 없다.
 
-마이페이지 `/mypage`에는 내 기획안 목록(공개 여부·수정 시각)이 있다.
+마이페이지 `/mypage`에는 내 기획안 목록(공개 여부·수정 시각), 로그인 방법 추가·해제, 「회원 탈퇴」 링크(`/mypage/withdraw`)가 있다.
 
-로그인(단계 1): `/signup`(가입), `/login`, `/forgot-password`, `/reset-password`, `/auth/callback`, `/auth/add-email`, `/auth/link-social`, `/auth/social-failed`, `/mypage`(로그인 필요), `/auth/confirm`(이메일 확인 링크가 들어오는 곳), `/auth/link-expired`(링크 만료 안내), `/privacy`(개인정보처리방침). 로그인 뒤 돌아갈 주소(`next`)는 `lib/safe-next.ts`로 같은 사이트 안 경로만 허용한다. 로그인 쿠키는 `proxy.ts`가 새로고침하고, 서버 코드는 `lib/supabase/server.ts`의 `createAuthClient()`와 `lib/auth.ts`의 `getCurrentUser()`·`requireUser()`로 확인한다. 기존 협업 신청 코드는 로그인 없는 연결(`lib/supabase.ts`)을 그대로 쓴다.
+로그인 화면(단계 1·4): `/signup`(가입), `/login`, `/forgot-password`, `/reset-password`, `/auth/callback`, `/auth/add-email`, `/auth/link-social`, `/auth/social-failed`, `/mypage`(로그인 필요), `/auth/confirm`(이메일 확인 링크가 들어오는 곳), `/auth/link-expired`(링크 만료 안내), `/privacy`(개인정보처리방침). 로그인 뒤 돌아갈 주소(`next`)는 `lib/safe-next.ts`로 같은 사이트 안 경로만 허용한다. 로그인 쿠키는 `proxy.ts`가 새로고침하고, 서버 코드는 `lib/supabase/server.ts`의 `createAuthClient()`와 `lib/auth.ts`의 `getCurrentUser()`·`requireUser()`로 확인한다. 로그인 없는 연결(`lib/supabase.ts`)은 협업 신청 폼의 작품 목록과 포트폴리오처럼 누구나 보는 데이터를 읽을 때만 쓴다. 신청 저장은 서버 전용 열쇠로, 받은 신청 읽기·수정·삭제는 로그인한 본인의 권한으로 한다.
 
 ### 규칙
 
