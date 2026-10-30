@@ -1,6 +1,6 @@
 # Supabase 이메일 문구 (한국어) — 미션7 단계 1
 
-> **키 대기:** Supabase 키와 메일(Gmail SMTP) 설정이 끝나기 전에는 가입 확인 메일이 실제로 오지 않습니다. 설정이 끝나면 이 문서의 순서대로 적용하고 가입을 한 번 시험해 주세요.
+> **키 대기:** Supabase 키와 메일(네이버 SMTP) 설정이 끝나기 전에는 가입 확인 메일이 실제로 오지 않습니다. 설정 순서는 `supabase/mail-setup.md`에 있습니다. 설정이 끝나면 이 문서의 문구를 적용하고 가입을 한 번 시험해 주세요.
 
 Supabase 화면 → Authentication → Emails(Email Templates)에서 아래 문구로 바꿉니다.
 링크는 반드시 `{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=...` 모양이어야 합니다.

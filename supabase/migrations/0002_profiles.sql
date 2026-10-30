@@ -62,13 +62,13 @@ declare
   v_name    text;
   v_consent text;
 begin
+  -- 빈 문자열("")은 건너뛰고 다음 후보를 쓴다.
   v_name := left(
-    nullif(btrim(coalesce(
-      new.raw_user_meta_data ->> 'display_name',
-      new.raw_user_meta_data ->> 'full_name',
-      new.raw_user_meta_data ->> 'name',
-      ''
-    )), ''),
+    coalesce(
+      nullif(btrim(coalesce(new.raw_user_meta_data ->> 'display_name', '')), ''),
+      nullif(btrim(coalesce(new.raw_user_meta_data ->> 'full_name', '')), ''),
+      nullif(btrim(coalesce(new.raw_user_meta_data ->> 'name', '')), '')
+    ),
     30
   );
   if v_name is null then
