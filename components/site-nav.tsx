@@ -33,6 +33,9 @@ export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
         <div className="hidden items-center gap-8 md:flex">
           {loggedIn ? (
             <>
+              <Link href="/collab" className="text-[15px] text-[#574a4f] hover:text-jaju">
+                받은 협업 신청
+              </Link>
               <Link href="/mypage" className="text-[15px] text-[#574a4f] hover:text-jaju">
                 마이페이지
               </Link>
@@ -69,6 +72,11 @@ export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
             ))}
             {loggedIn ? (
               <>
+                <li>
+                  <Link href="/collab" onClick={() => setOpen(false)} className="text-jaju">
+                    받은 협업 신청
+                  </Link>
+                </li>
                 <li>
                   <Link href="/mypage" onClick={() => setOpen(false)} className="text-jaju">
                     마이페이지

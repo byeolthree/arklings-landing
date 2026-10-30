@@ -152,7 +152,7 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 
 ### 미션 7 단계
 
-0. 준비·임시 조치: 규칙 파일 정리, 협업 신청 목록 임시 비밀번호, 첨부 보관함 비공개, 검색엔진 차단, 시각 KST, 메인 버튼
+0. 준비·임시 조치: 규칙 파일 정리, 협업 신청 목록 임시 비밀번호(단계 2에서 로그인으로 대체됨), 첨부 보관함 비공개, 검색엔진 차단, 시각 KST, 메인 버튼
 1. 이메일 로그인·프로필·동의 문구·`/privacy`
 2. 협업 신청: 받는 사람 구조·RLS·알림 메일·봇 방지·파일 검사
 3. 기획안: 서버 저장·이력·Ctrl+Z·PDF·메일·공개 여부
@@ -179,26 +179,30 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 
 ### Storage
 
-- 버킷 `collab-attachments`: **비공개**(마이그레이션 `0001`), PDF·JPG·PNG, 4MB 이하 (Vercel 요청 크기 한도 4.5MB 때문). 파일 경로는 `collab_requests.attachment_path`에 저장하고, 화면에는 서버가 만든 **5분짜리 임시 주소**로만 보여 준다. 신청을 삭제하면 파일도 함께 지운다.
+- 버킷 `collab-attachments`: **비공개**(마이그레이션 `0001`, `0003`), PDF·JPG·PNG, 4MB 이하 (Vercel 요청 크기 한도 4.5MB 때문). 올리기·읽기·삭제는 **서버 전용 열쇠로 앱 서버만** 한다(로그인 없는 정책 없음). 파일 경로는 `collab_requests.attachment_path`에 저장하고, 받는 사람에게는 서버가 만든 **5분짜리 임시 주소**로만 보여 준다. 신청을 삭제하면 파일도 함께 지운다. 올릴 때는 파일 앞 글자(시그니처)까지 서버가 확인한다(`lib/collab-file.ts`).
 
 ### 환경 변수 (이름만 기록, 값은 `.env.local`과 Vercel에만)
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `ADMIN_TEMP_PASSWORD` (임시 조치용. 단계 2에서 로그인·받는 사람 규칙으로 바뀌면 없앤다)
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`: 서버 전용 열쇠. 접수 저장·첨부 파일·메일 받는 사람 조회에만 `lib/supabase/admin.ts`로 쓴다. 쓰기 전에 반드시 권한을 먼저 확인한다.
+- `RATE_LIMIT_SALT` (선택): 봇 방지용 접속 주소 해시에 섞는 글자
+- `MAIL_SMTP_HOST`, `MAIL_SMTP_PORT`, `MAIL_SMTP_USER`, `MAIL_SMTP_PASS`, `MAIL_FROM`: 메일 발송 설정(아키텍터의 기존 네이버 메일). 코드에 직접 쓰지 않는다.
+- `ADMIN_NOTIFY_EMAIL`: 아클링스 앞 새 신청 알림을 받을 주소
 
-단계가 진행되면 `SUPABASE_SERVICE_ROLE_KEY`, 메일 SMTP 설정(`MAIL_*`, `ADMIN_NOTIFY_EMAIL`) 등이 더해진다. 새 변수는 사용자 승인 후 추가한다.
+단계가 진행되면 `CRON_SECRET` 등이 더해진다. 새 변수는 사용자 승인 후 추가한다.
 
 ### 화면 경로
 
-`/collab`(목록, 10개씩, 임시로 운영자 비밀번호 필요), `/collab/gate`(비밀번호 입력), `/collab/new`, `/collab/done`(접수 안내만), `/collab/[id]`, `/collab/[id]/edit`. `/apply`는 `/collab/new`로 이동. 없는 id는 404. 메뉴에는 협업 신청 목록 링크를 두지 않는다.
+`/collab/new`(누구나 접수), `/collab/done`(접수 안내만), `/collab`(**받은 협업 신청** 목록, 10개씩, 로그인 필요), `/collab/[id]`, `/collab/[id]/edit`(받는 사람만). `/apply`는 `/collab/new`로 이동. 남에게 온 신청이나 없는 id는 404. `/collab/gate`는 로그인 화면으로 보낸다(예전 임시 비밀번호 화면은 없어졌다).
+
+받는 사람 규칙(0003): 신청마다 `recipient_kind`(`arklings`/`user`)와 `recipient_id`가 있다. 읽기·수정·삭제는 받는 사람만 하고, 아클링스 앞 신청은 `admins` 표에 UUID가 있는 계정(운영자 표시, 화면에는 안 보임)이 본다. 접수(INSERT)는 DB에 열려 있지 않고 서버가 검사 뒤 서버 전용 열쇠로 저장한다. 봇 방지는 숨은 칸(`extra_note`)과 접속 주소 해시 기준 횟수 제한(1시간 5건·하루 20건, `lib/ratelimit.ts`)이다. 새 신청 알림·접수 확인 메일은 `lib/collab-notify.ts`가 응답 뒤에(`after`) 보내며, 실패해도 접수에는 영향이 없다.
 
 로그인(단계 1): `/signup`(가입), `/login`, `/mypage`(로그인 필요), `/auth/confirm`(이메일 확인 링크가 들어오는 곳), `/auth/link-expired`(링크 만료 안내), `/privacy`(개인정보처리방침). 로그인 뒤 돌아갈 주소(`next`)는 `lib/safe-next.ts`로 같은 사이트 안 경로만 허용한다. 로그인 쿠키는 `proxy.ts`가 새로고침하고, 서버 코드는 `lib/supabase/server.ts`의 `createAuthClient()`와 `lib/auth.ts`의 `getCurrentUser()`·`requireUser()`로 확인한다. 기존 협업 신청 코드는 로그인 없는 연결(`lib/supabase.ts`)을 그대로 쓴다.
 
 ### 규칙
 
 - 저장은 Server Actions로만 한다. mock 데이터·localStorage를 최종 저장소로 쓰지 않는다(기획안의 브라우저 임시 저장은 비로그인 사용자용 임시 보관일 뿐이다).
-- Server Action은 따로 열려 있는 입구이므로, 화면에서 막았더라도 **각 Action 안에서 다시 권한을 확인한다.**
+- Server Action은 따로 열려 있는 입구이므로, 화면에서 막았더라도 **각 Action 안에서 다시 권한을 확인한다.** 수정·삭제는 로그인한 본인의 권한으로 실행해 DB 규칙(RLS)이 한 번 더 막게 한다.
 - 저장 중 버튼 잠금, 입력 오류는 칸 아래 표시, 로딩·오류·빈 상태를 모두 만든다.
 - 화면에 보이는 시각은 `lib/time.ts`(한국 시간, KST)를 거친다.
 - 비밀 키·서비스 롤 키는 코드와 GitHub에 넣지 않는다.

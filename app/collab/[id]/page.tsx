@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { DeleteButton } from "@/components/delete-button";
 import { outlineBtn, PaperCard, PaperPage } from "@/components/paper-card";
 import { StatusBadge } from "@/components/status-badge";
-import { requireGateAccess } from "@/lib/admin-gate";
-import { BUCKET, getSupabase } from "@/lib/supabase";
+import { requireUser } from "@/lib/auth";
+import { BUCKET } from "@/lib/supabase";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { createAuthClient } from "@/lib/supabase/server";
 import { formatKst } from "@/lib/time";
 import { ROLES, UUID_RE, type CollabRequest } from "@/lib/collab";
 
@@ -30,11 +32,12 @@ function Row({ k, children }: { k: string; children: React.ReactNode }) {
 
 export default async function CollabDetailPage({ params, searchParams }: Props) {
   const { id } = await params;
-  await requireGateAccess(`/collab/${UUID_RE.test(id) ? id : ""}`);
+  await requireUser(`/collab/${UUID_RE.test(id) ? id : ""}`);
   const sp = await searchParams;
   if (!UUID_RE.test(id)) notFound();
 
-  const sb = getSupabase();
+  // 로그인한 본인의 권한으로 읽는다. 남에게 온 신청은 DB 규칙(RLS)이 돌려주지 않아 "없는 신청"(404)처럼 보인다.
+  const sb = await createAuthClient();
   const { data, error } = await sb.from("collab_requests").select("*, source_works(title)").eq("id", id).maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) notFound();
@@ -43,7 +46,8 @@ export default async function CollabDetailPage({ params, searchParams }: Props) 
   let fileUrl: string | null = null;
   let fileFailed = false;
   if (r.attachment_path) {
-    const signed = await sb.storage.from(BUCKET).createSignedUrl(r.attachment_path, FILE_URL_SECONDS);
+    // 받는 사람인지 위에서 확인했으므로, 보관함은 서버 전용 열쇠로 임시 주소만 만든다.
+    const signed = await createAdminClient().storage.from(BUCKET).createSignedUrl(r.attachment_path, FILE_URL_SECONDS);
     if (signed.error || !signed.data) fileFailed = true;
     else fileUrl = signed.data.signedUrl;
   }

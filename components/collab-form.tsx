@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { FormState } from "@/app/actions/collab";
 import { ConsentDetails } from "@/components/consent-details";
 import { CardHeading, PaperCard, primaryBtn } from "@/components/paper-card";
 import { CONSENT_LABEL } from "@/lib/consent";
 import {
+  ALLOWED_TYPES,
+  MAX_FILE_BYTES,
   NO_TARGET_LABEL,
   ROLES,
   STATUSES,
@@ -67,6 +69,22 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
     : (initial?.roles ?? []);
   const editing = !!initial;
 
+  // 파일을 고르는 순간 크기·형식을 검사해 바로 알려 준다(서버에서도 한 번 더 검사한다).
+  const [fileMsg, setFileMsg] = useState("");
+  function onFileChange(ev: React.ChangeEvent<HTMLInputElement>) {
+    const f = ev.target.files?.[0];
+    if (!f) return setFileMsg("");
+    if (!ALLOWED_TYPES.includes(f.type)) {
+      ev.target.value = "";
+      return setFileMsg("PDF, JPG, PNG 파일만 올릴 수 있어요. 다른 파일을 골라 주세요.");
+    }
+    if (f.size > MAX_FILE_BYTES) {
+      ev.target.value = "";
+      return setFileMsg(`선택한 파일이 ${(f.size / 1024 / 1024).toFixed(1)}MB예요. 4MB 이하만 올릴 수 있어요. 더 큰 파일은 「작업 링크」 칸에 링크로 남겨 주세요.`);
+    }
+    setFileMsg("");
+  }
+
   return (
     <PaperCard>
       <CardHeading
@@ -84,6 +102,16 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
           <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-[13px] text-destructive">
             {state.message}
           </p>
+        )}
+
+        {!editing && (
+          // 사람에게는 보이지 않는 칸(봇 방지). 이 칸이 채워지면 서버가 신청을 저장하지 않는다.
+          <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+            <label>
+              추가 메모 (비워 두세요)
+              <input type="text" name="extra_note" tabIndex={-1} autoComplete="off" />
+            </label>
+          </div>
         )}
 
         <Field label="이름 / 닉네임" required error={e.applicant_name} htmlFor="applicant_name">
@@ -141,8 +169,8 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
           <input id="portfolio_url" name="portfolio_url" placeholder="포트폴리오, 작업물 URL" defaultValue={v("portfolio_url", initial?.portfolio_url)} aria-invalid={!!e.portfolio_url} disabled={pending} className={`${inputCls} h-10 md:h-11`} />
         </Field>
 
-        <Field label="작업 파일 첨부 (선택)" error={e.attachment} hint="PDF, JPG, PNG · 4MB 이하" htmlFor="attachment">
-          <input id="attachment" name="attachment" type="file" accept="application/pdf,image/jpeg,image/png" disabled={pending} className={`${inputCls} py-2 file:mr-3 file:rounded-md file:border file:border-[#e8dfe3] file:bg-white file:px-3 file:py-1 file:text-[12px] file:font-medium`} />
+        <Field label="작업 파일 첨부 (선택)" error={fileMsg || e.attachment} hint="PDF, JPG, PNG · 4MB 이하 (더 크면 작업 링크에 링크로)" htmlFor="attachment">
+          <input id="attachment" name="attachment" type="file" accept="application/pdf,image/jpeg,image/png" onChange={onFileChange} disabled={pending} className={`${inputCls} py-2 file:mr-3 file:rounded-md file:border file:border-[#e8dfe3] file:bg-white file:px-3 file:py-1 file:text-[12px] file:font-medium`} />
           {initial?.attachment_path && (
             <label className="flex items-center gap-2 text-[12px] text-[#6f6469]">
               <input type="checkbox" name="remove_attachment" disabled={pending} />

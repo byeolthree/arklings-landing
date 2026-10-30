@@ -1,27 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PaperCard, PaperPage, primaryBtn } from "@/components/paper-card";
+import { PaperCard, PaperPage } from "@/components/paper-card";
 import { StatusBadge } from "@/components/status-badge";
-import { requireGateAccess } from "@/lib/admin-gate";
-import { getSupabase } from "@/lib/supabase";
+import { requireUser } from "@/lib/auth";
+import { createAuthClient } from "@/lib/supabase/server";
 import { formatKstDate } from "@/lib/time";
 import { PAGE_SIZE, ROLES, STATUSES, type CollabRequest, type Status } from "@/lib/collab";
 
-export const metadata: Metadata = { title: "협업 신청 목록", robots: { index: false, follow: false } };
-export const dynamic = "force-dynamic"; // 운영자 확인과 최신 목록을 요청 때마다 확인한다
+export const metadata: Metadata = { title: "받은 협업 신청", robots: { index: false, follow: false } };
+export const dynamic = "force-dynamic"; // 로그인 확인과 최신 목록을 요청 때마다 확인한다
 
 type SP = Promise<Record<string, string | string[] | undefined>>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 export default async function CollabListPage({ searchParams }: { searchParams: SP }) {
-  await requireGateAccess("/collab");
+  await requireUser("/collab");
   const sp = await searchParams;
   const page = Math.max(1, parseInt(one(sp.page) ?? "1", 10) || 1);
   const statusParam = one(sp.status);
   const status = statusParam && statusParam in STATUSES ? statusParam : undefined;
   const from = (page - 1) * PAGE_SIZE;
 
-  let q = getSupabase()
+  // 로그인한 본인의 권한으로 읽는다. DB 규칙(RLS)이 "나에게 온 신청"만 돌려준다.
+  let q = (await createAuthClient())
     .from("collab_requests")
     .select("*, source_works(title)", { count: "exact" })
     .order("created_at", { ascending: false })
@@ -48,13 +49,10 @@ export default async function CollabListPage({ searchParams }: { searchParams: S
       <PaperCard className="!px-5 md:!p-10">
         <div className="flex items-end justify-between gap-4">
           <div>
-            <h1 className="text-[20px] font-bold text-[#292126] md:text-[24px]">협업 신청 목록</h1>
+            <h1 className="text-[20px] font-bold text-[#292126] md:text-[24px]">받은 협업 신청</h1>
             <p className="mt-1 text-[13px] text-[#574a4f]">총 {total}건</p>
           </div>
-          <Link href="/collab/new" className={primaryBtn}>
-            협업 신청하기
-          </Link>
-        </div>
+                  </div>
 
         {one(sp.deleted) && (
           <p role="status" className="mt-5 rounded-lg border border-sage bg-sage/20 px-3 py-2 text-[13px] text-title">
@@ -73,8 +71,7 @@ export default async function CollabListPage({ searchParams }: { searchParams: S
 
         {rows.length === 0 ? (
           <div className="mt-6 rounded-xl border border-[#e8dfe3] bg-[#faf7f8] px-6 py-14 text-center">
-            <p className="text-[14px] text-[#292126]">{status ? "이 상태의 신청이 없습니다." : "아직 접수된 협업 신청이 없습니다."}</p>
-            <Link href="/collab/new" className={`${primaryBtn} mt-4`}>협업 신청하기</Link>
+            <p className="text-[14px] text-[#292126]">{status ? "이 상태의 신청이 없습니다." : "아직 받은 협업 신청이 없습니다."}</p>
           </div>
         ) : (
           <ul className="mt-6 divide-y divide-[#e8dfe3] rounded-xl border border-[#e8dfe3]">
