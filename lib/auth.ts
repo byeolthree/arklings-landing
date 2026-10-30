@@ -12,6 +12,13 @@ export type CurrentUser = {
   providers: string[];
 };
 
+// 이메일 소유 확인을 마친 계정인지. 카카오처럼 이메일 없이 들어온 계정은 확인을 마칠 때까지 false다.
+// 화면에서 막았더라도 Server Action은 따로 열린 입구이므로, 계정에 영향을 주는 동작은 맨 위에서 이 값을 다시 확인한다.
+export const CONFIRM_FIRST_MESSAGE = "이메일 확인을 먼저 마쳐 주세요. 확인이 끝나면 이용할 수 있어요.";
+export function isConfirmed(user: CurrentUser): boolean {
+  return Boolean(user.email && user.emailConfirmed);
+}
+
 // 지금 로그인한 사람. 로그인하지 않았거나 연결 설정이 없으면 null.
 // getUser()는 Supabase 서버가 직접 확인해 주므로, 쿠키만 믿지 않고 안전하다.
 // 같은 요청 안에서 여러 번 불러도 Supabase에는 한 번만 물어본다(cache).

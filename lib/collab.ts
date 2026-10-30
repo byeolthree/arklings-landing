@@ -33,7 +33,9 @@ export type CollabRequest = {
   status: Status;
   created_at: string;
   updated_at: string;
+  plan_id: string | null; // 기획안으로 들어온 신청이면 그 기획안(지워지면 비워진다)
   source_works?: { title: string } | null;
+  plans?: { title: string } | null;
 };
 
 export const NO_TARGET_LABEL = "특정 이야기 아님 (전체적인 협업 제안)";

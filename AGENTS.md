@@ -157,7 +157,7 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 2. 협업 신청: 받는 사람 구조·RLS·알림 메일·봇 방지·파일 검사
 3. 기획안: 서버 저장·이력·Ctrl+Z·PDF·메일·공개 여부
 4. 구글·카카오 로그인·계정 이어주기 (구현 완료, 진짜 서비스 확인 대기)
-5. 포트폴리오 페이지 (Figma 링크를 받은 뒤)
+5. 포트폴리오 페이지: `/portfolio`·`/portfolio/[id]`, 상세의 「협업 신청」(받는 사람 = 기획안 주인), 이메일 확인 안 한 계정 막기 (구현 완료, `0007_portfolio.sql`)
 6. 탈퇴·3개월 자동 삭제·정리 작업
 7. README·QA·배포 점검
 
@@ -170,13 +170,14 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 - 화면은 Figma 「미션5 아클링스 웹·모바일」 파일의 협업 신청 시안(노드 346:2, 346:539, 355:16, 355:49)을 따른다. 칸을 바꾸려면 시안과 SQL을 함께 고친다.
 - `profiles`(공개 이름만, 이메일은 복사하지 않음)와 `profile_consents`(동의 기록, 본인만 읽기)는 `0002_profiles.sql`이 만든다. 가입하면 트리거가 자동으로 채운다.
 - 기획안(`0004_plans.sql`): `plans`(주인·제목·공개 여부·공개용 사본 `public_content`. 공개된 것만 누구나 읽고 쓰기는 주인만, 사람당 30건), `plan_revisions`(「임시저장」 한 번 = 한 건. 고른 선택지 `selections` / 아클링스 제안 문장 `suggested`(만든 방식 `method` 포함) / 사용자가 고친 문장 `edited`를 따로 담는다. 주인만 읽고 쓰고 지우며 기획안당 100건), `mail_usage`(기획안 PDF 메일 하루 3번 제한, 앱이 직접 못 만지고 `reserve_plan_mail()`·`release_plan_mail()` 함수로만 센다). `collab_requests.plan_id`는 `plans`를 가리키고, 기획안이 지워지면 신청은 남고 연결만 비워진다.
+- 포트폴리오(`0007_portfolio.sql`): `plans.first_published_at`(처음 공개한 시각. DB 트리거가 처음 공개할 때 한 번만 찍고 앱이 못 바꾼다. 기존 `published_at`은 다시 공개할 때마다 덮어써지는 「마지막 공개 시각」으로 둔다), 보기(view) `portfolio_items`(공개된 기획안의 id·제목·처음 공개한 시각·공개 이름·공개용 사본만. 주인 번호·이메일·임시저장 이력은 없다. 호출한 사람의 권한(RLS)으로 읽는다), `is_email_confirmed()`(이메일 확인을 마친 계정인지), 기획안 신청 때 받는 사람을 기획안 주인으로 정하는 트리거. 화면에 보이는 날짜는 포트폴리오 목록·상세 모두 「게시일」(처음 공개한 날) 하나이고, 만든 시각·고친 시각은 포트폴리오에 띄우지 않는다.
 - 새 표는 단계가 진행되면서 `supabase/migrations/`에 추가한다.
 - 동의 문구는 `lib/consent.ts` 한 곳에서만 쓴다(가입·협업 신청·`/privacy`가 같은 글). 문구를 고치면 `CONSENT_VERSION`도 올린다.
 
 ### SQL 변경 규칙
 
 - `supabase/schema.sql`은 미션 6 최초 구조다. 다시 실행하면 `collab_requests`를 지우므로 **다시 실행하지 않는다.**
-- 구조 변경은 `supabase/migrations/000N_이름.sql` 새 파일로 만든다. 기존 데이터를 지우지 않고 여러 번 실행해도 안전하게 쓴다. 아키텍터가 Supabase SQL Editor에서 번호 순서대로 실행한다.
+- 구조 변경은 `supabase/migrations/000N_이름.sql` 새 파일로 만든다. 기존 데이터를 지우지 않고 여러 번 실행해도 안전하게 쓴다. 아키텍터가 Supabase SQL Editor에서 번호 순서대로 실행한다. (`0007`은 `0004`가 만든 기획안 표를 쓰므로 반드시 `0006` 다음에 실행한다.)
 
 ### Storage
 
@@ -215,11 +216,24 @@ Figma MCP로 매번 조회하기 전에 아래 표를 먼저 참고한다. 값�
 - 마이페이지에서 방법 추가·해제(`startLinkIdentity`/`unlinkProvider`, 항상 1개 이상 남김). 비밀번호 설정·재설정은 `/forgot-password` → 메일 → `/reset-password`(소셜 전용 계정도 이 길로 이메일 로그인을 추가). 정리 작업이 이메일 없이 7일 지난 빈 계정을 지운다.
 - Supabase 설정 확인표와 진짜 서비스에서 확인할 항목: `supabase/social-setup.md`. 이메일 템플릿: `supabase/email-templates.md`.
 
+### 포트폴리오 (단계 5)
+
+- `/portfolio`(목록, 10개씩, 처음 공개한 순서 최근 먼저)와 `/portfolio/[id]`(상세, [id]는 기획안 UUID)는 로그인 없이 열린다. 읽기는 `lib/portfolio.ts` 한 곳이며 DB의 `portfolio_items` 보기에서만 읽는다. 작성자는 공개 이름(`profiles.display_name`)을 읽을 때마다 가져오므로(기획안에 복사하지 않는다) 이름을 바꾸면 바로 반영된다. 주인 번호는 화면·주소·화면 소스 어디에도 내보내지 않는다. 공개를 껐거나 지워졌거나 없는 주소는 404 화면(`app/portfolio/not-found.tsx`)이다. 포트폴리오에는 공개한 완성본(`public_content`) 하나만 나오고 임시저장 이력은 나오지 않는다.
+- 올리기·내리기는 기획안 화면의 「포트폴리오에 올리기」·「포트폴리오에서 내리기」(`setPlanPublic`)이고, 올릴지 말지는 작성자가 고른다.
+- 상세의 「협업 신청」은 `/collab/new?plan=<기획안 UUID>`로 간다. 화면은 받는 사람 번호를 받지 않는다. `createCollab`이 `plan_id`로 기획안을 찾아 공개 중인지, 주인이 이메일 확인을 마쳤는지 확인하고 받는 사람(`recipient_kind=user`, `recipient_id`=주인)을 정하며, DB 트리거가 저장 순간에 같은 규칙을 한 번 더 적용한다(앱이 다른 값을 보내도 주인으로 바뀌고, 공개가 꺼졌으면 `plan_not_public`으로 막힌다). 신청 화면에는 작품 고르는 칸 대신 기획안 제목과 「○○님께 전달됩니다」가 보인다. 알림 메일은 받는 사람(주인)에게 간다. `plan` 없이 들어온 신청(랜딩)은 지금처럼 아클링스(운영자)가 받는다.
+- `lib/portfolio-sample.ts`는 1단계 시험용 가짜 데이터라 지금은 쓰지 않는다(삭제 허락을 받기 전까지 남겨 둔다).
+
+### 이메일 확인 규칙 (카카오 등 이메일 없이 들어온 계정)
+
+- 소셜 로그인은 로그인이 끝나는 순간 Supabase가 계정을 먼저 만들므로 「확인 안 한 계정」이 잠깐 생기는 것은 막을 수 없다. 대신 그 계정은 이메일 확인을 마칠 때까지 아무것도 할 수 없게 막는다.
+- 화면: `requireUser`가 `/auth/add-email`로 보낸다. 서버 동작: 공개 이름 고치기, 비밀번호 정하기, 로그인 방법 추가·해제, 받은 신청 고치기·지우기, 기획안 동작(`needUser`)은 맨 위에서 `isConfirmed()`를 다시 확인한다. DB: `0007`이 기획안·임시저장 이력·공개 이름 만들기·고치기와 받은 신청 고치기·지우기를 `is_email_confirmed()`로 막아 앱을 거치지 않고 DB를 직접 열어도 안 된다.
+- 실제 Supabase 설정에서 「Confirm email」(이메일 확인 필수)이 켜져 있어야 하고, 「Secure email change」 설정은 `supabase/social-setup.md` 확인표대로 한 통만 오는지 본다.
+
 ### 화면 경로
 
 `/collab/new`(누구나 접수), `/collab/done`(접수 안내만), `/collab`(**받은 협업 신청** 목록, 10개씩, 로그인 필요), `/collab/[id]`, `/collab/[id]/edit`(받는 사람만). `/apply`는 `/collab/new`로 이동. 남에게 온 신청이나 없는 id는 404. `/collab/gate`는 로그인 화면으로 보낸다(예전 임시 비밀번호 화면은 없어졌다).
 
-받는 사람 규칙(0003): 신청마다 `recipient_kind`(`arklings`/`user`)와 `recipient_id`가 있다. 읽기·수정·삭제는 받는 사람만 하고, 아클링스 앞 신청은 `admins` 표에 UUID가 있는 계정(운영자 표시, 화면에는 안 보임)이 본다. 접수(INSERT)는 DB에 열려 있지 않고 서버가 검사 뒤 서버 전용 열쇠로 저장한다. 봇 방지는 숨은 칸(`extra_note`)과 접속 주소 해시 기준 횟수 제한(1시간 5건·하루 20건, `lib/ratelimit.ts`)이다. 새 신청 알림·접수 확인 메일은 `lib/collab-notify.ts`가 응답 뒤에(`after`) 보내며, 실패해도 접수에는 영향이 없다.
+받는 사람 규칙(0003, 0007): 신청마다 `recipient_kind`(`arklings`/`user`)와 `recipient_id`가 있다. 읽기·수정·삭제는 받는 사람만 하고, 아클링스 앞 신청은 `admins` 표에 UUID가 있는 계정(운영자 표시, 화면에는 안 보임)이 본다. 접수(INSERT)는 DB에 열려 있지 않고 서버가 검사 뒤 서버 전용 열쇠로 저장한다. 봇 방지는 숨은 칸(`extra_note`)과 접속 주소 해시 기준 횟수 제한(1시간 5건·하루 20건, `lib/ratelimit.ts`)이다. 새 신청 알림·접수 확인 메일은 `lib/collab-notify.ts`가 응답 뒤에(`after`) 보내며, 실패해도 접수에는 영향이 없다.
 
 마이페이지 `/mypage`에는 내 기획안 목록(공개 여부·수정 시각)이 있다.
 

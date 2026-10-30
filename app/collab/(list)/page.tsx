@@ -24,7 +24,7 @@ export default async function CollabListPage({ searchParams }: { searchParams: S
   // 로그인한 본인의 권한으로 읽는다. DB 규칙(RLS)이 "나에게 온 신청"만 돌려준다.
   let q = (await createAuthClient())
     .from("collab_requests")
-    .select("*, source_works(title)", { count: "exact" })
+    .select("*, source_works(title), plans(title)", { count: "exact" })
     .order("created_at", { ascending: false })
     .range(from, from + PAGE_SIZE - 1);
   if (status) q = q.eq("status", status);
@@ -81,7 +81,7 @@ export default async function CollabListPage({ searchParams }: { searchParams: S
                   <div>
                     <p className="text-[15px] font-medium text-[#292126]">{r.applicant_name}</p>
                     <p className="text-[12px] text-[#574a4f]">
-                      {r.source_works?.title ?? "전체 협업 제안"} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)}
+                      {r.plan_id ? `기획안 「${r.plans?.title ?? "제목 없음"}」` : (r.source_works?.title ?? "전체 협업 제안")} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)}
                     </p>
                   </div>
                   <StatusBadge status={r.status} />

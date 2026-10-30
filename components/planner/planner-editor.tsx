@@ -277,7 +277,7 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel }: Pr
     if (!r) return;
     if (!r.ok) return setMsg({ text: r.error, err: true });
     if (r.panel) setPanel(r.panel);
-    setMsg({ text: makePublic ? "공개했어요. 지금 화면의 완성 내용이 공개용으로 저장됐어요." : "공개를 껐어요. 공개용 사본도 지웠어요." });
+    setMsg({ text: makePublic ? "포트폴리오에 올렸어요. 지금 화면의 완성 내용이 공개용으로 저장됐어요." : "포트폴리오에서 내렸어요. 공개용 사본도 지웠어요." });
   }
 
   async function onPdf() {
@@ -558,21 +558,26 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel }: Pr
 
                   <div className="pub-box">
                     <p>
-                      공개 상태 <span className={`pub-state ${plan.isPublic ? "on" : ""}`}>{plan.isPublic ? "공개 중" : "비공개"}</span>
+                      포트폴리오 <span className={`pub-state ${plan.isPublic ? "on" : ""}`}>{plan.isPublic ? "올라가 있음" : "올리지 않음"}</span>
                       {plan.isPublic && plan.publishedAt && <span> · 공개 내용 저장 {plan.publishedAt}</span>}
                     </p>
                     <p style={{ marginTop: 6 }}>
-                      공개하면 공개 이름 <b>「{displayName || "이름 없음"}」</b>과 이 기획안의 완성 내용이 포트폴리오(준비 중)에서 누구에게나 보여요. 이메일과 임시저장 이력은 공개되지 않아요.
-                      공개 이름은 마이페이지에서 바꿀 수 있어요.
+                      올리면 공개 이름 <b>「{displayName || "이름 없음"}」</b>과 이 기획안의 완성 내용이 포트폴리오에서 누구에게나 보여요. 이메일과 임시저장 이력은 공개되지 않아요.
+                      공개 이름은 마이페이지에서 바꿀 수 있고, 바꾸면 포트폴리오에도 바로 반영돼요. 올릴지 말지는 직접 고르세요. 언제든 내릴 수 있어요.
                     </p>
                     <div className="row-actions">
                       <button type="button" className="btn btn-primary sm" onClick={() => onPublic(true)} disabled={busy !== null}>
-                        {plan.isPublic ? "지금 화면 내용으로 공개 내용 갱신" : "지금 화면 내용으로 공개하기"}
+                        {plan.isPublic ? "지금 화면 내용으로 포트폴리오 내용 갱신" : "포트폴리오에 올리기"}
                       </button>
                       {plan.isPublic && (
-                        <button type="button" className="btn btn-ghost sm" onClick={() => onPublic(false)} disabled={busy !== null}>
-                          공개 끄기
-                        </button>
+                        <>
+                          <a className="btn btn-ghost sm" href={`/portfolio/${plan.id}`} target="_blank" rel="noopener noreferrer">
+                            포트폴리오에서 보기
+                          </a>
+                          <button type="button" className="btn btn-ghost sm" onClick={() => onPublic(false)} disabled={busy !== null}>
+                            포트폴리오에서 내리기
+                          </button>
+                        </>
                       )}
                       <button type="button" className="btn btn-ghost sm danger" onClick={onDeletePlan} disabled={busy !== null}>
                         기획안 통째로 삭제

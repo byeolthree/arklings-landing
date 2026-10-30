@@ -22,6 +22,8 @@ type Props = {
   works: SourceWork[];
   initial?: CollabRequest;
   cancelHref: string;
+  // 포트폴리오의 기획안으로 들어온 신청이면 값이 있다. 받는 사람은 화면이 아니라 서버가 기획안 번호로 정한다.
+  plan?: { id: string; title: string; recipientName: string };
 };
 
 // Figma 입력창: 배경 #faf7f8, 테두리 #e8dfe3, 모서리 8px, 높이 44(모바일 40), 글자 13(모바일 12)
@@ -59,7 +61,7 @@ function Field({
   );
 }
 
-export function CollabForm({ action, works, initial, cancelHref }: Props) {
+export function CollabForm({ action, works, initial, cancelHref, plan }: Props) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
   const e = state.errors ?? {};
   const v = (k: string, fallback = "") => state.values?.[k] ?? fallback;
@@ -126,6 +128,17 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
           <input id="sns_handle" name="sns_handle" placeholder="연락이 잘 되는 SNS 아이디를 적어주세요" defaultValue={v("sns_handle", initial?.sns_handle)} aria-invalid={!!e.sns_handle} disabled={pending} className={`${inputCls} h-10 md:h-11`} />
         </Field>
 
+        {plan ? (
+          // 기획안으로 들어온 신청: 작품 3개를 고르는 칸 대신 기획안 제목과 전달받을 사람을 보여 준다.
+          <div className="flex flex-col gap-1.5 md:gap-2">
+            <input type="hidden" name="plan_id" value={plan.id} />
+            <p className="text-[12px] font-medium text-[#292126] md:text-[13px]">신청 대상 기획안</p>
+            <div className="rounded-lg border border-[#e8dfe3] bg-[#f5ecf0] px-[11px] py-3">
+              <p className="text-[13px] font-bold text-[#292126] md:text-[14px]">{plan.title}</p>
+              <p className="mt-1 text-[12px] text-[#574a4f] md:text-[13px]">{plan.recipientName}님께 전달됩니다</p>
+            </div>
+          </div>
+        ) : (
         <Field label="신청 대상" required error={e.source_work_id} htmlFor="source_work_id">
           <div className="relative">
             {/* 서버 액션 뒤 React가 폼을 초기화하므로, 직전 입력값을 key로 다시 마운트해 선택을 유지한다 */}
@@ -140,6 +153,7 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
             <span aria-hidden className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[13px] text-[#8c8c8c]">⌄</span>
           </div>
         </Field>
+        )}
 
         <fieldset className="flex flex-col gap-2" disabled={pending}>
           <legend className="mb-2 text-[12px] font-medium text-[#292126] md:text-[13px]">
