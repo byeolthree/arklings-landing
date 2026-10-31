@@ -58,7 +58,7 @@
 
 /* 검색바 + 필터 버튼. 필터 선택지는 「필터」를 눌러야 펼쳐진다 */
 .cr .cr-tools { margin-bottom: 20px; }
-.cr .cr-toolbar { position: relative; display: flex; align-items: center; gap: 8px; max-width: 640px; }
+.cr .cr-toolbar { position: relative; display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 640px; margin: 0 auto; }
 .cr .cr-search { display: flex; gap: 8px; flex: 1; min-width: 0; }
 .cr .cr-input { flex: 1; min-width: 0; height: 44px; padding: 0 18px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper);
   font: inherit; font-size: 14px; color: var(--title); }
@@ -66,11 +66,11 @@
 .cr .cr-input:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 18%, transparent); }
 .cr .cr-search .btn { min-height: 44px; flex: none; }
 .cr .cr-filter { flex: none; }
-.cr .cr-filter > summary { list-style: none; min-height: 44px; padding: 0 16px; background: var(--paper); }
+.cr .cr-filter > summary { list-style: none; min-height: 44px; padding: 0 16px; background: var(--paper); color: var(--jaju); border-color: var(--jaju); }
 .cr .cr-filter > summary::-webkit-details-marker { display: none; }
-.cr .cr-filter[open] > summary { background: var(--teal); color: #fff; }
-.cr .cr-badge { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--teal); color: #fff; font-size: 11px; line-height: 1; }
-.cr .cr-filter[open] .cr-badge { background: #fff; color: var(--teal); }
+/* 마우스를 올려도, 펼쳐도 색은 그대로(움직임만) */
+.cr .cr-filter > summary:hover, .cr .cr-filter[open] > summary { background: var(--paper); color: var(--jaju); border-color: var(--jaju); }
+.cr .cr-badge { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--jaju); color: #fff; font-size: 11px; line-height: 1; }
 .cr .cr-filter-panel { position: absolute; z-index: 20; top: calc(100% + 8px); left: 0; right: 0; padding: 16px 18px; background: var(--paper); border-radius: 16px;
   box-shadow: 0 24px 48px -20px rgba(42,32,37,.45), 0 2px 8px rgba(42,32,37,.08); }
 @media (min-width: 768px) { .cr .cr-filter-panel { left: auto; width: 420px; } }
@@ -108,9 +108,11 @@
 .cr .cr-box-logline { font-size: 13px; line-height: 1.7; color: var(--body);
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 @media (min-width: 768px) { .cr .cr-box-logline { -webkit-line-clamp: 4; } }
-.cr .cr-chip { align-self: flex-start; margin-top: auto; padding: 4px 12px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 12px; font-weight: 500; }
-.cr .cr-chip.dusty { background: var(--dusty); }
-.cr .cr-chip.sage { background: var(--sage); color: var(--title); }
+/* 역할 태그: 같은 분야는 같은 색(청록·더스티 블루·뮤트 세이지), 글자는 모두 흰색 */
+.cr .cr-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: auto 0 0; padding: 0; list-style: none; }
+.cr .cr-tag { padding: 4px 12px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 12px; font-weight: 500; line-height: 1.5; }
+.cr .cr-tag.dusty { background: var(--dusty); }
+.cr .cr-tag.sage { background: var(--sage); }
 
 /* 쪽 이동 */
 .cr .pager { margin-top: 40px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 14px; }

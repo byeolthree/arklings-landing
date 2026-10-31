@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { ROLES } from "@/lib/collab";
 import { hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
+import { ROLE_TONE } from "./role-tone";
 import type { CreatorCard } from "./types";
 import "./creators.css";
 
 const MAX_ROLES = 3;
 
-// 자주색(주 색)을 아끼려고, 프로필 원과 「기획안 N건」 태그는 보조 색 세 가지(청록·더스티 블루·뮤트 세이지)를 번갈아 쓴다.
-// 목록 순서대로 한 칸씩, 줄이 바뀔 때마다 한 칸 더 밀어서 옆 카드·아래 카드와 색이 겹치지 않게 한다. 태그는 같은 카드의 원과 다른 색이다.
+// 자주색(주 색)을 아끼려고, 프로필 원은 보조 색 세 가지(청록·더스티 블루·뮤트 세이지)를 번갈아 쓴다.
+// 목록 순서대로 한 칸씩, 줄이 바뀔 때마다 한 칸 더 밀어서 옆 카드·아래 카드와 색이 겹치지 않게 한다.
 const TONES = ["teal", "dusty", "sage"] as const;
 const toneAt = (index: number) => TONES[(index + Math.floor(index / 3)) % TONES.length];
-const nextTone = (tone: (typeof TONES)[number]) => TONES[(TONES.indexOf(tone) + 1) % TONES.length];
 
 function rolesText(roles: CreatorCard["roles"]): string {
   const shown = roles.slice(0, MAX_ROLES).map((r) => ROLES[r]);
@@ -162,7 +162,13 @@ export function CreatorList({
                         <h3 className="cr-box-title">{c.latest.title}</h3>
                         <p className="cr-box-logline">{c.latest.logline}</p>
                       </div>
-                      <span className={`cr-chip ${nextTone(tone)}`}>기획안 {c.planCount}건</span>
+                      <ul className="cr-tags" aria-label="역할">
+                        {c.roles.map((r) => (
+                          <li key={r} className={`cr-tag ${ROLE_TONE[r]}`}>
+                            {ROLES[r]}
+                          </li>
+                        ))}
+                      </ul>
                     </Link>
                   </li>
                   );
