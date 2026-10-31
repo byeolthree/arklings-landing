@@ -6,12 +6,12 @@ import { ProfileFormPreview } from "./profile-form-preview";
 // 디자인 확인용 샘플 미리보기. 기획안 화면의 「포트폴리오에 올리기」를 눌렀을 때 열리는 프로필 칸을 본다. 디자인이 끝나면 지운다.
 export const metadata: Metadata = { title: "프로필 만들기 칸 샘플 미리보기", robots: { index: false, follow: false } };
 
-const MODES = { new: "처음 만들기", edit: "고치기", taken: "주소 중복(저장 시)", fail: "저장 실패" } as const;
+const MODES = { planner: "기획안 올리다가", mypage: "마이페이지 처음 만들기", edit: "마이페이지 고치기", taken: "주소 중복(저장 시)", fail: "저장 실패" } as const;
 
 export default async function ProfileFormPreviewPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
   const raw = Array.isArray(sp.state) ? sp.state[0] : sp.state;
-  const mode = (raw && raw in MODES ? raw : "new") as keyof typeof MODES;
+  const mode = (raw && raw in MODES ? raw : "planner") as keyof typeof MODES;
   return (
     <>
       <div className="fixed bottom-4 right-4 z-50 max-w-[300px] rounded-lg border border-[#e8dfe3] bg-white/95 px-3 py-2 text-[11px] leading-snug text-[#2a2025] shadow-md">
