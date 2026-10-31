@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { FormState } from "@/app/actions/collab";
+import { ConsentDetails } from "@/components/consent-details";
 import { CardHeading, PaperCard, primaryBtn } from "@/components/paper-card";
+import { CONSENT_LABEL } from "@/lib/consent";
 import {
+  ALLOWED_TYPES,
+  MAX_FILE_BYTES,
   NO_TARGET_LABEL,
   ROLES,
   STATUSES,
@@ -18,6 +22,8 @@ type Props = {
   works: SourceWork[];
   initial?: CollabRequest;
   cancelHref: string;
+  // 포트폴리오의 기획안으로 들어온 신청이면 값이 있다. 받는 사람은 화면이 아니라 서버가 기획안 번호로 정한다.
+  plan?: { id: string; title: string; recipientName: string };
 };
 
 // Figma 입력창: 배경 #faf7f8, 테두리 #e8dfe3, 모서리 8px, 높이 44(모바일 40), 글자 13(모바일 12)
@@ -55,7 +61,7 @@ function Field({
   );
 }
 
-export function CollabForm({ action, works, initial, cancelHref }: Props) {
+export function CollabForm({ action, works, initial, cancelHref, plan }: Props) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
   const e = state.errors ?? {};
   const v = (k: string, fallback = "") => state.values?.[k] ?? fallback;
@@ -64,6 +70,22 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
     ? (state.values.roles ?? "").split(",").filter(Boolean)
     : (initial?.roles ?? []);
   const editing = !!initial;
+
+  // 파일을 고르는 순간 크기·형식을 검사해 바로 알려 준다(서버에서도 한 번 더 검사한다).
+  const [fileMsg, setFileMsg] = useState("");
+  function onFileChange(ev: React.ChangeEvent<HTMLInputElement>) {
+    const f = ev.target.files?.[0];
+    if (!f) return setFileMsg("");
+    if (!ALLOWED_TYPES.includes(f.type)) {
+      ev.target.value = "";
+      return setFileMsg("PDF, JPG, PNG 파일만 올릴 수 있어요. 다른 파일을 골라 주세요.");
+    }
+    if (f.size > MAX_FILE_BYTES) {
+      ev.target.value = "";
+      return setFileMsg(`선택한 파일이 ${(f.size / 1024 / 1024).toFixed(1)}MB예요. 4MB 이하만 올릴 수 있어요. 더 큰 파일은 「작업 링크」 칸에 링크로 남겨 주세요.`);
+    }
+    setFileMsg("");
+  }
 
   return (
     <PaperCard>
@@ -84,6 +106,16 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
           </p>
         )}
 
+        {!editing && (
+          // 사람에게는 보이지 않는 칸(봇 방지). 이 칸이 채워지면 서버가 신청을 저장하지 않는다.
+          <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+            <label>
+              추가 메모 (비워 두세요)
+              <input type="text" name="extra_note" tabIndex={-1} autoComplete="off" />
+            </label>
+          </div>
+        )}
+
         <Field label="이름 / 닉네임" required error={e.applicant_name} htmlFor="applicant_name">
           <input id="applicant_name" name="applicant_name" placeholder="예: 아클링스" defaultValue={v("applicant_name", initial?.applicant_name)} aria-invalid={!!e.applicant_name} disabled={pending} className={`${inputCls} h-10 md:h-11`} />
         </Field>
@@ -96,6 +128,17 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
           <input id="sns_handle" name="sns_handle" placeholder="연락이 잘 되는 SNS 아이디를 적어주세요" defaultValue={v("sns_handle", initial?.sns_handle)} aria-invalid={!!e.sns_handle} disabled={pending} className={`${inputCls} h-10 md:h-11`} />
         </Field>
 
+        {plan ? (
+          // 기획안으로 들어온 신청: 작품 3개를 고르는 칸 대신 기획안 제목과 전달받을 사람을 보여 준다.
+          <div className="flex flex-col gap-1.5 md:gap-2">
+            <input type="hidden" name="plan_id" value={plan.id} />
+            <p className="text-[12px] font-medium text-[#292126] md:text-[13px]">신청 대상 기획안</p>
+            <div className="rounded-lg border border-[#e8dfe3] bg-[#f5ecf0] px-[11px] py-3">
+              <p className="text-[13px] font-bold text-[#292126] md:text-[14px]">{plan.title}</p>
+              <p className="mt-1 text-[12px] text-[#574a4f] md:text-[13px]">{plan.recipientName}님께 전달됩니다</p>
+            </div>
+          </div>
+        ) : (
         <Field label="신청 대상" required error={e.source_work_id} htmlFor="source_work_id">
           <div className="relative">
             {/* 서버 액션 뒤 React가 폼을 초기화하므로, 직전 입력값을 key로 다시 마운트해 선택을 유지한다 */}
@@ -110,6 +153,7 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
             <span aria-hidden className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[13px] text-[#8c8c8c]">⌄</span>
           </div>
         </Field>
+        )}
 
         <fieldset className="flex flex-col gap-2" disabled={pending}>
           <legend className="mb-2 text-[12px] font-medium text-[#292126] md:text-[13px]">
@@ -139,8 +183,8 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
           <input id="portfolio_url" name="portfolio_url" placeholder="포트폴리오, 작업물 URL" defaultValue={v("portfolio_url", initial?.portfolio_url)} aria-invalid={!!e.portfolio_url} disabled={pending} className={`${inputCls} h-10 md:h-11`} />
         </Field>
 
-        <Field label="작업 파일 첨부 (선택)" error={e.attachment} hint="PDF, JPG, PNG · 4MB 이하" htmlFor="attachment">
-          <input id="attachment" name="attachment" type="file" accept="application/pdf,image/jpeg,image/png" disabled={pending} className={`${inputCls} py-2 file:mr-3 file:rounded-md file:border file:border-[#e8dfe3] file:bg-white file:px-3 file:py-1 file:text-[12px] file:font-medium`} />
+        <Field label="작업 파일 첨부 (선택)" error={fileMsg || e.attachment} hint="PDF, JPG, PNG · 4MB 이하 (더 크면 작업 링크에 링크로)" htmlFor="attachment">
+          <input id="attachment" name="attachment" type="file" accept="application/pdf,image/jpeg,image/png" onChange={onFileChange} disabled={pending} className={`${inputCls} py-2 file:mr-3 file:rounded-md file:border file:border-[#e8dfe3] file:bg-white file:px-3 file:py-1 file:text-[12px] file:font-medium`} />
           {initial?.attachment_path && (
             <label className="flex items-center gap-2 text-[12px] text-[#6f6469]">
               <input type="checkbox" name="remove_attachment" disabled={pending} />
@@ -164,10 +208,9 @@ export function CollabForm({ action, works, initial, cancelHref }: Props) {
         <div className="flex flex-col gap-1.5">
           <label className="flex items-start gap-2 text-[12px] font-medium text-[#6f6469] md:text-[13px]">
             <input type="checkbox" name="consent" defaultChecked={v("consent", editing ? "on" : "") === "on"} disabled={pending} className="mt-0.5 size-4 shrink-0 accent-[#a61e5c]" />
-            <span>
-              신청 내용은 연락 및 검토 목적으로만 보관됩니다.<span className="block md:inline"> 개인정보 수집·이용에 동의합니다.</span>
-            </span>
+            <span>{CONSENT_LABEL}</span>
           </label>
+          <ConsentDetails />
           {e.consent && <p role="alert" className="text-[12px] text-destructive">{e.consent}</p>}
         </div>
 

@@ -13,8 +13,17 @@ const nextConfig: NextConfig = {
       fallback: [],
     };
   },
+  // PDF 만들기(pdfkit)는 자기 글꼴 데이터 파일을 읽으므로 묶음에 섞지 않고 그대로 둔다. 한글 글꼴은 PDF를 만드는 화면에 함께 실어 보낸다.
+  serverExternalPackages: ["pdfkit"],
+  outputFileTracingIncludes: {
+    "/planner": ["./assets/fonts/*.otf"],
+  },
   async redirects() {
-    return [{ source: "/apply", destination: "/collab/new", permanent: false }];
+    return [
+      { source: "/apply", destination: "/collab/new", permanent: false },
+      // 예전 기획안 화면 주소. 파일(public/planner.html)은 남겨 두고 새 화면으로 보낸다.
+      { source: "/planner.html", destination: "/planner", permanent: false },
+    ];
   },
 };
 

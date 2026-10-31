@@ -1,0 +1,93 @@
+/* 랜딩(public/landing.html)의 부품을 그대로 옮긴 공용 모양: 상단 메뉴·하단·버튼·옅은 띠·카드·입력 칸·구분선.
+   값(색·크기·간격·모서리·그림자)은 랜딩 CSS와 같다. 새 디자인을 만들지 않고 랜딩 것만 쓴다. */
+:root {
+  --jaju: #a61e5c;
+  --jaju-deep: #861349;
+  --teal: #1f5a66;
+  --gold: #d89a24;
+  --bg: #faf7f8;
+  --line: #e8dfe3;
+  --body: #574a50;
+  --title: #2a2025;
+  --paper: #ffffff;
+  --tint: #f5ecf0;
+  --hero-bg: color-mix(in srgb, var(--bg) 55%, var(--line));
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --lk-max: 1440px;
+}
+
+.lk-wrap { width: 100%; max-width: var(--lk-max); margin: 0 auto; padding: 0 16px; }
+@media (min-width: 768px) { .lk-wrap { padding: 0 40px; } }
+@media (min-width: 1024px) { .lk-wrap { padding: 0 80px; } }
+
+/* ---------- 버튼 (랜딩 .btn) ---------- */
+.lk-btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 40px; padding: 0 20px; border-radius: 999px;
+  font: inherit; font-weight: 700; font-size: 14px; cursor: pointer;
+  border: 1.5px solid var(--jaju); text-decoration: none; white-space: nowrap;
+  transition: transform .35s var(--ease), background .3s, color .3s, box-shadow .35s;
+  overflow: hidden; isolation: isolate;
+}
+.lk-btn-primary { background: var(--jaju); color: #fff; box-shadow: 0 8px 24px -10px rgba(166,30,92,.55); }
+.lk-btn-primary::after {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
+  transform: translateX(-120%); transition: transform .8s var(--ease);
+}
+.lk-btn-primary:hover::after { transform: translateX(120%); }
+.lk-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(166,30,92,.65); }
+.lk-btn-ghost { background: transparent; color: var(--jaju); }
+.lk-btn-ghost:hover { background: var(--jaju); color: #fff; transform: translateY(-2px); }
+.lk-btn:focus-visible, .lk-header a:focus-visible, .lk-header button:focus-visible, .lk-footer a:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+/* ---------- 상단 메뉴 (랜딩 header.site) ---------- */
+.lk-header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(250,247,248,.82); backdrop-filter: saturate(1.4) blur(10px);
+  transition: background .3s;
+}
+.lk-header.scrolled { background: rgba(250,247,248,.94); }
+.lk-nav { display: flex; align-items: center; gap: 28px; height: 68px; }
+.lk-logo { font-weight: 700; font-size: 22px; color: var(--jaju); text-decoration: none; letter-spacing: -0.02em; }
+.lk-nav-links { display: none; gap: 22px; font-size: 15px; }
+.lk-nav-links span { color: var(--body); }
+.lk-nav-links a { color: var(--body); text-decoration: none; transition: color .2s; }
+.lk-nav-links a:hover, .lk-nav-links a[aria-current="page"] { color: var(--title); }
+.lk-nav-links a[aria-current="page"] { font-weight: 700; }
+.lk-nav-right { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: 15px; }
+.lk-nav-right .lk-textlink { display: none; color: var(--body); background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-decoration: none; }
+.lk-nav-right .lk-textlink:hover { color: var(--jaju); }
+.lk-nav .lk-btn { min-height: 36px; padding: 0 16px; font-size: 13px; }
+@media (min-width: 768px) { .lk-logo { font-size: 24px; } }
+@media (min-width: 900px) { .lk-nav-links, .lk-nav-right .lk-textlink { display: flex; } }
+.lk-burger { display: none; position: relative; width: 40px; height: 40px; margin-right: -8px; border: 0; background: none; cursor: pointer; border-radius: 10px; }
+.lk-burger i { position: absolute; left: 10px; right: 10px; height: 2px; border-radius: 2px; background: var(--title); transition: transform .3s var(--ease), opacity .2s; }
+.lk-burger i:nth-child(1) { top: 13px; } .lk-burger i:nth-child(2) { top: 19px; } .lk-burger i:nth-child(3) { top: 25px; }
+.lk-burger[aria-expanded="true"] i:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.lk-burger[aria-expanded="true"] i:nth-child(2) { opacity: 0; }
+.lk-burger[aria-expanded="true"] i:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+.lk-menu { display: none; }
+@media (max-width: 899px) {
+  .lk-nav-cta { display: none !important; }
+  .lk-burger { display: block; }
+  .lk-menu { display: grid; position: absolute; left: 0; right: 0; top: 100%; padding: 8px 20px 16px;
+    background: rgba(250,247,248,.98); box-shadow: 0 18px 30px -24px rgba(42,32,37,.4);
+    opacity: 0; visibility: hidden; transform: translateY(-8px); transition: opacity .25s var(--ease), transform .25s var(--ease), visibility .25s; }
+  .lk-menu.open { opacity: 1; visibility: visible; transform: none; }
+  .lk-menu > *, .lk-menu form > button { padding: 14px 4px; font-size: 16px; color: var(--title); border: 0; border-bottom: 1px solid var(--line); background: none; text-align: left; font-family: inherit; text-decoration: none; cursor: pointer; }
+  .lk-menu > *:last-child { border-bottom: 0; }
+  .lk-menu form > button { width: 100%; }
+}
+
+/* ---------- 하단 (랜딩 footer.site) ---------- */
+.lk-footer { border-top: 1px solid var(--teal); color: var(--body); font-size: 14px; line-height: 1.6; }
+.lk-footer .lk-wrap { display: flex; justify-content: space-between; gap: 20px; padding-top: 22px; padding-bottom: 26px; flex-wrap: wrap; }
+.lk-footer b { color: var(--title); font-size: 18px; }
+.lk-footer p { margin: 0; font-size: 13px; }
+.lk-footer .links { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: 12px; }
+.lk-footer .links a { color: inherit; text-decoration: none; }
+.lk-footer .links a:hover { text-decoration: underline; }
+@media (max-width: 640px) { .lk-footer .links { align-items: flex-start; } }
+
+@media (prefers-reduced-motion: reduce) { .lk-btn, .lk-btn::after, .lk-burger i, .lk-menu { transition: none !important; } }

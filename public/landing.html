@@ -59,6 +59,7 @@
   .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(166,30,92,.65); }
   .btn-ghost { background: transparent; color: var(--jaju); }
   .btn-ghost:hover { background: var(--jaju); color: #fff; transform: translateY(-2px); }
+  .hero .btn-ghost:hover { background: transparent; color: var(--jaju); }
   .btn .arrow { transition: transform .35s var(--ease); }
   .btn:hover .arrow { transform: translateX(4px); }
   .btn:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
@@ -74,8 +75,13 @@
   .logo { font-weight: 700; font-size: 22px; color: var(--jaju); text-decoration: none; letter-spacing: -0.02em; }
   .nav-links { display: none; gap: 22px; font-size: 15px; }
   .nav-links span { color: var(--body); }
+  .nav-links a.nav-creators { color: var(--body); text-decoration: none; transition: color .2s; }
+  .nav-links a.nav-creators:hover { color: var(--title); }
   .nav-right { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: 15px; }
-  .nav-right .mypage { display: none; }
+  .nav-right .mypage { display: none; color: var(--body); text-decoration: none; }
+  .nav-right .mypage:hover { color: var(--jaju); }
+  .auth-slot { visibility: hidden; }
+  .auth-slot.ready { visibility: visible; }
   .nav .btn { min-height: 36px; padding: 0 16px; font-size: 13px; }
   @media (min-width: 768px) { .logo { font-size: 24px; } }
   @media (min-width: 900px) { .nav-links, .nav-right .mypage { display: flex; } }
@@ -408,6 +414,8 @@
   footer.site b { color: var(--title); font-size: 18px; }
   footer.site p { font-size: 13px; }
   footer.site .links { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: 12px; }
+  footer.site .links a { color: inherit; text-decoration: none; }
+  footer.site .links a:hover { text-decoration: underline; }
   @media (max-width: 640px) { footer.site .links { align-items: flex-start; } }
 
   /* sticky mobile CTA */
@@ -905,8 +913,8 @@
       background: rgba(250,247,248,.98); border-bottom: 1px solid var(--line); box-shadow: 0 18px 30px -24px rgba(42,32,37,.4);
       opacity: 0; visibility: hidden; transform: translateY(-8px); transition: opacity .25s var(--ease), transform .25s var(--ease), visibility .25s; }
     .nav-menu.open { opacity: 1; visibility: visible; transform: none; }
-    .nav-menu span { padding: 14px 4px; font-size: 16px; color: var(--title); border-bottom: 1px solid var(--line); cursor: pointer; }
-    .nav-menu span:last-child { border-bottom: 0; }
+    .nav-menu span, .nav-menu a { display: block; text-decoration: none; padding: 14px 4px; font-size: 16px; color: var(--title); border-bottom: 1px solid var(--line); cursor: pointer; }
+    .nav-menu span:last-child, .nav-menu a:last-child { border-bottom: 0; }
   }
 
   /* ===== v14: 줄바꿈 개선 ===== */
@@ -1054,16 +1062,16 @@
   <div class="wrap nav">
     <a class="logo" href="#top">Arklings</a>
     <nav class="nav-links" aria-label="주요 메뉴">
-      <span>킹덤</span><span>스튜디오</span><span>크리에이터</span><span>라이브러리</span><span>커뮤니티</span>
+      <span>킹덤</span><span>스튜디오</span><a class="nav-creators" href="/creators">크리에이터</a><span>라이브러리</span><span>커뮤니티</span>
     </nav>
     <div class="nav-right">
-      <span class="mypage">마이페이지</span>
-      <a class="btn btn-primary nav-cta" href="planner.html">지금 시작하기</a>
+      <a class="mypage auth-slot" id="navAuth" href="/login">로그인</a>
+      <a class="btn btn-primary nav-cta" href="/planner">기획안 만들기</a>
       <button class="nav-burger" id="navBurger" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="navMenu"><i></i><i></i><i></i></button>
     </div>
   </div>
   <nav class="nav-menu" id="navMenu" aria-label="모바일 메뉴">
-    <span>킹덤</span><span>스튜디오</span><span>크리에이터</span><span>라이브러리</span><span>커뮤니티</span><span>마이페이지</span>
+    <span>킹덤</span><span>스튜디오</span><a class="nav-creators" href="/creators">크리에이터</a><span>라이브러리</span><span>커뮤니티</span><a class="auth-slot" id="navAuthM" href="/login">로그인</a>
   </nav>
 </header>
 
@@ -1075,7 +1083,7 @@
       <h1 class="split" data-split>한국형 판타지를 만들고 싶은데<br />어떻게 시작해야 할까?</h1>
       <p class="lead reveal" data-delay="2"><span class="nb"><span class="nw">머릿속에만 머물던 그 아이디어,</span> <span class="nw">아클링스와 함께 정돈해보세요.</span></span><br /><span class="nb">근사한 시리즈IP가 탄생할 거예요!</span></p>
       <div class="ctas reveal" data-delay="3">
-        <a class="btn btn-primary" href="planner.html">지금 시작하기 <span class="arrow">→</span></a>
+        <a class="btn btn-primary" href="/planner">기획안 만들기 <span class="arrow">→</span></a>
         <a class="btn btn-ghost" href="/collab/new">협업 문의하기</a>
       </div>
     </div>
@@ -1144,7 +1152,7 @@
       </div>
 
       <div class="try-cta reveal">
-        <a class="btn btn-primary" href="planner.html">지금 시작하기 <span class="arrow">→</span></a>
+        <a class="btn btn-primary" href="/planner">기획안 만들기 <span class="arrow">→</span></a>
       </div>
     </div>
   </section>
@@ -1286,7 +1294,7 @@
             <span class="pf-form" style="--c:var(--teal)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>아웃라인</span>
             <span class="pf-form" style="--c:var(--dusty)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>파일럿</span>
           </div>
-          <div class="ctas pf-ctas reveal" data-delay="4"><a class="btn btn-primary" href="planner.html">지금 시작하기 <span class="arrow">→</span></a></div>
+          <div class="ctas pf-ctas reveal" data-delay="4"><a class="btn btn-primary" href="/planner">기획안 만들기 <span class="arrow">→</span></a></div>
         </div>
         <div>
           <div class="panel pf-card reveal" data-delay="1">
@@ -1374,11 +1382,11 @@
       <p>한국 신화·고대사 기반 IP 스튜디오. 다양한 창작자가 함께 고유 세계관을 만들어갑니다.</p>
       <p>© 2026 Arklings. All rights reserved.</p>
     </div>
-    <div class="links"><span>이용약관</span><span>개인정보처리방침</span><span>hello@arklings.kr</span></div>
+    <div class="links"><span>이용약관</span><a href="/privacy">개인정보처리방침</a><span>hello@arklings.kr</span></div>
   </div>
 </footer>
 
-<div class="mcta" id="mcta"><a class="btn btn-primary" href="planner.html">지금 시작하기 <span class="arrow">→</span></a></div>
+<div class="mcta" id="mcta"><a class="btn btn-primary" href="/planner">기획안 만들기 <span class="arrow">→</span></a></div>
 
 <script>
 (function () {
@@ -1569,6 +1577,24 @@
     heroEl.addEventListener("pointerdown", function (e) { var p = pos(e); spawn(p.x, p.y); last = p; });
     heroEl.addEventListener("pointerleave", function () { last = null; });
   })();
+})();
+</script>
+<script>
+/* 로그인 여부에 따라 메뉴의 「로그인」/「마이페이지」를 바꾼다. 확인이 끝나기 전에는 글자를 숨겨 깜빡임을 막는다. */
+(function () {
+  var a = document.getElementById("navAuth"), m = document.getElementById("navAuthM");
+  function show(loggedIn) {
+    [a, m].forEach(function (el) {
+      if (!el) return;
+      el.textContent = loggedIn ? "마이페이지" : "로그인";
+      el.setAttribute("href", loggedIn ? "/mypage" : "/login");
+      el.classList.add("ready");
+    });
+  }
+  fetch("/api/session", { credentials: "same-origin", cache: "no-store" })
+    .then(function (r) { return r.ok ? r.json() : { loggedIn: false }; })
+    .then(function (d) { show(!!(d && d.loggedIn)); })
+    .catch(function () { show(false); });
 })();
 </script>
 <script>

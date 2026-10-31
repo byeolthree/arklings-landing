@@ -1,0 +1,132 @@
+/* 크리에이터 화면(목록·프로필). 랜딩페이지(public/landing.html)와 같은 값(색·버튼·글자)을 쓰고, 다른 화면과 겹치지 않게 .cr 안에서만 적용한다.
+   주 색(자주)은 「검색」 「기획안 만들기」 같은 핵심 버튼에만 쓰고, 나머지 강조는 보조 색(청록·더스티 블루·뮤트 세이지·황금)으로 한다. */
+.cr {
+  --jaju: #a61e5c; --teal: #1f5a66; --dusty: #5f7c99; --sage: #6f8a7a; --gold: #d89a24;
+  --bg: #faf7f8; --line: #e8dfe3; --body: #574a50; --title: #2a2025; --paper: #ffffff; --tint: #f5ecf0;
+  --hero-bg: color-mix(in srgb, var(--bg) 55%, var(--line));
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  position: relative; isolation: isolate; overflow: hidden;
+  flex: 1; color: var(--body); font-size: 14px; line-height: 1.6; word-break: keep-all; overflow-wrap: break-word;
+  background: var(--bg);
+}
+.cr h1, .cr h2, .cr h3 { color: var(--title); margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+.cr p { margin: 0; text-wrap: pretty; }
+.cr .wrap { width: 100%; max-width: 1440px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 768px) { .cr .wrap { padding: 0 40px; } }
+@media (min-width: 1024px) { .cr .wrap { padding: 0 80px; } }
+.cr a:focus-visible, .cr button:focus-visible, .cr summary:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+/* 버튼 (랜딩 .btn). 주 버튼만 자주, 보조 버튼은 청록 */
+.cr .btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 40px; padding: 0 20px; border-radius: 999px; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer;
+  border: 1.5px solid var(--jaju); text-decoration: none; white-space: nowrap;
+  transition: transform .35s var(--ease), background .3s, color .3s, box-shadow .35s;
+}
+.cr .btn-primary { background: var(--jaju); color: #fff; box-shadow: 0 8px 24px -10px rgba(166,30,92,.55); }
+.cr .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(166,30,92,.65); }
+.cr .btn-ghost { background: transparent; color: var(--teal); border-color: var(--teal); }
+.cr .btn-ghost:hover { background: var(--teal); color: #fff; transform: translateY(-2px); }
+.cr .btn .arrow { transition: transform .35s var(--ease); }
+.cr .btn:hover .arrow { transform: translateX(4px); }
+
+/* 상단 띠 (랜딩 히어로 배경 + 옅은 점 무늬) */
+.cr .cr-top { position: relative; background: linear-gradient(180deg, var(--hero-bg), var(--bg)); padding: 48px 0 32px; }
+.cr .cr-top::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: radial-gradient(circle, rgba(42,32,37,.12) 1px, transparent 1.6px);
+  background-size: 22px 22px;
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent 90%); mask-image: linear-gradient(180deg, #000, transparent 90%);
+}
+@media (min-width: 768px) { .cr .cr-top { padding: 80px 0 48px; } }
+.cr .cr-title { margin: 0 auto; text-align: center; font-size: 22px; line-height: 1.3; font-weight: 700; max-width: 900px; }
+@media (min-width: 768px) { .cr .cr-title { font-size: 32px; } }
+.cr .cr-desc { margin: 12px auto 0; max-width: 900px; text-align: center; font-size: 15px; }
+@media (min-width: 768px) { .cr .cr-desc { font-size: 18px; } }
+
+/* 카드 (랜딩 .panel). 외곽선 없이 그림자로만 띄운다 */
+.cr .panel { background: var(--paper); border: 0; border-radius: 22px; box-shadow: 0 18px 40px -24px rgba(42,32,37,.4), 0 2px 6px rgba(42,32,37,.05); overflow: hidden; }
+
+/* 목록: 모바일 1열 → 768 이상 2열 → 1024 이상 3열(시안의 3열) */
+.cr .cr-list { padding: 8px 0 84px; }
+@media (min-width: 768px) { .cr .cr-list { padding: 16px 0 120px; } }
+.cr .cr-count { margin-bottom: 16px; font-size: 13px; }
+.cr .cr-grid { display: grid; gap: 16px; list-style: none; margin: 0; padding: 0; }
+@media (min-width: 768px) { .cr .cr-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; } }
+@media (min-width: 1024px) { .cr .cr-grid { grid-template-columns: repeat(3, 1fr); } }
+.cr .cr-grid > li { min-width: 0; }
+
+/* 검색바 + 필터 버튼. 필터 선택지는 「필터」를 눌러야 펼쳐진다 */
+.cr .cr-tools { margin-bottom: 20px; }
+.cr .cr-toolbar { position: relative; display: flex; align-items: center; justify-content: center; gap: 8px; max-width: 640px; margin: 0 auto; }
+.cr .cr-search { display: flex; gap: 8px; flex: 1; min-width: 0; }
+.cr .cr-input { flex: 1; min-width: 0; height: 44px; padding: 0 18px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper);
+  font: inherit; font-size: 14px; color: var(--title); }
+.cr .cr-input::placeholder { color: color-mix(in srgb, var(--body) 55%, transparent); }
+.cr .cr-input:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 18%, transparent); }
+.cr .cr-search .btn { min-height: 44px; flex: none; }
+.cr .cr-filter { flex: none; }
+.cr .cr-filter > summary { list-style: none; min-height: 44px; padding: 0 16px; background: var(--paper); color: var(--jaju); border-color: var(--jaju); }
+.cr .cr-filter > summary::-webkit-details-marker { display: none; }
+/* 마우스를 올려도, 펼쳐도 색은 그대로(움직임만) */
+.cr .cr-filter > summary:hover, .cr .cr-filter[open] > summary { background: var(--paper); color: var(--jaju); border-color: var(--jaju); }
+.cr .cr-badge { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--jaju); color: #fff; font-size: 11px; line-height: 1; }
+.cr .cr-filter-panel { position: absolute; z-index: 20; top: calc(100% + 8px); left: 0; right: 0; padding: 16px 18px; background: var(--paper); border-radius: 16px;
+  box-shadow: 0 24px 48px -20px rgba(42,32,37,.45), 0 2px 8px rgba(42,32,37,.08); }
+@media (min-width: 768px) { .cr .cr-filter-panel { left: auto; width: 420px; } }
+.cr .cr-filter-title { font-size: 12px; font-weight: 700; color: var(--teal); letter-spacing: .04em; margin-bottom: 10px; }
+.cr .cr-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+/* 필터 칩 (테두리 #8C8C8C, 모서리 20px, 데스크톱 13px / 모바일 12px) */
+.cr .cr-fchip { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border: 1px solid #8c8c8c; border-radius: 20px;
+  font-size: 12px; color: var(--body); text-decoration: none; white-space: nowrap; transition: border-color .2s, color .2s, background .2s; }
+@media (min-width: 768px) { .cr .cr-fchip { font-size: 13px; } }
+.cr .cr-fchip:hover { border-color: var(--teal); color: var(--teal); }
+.cr .cr-fchip[aria-current="true"] { border-color: var(--teal); color: #fff; background: var(--teal); font-weight: 700; }
+.cr .cr-clear { color: var(--teal); text-decoration: underline; }
+
+/* 크리에이터 카드: 외곽선 없음 */
+.cr .cr-card { display: flex; flex-direction: column; gap: 16px; height: 100%; padding: 20px; text-decoration: none; color: inherit;
+  transition: transform .45s var(--ease), box-shadow .45s var(--ease); }
+@media (min-width: 768px) { .cr .cr-card { padding: 24px; } }
+.cr .cr-card:hover { transform: translateY(-4px); box-shadow: 0 30px 54px -24px rgba(42,32,37,.5), 0 2px 6px rgba(42,32,37,.06); }
+.cr .cr-who { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.cr .cr-av { flex: none; display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; font-size: 18px; font-weight: 700; color: #fff; }
+.cr .cr-av.teal { background: var(--teal); }
+.cr .cr-av.dusty { background: var(--dusty); }
+.cr .cr-av.sage { background: var(--sage); color: var(--title); }
+.cr .cr-who-text { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+.cr .cr-name { font-size: 16px; font-weight: 700; color: var(--title); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cr .cr-bio { font-size: 13px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 대표 기획안 칸: 이미지 자리(높이 데스크톱 200 / 모바일 160). 배경은 원래대로 페이지 배경색, 외곽선은 없다 */
+.cr .cr-box { height: 160px; padding: 16px; background: var(--bg); border-radius: 12px; overflow: hidden;
+  display: flex; flex-direction: column; gap: 6px; }
+@media (min-width: 768px) { .cr .cr-box { height: 200px; } }
+.cr .cr-label { font-size: 12px; font-weight: 700; color: var(--teal); letter-spacing: .04em; }
+.cr .cr-box-title { font-family: var(--font-noto-serif), serif; font-size: 16px; line-height: 1.35; font-weight: 700;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cr .cr-box-logline { font-size: 13px; line-height: 1.7; color: var(--body);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+@media (min-width: 768px) { .cr .cr-box-logline { -webkit-line-clamp: 4; } }
+/* 역할 태그: 역할마다 다른 색(컬러 시스템에서 상태·제목·배경 색을 뺀 나머지), 같은 역할은 늘 같은 색, 글자는 모두 흰색 */
+.cr .cr-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: auto 0 0; padding: 0; list-style: none; }
+.cr .cr-tag { padding: 4px 12px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 12px; font-weight: 500; line-height: 1.5; }
+.cr .cr-tag.dusty { background: var(--dusty); }
+.cr .cr-tag.gold { background: var(--gold); }
+.cr .cr-tag.sage { background: var(--sage); }
+.cr .cr-tag.jaju { background: var(--jaju); }
+.cr .cr-tag.body { background: var(--body); }
+
+/* 쪽 이동 */
+.cr .pager { margin-top: 40px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 14px; }
+.cr .pager .now { min-width: 64px; text-align: center; }
+.cr .pager .off { opacity: .4; pointer-events: none; }
+
+/* 빈 상태·오류·404 */
+.cr .cr-state { padding: 56px 24px; text-align: center; }
+.cr .cr-state h2 { font-size: 18px; }
+@media (min-width: 768px) { .cr .cr-state { padding: 72px 40px; } .cr .cr-state h2 { font-size: 20px; } }
+.cr .cr-state p { margin-top: 8px; font-size: 14px; }
+.cr .cr-state .btn { margin-top: 24px; }
+
+@media (prefers-reduced-motion: reduce) { .cr .btn, .cr .cr-card, .cr .cr-fchip { transition: none; } }
