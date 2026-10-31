@@ -154,14 +154,6 @@ export function PublishProfile({
 
   return (
     <form className="pp-form" onSubmit={submit} noValidate aria-label="크리에이터 프로필">
-      {/* 처음 열 때(만들기)만 보이는 안내 두 줄 */}
-      {!editing && (
-        <div className="pp-notice" role="note">
-          <p>공개 주소는 나중에 바꿀 수 없습니다</p>
-          <p>이 프로필은 누구나 볼 수 있습니다</p>
-        </div>
-      )}
-
       <div className="pp-field">
         <label htmlFor="pp-handle" className="pp-label">
           공개 주소
