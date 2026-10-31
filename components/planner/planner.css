@@ -148,12 +148,7 @@
 /* 프로필 칸: 첫 열기 안내 두 줄, 역할별 한 줄, 채널 링크 */
 .pl .pp-notice p { margin: 0; }
 .pl .pp-notice p + p { margin-top: 4px; }
-.pl .pp-notes { display: grid; gap: 8px; margin-top: 8px; }
-.pl .pp-note { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 8px; }
-.pl .pp-note-label { font-size: 13px; font-weight: 700; color: var(--title); }
-.pl .pp-note .answer { margin-top: 0; }
 .pl .pp-channels { display: grid; gap: 8px; margin-top: 8px; }
 .pl .pp-channel { display: grid; grid-template-columns: 1fr; gap: 8px; }
 @media (min-width: 768px) { .pl .pp-channel { grid-template-columns: 180px 1fr auto; align-items: center; } }
 .pl .pp-channel .answer { margin-top: 0; }
-@media (max-width: 520px) { .pl .pp-note { grid-template-columns: 1fr; gap: 4px; } }

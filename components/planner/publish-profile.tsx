@@ -8,7 +8,6 @@ import {
   CHANNEL_LABEL_MAX,
   CHANNEL_MAX,
   HANDLE_MAX,
-  ROLE_NOTE_MAX,
   normalizeHandle,
   validateCreatorProfile,
   validateHandle,
@@ -24,16 +23,6 @@ export type SaveResult = { ok: true } | { ok: false; errors?: ProfileErrors; err
 // 공개 주소를 쓸 수 있는지 서버에 물어본 결과. available = 쓸 수 있음, taken = 이미 쓰는 중, error = 확인하지 못함
 export type HandleCheck = "available" | "taken" | "error";
 type Avail = { status: "idle" | "checking" | HandleCheck; handle: string };
-
-// 역할마다 「하는 일」 칸에 보여 줄 예시 글(입력칸 안의 흐린 글)
-const ROLE_NOTE_HINT: Record<Role, string> = {
-  video: "예: 숏폼·모션그래픽 영상",
-  script: "예: 단편 대본, 시리즈 구성",
-  art_director: "예: 컨셉 아트, 캐릭터 디자인",
-  history_advisor: "예: 삼국시대 복식·생활 고증",
-  producer: "예: 제작 일정·예산 관리",
-  other: "예: 맡아서 하는 일",
-};
 
 // 크리에이터 프로필 칸(공개 주소·역할·소개 …). 만들기와 고치기를 모두 처리한다.
 // context = "planner": 기획안을 올리다가 열리는 칸. 필수 칸(공개 주소·역할·한 줄 소개)만 있고, 저장하면 프로필도 함께 공개된다.
@@ -64,7 +53,6 @@ export function PublishProfile({
   const [roles, setRoles] = useState<Role[]>(initial?.roles ?? []);
   const [bio, setBio] = useState(initial?.bio ?? "");
   const [about, setAbout] = useState(initial?.about ?? "");
-  const [roleNotes, setRoleNotes] = useState<Partial<Record<Role, string>>>(initial?.roleNotes ?? {});
   const [channels, setChannels] = useState<Channel[]>(initial?.channels?.length ? initial.channels : []);
   const [openToCollab, setOpenToCollab] = useState(initial?.openToCollab ?? true);
   const [isPublic, setIsPublic] = useState(initial?.isPublic ?? false);
@@ -115,7 +103,6 @@ export function PublishProfile({
       bio,
       // 기획안을 올리다가 열리는 칸에서는 필수 칸만 받는다. 나머지는 마이페이지에서 나중에 채운다.
       about: full ? about : "",
-      roleNotes: full ? roleNotes : {},
       channels: full ? channels : [],
       openToCollab: full ? openToCollab : true,
       isPublic: full ? isPublic : true,
@@ -222,39 +209,6 @@ export function PublishProfile({
           </p>
         )}
       </div>
-
-      {/* P1 역할별 한 줄: 고른 역할마다 한 칸 */}
-      {full && roles.length > 0 && (
-        <div className="pp-field">
-          <span className="pp-label">
-            역할별 하는 일 <span className="pp-hint-inline">(선택, 역할마다 한 줄)</span>
-          </span>
-          <div className="pp-notes">
-            {(Object.keys(ROLES) as Role[])
-              .filter((r) => roles.includes(r))
-              .map((r) => (
-                <div key={r} className="pp-note">
-                  <label htmlFor={`pp-note-${r}`} className="pp-note-label">
-                    {ROLES[r]}
-                  </label>
-                  <input
-                    id={`pp-note-${r}`}
-                    className="answer title-in"
-                    value={roleNotes[r] ?? ""}
-                    onChange={(e) => setRoleNotes((cur) => ({ ...cur, [r]: e.target.value }))}
-                    maxLength={ROLE_NOTE_MAX}
-                    placeholder={ROLE_NOTE_HINT[r]}
-                  />
-                </div>
-              ))}
-          </div>
-          {errors.roleNotes && (
-            <p className="pp-err" role="alert">
-              {errors.roleNotes}
-            </p>
-          )}
-        </div>
-      )}
 
       <div className="pp-field">
         <label htmlFor="pp-bio" className="pp-label">

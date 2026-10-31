@@ -7,7 +7,6 @@ export const HANDLE_MIN = 3;
 export const HANDLE_MAX = 20;
 export const BIO_MAX = 200;
 export const ABOUT_MAX = 500; // P2 소개 글(프로필 화면에만 보임)
-export const ROLE_NOTE_MAX = 60; // P1 역할별 한 줄
 export const CHANNEL_MAX = 5; // P3 채널 링크 개수
 export const CHANNEL_LABEL_MAX = 20;
 export const URL_MAX = 2000;
@@ -27,12 +26,11 @@ export type ProfileValues = {
   roles: Role[];
   bio: string; // 카드용 한 줄 소개
   about: string; // P2 소개 글
-  roleNotes: Partial<Record<Role, string>>; // P1 역할별 한 줄(고른 역할에 대해서만)
   channels: Channel[]; // P3 채널 링크
   openToCollab: boolean; // P6 협업 신청 받기(기본 켜짐)
   isPublic: boolean; // 프로필 공개 여부(마이페이지에서 만들면 기본 비공개, 기획안을 올리며 만들면 공개)
 };
-export type ProfileErrors = Partial<Record<"handle" | "roles" | "bio" | "about" | "roleNotes" | "channels", string>>;
+export type ProfileErrors = Partial<Record<"handle" | "roles" | "bio" | "about" | "channels", string>>;
 
 export const isRole = (v: unknown): v is Role => typeof v === "string" && Object.prototype.hasOwnProperty.call(ROLES, v);
 
@@ -69,7 +67,6 @@ export type ProfileInput = {
   roles: readonly string[];
   bio: string;
   about?: string;
-  roleNotes?: Record<string, string>;
   channels?: readonly Channel[];
   openToCollab?: boolean;
   isPublic?: boolean;
@@ -94,18 +91,6 @@ export function validateCreatorProfile(input: ProfileInput):
   if (about.length > ABOUT_MAX) errors.about = `소개 글은 ${ABOUT_MAX}자 이내로 적어 주세요.`;
   else if (/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f<>]/.test(about)) errors.about = "소개 글에 쓸 수 없는 문자가 있어요.";
 
-  // 역할별 한 줄: 고른 역할의 것만 남기고, 빈 칸은 뺀다
-  const roleNotes: Partial<Record<Role, string>> = {};
-  for (const r of roles) {
-    const note = (input.roleNotes?.[r] ?? "").replace(/\s+/g, " ").trim();
-    if (!note) continue;
-    if (note.length > ROLE_NOTE_MAX || BAD_TEXT_RE.test(note)) {
-      errors.roleNotes = `역할별 한 줄은 ${ROLE_NOTE_MAX}자 이내로, 쓸 수 없는 문자 없이 적어 주세요.`;
-      break;
-    }
-    roleNotes[r] = note;
-  }
-
   // 채널 링크: 이름과 주소가 모두 빈 줄은 뺀다
   const channels: Channel[] = [];
   for (const c of input.channels ?? []) {
@@ -127,5 +112,5 @@ export function validateCreatorProfile(input: ProfileInput):
 
   return Object.keys(errors).length
     ? { ok: false, errors }
-    : { ok: true, value: { handle, roles, bio, about, roleNotes, channels, openToCollab: input.openToCollab ?? true, isPublic: input.isPublic ?? false } };
+    : { ok: true, value: { handle, roles, bio, about, channels, openToCollab: input.openToCollab ?? true, isPublic: input.isPublic ?? false } };
 }

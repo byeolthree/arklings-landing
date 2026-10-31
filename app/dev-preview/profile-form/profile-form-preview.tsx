@@ -75,8 +75,7 @@ export function ProfileFormPreview({ mode }: { mode: Mode }) {
           <div className="pub-box">
             {saved && (
               <p style={{ marginTop: 10 }} role="status">
-                저장했어요(샘플): <b>/creators/{saved.handle}</b> · 역할 {saved.roles.length}개 · 한 줄 소개 {saved.bio.length}자 · 소개 글 {saved.about.length}자 · 역할별 한 줄{" "}
-                {Object.keys(saved.roleNotes).length}개 · 채널 {saved.channels.length}개 · 협업 신청 {saved.openToCollab ? "받음" : "안 받음"} · {saved.isPublic ? "공개" : "비공개"}
+                저장했어요(샘플): <b>/creators/{saved.handle}</b> · 역할 {saved.roles.length}개 · 한 줄 소개 {saved.bio.length}자 · 소개 글 {saved.about.length}자 · 채널 {saved.channels.length}개 · 협업 신청 {saved.openToCollab ? "받음" : "안 받음"} · {saved.isPublic ? "공개" : "비공개"}
               </p>
             )}
             {!open && (
@@ -98,7 +97,6 @@ export function ProfileFormPreview({ mode }: { mode: Mode }) {
                         roles: ["script", "video"],
                         bio: "사라지는 기억과 기록하는 사람을 쓰는 대본 작가예요.",
                         about: "소금비 내리는 나라 같은 이야기를 씁니다. 단편 대본과 시리즈 구성을 주로 하고, 영상 작업자와의 협업을 찾고 있어요.",
-                        roleNotes: { script: "단편 대본, 시리즈 구성", video: "숏폼 영상 편집" },
                         channels: [{ label: "인스타그램", url: "https://instagram.com/jian.lee" }],
                         openToCollab: true,
                         isPublic: false,
