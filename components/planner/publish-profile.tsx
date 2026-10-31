@@ -24,7 +24,7 @@ export function PublishProfile({
   displayName: string;
   onSubmit: (value: ProfileValues) => Promise<SaveResult>;
   onCancel: () => void;
-  // 공개 주소 중복 확인(서버). 있으면 저장 전에 「쓸 수 있음」으로 끝나 있어야 하고, 서버는 저장할 때 마지막으로 한 번 더 확인한다.
+  // 공개 주소 중복 확인(서버). 「이미 쓰는 주소」로 나온 주소는 저장하지 않는다. 서버는 저장할 때 마지막으로 한 번 더 확인한다.
   checkHandle?: (handle: string) => Promise<HandleCheck>;
 }) {
   const [handle, setHandle] = useState(initial?.handle ?? "");
@@ -75,7 +75,7 @@ export function PublishProfile({
     if (!checked.ok) return setErrors(checked.errors);
     setErrors({});
     setPending(true);
-    // 저장하기 전에 이 주소의 중복 확인이 「쓸 수 있음」으로 끝나 있어야 한다. 아직 안 했으면 지금 한다.
+    // 저장하기 전에 이 주소가 이미 쓰는 주소인지 확인한다(아직 안 했으면 지금 한다). 확인이 실패하면 그대로 저장을 시도하고, 서버가 마지막으로 확인한다.
     if (checkHandle && !editing && !(avail.status === "available" && avail.handle === checked.value.handle)) {
       let result: HandleCheck;
       try {
@@ -84,11 +84,9 @@ export function PublishProfile({
         result = "error";
       }
       setAvail({ status: result, handle: checked.value.handle });
-      if (result !== "available") {
+      if (result === "taken") {
         setPending(false);
-        return setErrors({
-          handle: result === "taken" ? "이미 쓰고 있는 공개 주소예요. 다른 주소를 적어 주세요." : "중복 확인을 하지 못했어요. 「중복 확인」 버튼을 다시 눌러 주세요.",
-        });
+        return setErrors({ handle: "이미 쓰고 있는 공개 주소예요. 다른 주소를 적어 주세요." });
       }
     }
     try {
@@ -147,13 +145,12 @@ export function PublishProfile({
           <p className={`pp-avail ${avail.status}`} role="status" aria-live="polite">
             {avail.status === "available" && `「${avail.handle}」은(는) 쓸 수 있는 주소예요.`}
             {avail.status === "taken" && `「${avail.handle}」은(는) 이미 쓰고 있는 주소예요. 다른 주소를 적어 주세요.`}
-            {avail.status === "error" && "중복 확인을 하지 못했어요. 「중복 확인」 버튼을 다시 눌러 주세요."}
           </p>
         )}
         <p id="pp-handle-hint" className="pp-hint">
           {editing ? "공개 주소는 한 번 정하면 바꿀 수 없어요." : "영문 소문자·숫자·하이픈, 3~20자. 한 번 정하면 바꿀 수 없어요."}
         </p>
-        {errors.handle && avail.status !== "taken" && avail.status !== "error" && (
+        {errors.handle && avail.status !== "taken" && (
           <p className="pp-err" role="alert">
             {errors.handle}
           </p>
