@@ -37,7 +37,6 @@ export function ProfileFormPreview({ mode }: { mode: Mode }) {
             <p>
               포트폴리오 <span className="pub-state">공개하지 않음</span>
             </p>
-            <p style={{ marginTop: 6 }}>공개하면 이름 <b>「이지안」</b>과 기획안, 포트폴리오가 누구에게나 보여요.</p>
             {saved && (
               <p style={{ marginTop: 10 }} role="status">
                 저장했어요(샘플): <b>/creators/{saved.handle}</b> · 역할 {saved.roles.length}개 · 소개 {saved.bio.length}자

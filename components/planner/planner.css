@@ -126,8 +126,7 @@
 .pl .pp-form { margin-top: 16px; padding: 18px; border-radius: 16px; background: var(--tint); }
 @media (min-width: 768px) { .pl .pp-form { padding: 22px 24px; } }
 .pl .pp-title { font-size: 16px; }
-.pl .pp-sub { margin-top: 4px; font-size: 13px; }
-.pl .pp-notice { margin-top: 14px; padding: 10px 14px; border-radius: 10px; background: #fff; border-left: 3px solid var(--teal); font-size: 14px; font-weight: 700; color: var(--title); }
+.pl .pp-notice { margin-top: 12px; padding: 10px 14px; border-radius: 10px; background: #fff; border-left: 3px solid var(--teal); font-size: 14px; font-weight: 700; color: var(--title); }
 .pl .pp-notice span { font-size: 12px; font-weight: 400; color: var(--body); }
 .pl .pp-field { margin-top: 16px; }
 .pl .pp-label { display: block; font-size: 13px; font-weight: 700; color: var(--title); }

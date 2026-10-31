@@ -105,7 +105,6 @@ export function PublishProfile({
   return (
     <form className="pp-form" onSubmit={submit} noValidate aria-label="크리에이터 프로필">
       <h3 className="pp-title">{editing ? "크리에이터 프로필 고치기" : "먼저 크리에이터 프로필을 만들어 주세요"}</h3>
-      <p className="pp-sub">포트폴리오에는 프로필이 함께 올라가요. 프로필은 처음 한 번만 만들면 돼요.</p>
 
       {/* 칸을 접거나 숨길 수 없는 안내: 프로필이 누구에게나 보인다는 것 */}
       <p className="pp-notice" role="note">
