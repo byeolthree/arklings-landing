@@ -42,12 +42,13 @@
 3. 프로필 `/dev-preview/creators/<공개주소>`(`?state=many|empty`)
 4. 기획안 상세 `/dev-preview/portfolio/sample-<주소>-<순번>`(`?state=noprofile|short`)
 5. 상태 화면 `/dev-preview/states?view=...`, `app/portfolio/*`, `app/creators/*`의 error/loading/not-found(`components/creators/state-views.tsx`, `error-view.tsx`)
-6·8. 프로필 칸 `/dev-preview/profile-form?state=planner|mypage|edit|taken|fail` (`components/planner/publish-profile.tsx`, 규칙 `lib/creator-rules.ts`). 8단계에서 첫 열기 안내 두 줄, 마이페이지판(P1·P2·P3·P6·공개 설정), 기획안 올리기판(필수 칸만)을 만듦.
-- 실제 기획안 편집기(`components/planner/planner-editor.tsx`)에는 프로필 칸을 아직 연결하지 않았다. 그 파일의 문구 두 개(「올리지 않음→공개하지 않음」, 「공개하면 이름 「○○」과 기획안, 포트폴리오가 누구에게나 보여요」)는 **승인 전에 고친 것**이다(별뜨리님이 샘플 화면의 문구를 바꾸라고 하셨는데 실제 기획안 화면까지 함께 고쳤고, 승인받은 기록이 없다). **새 세션이 시작할 때 별뜨리님께 보고하고 그대로 둘지 물을 것.**
+6·8. 프로필 칸 `/dev-preview/profile-form?state=planner|planner-private|mypage|edit|taken|fail` (`components/planner/publish-profile.tsx`, 규칙 `lib/creator-rules.ts`). 8단계에서 첫 열기 안내 두 줄, 마이페이지판(P1·P2·P3·P6·공개 설정), 기획안 올리기판(필수 칸만)을 만듦.
+- 실제 기획안 편집기(`components/planner/planner-editor.tsx`)에는 프로필 칸을 아직 연결하지 않았다. 승인 전에 바뀌었던 문구 두 개는 별뜨리님 지시로 `dev` 때 문구로 되돌렸고 `dev`와 차이 없음을 확인했다. 이 화면의 안내 문장은 12단계에서 프로필 칸을 연결할 때 별뜨리님과 다시 정한다.
+- D12(가) 「프로필도 공개할까요?」는 8단계로 확정(별뜨리님): `components/planner/publish-profile-choice.tsx`, 샘플 `?state=planner-private`.
 
 ## 다음에 할 일 (계획 문서 6번)
-- **8단계 승인 대기 중**(별뜨리님 확인 후 다음). 승인되면:
-9. 마이페이지 「크리에이터 프로필」 구역 샘플(프로필 없음/있음(공개 중·비공개 표시)/고치기/공개로 바꾸기). 배치도 A 참고. 8단계에서 미룬 「프로필도 공개할까요?」 질문(D12 가)을 9단계나 11단계 중 어디에 넣을지 별뜨리님께 물어볼 것.
+- **8단계 승인 대기 중**(`planner-private` 경우까지 별뜨리님이 본 뒤 승인). 승인되면:
+9. 마이페이지 「크리에이터 프로필」 구역 샘플(프로필 없음/있음(공개 중·비공개 표시)/고치기/공개로 바꾸기). 배치도 A 참고.
 10. 작업물 링크 추가·고치기·지우기 화면 샘플(배치도 C, 유튜브 썸네일·대표 이미지 주소 미리 보기)
 11. 프로필 화면 개정 샘플: 링크 카드, 소개 글·역할별 한 줄·채널 링크 자리, 「이 크리에이터에게 협업 신청」 버튼, 작업 0건, 본인용 「비공개 상태입니다」(`?state=private`), 목록 카드 대표 작업에 링크 반영, 크리에이터 0명 안내 두 버튼. (배치도 D·E 참고)
 12. 백엔드(0008 파일, `lib/creators.ts`, `lib/creator-links.ts`, `app/actions/creators.ts`, `app/actions/creator-links.ts`, `setPlanPublic` 수정, 협업 신청 프로필 경로, 마이페이지·기획안 화면·`/creators` 실제 연결). DB가 없어 `npm run build`/`npm run lint`까지만 확인 가능. 시작 전에 건드릴 파일 목록을 먼저 보여 줄 것.

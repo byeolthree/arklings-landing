@@ -3,15 +3,18 @@
 import { useState } from "react";
 import { SAMPLE_CREATORS } from "@/components/creators/sample-data";
 import { profileFormTitle, PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
+import { profileChoiceTitle, PublishProfileChoice } from "@/components/planner/publish-profile-choice";
 import type { ProfileValues } from "@/lib/creator-rules";
 
-export type Mode = "planner" | "mypage" | "edit" | "taken" | "fail";
+export type Mode = "planner" | "planner-private" | "mypage" | "edit" | "taken" | "fail";
 
 // 샘플 미리보기용: 실제 저장 없이 저장 결과(성공·주소 중복·저장 실패)를 흉내 낸다.
+// planner-private = 비공개 프로필을 이미 가진 사람이 올릴 때 「프로필도 공개할까요?」를 묻는 칸
 // planner = 기획안을 올리다가 열리는 칸(필수 칸만), mypage = 마이페이지에서 처음 만들기, edit = 마이페이지에서 고치기
 export function ProfileFormPreview({ mode }: { mode: Mode }) {
   const [open, setOpen] = useState(true);
   const [saved, setSaved] = useState<ProfileValues | null>(null);
+  const [chosen, setChosen] = useState<boolean | null>(null);
   const context = mode === "planner" ? "planner" : "mypage";
   const editing = mode === "edit";
 
@@ -29,6 +32,39 @@ export function ProfileFormPreview({ mode }: { mode: Mode }) {
     setSaved(value);
     setOpen(false);
     return { ok: true };
+  }
+
+  if (mode === "planner-private") {
+    return (
+      <div className="pl">
+        <div className="wrap" style={{ maxWidth: 960, margin: "0 auto", padding: "24px 16px" }}>
+          <section className="panel" style={{ marginTop: 0 }}>
+            <h2>{profileChoiceTitle}</h2>
+            <div className="pub-box">
+              {chosen !== null && (
+                <p role="status">{chosen ? "프로필도 공개하고 기획안을 올렸어요(샘플)." : "기획안만 올렸어요(샘플). 프로필은 비공개로 남아 있어요."}</p>
+              )}
+              {chosen === null ? (
+                <PublishProfileChoice
+                  onChoose={async (withProfile) => {
+                    await new Promise((r) => setTimeout(r, 700));
+                    setChosen(withProfile);
+                    return { ok: true };
+                  }}
+                  onCancel={() => setChosen(null)}
+                />
+              ) : (
+                <div className="row-actions">
+                  <button type="button" className="btn btn-primary sm" onClick={() => setChosen(null)}>
+                    다시 열기
+                  </button>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+    );
   }
 
   return (
