@@ -183,6 +183,15 @@
 - 404 문구: 크리에이터 「찾을 수 없는 크리에이터예요」, 기획안 「찾을 수 없는 기획안이에요」(둘 다 「크리에이터 둘러보기」→`/creators`). 오류 문구: 「포트폴리오를 불러오지 못했어요」(`/portfolio`), 「크리에이터를 불러오지 못했어요」(`/creators`).
 - 샘플 미리보기: `/dev-preview/states?view=list-loading|profile-loading|detail-loading|error|creator-404|plan-404`.
 
+## 3-8. 공개 과정의 프로필 만들기 (6단계에서 만든 부분)
+
+- 화면 부품: `components/planner/publish-profile.tsx`(`PublishProfile`). 만들기와 고치기를 모두 처리한다. 칸은 공개 주소(`/creators/` 뒤에 적음), 역할(칩 6개, 하나 이상), 소개(선택, 200자 이내, 글자 수 표시). **칸 위에 항상 보이는 안내 「이 프로필은 누구나 볼 수 있습니다」**와, 공개 이름·공개 주소·역할·소개가 보인다는 설명을 둔다(접거나 숨길 수 없음).
+- 규칙: `lib/creator-rules.ts`(새 파일, 크리에이터 데이터 규칙). 화면이 먼저 검사하고, 서버(`saveCreatorProfile`, 7단계)가 같은 함수로 다시 검사한다. 공개 주소는 영문 소문자·숫자·하이픈 3~20자(처음·끝 하이픈 불가, 연속 하이픈 불가, 예약어 불가), 역할은 `ROLES` 6개 중 1개 이상, 소개는 200자 이내.
+- 고치기 모드에서는 공개 주소 칸이 읽기 전용이고 「한 번 정하면 바꿀 수 없어요」 안내가 보인다(D5).
+- 저장 결과 처리: 칸별 오류(주소 중복 등)는 칸 아래에, 그 밖의 실패는 버튼 위에 보인다. 저장 중에는 버튼이 잠긴다.
+- **아직 연결하지 않은 것(7단계, 백엔드와 함께):** `planner-editor.tsx`에서 「포트폴리오에 올리기」를 눌렀을 때 프로필이 없으면 이 칸을 열고, 저장한 뒤 이어서 `setPlanPublic`을 부르는 연결, 내 프로필을 `app/planner/page.tsx`가 화면에 넘기는 것, `saveCreatorProfile` 서버 동작, 프로필이 있을 때의 요약 줄과 「프로필 고치기」 버튼.
+- 샘플 미리보기: `/dev-preview/profile-form?state=new|edit|taken|fail`(실제 저장 없이 결과를 흉내 낸다).
+
 ## 4. 데이터·백엔드 (크리에이터 데이터에 한해)
 
 **실행은 하지 않는다.** `supabase/migrations/0008_creators.sql` 파일만 만든다. 순서는 0001~0007과 같다: `main`에 새 코드를 올린 뒤 별뜨리님이 SQL Editor에서 0007 다음에 0008을 실행한다. 여러 번 실행해도 안전하게 쓴다(`if not exists`, `create or replace`).

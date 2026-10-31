@@ -121,3 +121,22 @@
 .pl .danger { color: var(--jaju); }
 
 @media (prefers-reduced-motion: reduce) { .pl *, .pl *::before, .pl *::after { transition: none !important; animation: none !important; } }
+
+/* 포트폴리오에 올리기 → 크리에이터 프로필 칸 */
+.pl .pp-form { margin-top: 16px; padding: 18px; border-radius: 16px; background: var(--tint); }
+@media (min-width: 768px) { .pl .pp-form { padding: 22px 24px; } }
+.pl .pp-title { font-size: 16px; }
+.pl .pp-sub { margin-top: 4px; font-size: 13px; }
+.pl .pp-notice { margin-top: 14px; padding: 10px 14px; border-radius: 10px; background: #fff; border-left: 3px solid var(--teal); font-size: 14px; font-weight: 700; color: var(--title); }
+.pl .pp-notice span { font-size: 12px; font-weight: 400; color: var(--body); }
+.pl .pp-field { margin-top: 16px; }
+.pl .pp-label { display: block; font-size: 13px; font-weight: 700; color: var(--title); }
+.pl .pp-hint, .pl .pp-hint-inline { font-size: 12px; font-weight: 400; color: var(--body); }
+.pl .pp-hint { margin-top: 6px; }
+.pl .pp-handle { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.pl .pp-handle .answer { margin-top: 0; flex: 1; min-width: 0; }
+.pl .pp-prefix { flex: none; font-size: 14px; color: var(--body); }
+.pl .pp-roles { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.pl .pp-err { margin-top: 6px; font-size: 12px; font-weight: 700; color: var(--jaju); }
+.pl .pp-form .row-actions { margin-top: 18px; }
+.pl .pp-form .answer[readonly] { background: color-mix(in srgb, var(--line) 50%, #fff); }
