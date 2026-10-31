@@ -117,6 +117,30 @@
 .cr .cr-tag.jaju { background: var(--jaju); }
 .cr .cr-tag.body { background: var(--body); }
 
+/* 프로필: 제목 띠 없이 바로 프로필과 포트폴리오를 보여 준다 */
+.cr .cr-prof { padding-top: 24px; }
+@media (min-width: 768px) { .cr .cr-prof { padding-top: 40px; } }
+.cr .cr-back { display: inline-flex; font-size: 13px; color: var(--teal); text-decoration: none; }
+.cr .cr-back:hover { text-decoration: underline; }
+.cr .cr-prof-head { display: flex; align-items: flex-start; gap: 16px; margin-top: 20px; }
+@media (min-width: 768px) { .cr .cr-prof-head { gap: 24px; margin-top: 28px; } }
+.cr .cr-av-lg { width: 64px; height: 64px; font-size: 26px; }
+@media (min-width: 768px) { .cr .cr-av-lg { width: 96px; height: 96px; font-size: 38px; } }
+.cr .cr-prof-text { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.cr .cr-prof-name { font-size: 24px; line-height: 1.25; font-weight: 700; }
+@media (min-width: 768px) { .cr .cr-prof-name { font-size: 32px; } }
+.cr .cr-prof-text .cr-tags { margin: 0; }
+.cr .cr-prof-bio { max-width: 720px; font-size: 15px; line-height: 1.7; color: var(--body); }
+.cr .cr-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 36px 0 16px; padding-top: 20px; border-top: 1px solid var(--line); }
+@media (min-width: 768px) { .cr .cr-sec-head { margin-top: 48px; } }
+.cr .cr-sec-title { font-size: 18px; font-weight: 700; }
+.cr .cr-sec-head .cr-count { margin: 0; }
+.cr .cr-plan { display: flex; flex-direction: column; gap: 14px; height: 100%; padding: 20px; text-decoration: none; color: inherit;
+  transition: transform .45s var(--ease), box-shadow .45s var(--ease); }
+@media (min-width: 768px) { .cr .cr-plan { padding: 24px; } }
+.cr .cr-plan:hover { transform: translateY(-4px); box-shadow: 0 30px 54px -24px rgba(42,32,37,.5), 0 2px 6px rgba(42,32,37,.06); }
+.cr .cr-plan-date { margin-top: auto; font-size: 13px; color: var(--body); }
+
 /* 쪽 이동 */
 .cr .pager { margin-top: 40px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 14px; }
 .cr .pager .now { min-width: 64px; text-align: center; }
@@ -129,4 +153,4 @@
 .cr .cr-state p { margin-top: 8px; font-size: 14px; }
 .cr .cr-state .btn { margin-top: 24px; }
 
-@media (prefers-reduced-motion: reduce) { .cr .btn, .cr .cr-card, .cr .cr-fchip { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .cr .btn, .cr .cr-card, .cr .cr-plan, .cr .cr-fchip { transition: none; } }

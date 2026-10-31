@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ROLES } from "@/lib/collab";
 import { hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
-import { ROLE_TONE } from "./role-tone";
+import { RoleTags } from "./role-tags";
 import type { CreatorCard } from "./types";
 import "./creators.css";
 
@@ -154,13 +154,7 @@ export function CreatorList({
                         <h3 className="cr-box-title">{c.latest.title}</h3>
                         <p className="cr-box-logline">{c.latest.logline}</p>
                       </div>
-                      <ul className="cr-tags" aria-label="역할">
-                        {c.roles.map((r) => (
-                          <li key={r} className={`cr-tag ${ROLE_TONE[r]}`}>
-                            {ROLES[r]}
-                          </li>
-                        ))}
-                      </ul>
+                      <RoleTags roles={c.roles} />
                     </Link>
                   </li>
                   );

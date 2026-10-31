@@ -1,6 +1,6 @@
 // 디자인 확인용 샘플 데이터(/dev-preview/creators). 이름·글은 모두 가짜이며 실제 DB와 연결되지 않는다.
 // 디자인 작업이 끝나 실제 읽기(lib/creators.ts)로 바꾸면 이 파일과 /dev-preview 주소는 지운다.
-import type { CreatorCard } from "./types";
+import type { CreatorCard, CreatorProfileData, PlanCard } from "./types";
 
 export const SAMPLE_CREATORS: CreatorCard[] = [
   { handle: "jian-lee", name: "이지안", roles: ["script"], bio: "사라지는 기억과 기록하는 사람을 쓰는 대본 작가예요.", planCount: 3, latest: { title: "소금비 내리는 나라", logline: "소금비가 내리는 날마다 한 사람의 기억이 사라지는 나라에서, 기억을 기록하는 서기가 왕의 기억만 지워지지 않는 이유를 쫓는다." } },
@@ -20,3 +20,34 @@ export const SAMPLE_CREATORS: CreatorCard[] = [
 ];
 
 export const SAMPLE_PAGE_SIZE = 12;
+
+export const SAMPLE_PROFILE_PAGE_SIZE = 9;
+
+const PLAN_POOL: { title: string; logline: string }[] = [
+  { title: "달빛 아래 두 번째 문", logline: "밤에만 열리는 문을 지키는 소녀가 문 너머에서 온 손님에게 이름을 빼앗길 위기에 처한다." },
+  { title: "실이 이어 준 사람들", logline: "베 짜는 마을의 여인들이 실 한 올로 먼 나라의 약속을 지켜 낸다." },
+  { title: "붉은 강이 흐르는 밤", logline: "해마다 강이 붉게 물드는 밤, 나루터지기가 마지막 배를 띄우기로 결심한다." },
+  { title: "삼한의 마지막 등불", logline: "서로 다른 세 나라의 등불지기가 같은 불씨를 나눠 가지며 겨울을 난다." },
+  { title: "지도에 없는 마을", logline: "지도를 그리던 청년이 지도에 없는 마을에서 자신이 그린 적 없는 지도를 발견한다." },
+  { title: "바람의 값", logline: "바람에도 값을 매기는 항구 도시에서, 값을 치르지 못한 선원들이 돌아갈 길을 찾는다." },
+  { title: "나루터의 약속", logline: "물길이 바뀐 뒤에도 같은 자리에서 서로를 기다리는 두 뱃사공의 이야기." },
+  { title: "마지막 봉화", logline: "봉화대를 지키는 병사가 어느 날 아무도 답하지 않는 불꽃을 올린다." },
+  { title: "색을 잃은 도읍", logline: "색이 하나씩 사라지는 도읍에서 염색장이 마지막 색을 지킨다." },
+  { title: "여름이 끝나는 날", logline: "여름의 마지막 날에만 열리는 시장에서 잃어버린 계절을 되파는 상인을 만난다." },
+  { title: "소금비 내리는 나라", logline: "소금비가 내리는 날마다 한 사람의 기억이 사라지는 나라에서, 기억을 기록하는 서기가 왕의 기억만 지워지지 않는 이유를 쫓는다." },
+  { title: "짧은 글", logline: "한 줄 소개가 짧은 경우." },
+];
+
+// 한 크리에이터의 샘플 기획안 목록(최신 공개 순). 대표 기획안(latest)이 맨 위에 온다.
+export function samplePlansOf(c: CreatorCard): PlanCard[] {
+  const n = Math.max(c.planCount, 1);
+  return Array.from({ length: n }, (_, i) => {
+    const base = i === 0 ? c.latest : PLAN_POOL[(i * 5 + c.handle.length) % PLAN_POOL.length];
+    const day = new Date(Date.UTC(2026, 9, 30 - i * 3, 3, 0, 0));
+    return { id: `sample-${c.handle}-${i + 1}`, title: base.title, logline: base.logline, publishedAt: day.toISOString() };
+  });
+}
+
+export function sampleProfileOf(c: CreatorCard): CreatorProfileData {
+  return { handle: c.handle, name: c.name, roles: c.roles, bio: c.bio };
+}
