@@ -5,13 +5,21 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { signOut } from "@/app/actions/auth";
 
-// 랜딩(public/landing.html)의 상단 메뉴와 같은 모양. 가운데 메뉴 글자는 랜딩처럼 아직 연결된 화면이 없어 글자로만 둔다.
-const MENU = ["킹덤", "스튜디오", "크리에이터", "라이브러리", "커뮤니티"];
+// 랜딩(public/landing.html)의 상단 메뉴와 같은 모양. 가운데 메뉴 글자 중 연결된 화면이 있는 것만 링크(지금은 「크리에이터」), 나머지는 글자로만 둔다.
+const MENU: { label: string; href?: string }[] = [
+  { label: "킹덤" },
+  { label: "스튜디오" },
+  { label: "크리에이터", href: "/creators" },
+  { label: "라이브러리" },
+  { label: "커뮤니티" },
+];
 
 export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  // 크리에이터 목록·프로필과 그 사람의 기획안 상세에 있을 때 메뉴의 「크리에이터」를 현재 위치로 보여 준다.
+  const onCreators = pathname.startsWith("/creators") || pathname.startsWith("/portfolio");
   // 로그인 화면에서 돌아올 곳. 로그인·가입 화면 자체에서는 붙이지 않는다.
   const loginHref =
     pathname === "/login" || pathname === "/signup" || pathname.startsWith("/auth/")
@@ -34,9 +42,15 @@ export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
           Arklings
         </Link>
         <nav className="lk-nav-links" aria-label="주요 메뉴">
-          {MENU.map((m) => (
-            <span key={m}>{m}</span>
-          ))}
+          {MENU.map((m) =>
+            m.href ? (
+              <Link key={m.label} href={m.href} aria-current={onCreators ? "page" : undefined}>
+                {m.label}
+              </Link>
+            ) : (
+              <span key={m.label}>{m.label}</span>
+            ),
+          )}
         </nav>
         <div className="lk-nav-right">
           {loggedIn ? (
@@ -76,9 +90,15 @@ export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
         </div>
       </div>
       <nav className={`lk-menu${open ? " open" : ""}`} id="lk-menu" aria-label="모바일 메뉴" aria-hidden={!open}>
-        {MENU.map((m) => (
-          <span key={m}>{m}</span>
-        ))}
+        {MENU.map((m) =>
+          m.href ? (
+            <Link key={m.label} href={m.href} onClick={close} tabIndex={open ? 0 : -1} aria-current={onCreators ? "page" : undefined}>
+              {m.label}
+            </Link>
+          ) : (
+            <span key={m.label}>{m.label}</span>
+          ),
+        )}
         {loggedIn ? (
           <>
             <Link href="/collab" onClick={close} tabIndex={open ? 0 : -1}>
