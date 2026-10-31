@@ -14,21 +14,24 @@ export default async function ProfileFormPreviewPage({ searchParams }: { searchP
   const mode = (raw && raw in MODES ? raw : "planner") as keyof typeof MODES;
   return (
     <>
-      <div className="fixed bottom-4 right-4 z-50 max-w-[300px] rounded-lg border border-[#e8dfe3] bg-white/95 px-3 py-2 text-[11px] leading-snug text-[#2a2025] shadow-md">
-        <strong>미리보기 도우미</strong> (사이트에 없는 상자)
-        <br />
-        가운데 흰 판은 기획안 화면 아래쪽 「포트폴리오」 칸을 흉내 낸 샘플이에요. 중복 확인 시험: <b>taken-name</b>(이미 쓰는 주소), <b>check-fail</b>(확인 실패), 샘플 크리에이터 주소(예: jian-lee).
-        <br />
-        보기:{" "}
-        {Object.entries(MODES).map(([k, label], i) => (
-          <span key={k}>
-            {i > 0 && " · "}
-            <Link href={`/dev-preview/profile-form?state=${k}`} className={k === mode ? "font-bold underline" : "underline"}>
-              {label}
-            </Link>
-          </span>
-        ))}
-      </div>
+      <details className="fixed bottom-4 right-4 z-50 max-w-[300px] rounded-lg border border-[#e8dfe3] bg-white/95 px-3 py-2 text-[11px] leading-snug text-[#2a2025] shadow-md">
+        <summary className="cursor-pointer">
+          <strong>미리보기 도우미</strong> (사이트에 없는 상자, 눌러서 펼침)
+        </summary>
+        <div className="mt-1">
+          가운데 흰 판은 기획안 화면 아래쪽 「포트폴리오」 칸을 흉내 낸 샘플이에요. 중복 확인 시험: <b>taken-name</b>(이미 쓰는 주소), <b>check-fail</b>(확인 실패), 샘플 크리에이터 주소(예: jian-lee).
+          <br />
+          보기:{" "}
+          {Object.entries(MODES).map(([k, label], i) => (
+            <span key={k}>
+              {i > 0 && " · "}
+              <Link href={`/dev-preview/profile-form?state=${k}`} className={k === mode ? "font-bold underline" : "underline"}>
+                {label}
+              </Link>
+            </span>
+          ))}
+        </div>
+      </details>
       <ProfileFormPreview mode={mode} />
     </>
   );
