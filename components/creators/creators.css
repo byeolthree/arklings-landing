@@ -1,0 +1,87 @@
+/* 크리에이터 화면(목록·프로필). 랜딩페이지(public/landing.html)와 같은 값(색·카드·버튼·글자)을 쓰고, 다른 화면과 겹치지 않게 .cr 안에서만 적용한다. */
+.cr {
+  --jaju: #a61e5c; --teal: #1f5a66; --gold: #d89a24;
+  --bg: #faf7f8; --line: #e8dfe3; --body: #574a50; --title: #2a2025; --paper: #ffffff; --tint: #f5ecf0;
+  --hero-bg: color-mix(in srgb, var(--bg) 55%, var(--line));
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  flex: 1; color: var(--body); font-size: 14px; line-height: 1.6; word-break: keep-all; overflow-wrap: break-word;
+}
+.cr h1, .cr h2, .cr h3 { color: var(--title); margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+.cr p { margin: 0; text-wrap: pretty; }
+.cr .wrap { width: 100%; max-width: 1440px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 768px) { .cr .wrap { padding: 0 40px; } }
+@media (min-width: 1024px) { .cr .wrap { padding: 0 80px; } }
+.cr a:focus-visible, .cr button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+/* 버튼 (랜딩 .btn) */
+.cr .btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 40px; padding: 0 20px; border-radius: 999px; font: inherit; font-weight: 700; font-size: 14px; cursor: pointer;
+  border: 1.5px solid var(--jaju); text-decoration: none; white-space: nowrap;
+  transition: transform .35s var(--ease), background .3s, color .3s, box-shadow .35s;
+}
+.cr .btn-primary { background: var(--jaju); color: #fff; box-shadow: 0 8px 24px -10px rgba(166,30,92,.55); }
+.cr .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(166,30,92,.65); }
+.cr .btn-ghost { background: transparent; color: var(--jaju); }
+.cr .btn-ghost:hover { background: var(--jaju); color: #fff; transform: translateY(-2px); }
+.cr .btn .arrow { transition: transform .35s var(--ease); }
+.cr .btn:hover .arrow { transform: translateX(4px); }
+
+/* 상단 띠 (랜딩 히어로 배경 → 페이지 배경) */
+.cr .cr-top { background: linear-gradient(180deg, var(--hero-bg), var(--bg)); padding: 48px 0 32px; }
+@media (min-width: 768px) { .cr .cr-top { padding: 80px 0 48px; } }
+.cr .kicker { text-align: center; font-size: 16px; font-weight: 500; color: var(--body); }
+@media (min-width: 768px) { .cr .kicker { font-size: 20px; } }
+.cr .cr-title { margin: 10px auto 0; text-align: center; font-size: 22px; line-height: 1.3; font-weight: 700; max-width: 900px; }
+@media (min-width: 768px) { .cr .cr-title { margin-top: 12px; font-size: 32px; } }
+.cr .cr-desc { margin: 12px auto 0; max-width: 900px; text-align: center; font-size: 15px; }
+@media (min-width: 768px) { .cr .cr-desc { font-size: 18px; } }
+
+/* 카드 (랜딩 .panel) */
+.cr .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 30px 60px -36px rgba(42,32,37,.35); overflow: hidden; }
+
+/* 목록: 모바일 1열 → 768 이상 2열 → 1024 이상 3열(시안의 3열) */
+.cr .cr-list { padding: 8px 0 84px; }
+@media (min-width: 768px) { .cr .cr-list { padding: 16px 0 120px; } }
+.cr .cr-count { margin-bottom: 16px; font-size: 13px; }
+.cr .cr-grid { display: grid; gap: 16px; list-style: none; margin: 0; padding: 0; }
+@media (min-width: 768px) { .cr .cr-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; } }
+@media (min-width: 1024px) { .cr .cr-grid { grid-template-columns: repeat(3, 1fr); } }
+.cr .cr-grid > li { min-width: 0; }
+
+.cr .cr-card { display: flex; flex-direction: column; gap: 16px; height: 100%; padding: 20px; text-decoration: none; color: inherit;
+  transition: transform .45s var(--ease), box-shadow .45s var(--ease), border-color .3s; }
+@media (min-width: 768px) { .cr .cr-card { padding: 24px; } }
+.cr .cr-card:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--jaju) 30%, var(--line)); box-shadow: 0 36px 60px -34px rgba(42,32,37,.45); }
+.cr .cr-who { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.cr .cr-av { flex: none; display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  background: var(--jaju); color: #fff; font-size: 18px; font-weight: 700; }
+.cr .cr-who-text { min-width: 0; display: flex; flex-direction: column; }
+.cr .cr-name { font-size: 16px; font-weight: 700; color: var(--title); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cr .cr-roles { font-size: 13px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 대표 기획안 칸: 이미지 자리 규칙(배경 #FAF7F8 + 1px #8C8C8C, 모서리 8px, 높이 데스크톱 200 / 모바일 160) 안에 글을 넣는다 */
+.cr .cr-box { height: 160px; padding: 16px; background: var(--bg); border: 1px solid #8c8c8c; border-radius: 8px; overflow: hidden;
+  display: flex; flex-direction: column; gap: 6px; }
+@media (min-width: 768px) { .cr .cr-box { height: 200px; } }
+.cr .cr-label { font-size: 12px; font-weight: 700; color: var(--teal); letter-spacing: .04em; }
+.cr .cr-box-title { font-family: var(--font-noto-serif), serif; font-size: 16px; line-height: 1.35; font-weight: 700;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cr .cr-box-logline { font-size: 13px; line-height: 1.7; color: var(--body);
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+@media (min-width: 768px) { .cr .cr-box-logline { -webkit-line-clamp: 4; } }
+.cr .cr-chip { align-self: flex-start; margin-top: auto; padding: 4px 12px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 12px; font-weight: 500; }
+
+/* 쪽 이동 */
+.cr .pager { margin-top: 40px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 14px; }
+.cr .pager .now { min-width: 64px; text-align: center; }
+.cr .pager .off { opacity: .4; pointer-events: none; }
+
+/* 빈 상태·오류·404 */
+.cr .cr-state { padding: 56px 24px; text-align: center; }
+.cr .cr-state h2 { font-size: 18px; }
+@media (min-width: 768px) { .cr .cr-state { padding: 72px 40px; } .cr .cr-state h2 { font-size: 20px; } }
+.cr .cr-state p { margin-top: 8px; font-size: 14px; }
+.cr .cr-state .btn { margin-top: 24px; }
+
+@media (prefers-reduced-motion: reduce) { .cr .btn, .cr .cr-card { transition: none; } }
