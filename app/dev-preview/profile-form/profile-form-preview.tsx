@@ -32,7 +32,6 @@ export function ProfileFormPreview({ mode }: { mode: Mode }) {
     <div className="pl">
       <div className="wrap" style={{ maxWidth: 960, margin: "0 auto", padding: "24px 16px" }}>
         <section className="panel" style={{ marginTop: 0 }}>
-          <h2>내 기획안 기록</h2>
           <div className="pub-box">
             <p>
               포트폴리오 <span className="pub-state">공개하지 않음</span>
