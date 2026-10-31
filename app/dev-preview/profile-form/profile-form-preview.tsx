@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { PublishProfile, type SaveResult } from "@/components/planner/publish-profile";
+import { SAMPLE_CREATORS } from "@/components/creators/sample-data";
+import { PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
 import type { ProfileValues } from "@/lib/creator-rules";
 
 type Mode = "new" | "edit" | "taken" | "fail";
@@ -10,6 +11,13 @@ type Mode = "new" | "edit" | "taken" | "fail";
 export function ProfileFormPreview({ mode }: { mode: Mode }) {
   const [open, setOpen] = useState(true);
   const [saved, setSaved] = useState<ProfileValues | null>(null);
+
+  // 샘플의 중복 확인: 샘플 크리에이터들의 공개 주소와 "taken-name"은 이미 쓰는 주소로 본다. "check-fail"은 확인 실패를 흉내 낸다.
+  async function checkHandle(handle: string): Promise<HandleCheck> {
+    await new Promise((r) => setTimeout(r, 500));
+    if (handle === "check-fail") return "error";
+    return SAMPLE_CREATORS.some((c) => c.handle === handle) || handle === "taken-name" ? "taken" : "available";
+  }
 
   async function onSubmit(value: ProfileValues): Promise<SaveResult> {
     await new Promise((r) => setTimeout(r, 700));
@@ -25,12 +33,11 @@ export function ProfileFormPreview({ mode }: { mode: Mode }) {
       <div className="wrap" style={{ maxWidth: 960, margin: "0 auto", padding: "24px 16px" }}>
         <section className="panel" style={{ marginTop: 0 }}>
           <h2>내 기획안 기록</h2>
-          <p className="sub">(기획안 화면 아래쪽 「포트폴리오」 칸을 흉내 낸 샘플이에요)</p>
           <div className="pub-box">
             <p>
-              포트폴리오 <span className="pub-state">올리지 않음</span>
+              포트폴리오 <span className="pub-state">공개하지 않음</span>
             </p>
-            <p style={{ marginTop: 6 }}>올리면 공개 이름 <b>「이지안」</b>과 이 기획안의 완성 내용이 포트폴리오에서 누구에게나 보여요.</p>
+            <p style={{ marginTop: 6 }}>공개하면 이름 <b>「이지안」</b>과 기획안, 포트폴리오가 누구에게나 보여요.</p>
             {saved && (
               <p style={{ marginTop: 10 }} role="status">
                 저장했어요(샘플): <b>/creators/{saved.handle}</b> · 역할 {saved.roles.length}개 · 소개 {saved.bio.length}자
@@ -51,6 +58,7 @@ export function ProfileFormPreview({ mode }: { mode: Mode }) {
                 displayName="이지안"
                 onSubmit={onSubmit}
                 onCancel={() => setOpen(false)}
+                checkHandle={mode === "edit" ? undefined : checkHandle}
               />
             )}
           </div>

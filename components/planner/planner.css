@@ -133,10 +133,15 @@
 .pl .pp-label { display: block; font-size: 13px; font-weight: 700; color: var(--title); }
 .pl .pp-hint, .pl .pp-hint-inline { font-size: 12px; font-weight: 400; color: var(--body); }
 .pl .pp-hint { margin-top: 6px; }
-.pl .pp-handle { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-.pl .pp-handle .answer { margin-top: 0; flex: 1; min-width: 0; }
+.pl .pp-handle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.pl .pp-handle .answer { margin-top: 0; flex: 1 1 140px; min-width: 0; }
 .pl .pp-prefix { flex: none; font-size: 14px; color: var(--body); }
 .pl .pp-roles { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .pl .pp-err { margin-top: 6px; font-size: 12px; font-weight: 700; color: var(--jaju); }
 .pl .pp-form .row-actions { margin-top: 18px; }
 .pl .pp-form .answer[readonly] { background: color-mix(in srgb, var(--line) 50%, #fff); }
+
+.pl .pp-avail { margin-top: 6px; min-height: 18px; font-size: 12px; font-weight: 700; }
+.pl .pp-avail.available { color: var(--teal); }
+.pl .pp-avail.taken { color: var(--jaju); }
+.pl .pp-avail.error { color: var(--body); font-weight: 400; }
