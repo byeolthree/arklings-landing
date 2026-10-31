@@ -4,6 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { ROLES } from "@/lib/collab";
 import { BIO_MAX, HANDLE_MAX, normalizeHandle, validateCreatorProfile, validateHandle, type ProfileErrors, type ProfileValues } from "@/lib/creator-rules";
 
+// 프로필 칸의 제목. 칸을 감싸는 판(패널)의 맨 위 제목 자리에 부르는 쪽이 둔다.
+export const profileFormTitle = (mode: "create" | "edit") => (mode === "edit" ? "크리에이터 프로필 고치기" : "크리에이터 프로필을 만들어 주세요");
+
 export type SaveResult = { ok: true } | { ok: false; errors?: ProfileErrors; error?: string };
 // 공개 주소를 쓸 수 있는지 서버에 물어본 결과. available = 쓸 수 있음, taken = 이미 쓰는 중, error = 확인하지 못함
 export type HandleCheck = "available" | "taken" | "error";
@@ -104,7 +107,6 @@ export function PublishProfile({
 
   return (
     <form className="pp-form" onSubmit={submit} noValidate aria-label="크리에이터 프로필">
-      <h3 className="pp-title">{editing ? "크리에이터 프로필 고치기" : "먼저 크리에이터 프로필을 만들어 주세요"}</h3>
 
       {/* 칸을 접거나 숨길 수 없는 안내: 프로필이 누구에게나 보인다는 것 */}
       <p className="pp-notice" role="note">

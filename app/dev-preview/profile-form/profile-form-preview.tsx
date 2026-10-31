@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SAMPLE_CREATORS } from "@/components/creators/sample-data";
-import { PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
+import { profileFormTitle, PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
 import type { ProfileValues } from "@/lib/creator-rules";
 
 type Mode = "new" | "edit" | "taken" | "fail";
@@ -32,6 +32,7 @@ export function ProfileFormPreview({ mode }: { mode: Mode }) {
     <div className="pl">
       <div className="wrap" style={{ maxWidth: 960, margin: "0 auto", padding: "24px 16px" }}>
         <section className="panel" style={{ marginTop: 0 }}>
+          <h2>{profileFormTitle(mode === "edit" ? "edit" : "create")}</h2>
           <div className="pub-box">
             <p>
               포트폴리오 <span className="pub-state">공개하지 않음</span>
