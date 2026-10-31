@@ -6,6 +6,14 @@ import "./creators.css";
 
 const MAX_ROLES = 3;
 
+// 자주색(주 색)을 아끼려고, 프로필 원은 보조 색 네 가지를 공개 주소 글자로 정해 돌려 쓴다(같은 사람은 늘 같은 색).
+const AVATAR_TONES = ["teal", "dusty", "sage", "gold"] as const;
+function toneOf(handle: string): (typeof AVATAR_TONES)[number] {
+  let n = 0;
+  for (const ch of handle) n = (n + ch.charCodeAt(0)) % 997;
+  return AVATAR_TONES[n % AVATAR_TONES.length];
+}
+
 function rolesText(roles: CreatorCard["roles"]): string {
   const shown = roles.slice(0, MAX_ROLES).map((r) => ROLES[r]);
   const rest = roles.length - shown.length;
@@ -47,37 +55,51 @@ export function CreatorList({
       <section className="cr-list">
         <div className="wrap">
           <div className="cr-tools">
-            <form className="cr-search" role="search" method="get">
-              {Object.entries(hiddenFields).map(([k, v]) => (
-                <input key={k} type="hidden" name={k} value={v} />
-              ))}
-              {filter.role && <input type="hidden" name="role" value={filter.role} />}
-              <label htmlFor="cr-q" className="sr-only">
-                크리에이터 검색
-              </label>
-              <input
-                id="cr-q"
-                name="q"
-                type="search"
-                className="cr-input"
-                defaultValue={filter.q}
-                maxLength={MAX_QUERY}
-                placeholder="이름이나 기획안으로 찾기"
-                autoComplete="off"
-              />
-              <button type="submit" className="btn btn-primary">
-                검색
-              </button>
-            </form>
-            <div className="cr-chips" role="group" aria-label="역할로 거르기">
-              <Link href={pageHref({ q: filter.q })} className="cr-fchip" aria-current={filter.role ? undefined : "true"}>
-                전체
-              </Link>
-              {(Object.keys(ROLES) as (keyof typeof ROLES)[]).map((r) => (
-                <Link key={r} href={pageHref({ q: filter.q, role: r })} className="cr-fchip" aria-current={filter.role === r ? "true" : undefined}>
-                  {ROLES[r]}
-                </Link>
-              ))}
+            <div className="cr-toolbar">
+              <form className="cr-search" role="search" method="get">
+                {Object.entries(hiddenFields).map(([k, v]) => (
+                  <input key={k} type="hidden" name={k} value={v} />
+                ))}
+                {filter.role && <input type="hidden" name="role" value={filter.role} />}
+                <label htmlFor="cr-q" className="sr-only">
+                  크리에이터 검색
+                </label>
+                <input
+                  id="cr-q"
+                  name="q"
+                  type="search"
+                  className="cr-input"
+                  defaultValue={filter.q}
+                  maxLength={MAX_QUERY}
+                  placeholder="이름이나 기획안으로 찾기"
+                  autoComplete="off"
+                />
+                <button type="submit" className="btn btn-primary">
+                  검색
+                </button>
+              </form>
+              {/* 필터는 평소에 접혀 있다가 「필터」를 눌러야 선택지가 나온다 */}
+              <details className="cr-filter">
+                <summary className="btn btn-ghost">
+                  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 5h18M6 12h12M10 19h4" />
+                  </svg>
+                  필터{filter.role && <span className="cr-badge">1</span>}
+                </summary>
+                <div className="cr-filter-panel" role="group" aria-label="역할로 거르기">
+                  <p className="cr-filter-title">역할</p>
+                  <div className="cr-chips">
+                    <Link href={pageHref({ q: filter.q })} className="cr-fchip" aria-current={filter.role ? undefined : "true"}>
+                      전체
+                    </Link>
+                    {(Object.keys(ROLES) as (keyof typeof ROLES)[]).map((r) => (
+                      <Link key={r} href={pageHref({ q: filter.q, role: r })} className="cr-fchip" aria-current={filter.role === r ? "true" : undefined}>
+                        {ROLES[r]}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </details>
             </div>
           </div>
           {total === 0 && filtered ? (
@@ -127,7 +149,7 @@ export function CreatorList({
                   <li key={c.handle}>
                     <Link href={profileHref(c.handle)} className="panel cr-card">
                       <div className="cr-who">
-                        <span className="cr-av" aria-hidden="true">
+                        <span className={`cr-av ${toneOf(c.handle)}`} aria-hidden="true">
                           {c.name.slice(0, 1)}
                         </span>
                         <div className="cr-who-text">
