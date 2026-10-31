@@ -8,7 +8,7 @@
 - 별뜨리님 목적: **프로필을 열면 그 자리에서 작품이 보여야 한다.** 이전 계획의 「링크로 시작, 파일 올리기 없음」은 폐기. 이미지·영상·문서(PDF)를 직접 올려 프로필에서 바로 보이게 하고, 기획안(사이트 기획안 선택 + 외부 기획안 PDF)도 프로필에서 올린다. P5는 폐기, 작업물 링크는 선택 항목, 채널 링크는 연락처·활동 공간 용도로만.
 - 계획 문서에 더한 것: 0-2(개정과 D17~D23), 3-11(프로필 칸 문구 전체 표, **새 문구를 짓지 말고 별뜨리님이 정하게 한다**), 3-12(소개 칸 3개 비교와 합치기 안), 4-4(Supabase 무료 한도 1GB·월 전송량 5GB·파일 50MB 확인, 영상 선택지 A~D, 사람당 한도 제안, 보관 방식).
 - **코드는 이 개정을 별뜨리님이 승인하기 전에는 고치지 않는다.** 다음 일: D17~D23 답을 받고 → 3-11 문구로 8단계 샘플(프로필 칸) 다시 고침 → 배치도(칸 구성)를 다시 그려 승인 → 9~12단계.
-- 프로필 칸에서 맨 위 안내 두 줄과 중복된 「바꿀 수 없다」 문구 정리는 문구가 정해진 뒤에 한다(아직 코드는 그대로).
+- **5차 개정(2026-10-31):** 프로필 칸 맨 위 **안내 구역을 통째로 뺀다**(「이 프로필은 누구나 볼 수 있습니다」·「공개 주소는 나중에 바꿀 수 없습니다」, 주소 칸 옆과 고치기 모드의 「한 번 정하면 바꿀 수 없어요」 포함, 모든 판). 공개 주소를 못 바꾸는 규칙(D5)은 그대로. 이미 만든 8단계 샘플(`components/planner/publish-profile.tsx`의 안내 구역과 주소 도움말)에는 아직 남아 있고, **계획 승인 뒤에** 뺀다.
 - 마우스 올림 색 변화는 모든 화면에서 이미 제거했다(움직임·밑줄은 유지). 새 화면에도 색이 바뀌는 hover를 넣지 않는다.
 
 ## 환경
@@ -49,7 +49,7 @@
 3. 프로필 `/dev-preview/creators/<공개주소>`(`?state=many|empty`)
 4. 기획안 상세 `/dev-preview/portfolio/sample-<주소>-<순번>`(`?state=noprofile|short`)
 5. 상태 화면 `/dev-preview/states?view=...`, `app/portfolio/*`, `app/creators/*`의 error/loading/not-found(`components/creators/state-views.tsx`, `error-view.tsx`)
-6·8. 프로필 칸 `/dev-preview/profile-form?state=planner|planner-private|mypage|edit|taken|fail` (`components/planner/publish-profile.tsx`, 규칙 `lib/creator-rules.ts`). 8단계에서 첫 열기 안내 두 줄, 마이페이지판(P1·P2·P3·P6·공개 설정), 기획안 올리기판(필수 칸만)을 만듦.
+6·8. 프로필 칸 `/dev-preview/profile-form?state=planner|planner-private|mypage|edit|taken|fail` (`components/planner/publish-profile.tsx`, 규칙 `lib/creator-rules.ts`). 8단계에서 (5차 개정으로 빼기로 한 첫 열기 안내 두 줄 포함해) 마이페이지판(P1·P2·P3·P6·공개 설정), 기획안 올리기판(필수 칸만)을 만듦.
 - 실제 기획안 편집기(`components/planner/planner-editor.tsx`)에는 프로필 칸을 아직 연결하지 않았다. 승인 전에 바뀌었던 문구 두 개는 별뜨리님 지시로 `dev` 때 문구로 되돌렸고 `dev`와 차이 없음을 확인했다. 이 화면의 안내 문장은 12단계에서 프로필 칸을 연결할 때 별뜨리님과 다시 정한다.
 - D12(가) 「프로필도 공개할까요?」는 8단계로 확정(별뜨리님): `components/planner/publish-profile-choice.tsx`, 샘플 `?state=planner-private`.
 
