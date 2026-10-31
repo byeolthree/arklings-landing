@@ -35,6 +35,23 @@
 .cr .cr-desc { margin: 12px auto 0; max-width: 900px; text-align: center; font-size: 15px; }
 @media (min-width: 768px) { .cr .cr-desc { font-size: 18px; } }
 
+/* 검색바·역할 필터 (필터 칩: 테두리 #8C8C8C, 모서리 20px, 데스크톱 13px / 모바일 12px) */
+.cr .cr-tools { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; }
+.cr .cr-search { display: flex; gap: 8px; width: 100%; max-width: 520px; }
+.cr .cr-input { flex: 1; min-width: 0; height: 44px; padding: 0 18px; border: 1px solid var(--line); border-radius: 999px; background: var(--paper);
+  font: inherit; font-size: 14px; color: var(--title); }
+.cr .cr-input::placeholder { color: color-mix(in srgb, var(--body) 55%, transparent); }
+.cr .cr-input:focus { outline: none; border-color: var(--jaju); box-shadow: 0 0 0 3px color-mix(in srgb, var(--jaju) 18%, transparent); }
+.cr .cr-search .btn { min-height: 44px; flex: none; }
+.cr .cr-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.cr .cr-fchip { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border: 1px solid #8c8c8c; border-radius: 20px;
+  font-size: 12px; color: var(--body); text-decoration: none; white-space: nowrap; transition: border-color .2s, color .2s, background .2s; }
+@media (min-width: 768px) { .cr .cr-fchip { font-size: 13px; } }
+.cr .cr-fchip:hover { border-color: var(--jaju); color: var(--jaju); }
+.cr .cr-fchip[aria-current="true"] { border-color: var(--jaju); color: var(--jaju); background: var(--tint); font-weight: 700; }
+.cr .cr-clear { color: var(--jaju); text-decoration: underline; }
+@media (prefers-reduced-motion: reduce) { .cr .cr-fchip { transition: none; } }
+
 /* 카드 (랜딩 .panel) */
 .cr .panel { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 30px 60px -36px rgba(42,32,37,.35); overflow: hidden; }
 

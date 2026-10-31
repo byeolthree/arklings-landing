@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CreatorList } from "@/components/creators/creator-list";
+import { matchesFilter, parseFilter } from "@/components/creators/filter";
 import { SAMPLE_CREATORS, SAMPLE_PAGE_SIZE } from "@/components/creators/sample-data";
 
 // 디자인 확인용 샘플 미리보기. 실제 DB와 연결되지 않고, 디자인이 끝나면 지운다.
@@ -14,14 +15,19 @@ export default async function CreatorsPreviewPage({ searchParams }: { searchPara
   const state = one(sp.state); // empty = 크리에이터가 하나도 없음
   const requested = Math.max(1, parseInt(one(sp.page) ?? "1", 10) || 1);
 
-  const all = state === "empty" ? [] : SAMPLE_CREATORS;
+  const filter = parseFilter(one(sp.q), one(sp.role));
+  const all = (state === "empty" ? [] : SAMPLE_CREATORS).filter((c) => matchesFilter(c, filter));
   const total = all.length;
   const pages = Math.max(1, Math.ceil(total / SAMPLE_PAGE_SIZE));
   const from = (requested - 1) * SAMPLE_PAGE_SIZE;
   const cards = all.slice(from, from + SAMPLE_PAGE_SIZE);
 
-  const q = (extra: Record<string, string>) => {
-    const p = new URLSearchParams({ ...(state ? { state } : {}), ...extra });
+  const href = ({ page, q, role }: { page?: number; q?: string; role?: string }) => {
+    const p = new URLSearchParams();
+    if (state) p.set("state", state);
+    if (q) p.set("q", q);
+    if (role) p.set("role", role);
+    if (page && page > 1) p.set("page", String(page));
     const s = p.toString();
     return `/dev-preview/creators${s ? `?${s}` : ""}`;
   };
@@ -42,8 +48,10 @@ export default async function CreatorsPreviewPage({ searchParams }: { searchPara
         total={total}
         page={requested}
         pages={pages}
+        filter={filter}
         profileHref={(h) => `/dev-preview/creators/${h}`}
-        pageHref={(p) => q(p > 1 ? { page: String(p) } : {})}
+        pageHref={href}
+        hiddenFields={state ? { state } : {}}
       />
     </>
   );

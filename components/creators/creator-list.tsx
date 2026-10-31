@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ROLES } from "@/lib/collab";
+import { hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
 import type { CreatorCard } from "./types";
 import "./creators.css";
 
@@ -17,16 +18,23 @@ export function CreatorList({
   total,
   page,
   pages,
+  filter,
   profileHref,
   pageHref,
+  hiddenFields = {},
 }: {
   cards: CreatorCard[];
   total: number;
   page: number;
   pages: number;
+  filter: CreatorFilter;
   profileHref: (handle: string) => string;
-  pageHref: (page: number) => string;
+  // 쪽·검색어·역할을 주소로 바꿔 주는 함수(1쪽이면 page를 생략한다)
+  pageHref: (opts: { page?: number; q?: string; role?: string }) => string;
+  // 검색 폼이 함께 보내야 하는 다른 주소 값(예: 샘플 미리보기의 state)
+  hiddenFields?: Record<string, string>;
 }) {
+  const filtered = hasFilter(filter);
   return (
     <div className="cr">
       <section className="cr-top">
@@ -38,7 +46,53 @@ export function CreatorList({
 
       <section className="cr-list">
         <div className="wrap">
-          {total === 0 ? (
+          <div className="cr-tools">
+            <form className="cr-search" role="search" method="get">
+              {Object.entries(hiddenFields).map(([k, v]) => (
+                <input key={k} type="hidden" name={k} value={v} />
+              ))}
+              {filter.role && <input type="hidden" name="role" value={filter.role} />}
+              <label htmlFor="cr-q" className="sr-only">
+                크리에이터 검색
+              </label>
+              <input
+                id="cr-q"
+                name="q"
+                type="search"
+                className="cr-input"
+                defaultValue={filter.q}
+                maxLength={MAX_QUERY}
+                placeholder="이름이나 기획안으로 찾기"
+                autoComplete="off"
+              />
+              <button type="submit" className="btn btn-primary">
+                검색
+              </button>
+            </form>
+            <div className="cr-chips" role="group" aria-label="역할로 거르기">
+              <Link href={pageHref({ q: filter.q })} className="cr-fchip" aria-current={filter.role ? undefined : "true"}>
+                전체
+              </Link>
+              {(Object.keys(ROLES) as (keyof typeof ROLES)[]).map((r) => (
+                <Link key={r} href={pageHref({ q: filter.q, role: r })} className="cr-fchip" aria-current={filter.role === r ? "true" : undefined}>
+                  {ROLES[r]}
+                </Link>
+              ))}
+            </div>
+          </div>
+          {total === 0 && filtered ? (
+            <div className="panel cr-state">
+              <h2>맞는 크리에이터가 없어요</h2>
+              <p>
+                {filter.q ? `「${filter.q}」` : ""}
+                {filter.q && filter.role ? " · " : ""}
+                {filter.role ? ROLES[filter.role] : ""} 조건에 맞는 크리에이터가 아직 없어요.
+              </p>
+              <Link href={pageHref({})} className="btn btn-ghost">
+                조건 지우기
+              </Link>
+            </div>
+          ) : total === 0 ? (
             <div className="panel cr-state">
               <h2>아직 크리에이터가 없어요</h2>
               <p>기획안을 완성해 포트폴리오에 올리면 크리에이터로 여기에 보여요.</p>
@@ -50,13 +104,24 @@ export function CreatorList({
             <div className="panel cr-state">
               <h2>이 쪽에는 크리에이터가 없어요</h2>
               <p>마지막 쪽은 {pages}쪽이에요.</p>
-              <Link href={pageHref(1)} className="btn btn-ghost">
+              <Link href={pageHref({ q: filter.q, role: filter.role })} className="btn btn-ghost">
                 첫 쪽으로
               </Link>
             </div>
           ) : (
             <>
-              <p className="cr-count">총 {total}명</p>
+              <p className="cr-count">
+                {filtered ? "검색 결과" : "총"} {total}명
+                {filtered && (
+                  <>
+                    {" "}
+                    ·{" "}
+                    <Link href={pageHref({})} className="cr-clear">
+                      조건 지우기
+                    </Link>
+                  </>
+                )}
+              </p>
               <ul className="cr-grid">
                 {cards.map((c) => (
                   <li key={c.handle}>
@@ -83,7 +148,7 @@ export function CreatorList({
               {pages > 1 && (
                 <nav className="pager" aria-label="쪽 이동">
                   {page > 1 ? (
-                    <Link href={pageHref(page - 1)} className="btn btn-ghost">
+                    <Link href={pageHref({ page: page - 1, q: filter.q, role: filter.role })} className="btn btn-ghost">
                       ← 이전
                     </Link>
                   ) : (
@@ -95,7 +160,7 @@ export function CreatorList({
                     {page} / {pages}
                   </span>
                   {page < pages ? (
-                    <Link href={pageHref(page + 1)} className="btn btn-ghost">
+                    <Link href={pageHref({ page: page + 1, q: filter.q, role: filter.role })} className="btn btn-ghost">
                       다음 →
                     </Link>
                   ) : (
