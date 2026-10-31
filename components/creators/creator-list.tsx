@@ -29,16 +29,12 @@ export function CreatorList({
 }) {
   return (
     <div className="cr">
-      <section className="cr-top">
-        <div className="wrap">
-          <p className="kicker">아클링스 크리에이터</p>
-          <h1 className="cr-title">크리에이터 — 포트폴리오 탐색</h1>
-          <p className="cr-desc">크리에이터를 눌러 프로필과 공개한 기획안을 둘러보세요.</p>
-        </div>
-      </section>
-
       <section className="cr-list">
         <div className="wrap">
+          <div className="cr-head">
+            <h1 className="cr-label-top">크리에이터-포트폴리오 탐색</h1>
+            {total > 0 && <span className="cr-count">총 {total}명</span>}
+          </div>
           {total === 0 ? (
             <div className="panel cr-state">
               <h2>아직 크리에이터가 없어요</h2>
@@ -57,7 +53,6 @@ export function CreatorList({
             </div>
           ) : (
             <>
-              <p className="cr-count">총 {total}명</p>
               <ul className="cr-grid">
                 {cards.map((c) => (
                   <li key={c.handle}>
