@@ -6,6 +6,7 @@ export type CreatorCard = {
   handle: string;
   name: string; // 공개 이름
   roles: Role[];
+  bio?: string; // 크리에이터를 소개하는 한 줄 문구(선택, 200자 이내). 없으면 카드에서 줄을 숨긴다
   planCount: number; // 공개한 기획안 수(1 이상인 사람만 목록에 나온다)
   latest: { title: string; logline: string }; // 가장 최근에 공개한 기획안
 };

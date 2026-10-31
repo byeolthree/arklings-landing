@@ -2,7 +2,7 @@ import { ROLES, type Role } from "@/lib/collab";
 import type { CreatorCard } from "./types";
 
 // 크리에이터 목록의 검색·필터 값. 주소의 ?q=(검색어)와 ?role=(역할 하나)에서 읽는다.
-// 검색은 카드에 보이는 글(공개 이름, 대표 기획안 제목·한 줄 소개)에서만 찾는다.
+// 검색은 카드에 보이는 글(공개 이름, 크리에이터 한 줄 소개, 대표 기획안 제목·한 줄 소개)에서만 찾는다.
 export const MAX_QUERY = 30;
 
 export type CreatorFilter = { q: string; role?: Role };
@@ -24,5 +24,5 @@ export function matchesFilter(c: CreatorCard, f: CreatorFilter): boolean {
   if (f.role && !c.roles.includes(f.role)) return false;
   if (!f.q) return true;
   const needle = f.q.toLowerCase();
-  return [c.name, c.latest.title, c.latest.logline].some((t) => t.toLowerCase().includes(needle));
+  return [c.name, c.bio ?? "", c.latest.title, c.latest.logline].some((t) => t.toLowerCase().includes(needle));
 }

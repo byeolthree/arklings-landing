@@ -5,18 +5,10 @@ import { ROLE_TONE } from "./role-tone";
 import type { CreatorCard } from "./types";
 import "./creators.css";
 
-const MAX_ROLES = 3;
-
 // 자주색(주 색)을 아끼려고, 프로필 원은 보조 색 세 가지(청록·더스티 블루·뮤트 세이지)를 번갈아 쓴다.
 // 목록 순서대로 한 칸씩, 줄이 바뀔 때마다 한 칸 더 밀어서 옆 카드·아래 카드와 색이 겹치지 않게 한다.
 const TONES = ["teal", "dusty", "sage"] as const;
 const toneAt = (index: number) => TONES[(index + Math.floor(index / 3)) % TONES.length];
-
-function rolesText(roles: CreatorCard["roles"]): string {
-  const shown = roles.slice(0, MAX_ROLES).map((r) => ROLES[r]);
-  const rest = roles.length - shown.length;
-  return rest > 0 ? `${shown.join(" · ")} 외 ${rest}` : shown.join(" · ");
-}
 
 // 크리에이터 목록 화면. 데이터를 받기만 하고 읽지 않는다(실제 화면과 샘플 미리보기가 함께 쓴다).
 export function CreatorList({
@@ -154,7 +146,7 @@ export function CreatorList({
                         </span>
                         <div className="cr-who-text">
                           <span className="cr-name">{c.name}</span>
-                          <span className="cr-roles">{rolesText(c.roles)}</span>
+                          {c.bio && <span className="cr-bio">{c.bio}</span>}
                         </div>
                       </div>
                       <div className="cr-box">

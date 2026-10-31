@@ -94,9 +94,9 @@
 .cr .cr-av.teal { background: var(--teal); }
 .cr .cr-av.dusty { background: var(--dusty); }
 .cr .cr-av.sage { background: var(--sage); color: var(--title); }
-.cr .cr-who-text { min-width: 0; display: flex; flex-direction: column; }
+.cr .cr-who-text { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
 .cr .cr-name { font-size: 16px; font-weight: 700; color: var(--title); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cr .cr-roles { font-size: 13px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cr .cr-bio { font-size: 13px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* 대표 기획안 칸: 이미지 자리(높이 데스크톱 200 / 모바일 160). 배경은 원래대로 페이지 배경색, 외곽선은 없다 */
 .cr .cr-box { height: 160px; padding: 16px; background: var(--bg); border-radius: 12px; overflow: hidden;
@@ -108,11 +108,14 @@
 .cr .cr-box-logline { font-size: 13px; line-height: 1.7; color: var(--body);
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 @media (min-width: 768px) { .cr .cr-box-logline { -webkit-line-clamp: 4; } }
-/* 역할 태그: 같은 분야는 같은 색(청록·더스티 블루·뮤트 세이지), 글자는 모두 흰색 */
+/* 역할 태그: 역할마다 다른 색(컬러 시스템의 보조·강조·상태 색), 같은 역할은 늘 같은 색, 글자는 모두 흰색 */
 .cr .cr-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: auto 0 0; padding: 0; list-style: none; }
 .cr .cr-tag { padding: 4px 12px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 12px; font-weight: 500; line-height: 1.5; }
+.cr .cr-tag.blue { background: #2463a7; }
+.cr .cr-tag.gold { background: var(--gold); }
+.cr .cr-tag.red { background: #c83a3a; }
+.cr .cr-tag.green { background: #16794b; }
 .cr .cr-tag.dusty { background: var(--dusty); }
-.cr .cr-tag.sage { background: var(--sage); }
 
 /* 쪽 이동 */
 .cr .pager { margin-top: 40px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 14px; }
