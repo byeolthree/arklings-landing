@@ -28,12 +28,14 @@ export default async function CreatorsPreviewPage({ searchParams }: { searchPara
 
   return (
     <>
-      <div className="border-b border-[#e8dfe3] bg-[#fdf6e7] px-4 py-2 text-[12px] text-[#2a2025]">
-        <strong>샘플 미리보기</strong> · 이름과 글은 모두 가짜이고 실제 DB와 연결되지 않아요. 보기:{" "}
+      <div className="fixed bottom-4 right-4 z-50 max-w-[260px] rounded-lg border border-[#e8dfe3] bg-white/95 px-3 py-2 text-[11px] leading-snug text-[#2a2025] shadow-md">
+        <strong>미리보기 도우미</strong> (사이트에 없는 상자)
+        <br />
+        가짜 데이터예요. 보기:{" "}
         <Link href="/dev-preview/creators" className="underline">목록</Link> ·{" "}
         <Link href="/dev-preview/creators?page=2" className="underline">2쪽</Link> ·{" "}
-        <Link href="/dev-preview/creators?page=9" className="underline">쪽 번호가 너무 큼</Link> ·{" "}
-        <Link href="/dev-preview/creators?state=empty" className="underline">크리에이터 없음</Link>
+        <Link href="/dev-preview/creators?page=9" className="underline">없는 쪽</Link> ·{" "}
+        <Link href="/dev-preview/creators?state=empty" className="underline">비었을 때</Link>
       </div>
       <CreatorList
         cards={cards}
