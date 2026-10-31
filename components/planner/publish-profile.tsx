@@ -128,6 +128,8 @@ export function PublishProfile({
       const r = await onSubmit(checked.value);
       if (!r.ok) {
         if (r.errors) setErrors(r.errors);
+        // 저장하는 순간 서버가 「이미 쓰는 주소」라고 하면(동시에 같은 주소를 저장한 경우 등) 앞서 나온 「쓸 수 있는 주소예요」는 지우고 「이미 쓰는 주소」 하나만 보인다
+        if (r.errors?.handle && !editing) setAvail({ status: "taken", handle: checked.value.handle });
         if (r.error) setFormError(r.error);
       }
     } catch {
