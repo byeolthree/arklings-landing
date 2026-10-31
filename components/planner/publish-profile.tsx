@@ -24,7 +24,7 @@ export function PublishProfile({
   displayName: string;
   onSubmit: (value: ProfileValues) => Promise<SaveResult>;
   onCancel: () => void;
-  // 공개 주소 중복 확인(서버). 없으면 중복 확인 버튼과 자동 확인을 쓰지 않는다(저장할 때 서버가 마지막으로 확인한다).
+  // 공개 주소 중복 확인(서버). 있으면 저장 전에 「쓸 수 있음」으로 끝나 있어야 하고, 서버는 저장할 때 마지막으로 한 번 더 확인한다.
   checkHandle?: (handle: string) => Promise<HandleCheck>;
 }) {
   const [handle, setHandle] = useState(initial?.handle ?? "");
@@ -73,11 +73,24 @@ export function PublishProfile({
     setFormError("");
     const checked = validateCreatorProfile({ handle, roles, bio });
     if (!checked.ok) return setErrors(checked.errors);
-    if (avail.status === "taken" && avail.handle === checked.value.handle) {
-      return setErrors({ handle: "이미 쓰고 있는 공개 주소예요. 다른 주소를 적어 주세요." });
-    }
     setErrors({});
     setPending(true);
+    // 저장하기 전에 이 주소의 중복 확인이 「쓸 수 있음」으로 끝나 있어야 한다. 아직 안 했으면 지금 한다.
+    if (checkHandle && !editing && !(avail.status === "available" && avail.handle === checked.value.handle)) {
+      let result: HandleCheck;
+      try {
+        result = await checkHandle(checked.value.handle);
+      } catch {
+        result = "error";
+      }
+      setAvail({ status: result, handle: checked.value.handle });
+      if (result !== "available") {
+        setPending(false);
+        return setErrors({
+          handle: result === "taken" ? "이미 쓰고 있는 공개 주소예요. 다른 주소를 적어 주세요." : "중복 확인을 하지 못했어요. 「중복 확인」 버튼을 다시 눌러 주세요.",
+        });
+      }
+    }
     try {
       const r = await onSubmit(checked.value);
       if (!r.ok) {
@@ -134,13 +147,13 @@ export function PublishProfile({
           <p className={`pp-avail ${avail.status}`} role="status" aria-live="polite">
             {avail.status === "available" && `「${avail.handle}」은(는) 쓸 수 있는 주소예요.`}
             {avail.status === "taken" && `「${avail.handle}」은(는) 이미 쓰고 있는 주소예요. 다른 주소를 적어 주세요.`}
-            {avail.status === "error" && "지금은 이 주소가 비어 있는지 확인하지 못했어요. 그대로 저장해도 돼요. 저장할 때 다시 확인하고, 이미 쓰는 주소면 알려 드려요."}
+            {avail.status === "error" && "중복 확인을 하지 못했어요. 「중복 확인」 버튼을 다시 눌러 주세요."}
           </p>
         )}
         <p id="pp-handle-hint" className="pp-hint">
           {editing ? "공개 주소는 한 번 정하면 바꿀 수 없어요." : "영문 소문자·숫자·하이픈, 3~20자. 한 번 정하면 바꿀 수 없어요."}
         </p>
-        {errors.handle && (
+        {errors.handle && avail.status !== "taken" && avail.status !== "error" && (
           <p className="pp-err" role="alert">
             {errors.handle}
           </p>
