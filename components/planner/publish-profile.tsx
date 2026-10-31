@@ -134,7 +134,7 @@ export function PublishProfile({
           <p className={`pp-avail ${avail.status}`} role="status" aria-live="polite">
             {avail.status === "available" && `「${avail.handle}」은(는) 쓸 수 있는 주소예요.`}
             {avail.status === "taken" && `「${avail.handle}」은(는) 이미 쓰고 있는 주소예요. 다른 주소를 적어 주세요.`}
-            {avail.status === "error" && "지금은 확인하지 못했어요. 그래도 저장할 때 한 번 더 확인해요."}
+            {avail.status === "error" && "지금은 이 주소가 비어 있는지 확인하지 못했어요. 그대로 저장해도 돼요. 저장할 때 다시 확인하고, 이미 쓰는 주소면 알려 드려요."}
           </p>
         )}
         <p id="pp-handle-hint" className="pp-hint">
