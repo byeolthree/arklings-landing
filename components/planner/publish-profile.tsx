@@ -198,7 +198,13 @@ export function PublishProfile({
           </p>
         )}
         <p id="pp-handle-hint" className="pp-hint">
-          {editing ? "공개 주소는 한 번 정하면 바꿀 수 없어요." : "영문 소문자·숫자·하이픈, 3~20자. 한 번 정하면 바꿀 수 없어요."}
+          {editing ? (
+            <span style={{ color: "var(--jaju)" }}>공개 주소는 한 번 정하면 바꿀 수 없어요.</span>
+          ) : (
+            <>
+              영문 소문자·숫자·하이픈, 3~20자. <span style={{ color: "var(--jaju)" }}>한 번 정하면 바꿀 수 없어요.</span>
+            </>
+          )}
         </p>
         {errors.handle && avail.status !== "taken" && (
           <p className="pp-err" role="alert">
