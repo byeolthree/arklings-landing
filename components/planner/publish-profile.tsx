@@ -17,15 +17,14 @@ type Avail = { status: "idle" | "checking" | HandleCheck; handle: string };
 export function PublishProfile({
   mode,
   initial,
-  displayName,
   onSubmit,
   onCancel,
   checkHandle,
 }: {
   mode: "create" | "edit";
   initial?: ProfileValues;
-  displayName: string;
-  onSubmit: (value: ProfileValues) => Promise<SaveResult>;
+  // publish = 공개로 올릴지(true) 비공개로 둘지(false). 만들기 모드에서만 고른다(고치기는 항상 true).
+  onSubmit: (value: ProfileValues, publish: boolean) => Promise<SaveResult>;
   onCancel: () => void;
   // 공개 주소 중복 확인(서버). 「이미 쓰는 주소」로 나온 주소는 저장하지 않는다. 서버는 저장할 때 마지막으로 한 번 더 확인한다.
   checkHandle?: (handle: string) => Promise<HandleCheck>;
@@ -36,6 +35,7 @@ export function PublishProfile({
   const [errors, setErrors] = useState<ProfileErrors>({});
   const [formError, setFormError] = useState("");
   const [pending, setPending] = useState(false);
+  const [publish, setPublish] = useState(true);
   const editing = mode === "edit";
   const [avail, setAvail] = useState<Avail>({ status: "idle", handle: "" });
   const reqId = useRef(0);
@@ -93,7 +93,7 @@ export function PublishProfile({
       }
     }
     try {
-      const r = await onSubmit(checked.value);
+      const r = await onSubmit(checked.value, editing ? true : publish);
       if (!r.ok) {
         if (r.errors) setErrors(r.errors);
         if (r.error) setFormError(r.error);
@@ -108,11 +108,6 @@ export function PublishProfile({
   return (
     <form className="pp-form" onSubmit={submit} noValidate aria-label="크리에이터 프로필">
 
-      {/* 칸을 접거나 숨길 수 없는 안내: 프로필이 누구에게나 보인다는 것 */}
-      <p className="pp-notice" role="note">
-        이 프로필은 누구나 볼 수 있습니다
-        <span> · 공개 이름 「{displayName || "이름 없음"}」, 공개 주소, 역할, 소개가 보여요.</span>
-      </p>
 
       <div className="pp-field">
         <label htmlFor="pp-handle" className="pp-label">
@@ -206,9 +201,25 @@ export function PublishProfile({
         </p>
       )}
 
+      {!editing && (
+        <div className="pp-field">
+          <span className="pp-label" id="pp-vis-label">
+            공개 설정
+          </span>
+          <div className="pp-roles" role="radiogroup" aria-labelledby="pp-vis-label">
+            <button type="button" className="opt" role="radio" aria-checked={publish} onClick={() => setPublish(true)}>
+              공개
+            </button>
+            <button type="button" className="opt" role="radio" aria-checked={!publish} onClick={() => setPublish(false)}>
+              비공개
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="row-actions">
         <button type="submit" className="btn btn-primary sm" disabled={pending}>
-          {pending ? "저장하는 중…" : editing ? "프로필 저장" : "프로필 저장하고 올리기"}
+          {pending ? "저장하는 중…" : editing || !publish ? "프로필 저장" : "프로필 저장하고 올리기"}
         </button>
         <button type="button" className="btn btn-ghost sm" onClick={onCancel} disabled={pending}>
           취소

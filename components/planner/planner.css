@@ -67,7 +67,7 @@
 .pl .opts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .pl .opt { min-height: 38px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; font: inherit; font-size: 14px; font-weight: 500; color: var(--title); cursor: pointer; transition: border-color .25s, background .25s, color .25s, transform .25s var(--ease); }
 .pl .opt:hover { border-color: var(--teal); transform: translateY(-2px); }
-.pl .opt[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #fff; }
+.pl .opt[aria-pressed="true"], .pl .opt[aria-checked="true"] { background: var(--teal); border-color: var(--teal); color: #fff; }
 .pl .answer { display: block; width: 100%; margin-top: 14px; min-height: 96px; resize: vertical; padding: 14px 16px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--bg); font: inherit; font-size: 14px; line-height: 1.7; color: var(--title); }
 .pl .answer:focus { outline: none; border-color: var(--teal); background: #fff; }
 .pl input.title-in { min-height: 48px; resize: none; padding: 0 16px; }
