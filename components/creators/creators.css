@@ -94,13 +94,12 @@
 .cr .cr-av.teal { background: var(--teal); }
 .cr .cr-av.dusty { background: var(--dusty); }
 .cr .cr-av.sage { background: var(--sage); color: var(--title); }
-.cr .cr-av.gold { background: var(--gold); color: var(--title); }
 .cr .cr-who-text { min-width: 0; display: flex; flex-direction: column; }
 .cr .cr-name { font-size: 16px; font-weight: 700; color: var(--title); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cr .cr-roles { font-size: 13px; color: var(--body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* 대표 기획안 칸: 이미지 자리(높이 데스크톱 200 / 모바일 160). 외곽선 없이 옅은 청록 면으로 구분한다 */
-.cr .cr-box { height: 160px; padding: 16px; background: color-mix(in srgb, var(--teal) 7%, #fff); border-radius: 12px; overflow: hidden;
+/* 대표 기획안 칸: 이미지 자리(높이 데스크톱 200 / 모바일 160). 배경은 원래대로 페이지 배경색, 외곽선은 없다 */
+.cr .cr-box { height: 160px; padding: 16px; background: var(--bg); border-radius: 12px; overflow: hidden;
   display: flex; flex-direction: column; gap: 6px; }
 @media (min-width: 768px) { .cr .cr-box { height: 200px; } }
 .cr .cr-label { font-size: 12px; font-weight: 700; color: var(--teal); letter-spacing: .04em; }
@@ -110,6 +109,8 @@
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 @media (min-width: 768px) { .cr .cr-box-logline { -webkit-line-clamp: 4; } }
 .cr .cr-chip { align-self: flex-start; margin-top: auto; padding: 4px 12px; border-radius: 999px; background: var(--teal); color: #fff; font-size: 12px; font-weight: 500; }
+.cr .cr-chip.dusty { background: var(--dusty); }
+.cr .cr-chip.sage { background: var(--sage); color: var(--title); }
 
 /* 쪽 이동 */
 .cr .pager { margin-top: 40px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 14px; }

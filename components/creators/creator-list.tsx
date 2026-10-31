@@ -6,13 +6,11 @@ import "./creators.css";
 
 const MAX_ROLES = 3;
 
-// 자주색(주 색)을 아끼려고, 프로필 원은 보조 색 네 가지를 공개 주소 글자로 정해 돌려 쓴다(같은 사람은 늘 같은 색).
-const AVATAR_TONES = ["teal", "dusty", "sage", "gold"] as const;
-function toneOf(handle: string): (typeof AVATAR_TONES)[number] {
-  let n = 0;
-  for (const ch of handle) n = (n + ch.charCodeAt(0)) % 997;
-  return AVATAR_TONES[n % AVATAR_TONES.length];
-}
+// 자주색(주 색)을 아끼려고, 프로필 원과 「기획안 N건」 태그는 보조 색 세 가지(청록·더스티 블루·뮤트 세이지)를 번갈아 쓴다.
+// 목록 순서대로 한 칸씩, 줄이 바뀔 때마다 한 칸 더 밀어서 옆 카드·아래 카드와 색이 겹치지 않게 한다. 태그는 같은 카드의 원과 다른 색이다.
+const TONES = ["teal", "dusty", "sage"] as const;
+const toneAt = (index: number) => TONES[(index + Math.floor(index / 3)) % TONES.length];
+const nextTone = (tone: (typeof TONES)[number]) => TONES[(TONES.indexOf(tone) + 1) % TONES.length];
 
 function rolesText(roles: CreatorCard["roles"]): string {
   const shown = roles.slice(0, MAX_ROLES).map((r) => ROLES[r]);
@@ -145,11 +143,13 @@ export function CreatorList({
                 )}
               </p>
               <ul className="cr-grid">
-                {cards.map((c) => (
+                {cards.map((c, i) => {
+                  const tone = toneAt(i);
+                  return (
                   <li key={c.handle}>
                     <Link href={profileHref(c.handle)} className="panel cr-card">
                       <div className="cr-who">
-                        <span className={`cr-av ${toneOf(c.handle)}`} aria-hidden="true">
+                        <span className={`cr-av ${tone}`} aria-hidden="true">
                           {c.name.slice(0, 1)}
                         </span>
                         <div className="cr-who-text">
@@ -162,10 +162,11 @@ export function CreatorList({
                         <h3 className="cr-box-title">{c.latest.title}</h3>
                         <p className="cr-box-logline">{c.latest.logline}</p>
                       </div>
-                      <span className="cr-chip">기획안 {c.planCount}건</span>
+                      <span className={`cr-chip ${nextTone(tone)}`}>기획안 {c.planCount}건</span>
                     </Link>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
               {pages > 1 && (
                 <nav className="pager" aria-label="쪽 이동">
