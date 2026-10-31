@@ -61,7 +61,7 @@ export default async function LinkSocialPage() {
               이어 주지 않기
             </button>
           </form>
-          <Link href="/mypage" className="text-center text-[12px] text-[#6f6469] hover:text-jaju">
+          <Link href="/mypage" className="text-center text-[12px] text-[#6f6469]">
             나중에 하기
           </Link>
         </div>

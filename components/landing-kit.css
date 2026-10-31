@@ -38,7 +38,7 @@
 .lk-btn-primary:hover::after { transform: translateX(120%); }
 .lk-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(166,30,92,.65); }
 .lk-btn-ghost { background: transparent; color: var(--jaju); }
-.lk-btn-ghost:hover { background: var(--jaju); color: #fff; transform: translateY(-2px); }
+.lk-btn-ghost:hover { transform: translateY(-2px); }
 .lk-btn:focus-visible, .lk-header a:focus-visible, .lk-header button:focus-visible, .lk-footer a:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 
 /* ---------- 상단 메뉴 (랜딩 header.site) ---------- */
@@ -53,11 +53,10 @@
 .lk-nav-links { display: none; gap: 22px; font-size: 15px; }
 .lk-nav-links span { color: var(--body); }
 .lk-nav-links a { color: var(--body); text-decoration: none; transition: color .2s; }
-.lk-nav-links a:hover, .lk-nav-links a[aria-current="page"] { color: var(--title); }
+.lk-nav-links a[aria-current="page"] { color: var(--title); }
 .lk-nav-links a[aria-current="page"] { font-weight: 700; }
 .lk-nav-right { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: 15px; }
 .lk-nav-right .lk-textlink { display: none; color: var(--body); background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-decoration: none; }
-.lk-nav-right .lk-textlink:hover { color: var(--jaju); }
 .lk-nav .lk-btn { min-height: 36px; padding: 0 16px; font-size: 13px; }
 @media (min-width: 768px) { .lk-logo { font-size: 24px; } }
 @media (min-width: 900px) { .lk-nav-links, .lk-nav-right .lk-textlink { display: flex; } }

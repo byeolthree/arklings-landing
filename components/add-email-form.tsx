@@ -28,7 +28,7 @@ export function AddEmailForm({ returnTo, providerLabel }: { returnTo: string; pr
               {pending ? "보내는 중…" : "확인 메일 다시 보내기"}
             </button>
           </form>
-          <Link href={`/auth/add-email?next=${encodeURIComponent(returnTo)}`} className="text-center text-[12px] text-[#6f6469] hover:text-jaju">
+          <Link href={`/auth/add-email?next=${encodeURIComponent(returnTo)}`} className="text-center text-[12px] text-[#6f6469]">
             다른 이메일 주소로 다시 입력하기
           </Link>
         </div>

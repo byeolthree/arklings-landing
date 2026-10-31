@@ -23,7 +23,7 @@
 .pf .btn-primary { background: var(--jaju); color: #fff; box-shadow: 0 8px 24px -10px rgba(166,30,92,.55); }
 .pf .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(166,30,92,.65); }
 .pf .btn-ghost { background: transparent; color: var(--jaju); }
-.pf .btn-ghost:hover { background: var(--jaju); color: #fff; transform: translateY(-2px); }
+.pf .btn-ghost:hover { transform: translateY(-2px); }
 .pf .btn[aria-disabled="true"] { opacity: .45; pointer-events: none; box-shadow: none; }
 .pf .btn .arrow { transition: transform .35s var(--ease); }
 .pf .btn:hover .arrow { transform: translateX(4px); }
@@ -50,7 +50,7 @@
 .pf .pf-card { display: flex; flex-direction: column; height: 100%; padding: 22px 22px 18px; text-decoration: none; color: inherit;
   transition: transform .45s var(--ease), box-shadow .45s var(--ease), border-color .3s; }
 @media (min-width: 768px) { .pf .pf-card { padding: 28px 28px 22px; } }
-.pf .pf-card:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--jaju) 30%, var(--line)); box-shadow: 0 36px 60px -34px rgba(42,32,37,.45); }
+.pf .pf-card:hover { transform: translateY(-4px); box-shadow: 0 36px 60px -34px rgba(42,32,37,.45); }
 .pf .pf-label { display: inline-flex; width: fit-content; font-size: 12px; font-weight: 700; color: var(--teal); letter-spacing: .04em; }
 .pf .pf-card-title { margin-top: 8px; font-family: var(--font-noto-serif), serif; font-size: 18px; line-height: 1.35; font-weight: 700; }
 @media (min-width: 768px) { .pf .pf-card-title { font-size: 20px; } }

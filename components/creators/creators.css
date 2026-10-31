@@ -26,7 +26,7 @@
 .cr .btn-primary { background: var(--jaju); color: #fff; box-shadow: 0 8px 24px -10px rgba(166,30,92,.55); }
 .cr .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(166,30,92,.65); }
 .cr .btn-ghost { background: transparent; color: var(--teal); border-color: var(--teal); }
-.cr .btn-ghost:hover { background: var(--teal); color: #fff; transform: translateY(-2px); }
+.cr .btn-ghost:hover { transform: translateY(-2px); }
 .cr .btn .arrow { transition: transform .35s var(--ease); }
 .cr .btn:hover .arrow { transform: translateX(4px); }
 
@@ -69,7 +69,7 @@
 .cr .cr-filter > summary { list-style: none; min-height: 44px; padding: 0 16px; background: var(--paper); color: var(--jaju); border-color: var(--jaju); }
 .cr .cr-filter > summary::-webkit-details-marker { display: none; }
 /* 마우스를 올려도, 펼쳐도 색은 그대로(움직임만) */
-.cr .cr-filter > summary:hover, .cr .cr-filter[open] > summary { background: var(--paper); color: var(--jaju); border-color: var(--jaju); }
+.cr .cr-filter[open] > summary { background: var(--paper); color: var(--jaju); border-color: var(--jaju); }
 .cr .cr-badge { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--jaju); color: #fff; font-size: 11px; line-height: 1; }
 .cr .cr-filter-panel { position: absolute; z-index: 20; top: calc(100% + 8px); left: 0; right: 0; padding: 16px 18px; background: var(--paper); border-radius: 16px;
   box-shadow: 0 24px 48px -20px rgba(42,32,37,.45), 0 2px 8px rgba(42,32,37,.08); }
@@ -80,7 +80,6 @@
 .cr .cr-fchip { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border: 1px solid #8c8c8c; border-radius: 20px;
   font-size: 12px; color: var(--body); text-decoration: none; white-space: nowrap; transition: border-color .2s, color .2s, background .2s; }
 @media (min-width: 768px) { .cr .cr-fchip { font-size: 13px; } }
-.cr .cr-fchip:hover { border-color: var(--teal); color: var(--teal); }
 .cr .cr-fchip[aria-current="true"] { border-color: var(--teal); color: #fff; background: var(--teal); font-weight: 700; }
 .cr .cr-clear { color: var(--teal); text-decoration: underline; }
 

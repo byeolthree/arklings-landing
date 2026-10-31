@@ -21,7 +21,7 @@
 .pl .btn-primary { background: var(--jaju); color: #fff; box-shadow: 0 8px 24px -10px rgba(166,30,92,.55); }
 .pl .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(166,30,92,.65); }
 .pl .btn-ghost { background: transparent; color: var(--jaju); }
-.pl .btn-ghost:hover { background: var(--jaju); color: #fff; transform: translateY(-2px); }
+.pl .btn-ghost:hover { transform: translateY(-2px); }
 .pl .btn.sm { min-height: 34px; padding: 0 14px; font-size: 13px; }
 .pl .btn[disabled] { opacity: .45; pointer-events: none; }
 .pl .btn:focus-visible, .pl button:focus-visible, .pl a:focus-visible, .pl textarea:focus-visible, .pl input:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
@@ -66,7 +66,7 @@
 .pl .qitem .hint { margin-top: 4px; font-size: 13px; }
 .pl .opts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .pl .opt { min-height: 38px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; font: inherit; font-size: 14px; font-weight: 500; color: var(--title); cursor: pointer; transition: border-color .25s, background .25s, color .25s, transform .25s var(--ease); }
-.pl .opt:hover { border-color: var(--teal); transform: translateY(-2px); }
+.pl .opt:hover { transform: translateY(-2px); }
 .pl .opt[aria-pressed="true"], .pl .opt[aria-checked="true"] { background: var(--teal); border-color: var(--teal); color: #fff; }
 .pl .answer { display: block; width: 100%; margin-top: 14px; min-height: 96px; resize: vertical; padding: 14px 16px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--bg); font: inherit; font-size: 14px; line-height: 1.7; color: var(--title); }
 .pl .answer:focus { outline: none; border-color: var(--teal); background: #fff; }

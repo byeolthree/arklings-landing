@@ -42,7 +42,7 @@ export function WithdrawForm() {
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex items-center justify-center rounded-lg bg-[#c83a3a] px-5 py-3 text-[14px] font-bold text-white hover:opacity-90 disabled:opacity-60"
+        className="inline-flex items-center justify-center rounded-lg bg-[#c83a3a] px-5 py-3 text-[14px] font-bold text-white disabled:opacity-60"
       >
         {pending ? "처리 중…" : "회원 탈퇴하기"}
       </button>

@@ -217,7 +217,7 @@ export function CollabForm({ action, works, initial, cancelHref, plan }: Props) 
         <button type="submit" disabled={pending} className={`${primaryBtn} w-full`}>
           {pending ? "저장 중…" : editing ? "수정 저장" : "신청서 보내기"}
         </button>
-        <Link href={cancelHref} className="-mt-3 text-center text-[12px] text-[#6f6469] hover:text-jaju md:-mt-4">
+        <Link href={cancelHref} className="-mt-3 text-center text-[12px] text-[#6f6469] md:-mt-4">
           취소
         </Link>
       </form>
