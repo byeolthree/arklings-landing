@@ -1,6 +1,7 @@
 // 디자인 확인용 샘플 데이터(/dev-preview/creators). 이름·글은 모두 가짜이며 실제 DB와 연결되지 않는다.
 // 디자인 작업이 끝나 실제 읽기(lib/creators.ts)로 바꾸면 이 파일과 /dev-preview 주소는 지운다.
-import type { CreatorCard, CreatorProfileData, PlanCard } from "./types";
+import { SLOT_LABELS } from "@/lib/plans";
+import type { CreatorCard, CreatorProfileData, PlanCard, PlanDetailData } from "./types";
 
 export const SAMPLE_CREATORS: CreatorCard[] = [
   { handle: "jian-lee", name: "이지안", roles: ["script"], bio: "사라지는 기억과 기록하는 사람을 쓰는 대본 작가예요.", planCount: 3, latest: { title: "소금비 내리는 나라", logline: "소금비가 내리는 날마다 한 사람의 기억이 사라지는 나라에서, 기억을 기록하는 서기가 왕의 기억만 지워지지 않는 이유를 쫓는다." } },
@@ -50,4 +51,34 @@ export function samplePlansOf(c: CreatorCard): PlanCard[] {
 
 export function sampleProfileOf(c: CreatorCard): CreatorProfileData {
   return { handle: c.handle, name: c.name, roles: c.roles, bio: c.bio };
+}
+
+const SAMPLE_ANSWERS = [
+  "해마다 첫눈이 오는 밤, 마을의 우물이 거꾸로 차오른다.",
+  "우물 곁을 지키는 열네 살 물지기 소녀.",
+  "마을 사람들은 우물이 거꾸로 차오르는 일을 입에 올리지 못한다.",
+  "차오른 물이 마을을 덮기 전에 우물의 처음 주인을 찾는다.",
+  "처음 주인을 찾으면 마을에서 가장 오래된 약속이 깨진다.",
+];
+
+// 샘플 기획안 번호(sample-<공개주소>-<순번>)로 상세 화면 값을 만든다. 없는 번호는 null.
+export function sampleDetailOf(id: string): PlanDetailData | null {
+  const m = /^sample-(.+)-(\d+)$/.exec(id);
+  if (!m) return null;
+  const creator = SAMPLE_CREATORS.find((c) => c.handle === m[1]);
+  if (!creator) return null;
+  const plan = samplePlansOf(creator).find((p) => p.id === id);
+  if (!plan) return null;
+  return {
+    id,
+    title: plan.title,
+    authorName: creator.name,
+    authorHandle: creator.handle,
+    authorRoles: creator.roles,
+    publishedAt: plan.publishedAt,
+    content: {
+      sections: [{ id: "logline", label: "로그라인", text: plan.logline }],
+      answers: SLOT_LABELS.map((label, k) => ({ label, text: SAMPLE_ANSWERS[k] })),
+    },
+  };
 }
