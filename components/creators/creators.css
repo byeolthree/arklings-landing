@@ -7,18 +7,7 @@
   --ease: cubic-bezier(.2, .8, .2, 1);
   position: relative; isolation: isolate; overflow: hidden;
   flex: 1; color: var(--body); font-size: 14px; line-height: 1.6; word-break: keep-all; overflow-wrap: break-word;
-  background: linear-gradient(180deg, var(--bg) 0, var(--tint) 360px, var(--tint) 100%);
-}
-/* 배경 번짐: 랜딩 히어로의 먹물 번짐 느낌을 보조 색 네 가지의 옅은 얼룩으로 깐다(그림 파일 없이 CSS만) */
-.cr::before {
-  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background:
-    radial-gradient(640px 460px at 4% 150px, rgba(31,90,102,.28), transparent 70%),
-    radial-gradient(680px 500px at 98% 90px, rgba(95,124,153,.30), transparent 70%),
-    radial-gradient(760px 560px at 74% 1000px, rgba(111,138,122,.26), transparent 70%),
-    radial-gradient(640px 500px at 2% 1500px, rgba(216,154,36,.22), transparent 70%),
-    radial-gradient(680px 500px at 94% 1950px, rgba(31,90,102,.22), transparent 70%);
-  background-repeat: no-repeat;
+  background: var(--bg);
 }
 .cr h1, .cr h2, .cr h3 { color: var(--title); margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
 .cr p { margin: 0; text-wrap: pretty; }
@@ -42,10 +31,10 @@
 .cr .btn:hover .arrow { transform: translateX(4px); }
 
 /* 상단 띠 (랜딩 히어로 배경 + 옅은 점 무늬) */
-.cr .cr-top { position: relative; background: linear-gradient(180deg, var(--hero-bg), transparent); padding: 48px 0 32px; }
+.cr .cr-top { position: relative; background: linear-gradient(180deg, var(--hero-bg), var(--bg)); padding: 48px 0 32px; }
 .cr .cr-top::before {
   content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background-image: radial-gradient(circle, rgba(42,32,37,.22) 1px, transparent 1.8px);
+  background-image: radial-gradient(circle, rgba(42,32,37,.12) 1px, transparent 1.6px);
   background-size: 22px 22px;
   -webkit-mask-image: linear-gradient(180deg, #000, transparent 90%); mask-image: linear-gradient(180deg, #000, transparent 90%);
 }
