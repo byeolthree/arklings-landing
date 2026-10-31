@@ -141,7 +141,8 @@ export function PublishProfile({
             </button>
           )}
         </div>
-        {checkHandle && !editing && (
+        {/* 결과가 있을 때만 줄을 만든다(없으면 아래 안내 문구가 바로 위로 붙는다) */}
+        {checkHandle && !editing && (avail.status === "available" || avail.status === "taken") && (
           <p className={`pp-avail ${avail.status}`} role="status" aria-live="polite">
             {avail.status === "available" && `「${avail.handle}」은(는) 쓸 수 있는 주소예요.`}
             {avail.status === "taken" && `「${avail.handle}」은(는) 이미 쓰고 있는 주소예요. 다른 주소를 적어 주세요.`}

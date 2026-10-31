@@ -141,7 +141,6 @@
 .pl .pp-form .row-actions { margin-top: 18px; }
 .pl .pp-form .answer[readonly] { background: color-mix(in srgb, var(--line) 50%, #fff); }
 
-.pl .pp-avail { margin-top: 6px; min-height: 18px; font-size: 12px; font-weight: 700; }
+.pl .pp-avail { margin-top: 6px; font-size: 12px; font-weight: 700; }
 .pl .pp-avail.available { color: var(--teal); }
 .pl .pp-avail.taken { color: var(--jaju); }
-.pl .pp-avail.error { color: var(--body); font-weight: 400; }
