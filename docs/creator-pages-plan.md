@@ -176,6 +176,13 @@
 
 나눔점은 랜딩과 같은 768 / 1024. 한 화면을 만들 때마다 1440과 375를 모두 보여 준다.
 
+## 3-7. 상태 화면 (5단계에서 만든 모양)
+
+- 공용 부품: `components/creators/state-views.tsx`(404, 불러오는 중), `components/creators/error-view.tsx`(오류, 「다시 시도」). 외곽선 없는 흰 카드에 제목·한 줄 설명·버튼. 오류·404에는 무슨 일인지 알려 주는 제목을 두고, 불러오는 중 화면에는 제목을 두지 않는다(실제 화면과 같은 카드 모양의 옅은 막대).
+- 적용: `app/portfolio/{error,loading,not-found}.tsx`, `app/portfolio/[id]/loading.tsx`(기획안 상세 불러오는 중)를 새 부품으로 바꿨다. `app/creators/{error,loading,not-found}.tsx`, `app/creators/[handle]/loading.tsx`는 7단계에 실제 화면이 연결될 때 쓰이도록 미리 만들었다.
+- 404 문구: 크리에이터 「찾을 수 없는 크리에이터예요」, 기획안 「찾을 수 없는 기획안이에요」(둘 다 「크리에이터 둘러보기」→`/creators`). 오류 문구: 「포트폴리오를 불러오지 못했어요」(`/portfolio`), 「크리에이터를 불러오지 못했어요」(`/creators`).
+- 샘플 미리보기: `/dev-preview/states?view=list-loading|profile-loading|detail-loading|error|creator-404|plan-404`.
+
 ## 4. 데이터·백엔드 (크리에이터 데이터에 한해)
 
 **실행은 하지 않는다.** `supabase/migrations/0008_creators.sql` 파일만 만든다. 순서는 0001~0007과 같다: `main`에 새 코드를 올린 뒤 별뜨리님이 SQL Editor에서 0007 다음에 0008을 실행한다. 여러 번 실행해도 안전하게 쓴다(`if not exists`, `create or replace`).

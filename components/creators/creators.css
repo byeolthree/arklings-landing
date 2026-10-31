@@ -176,5 +176,19 @@
 @media (min-width: 768px) { .cr .cr-state { padding: 72px 40px; } .cr .cr-state h2 { font-size: 20px; } }
 .cr .cr-state p { margin-top: 8px; font-size: 14px; }
 .cr .cr-state .btn { margin-top: 24px; }
+.cr .cr-state h1 { font-size: 18px; }
+@media (min-width: 768px) { .cr .cr-state h1 { font-size: 20px; } }
+.cr .cr-state-wrap { padding-top: 24px; max-width: 1040px; }
+@media (min-width: 768px) { .cr .cr-state-wrap { padding-top: 48px; } }
+
+/* 불러오는 중: 카드 모양을 흉내 낸 옅은 막대(제목 없음) */
+.cr .skel { background: var(--line); border-radius: 8px; animation: cr-pulse 1.4s ease-in-out infinite; }
+@keyframes cr-pulse { 50% { opacity: .45; } }
+.cr .cr-skel-av { flex: none; width: 44px; height: 44px; border-radius: 50%; }
+.cr .cr-skel-av-lg { width: 64px; height: 64px; }
+@media (min-width: 768px) { .cr .cr-skel-av-lg { width: 96px; height: 96px; } }
+.cr .cr-skel-box { height: 160px; border-radius: 12px; }
+@media (min-width: 768px) { .cr .cr-skel-box { height: 200px; } }
+@media (prefers-reduced-motion: reduce) { .cr .skel { animation: none; } }
 
 @media (prefers-reduced-motion: reduce) { .cr .btn, .cr .cr-card, .cr .cr-plan, .cr .cr-fchip { transition: none; } }
