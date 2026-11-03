@@ -31,6 +31,7 @@ export default async function WorkDetailPreviewPage({ params, searchParams }: Pr
     roles: plan.authorRoles ?? [],
     genres: card?.latest.genres ?? [],
     logline: plan.content.sections[0]?.text ?? "",
+    plan: state === "noplan" ? undefined : plan.content.answers,
   };
 
   const plans = hasProfile ? samplePlansOf(card).slice(0, SAMPLE_PROFILE_PAGE_SIZE) : [];
@@ -41,6 +42,7 @@ export default async function WorkDetailPreviewPage({ params, searchParams }: Pr
         <br />
         가짜 데이터예요. 보기:{" "}
         <Link href={base} className="underline">기본</Link> ·{" "}
+        <Link href={`${base}?state=noplan`} className="underline">기획안 없는 작품</Link> ·{" "}
         <Link href={`${base}?state=noprofile`} className="underline">프로필 없는 작성자</Link>
       </div>
       {hasProfile && (

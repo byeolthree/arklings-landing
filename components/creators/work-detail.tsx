@@ -12,9 +12,10 @@ export type WorkDetailData = {
   roles: Role[];
   genres: string[];
   logline: string;
+  plan?: { label: string; text: string }[]; // 사이트 기획안 요소(사건·주인공·장애물·목표·위험). 없으면 요소가 없다
 };
 
-// 작품 상세 창: 마이페이지 「포트폴리오 등록」의 펼친 작품 카드와 같은 모양이고 편집용 버튼(↑↓·지우기·손잡이·토글·저장·취소·+ 추가)만 없다. 사이트 기획안 요소는 두지 않는다(로그라인이 다섯 칸을 한 문장으로 엮은 것이므로, 별뜨리님 2026-11-04).
+// 작품 상세 창: 마이페이지 「포트폴리오 등록」의 펼친 작품 카드와 같은 모양이고 편집용 버튼(↑↓·지우기·손잡이·토글·저장·취소·+ 추가)만 없다.
 // 프로필 화면 위에서 열린다(D28). 요소 순서는 등록한 사람이 정한 순서이고 접힌 곳 없이 모두 펼쳐 보인다.
 // 샘플 미리보기에서는 글·이미지·영상·문서 요소를 자리 표시로 둔다.
 export function WorkDetail({ work, closeHref, applyHref }: { work: WorkDetailData; closeHref: string; applyHref: string }) {
@@ -47,6 +48,12 @@ export function WorkDetail({ work, closeHref, applyHref }: { work: WorkDetailDat
           <p>{work.logline}</p>
         </div>
 
+        {work.plan && (
+          <div className="cr-w-el">
+            <b>사이트 기획안</b>
+            <p>{work.plan.map((s) => `${s.label} ${s.text}`).join(" · ")}</p>
+          </div>
+        )}
         <div className="cr-w-el">
           <p className="cr-w-text">〈글〉</p>
         </div>
