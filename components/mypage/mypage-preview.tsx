@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { SAMPLE_CREATORS } from "@/components/creators/sample-data";
 import { PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
 import { ROLES } from "@/lib/collab";
+import { WorkEditor } from "@/components/mypage/work-editor";
 import type { ProfileValues } from "@/lib/creator-rules";
 
 export type ProfileState = "none" | "public" | "private";
@@ -73,6 +74,8 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
   const [active, setActive] = useState<string>("mp-basic");
   const [saved, setSaved] = useState(false);
   const [showPending, setShowPending] = useState(pending);
+  const [openWork, setOpenWork] = useState<[boolean, boolean]>([true, true]);
+  const setWork = (i: 0 | 1, v: boolean) => setOpenWork((cur) => (i === 0 ? [v, cur[1]] : [cur[0], v]));
   const banner = msg ? MESSAGES[msg] : undefined;
   const exists = profile !== "none";
   const isPublic = profile === "public";
@@ -267,6 +270,9 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
             </div>
 
             <div className="mp-works">
+              {openWork[0] ? (
+                <WorkEditor isPublic={true} withPlan={true} roles={["video", "script"]} onFold={() => setWork(0, false)} />
+              ) : (
               <div className="mp-work">
                 <div className="mp-thumb">대표 이미지</div>
                 <div className="mp-work-main">
@@ -285,11 +291,15 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
                   <button type="button" className="btn btn-ghost">
                     포트폴리오에서 내리기
                   </button>
-                  <button type="button" className="btn btn-ghost" aria-disabled="true">
+                  <button type="button" className="btn btn-ghost" onClick={() => setWork(0, true)}>
                     펼쳐서 꾸미기 ▾
                   </button>
                 </div>
               </div>
+              )}
+              {openWork[1] ? (
+                <WorkEditor isPublic={false} withPlan={false} roles={["art_director"]} onFold={() => setWork(1, false)} />
+              ) : (
               <div className="mp-work">
                 <div className="mp-thumb">대표 이미지</div>
                 <div className="mp-work-main">
@@ -306,11 +316,12 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
                   <button type="button" className="btn btn-ghost">
                     포트폴리오에 올리기
                   </button>
-                  <button type="button" className="btn btn-ghost" aria-disabled="true">
+                  <button type="button" className="btn btn-ghost" onClick={() => setWork(1, true)}>
                     펼쳐서 꾸미기 ▾
                   </button>
                 </div>
               </div>
+              )}
             </div>
           </Section>
       </div>

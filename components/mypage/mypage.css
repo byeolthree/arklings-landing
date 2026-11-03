@@ -129,4 +129,46 @@
 .mp .mp-genres { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .mp .mp-work-btns { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 20px 20px; }
 
+/* 펼친 작품 카드 */
+.mp .mp-work.we { grid-column: 1 / -1; padding: 20px; gap: 0; overflow: visible; }
+.mp .we-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.mp .we-state { font-size: 13px; color: var(--body); }
+.mp .we-close { margin-left: auto; }
+.mp .we-head { margin-top: 20px; }
+.mp .we-title { width: 100%; border: 0; border-bottom: 1px solid var(--line); background: transparent; padding: 6px 0; font: inherit; font-size: 22px; font-weight: 700; color: var(--title); }
+.mp .we-title::placeholder, .mp .we-text::placeholder { color: color-mix(in srgb, var(--body) 50%, #fff); font-weight: 400; }
+.mp .we-by { margin-top: 6px; font-size: 13px; color: var(--body); }
+.mp .we-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; }
+.mp .we-pick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.mp .we-pick .opt { padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--body); font: inherit; font-size: 13px; cursor: pointer; }
+.mp .we-pick .opt[aria-pressed="true"] { background: var(--body); border-color: var(--body); color: #fff; }
+.mp .we-logline { margin-top: 20px; }
+.mp .we-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: var(--title); }
+.mp .we-text { width: 100%; resize: vertical; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); padding: 12px 14px; font: inherit; font-size: 14px; line-height: 1.6; color: var(--title); }
+.mp .we-body { margin-top: 12px; }
+.mp .we-gap { height: 16px; display: flex; justify-content: center; align-items: center; }
+.mp .we-gap .we-mini { opacity: 0; }
+.mp .we-gap:hover .we-mini, .mp .we-gap:focus-within .we-mini { opacity: 1; }
+.mp .we-mini { min-width: 28px; height: 28px; padding: 0 8px; border: 1px solid var(--body); border-radius: 999px; background: #fff; color: var(--body); font: inherit; font-size: 12px; cursor: pointer; }
+.mp .we-mini:disabled { opacity: .35; cursor: default; }
+.mp .we-el { position: relative; display: flex; gap: 10px; align-items: flex-start; padding: 10px; border: 1px solid transparent; border-radius: 14px; }
+.mp .we-el:hover, .mp .we-el:focus-within { border-color: var(--line); background: var(--bg); }
+.mp .we-grip { color: var(--body); cursor: grab; line-height: 1.6; user-select: none; }
+.mp .we-main { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.mp .we-main > .we-media, .mp .we-main > .we-text, .mp .we-main > .we-plan { flex: 1 1 100%; }
+.mp .we-tools { display: flex; gap: 6px; opacity: 0; }
+.mp .we-el:hover .we-tools, .mp .we-el:focus-within .we-tools { opacity: 1; }
+.mp .we-fold { flex: none; border: 0; background: none; padding: 0; font: inherit; font-size: 13px; color: var(--body); cursor: pointer; }
+.mp .we-line { font-size: 14px; color: var(--title); }
+.mp .we-media { aspect-ratio: 16 / 9; border-radius: 14px; background: var(--bg); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--body); }
+.mp .we-media.doc { aspect-ratio: 4 / 3; max-height: 260px; }
+.mp .we-plan { display: grid; gap: 4px; font-size: 14px; color: var(--body); }
+.mp .we-plan b { color: var(--title); }
+.mp .we-edit { opacity: 0; font-size: 13px; color: var(--body); text-decoration: underline; }
+.mp .we-el:hover .we-edit, .mp .we-el:focus-within .we-edit { opacity: 1; }
+.mp .we-add { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--body); }
+.mp .we-foot { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
+.mp .we-del { margin-left: auto; }
+@media (max-width: 767px) { .mp .we-el { flex-wrap: wrap; } .mp .we-tools { flex: 1 1 100%; padding-left: 24px; } .mp .we-del { margin-left: 0; } .mp .we-tools { opacity: 1; } .mp .we-gap .we-mini { opacity: 1; } }
+
 @media (prefers-reduced-motion: reduce) { .mp *, .mp *::before, .mp *::after { transition: none !important; animation: none !important; } }
