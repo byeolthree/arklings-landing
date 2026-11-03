@@ -1,10 +1,10 @@
 /* 마이페이지 세 구역(샘플). 배치도 I를 따르고 값(색·카드·버튼·글자)은 랜딩(public/landing.html)과 디자인 토큰을 쓴다.
-   색은 한 곳에 몰리지 않게 나눈다: 자주색(primary)은 눌러야 하는 주 버튼에만, 나머지 버튼·선택은 글자색(neutral), 상태·강조는 dusty-blue·muted-sage.
+   색은 한 곳에 몰리지 않게 나눈다(배경은 neutral의 흰색·배경색만, 청록·초록 계열 배경은 쓰지 않는다): 자주색(primary)은 눌러야 하는 주 버튼에만, 나머지 버튼·선택은 글자색(neutral), 상태·강조는 dusty-blue·muted-sage.
    다른 화면과 겹치지 않게 모두 .mp 안에서만 쓴다. */
 .mp {
   --jaju: #a61e5c; --teal: #1f5a66; --gold: #d89a24;
   --bg: #faf7f8; --line: #e8dfe3; --body: #574a50; --title: #2a2025; --paper: #ffffff; --tint: #f5ecf0;
-  --blue: #5f7c99; --sage: #6f8a7a; --blue-ink: #3e566f; --sage-ink: #3f5a4b; --band: #e8eff1;
+  --blue: #5f7c99; --sage: #6f8a7a; --blue-ink: #3e566f; --sage-ink: #3f5a4b;
   --ease: cubic-bezier(.2, .8, .2, 1);
   flex: 1; color: var(--body); font-size: 14px; line-height: 1.6; word-break: keep-all; overflow-wrap: break-word;
 }
@@ -47,15 +47,16 @@
 /* 구역 띠: 화면 끝까지 이어지고 구역마다 배경이 다르다 */
 .mp .mp-sec { padding: 40px 0; scroll-margin-top: 130px; }
 @media (min-width: 768px) { .mp .mp-sec { padding: 56px 0; } }
+.mp .mp-sec { border-top: 1px solid var(--line); }
 .mp .mp-sec.s1 { background: var(--paper); }
-.mp .mp-sec.s2 { background: var(--band); }
-.mp .mp-sec.s3 { background: var(--bg); }
+.mp .mp-sec.s2 { background: var(--bg); }
+.mp .mp-sec.s3 { background: var(--paper); }
 .mp .mp-sh { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-bottom: 20px; }
 .mp .mp-sh h2 { font-size: 18px; line-height: 1.4; font-weight: 700; }
 .mp .mp-extra { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13px; }
 .mp .mp-addr { font-weight: 500; color: var(--blue-ink); text-decoration: underline; text-underline-offset: 3px; }
 .mp .mp-state { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #fff; border: 1px solid var(--line); color: var(--body); }
-.mp .mp-state.on { background: color-mix(in srgb, var(--sage) 16%, #fff); border-color: color-mix(in srgb, var(--sage) 45%, #fff); color: var(--sage-ink); }
+.mp .mp-state.on { background: #fff; border-color: var(--sage); color: var(--sage-ink); }
 .mp .mp-toggle { margin-left: auto; min-height: 30px; padding: 0 12px; font-size: 12px; }
 .mp .mp-chev { width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-135deg); margin-top: 3px; transition: transform .3s var(--ease); }
 .mp .mp-toggle[aria-expanded="false"] .mp-chev { transform: rotate(45deg); margin-top: -3px; }
@@ -63,7 +64,7 @@
 /* 구역 안 카드 (랜딩 .panel) */
 .mp .mp-card { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 30px 60px -36px rgba(42,32,37,.35); padding: 20px 18px; }
 @media (min-width: 768px) { .mp .mp-card { padding: 32px 36px; } }
-.mp .mp-sec.s1 .mp-card { background: var(--bg); }
+.mp .mp-sec.s1 .mp-card, .mp .mp-sec.s3 .mp-card { background: var(--bg); }
 
 /* 기본 정보 */
 .mp .mp-rows { margin: 0; }
@@ -97,7 +98,7 @@
 /* 포트폴리오 등록 */
 .mp .mp-top-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px; }
 .mp .mp-count { font-size: 14px; color: var(--title); display: flex; flex-wrap: wrap; gap: 4px 16px; font-weight: 500; }
-.mp .mp-plans { margin-top: 24px; padding: 16px 20px; border-radius: 16px; background: var(--bg); border: 1px solid var(--line); }
+.mp .mp-plans { margin-top: 24px; padding: 16px 20px; border-radius: 16px; background: #fff; border: 1px solid var(--line); }
 .mp .mp-plans h3 { font-size: 13px; font-weight: 700; color: var(--body); }
 .mp .mp-plans ul { list-style: none; margin: 8px 0 0; padding: 0; }
 .mp .mp-plans li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; color: var(--title); }
