@@ -80,7 +80,7 @@
 }
 
 /* ---------- 하단 (랜딩 footer.site) ---------- */
-.lk-footer { border-top: 1px solid var(--teal); color: var(--body); font-size: 14px; line-height: 1.6; }
+.lk-footer { color: var(--body); font-size: 14px; line-height: 1.6; }
 .lk-footer .lk-wrap { display: flex; justify-content: space-between; gap: 20px; padding-top: 22px; padding-bottom: 26px; flex-wrap: wrap; }
 .lk-footer b { color: var(--title); font-size: 18px; }
 .lk-footer p { margin: 0; font-size: 13px; }
