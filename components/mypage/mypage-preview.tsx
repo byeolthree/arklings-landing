@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { SAMPLE_CREATORS } from "@/components/creators/sample-data";
 import { PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
 import { ROLES } from "@/lib/collab";
-import { WorkEditor } from "@/components/mypage/work-editor";
+import { GENRES, WorkEditor } from "@/components/mypage/work-editor";
 import type { ProfileValues } from "@/lib/creator-rules";
 
 export type ProfileState = "none" | "public" | "private";
@@ -283,8 +283,8 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
                     <span>〈공개 중〉</span>
                   </div>
                   <div className="mp-genres">
-                    <span className="mp-tag genre">〈장르〉</span>
-                    <span className="mp-tag genre">〈장르〉</span>
+                    <span className="mp-tag genre">{GENRES[0]}</span>
+                    <span className="mp-tag genre">{GENRES[1]}</span>
                   </div>
                 </div>
                 <div className="mp-work-btns">
@@ -309,7 +309,7 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
                     <span>〈공개하지 않음〉</span>
                   </div>
                   <div className="mp-genres">
-                    <span className="mp-tag genre">〈장르〉</span>
+                    <span className="mp-tag genre">{GENRES[0]}</span>
                   </div>
                 </div>
                 <div className="mp-work-btns">
