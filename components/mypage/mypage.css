@@ -1,0 +1,104 @@
+/* 마이페이지 세 구역(샘플). 랜딩(public/landing.html)과 같은 값(색·카드·버튼·글자)을 쓰되 다른 화면과 겹치지 않게 모두 .mp 안에서만 쓴다. */
+.mp {
+  --jaju: #a61e5c; --teal: #1f5a66; --gold: #d89a24;
+  --bg: #faf7f8; --line: #e8dfe3; --body: #574a50; --title: #2a2025; --paper: #ffffff; --tint: #f5ecf0;
+  --hero-bg: color-mix(in srgb, var(--bg) 55%, var(--line));
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  flex: 1; color: var(--body); font-size: 14px; line-height: 1.6; word-break: keep-all; overflow-wrap: break-word;
+}
+.mp h1, .mp h2, .mp h3 { color: var(--title); margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+.mp p { margin: 0; text-wrap: pretty; }
+.mp .wrap { width: 100%; max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 768px) { .mp .wrap { padding: 0 40px; } }
+
+/* 버튼 (랜딩 .btn) */
+.mp .btn {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 34px; padding: 0 14px; border-radius: 999px; font: inherit; font-weight: 700; font-size: 13px; cursor: pointer;
+  border: 1.5px solid var(--jaju); text-decoration: none; white-space: nowrap;
+  transition: transform .35s var(--ease), background .3s, color .3s, box-shadow .35s;
+}
+.mp .btn-primary { background: var(--jaju); color: #fff; box-shadow: 0 8px 24px -10px rgba(166,30,92,.55); }
+.mp .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(166,30,92,.65); }
+.mp .btn-ghost { background: transparent; color: var(--jaju); }
+.mp .btn-ghost:hover { transform: translateY(-2px); }
+.mp .btn[aria-disabled="true"] { opacity: .45; pointer-events: none; box-shadow: none; }
+.mp a:focus-visible, .mp button:focus-visible, .mp input:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+/* 맨 위: 제목 + 설명 (랜딩 히어로 배경 → 페이지 배경) */
+.mp .mp-top { background: linear-gradient(180deg, var(--hero-bg), var(--bg)); padding: 48px 0 24px; text-align: center; }
+@media (min-width: 768px) { .mp .mp-top { padding: 80px 0 32px; } }
+.mp .mp-title { font-size: 22px; line-height: 1.3; font-weight: 700; }
+@media (min-width: 768px) { .mp .mp-title { font-size: 32px; } }
+.mp .mp-desc { margin: 12px auto 0; max-width: 900px; font-size: 15px; }
+@media (min-width: 768px) { .mp .mp-desc { font-size: 18px; } }
+
+/* 구역 이동 줄: 스크롤해도 화면 위(사이트 상단 메뉴 바로 아래)에 붙는다 */
+.mp .mp-nav { position: sticky; top: 68px; z-index: 40; padding: 10px 0; background: rgba(250,247,248,.92); backdrop-filter: saturate(1.4) blur(10px); }
+.mp .mp-tabs { display: flex; gap: 4px; padding: 6px; border-radius: 999px; background: color-mix(in srgb, var(--line) 70%, var(--bg)); width: fit-content; max-width: 100%; margin: 0 auto; }
+.mp .mp-tab { border: 0; font: inherit; font-size: 14px; font-weight: 700; color: var(--body); padding: 10px 16px; border-radius: 999px; white-space: nowrap; background: transparent; text-decoration: none; cursor: pointer; transition: background .3s, color .3s; }
+.mp .mp-tab[aria-current="true"] { background: #fff; color: var(--title); box-shadow: 0 6px 18px -10px rgba(42,32,37,.35); }
+@media (max-width: 480px) { .mp .mp-tab { font-size: 13px; padding: 9px 12px; } }
+
+/* 구역 (랜딩 .panel) — 구역마다 배경색이 다르다 */
+.mp .mp-body { padding: 8px 0 80px; display: grid; gap: 20px; }
+@media (max-width: 767px) { .mp .mp-body { padding-bottom: 40px; gap: 16px; } }
+.mp .mp-sec { border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 30px 60px -36px rgba(42,32,37,.35); scroll-margin-top: 140px; overflow: hidden; }
+.mp .mp-sec.s1 { background: var(--paper); }
+.mp .mp-sec.s2 { background: var(--tint); }
+.mp .mp-sec.s3 { background: var(--hero-bg); }
+.mp .mp-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 18px 20px; border: 0; background: none; font: inherit; text-align: left; cursor: pointer; }
+@media (min-width: 768px) { .mp .mp-head { padding: 22px 28px; } }
+.mp .mp-head-main { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; min-width: 0; }
+.mp .mp-head h2 { font-size: 18px; font-weight: 700; }
+.mp .mp-addr { font-size: 13px; font-weight: 500; color: var(--jaju); text-decoration: none; }
+.mp .mp-state { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #fff; color: var(--title); }
+.mp .mp-state.on { background: var(--teal); color: #fff; }
+.mp .mp-chev { flex: none; width: 10px; height: 10px; border-right: 2px solid var(--body); border-bottom: 2px solid var(--body); transform: rotate(45deg); transition: transform .3s var(--ease); margin: -4px 4px 0 0; }
+.mp .mp-head[aria-expanded="false"] .mp-chev { transform: rotate(-45deg); margin: 0 4px 0 0; }
+.mp .mp-inner { padding: 0 20px 22px; }
+@media (min-width: 768px) { .mp .mp-inner { padding: 0 28px 28px; } }
+
+/* 기본 정보 */
+.mp .mp-rows { margin: 0; border-top: 1px solid var(--line); }
+.mp .mp-row { display: grid; gap: 4px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+@media (min-width: 768px) { .mp .mp-row { grid-template-columns: 9rem 1fr; gap: 16px; } }
+.mp .mp-row dt { font-size: 13px; color: var(--body); }
+.mp .mp-row dd { margin: 0; font-size: 14px; color: var(--title); min-width: 0; }
+.mp .mp-note { display: block; margin-top: 4px; font-size: 12px; color: var(--body); }
+.mp .mp-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.mp .mp-msg { margin: 0 0 10px; padding: 8px 12px; border-radius: 10px; font-size: 13px; }
+.mp .mp-msg.ok { background: #eef7f1; color: #16794b; }
+.mp .mp-msg.err { background: #fff; border: 1px solid var(--jaju); color: var(--jaju); }
+.mp .mp-name { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.mp .mp-input { flex: 1 1 180px; min-width: 0; height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: 6px; background: #fff; font: inherit; font-size: 14px; color: var(--title); }
+.mp .mp-foot { margin-top: 20px; display: grid; gap: 14px; }
+.mp .mp-foot small { font-size: 12px; color: var(--body); }
+.mp .mp-foot a { color: inherit; text-decoration: underline; }
+
+/* 크리에이터 등록: 구역 배경 위에 프로필 칸을 그대로 올린다 */
+.mp .pl.mp-pl .pp-form { margin-top: 0; padding: 0; background: transparent; }
+.mp .mp-pending { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 16px; padding: 10px 14px; border-radius: 12px; background: #fff; border-left: 3px solid var(--teal); font-size: 14px; font-weight: 700; color: var(--title); }
+.mp .mp-sample { margin-top: 12px; font-size: 12px; color: var(--body); border: 1px dashed var(--line); border-radius: 8px; padding: 6px 10px; background: #fff; }
+
+/* 포트폴리오 등록 */
+.mp .mp-top-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
+.mp .mp-count { font-size: 13px; color: var(--body); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.mp .mp-plans { margin-top: 14px; padding: 12px 16px; border-radius: 14px; background: #fff; border: 1px solid var(--line); }
+.mp .mp-plans h3 { font-size: 13px; font-weight: 700; color: var(--body); }
+.mp .mp-plans ul { list-style: none; margin: 6px 0 0; padding: 0; }
+.mp .mp-plans li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 13px; color: var(--title); }
+.mp .mp-plans li:first-child { border-top: 0; }
+.mp .mp-plans li.off { color: var(--body); }
+.mp .mp-works { margin-top: 14px; display: grid; gap: 12px; }
+.mp .mp-work { display: grid; grid-template-columns: 84px 1fr; gap: 14px; align-items: center; padding: 14px; border-radius: 16px; background: #fff; border: 1px solid var(--line); }
+@media (min-width: 768px) { .mp .mp-work { grid-template-columns: 96px 1fr auto; padding: 16px 20px; } }
+.mp .mp-thumb { height: 64px; border-radius: 10px; background: var(--tint); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--body); }
+.mp .mp-work-main { min-width: 0; }
+.mp .mp-work-title { font-size: 15px; font-weight: 700; color: var(--title); }
+.mp .mp-work-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; font-size: 12px; }
+.mp .mp-tag { display: inline-block; padding: 2px 10px; border-radius: 999px; background: var(--jaju); color: #fff; font-size: 12px; }
+.mp .mp-work-btns { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; }
+@media (min-width: 768px) { .mp .mp-work-btns { grid-column: auto; justify-content: flex-end; } }
+
+@media (prefers-reduced-motion: reduce) { .mp *, .mp *::before, .mp *::after { transition: none !important; animation: none !important; } }

@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { ROLES, type Role } from "@/lib/collab";
 import {
   ABOUT_MAX,
-  BIO_MAX,
   CHANNEL_LABEL_MAX,
   CHANNEL_MAX,
   HANDLE_MAX,
@@ -25,7 +24,7 @@ export type HandleCheck = "available" | "taken" | "error";
 type Avail = { status: "idle" | "checking" | HandleCheck; handle: string };
 
 // 크리에이터 프로필 칸(공개 주소·역할·소개 …). 만들기와 고치기를 모두 처리한다.
-// context = "planner": 기획안을 올리다가 열리는 칸. 필수 칸(공개 주소·역할·한 줄 소개)만 있고, 저장하면 프로필도 함께 공개된다.
+// context = "planner": 기획안을 올리다가 열리는 칸. 필수 칸(공개 주소·역할)만 있고, 저장하면 프로필도 함께 공개된다.
 // context = "mypage": 마이페이지의 전체판. 역할별 한 줄·소개 글·채널 링크·협업 신청 받기·공개 설정이 더해지고, 만들 때 공개 설정은 비공개가 먼저 골라져 있다.
 // 값은 이 부품이 먼저 검사하고, 저장은 부르는 쪽이 정한 함수(onSubmit)가 한다.
 export function PublishProfile({
@@ -41,7 +40,8 @@ export function PublishProfile({
   context: "mypage" | "planner";
   initial?: Partial<ProfileValues>;
   onSubmit: (value: ProfileValues) => Promise<SaveResult>;
-  onCancel: () => void;
+  // 취소 버튼은 이 함수를 줄 때만 보인다(기획안을 올리다가 여는 칸). 마이페이지 구역에는 열고 닫는 칸이 없어 안 준다.
+  onCancel?: () => void;
   // 공개 주소 중복 확인(서버). 「이미 쓰는 주소」로 나온 주소는 저장하지 않는다. 서버는 저장할 때 마지막으로 한 번 더 확인한다.
   checkHandle?: (handle: string) => Promise<HandleCheck>;
   // 저장 버튼 글. 안 주면 상황에 맞게 정한다(기획안 올리기: 「프로필 저장하고 올리기」, 그 밖: 「프로필 저장」).
@@ -51,7 +51,6 @@ export function PublishProfile({
   const editing = mode === "edit";
   const [handle, setHandle] = useState(initial?.handle ?? "");
   const [roles, setRoles] = useState<Role[]>(initial?.roles ?? []);
-  const [bio, setBio] = useState(initial?.bio ?? "");
   const [about, setAbout] = useState(initial?.about ?? "");
   const [channels, setChannels] = useState<Channel[]>(initial?.channels?.length ? initial.channels : []);
   const [openToCollab, setOpenToCollab] = useState(initial?.openToCollab ?? true);
@@ -100,7 +99,7 @@ export function PublishProfile({
     const checked = validateCreatorProfile({
       handle,
       roles,
-      bio,
+      bio: "", // 한 줄 소개 칸은 없앴다(D23 8차). 서버 규칙에는 아직 있으므로 빈 값을 보낸다
       // 기획안을 올리다가 열리는 칸에서는 필수 칸만 받는다. 나머지는 마이페이지에서 나중에 채운다.
       about: full ? about : "",
       channels: full ? channels : [],
@@ -212,29 +211,6 @@ export function PublishProfile({
         )}
       </div>
 
-      <div className="pp-field">
-        <label htmlFor="pp-bio" className="pp-label">
-          한 줄 소개 <span className="pp-hint-inline">(선택)</span>
-        </label>
-        <textarea
-          id="pp-bio"
-          className="answer"
-          style={{ minHeight: 72 }}
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          placeholder="나를 소개하는 한 줄이에요. 예: 사라지는 기억과 기록하는 사람을 쓰는 대본 작가예요."
-          aria-invalid={errors.bio ? true : undefined}
-        />
-        <p className={`len ${bio.length > BIO_MAX ? "over" : ""}`}>
-          <span className="cnt">{bio.length}</span> / {BIO_MAX}자
-        </p>
-        {errors.bio && (
-          <p className="pp-err" role="alert">
-            {errors.bio}
-          </p>
-        )}
-      </div>
-
       {/* P2 소개 글 */}
       {full && (
         <div className="pp-field">
@@ -247,7 +223,7 @@ export function PublishProfile({
             style={{ minHeight: 120 }}
             value={about}
             onChange={(e) => setAbout(e.target.value)}
-            placeholder="경력, 참여한 일, 하고 싶은 협업을 자유롭게 적어 주세요."
+            placeholder={"〈한 줄 소개〉\n〈경력〉\n〈참여한 일〉\n〈하고 싶은 협업〉"}
             aria-invalid={errors.about ? true : undefined}
           />
           <p className={`len ${about.length > ABOUT_MAX ? "over" : ""}`}>
@@ -353,9 +329,11 @@ export function PublishProfile({
         <button type="submit" className="btn btn-primary sm" disabled={pending}>
           {pending ? "저장하는 중…" : label}
         </button>
-        <button type="button" className="btn btn-ghost sm" onClick={onCancel} disabled={pending}>
-          취소
-        </button>
+        {onCancel && (
+          <button type="button" className="btn btn-ghost sm" onClick={onCancel} disabled={pending}>
+            취소
+          </button>
+        )}
       </div>
     </form>
   );

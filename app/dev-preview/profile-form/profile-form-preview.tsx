@@ -75,7 +75,7 @@ export function ProfileFormPreview({ mode }: { mode: Mode }) {
           <div className="pub-box">
             {saved && (
               <p style={{ marginTop: 10 }} role="status">
-                저장했어요(샘플): <b>/creators/{saved.handle}</b> · 역할 {saved.roles.length}개 · 한 줄 소개 {saved.bio.length}자 · 소개 글 {saved.about.length}자 · 채널 {saved.channels.length}개 · 협업 신청 {saved.openToCollab ? "받음" : "안 받음"} · {saved.isPublic ? "공개" : "비공개"}
+                저장했어요(샘플): <b>/creators/{saved.handle}</b> · 역할 {saved.roles.length}개 · 소개 글 {saved.about.length}자 · 채널 {saved.channels.length}개 · 협업 신청 {saved.openToCollab ? "받음" : "안 받음"} · {saved.isPublic ? "공개" : "비공개"}
               </p>
             )}
             {!open && (
