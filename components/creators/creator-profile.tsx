@@ -80,14 +80,14 @@ export function CreatorProfile({
               {works.map((w) => (
                 <li key={w.id}>
                   <article className="panel cr-work">
+                    <h3 className="cr-work-title">
+                      <Link href={workHref(w.id)}>{w.title}</Link>
+                    </h3>
                     <div className="cr-box cr-work-log">
                       <span className="cr-label">로그라인</span>
                       <p className="cr-box-logline">{w.logline}</p>
                     </div>
                     <WorkMedia href={workHref(w.id)} slides={["〈대표 이미지〉", "〈영상〉"]} />
-                    <h3 className="cr-work-title">
-                      <Link href={workHref(w.id)}>{w.title}</Link>
-                    </h3>
                     <RoleTags roles={w.roles} />
                     {w.genres.length > 0 && (
                       <ul className="cr-genres" aria-label="장르">
