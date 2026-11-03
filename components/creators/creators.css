@@ -211,3 +211,23 @@
 .cr .cr-w-text { color: var(--body); }
 .cr .cr-w-media { aspect-ratio: 16 / 9; border-radius: 14px; background: var(--bg); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--body); }
 .cr .cr-w-media.doc { aspect-ratio: 4 / 3; max-height: 260px; }
+
+/* 프로필: 채널 링크·협업 신청 받는 중·작품 카드(대표 이미지·영상을 좌우로 넘김, 로그라인은 그 위) */
+.cr .cr-prof-bio { white-space: pre-line; }
+.cr .cr-chan { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.cr .cr-chan a { color: var(--body); }
+.cr .cr-open { font-size: 13px; font-weight: 700; color: var(--title); }
+.cr .cr-work { display: flex; flex-direction: column; gap: 14px; height: 100%; padding: 20px; }
+@media (min-width: 768px) { .cr .cr-work { padding: 24px; } }
+.cr .cr-work-log { height: auto; max-height: none; }
+.cr .cr-work-log .cr-box-logline { display: block; -webkit-line-clamp: unset; overflow: visible; }
+.cr .cr-media { position: relative; }
+.cr .cr-media-track { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.cr .cr-media-track::-webkit-scrollbar { display: none; }
+.cr .cr-slide { flex: 0 0 100%; scroll-snap-align: center; aspect-ratio: 16 / 9; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); display: grid; place-items: center; font-size: 13px; color: var(--body); text-decoration: none; }
+.cr .cr-media-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 999px; border: 1.5px solid var(--jaju); background: #fff; color: var(--jaju); font-size: 20px; line-height: 1; cursor: pointer; }
+.cr .cr-media-nav.prev { left: 8px; }
+.cr .cr-media-nav.next { right: 8px; }
+.cr .cr-work-title { font-size: 16px; line-height: 1.35; font-weight: 700; }
+.cr .cr-work-title a { color: var(--title); text-decoration: none; }
+.cr .cr-work-title a:hover { text-decoration: underline; }

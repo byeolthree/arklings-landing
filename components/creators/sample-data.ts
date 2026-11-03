@@ -1,7 +1,8 @@
 // 디자인 확인용 샘플 데이터(/dev-preview/creators). 이름·글은 모두 가짜이며 실제 DB와 연결되지 않는다.
 // 디자인 작업이 끝나 실제 읽기(lib/creators.ts)로 바꾸면 이 파일과 /dev-preview 주소는 지운다.
 import { SLOT_LABELS } from "@/lib/plans";
-import type { CreatorCard, CreatorProfileData, PlanCard, PlanDetailData } from "./types";
+import { GENRES } from "./genres";
+import type { CreatorCard, CreatorProfileData, PlanCard, PlanDetailData, WorkCard } from "./types";
 
 const LOGLINES: Record<string, [string, string, string, string, string]> = {
   "소금비 내리는 나라": ["소금비가 내리는 날마다 한 사람의 기억이 사라지는 일", "기억을 기록하는 사관", "왕의 기억만 지워지지 않는 비밀", "사라진 기억의 복구", "나라 전체가 기억을 잃는 재앙"],
@@ -73,8 +74,26 @@ export function samplePlansOf(c: CreatorCard): PlanCard[] {
   });
 }
 
+// 소개 글·채널 링크·협업 신청 받는 중은 샘플 몇 사람에게만 더해 둔다(없는 사람은 그 칸이 안 보인다).
+const SAMPLE_EXTRA: Record<string, { about?: string; channels?: { label: string; url: string }[]; openToCollab?: boolean }> = {
+  "jian-lee": { about: "경력 5년차 대본 작가예요.\n드라마와 판타지를 오가며 이야기를 씁니다.\n하고 싶은 협업: 영상으로 옮길 짧은 이야기.", channels: [{ label: "인스타그램", url: "https://example.com/instagram" }, { label: "유튜브", url: "https://example.com/youtube" }], openToCollab: true },
+  "seoha-park": { channels: [{ label: "유튜브", url: "https://example.com/youtube" }], openToCollab: true },
+  "dayun-choi": { openToCollab: false },
+  "hayun-jung": { channels: [{ label: "블로그", url: "https://example.com/blog" }], openToCollab: true },
+};
+
 export function sampleProfileOf(c: CreatorCard): CreatorProfileData {
-  return { handle: c.handle, name: c.name, roles: c.roles, bio: c.bio };
+  const x = SAMPLE_EXTRA[c.handle];
+  return { handle: c.handle, name: c.name, roles: c.roles, bio: x?.about ?? c.bio, channels: x?.channels, openToCollab: x?.openToCollab ?? true };
+}
+
+// 프로필의 작품 카드(최신 공개 순). 장르는 대표 작품이 가진 것을 쓰고, 나머지는 돌려 가며 붙인 샘플이다.
+export function sampleWorksOf(c: CreatorCard, count = c.planCount): WorkCard[] {
+  return samplePlansOf({ ...c, planCount: count }).map((p, i) => {
+    const h = c.handle.length;
+    const genres = i === 0 && c.latest.genres ? c.latest.genres : [GENRES[(i * 3 + h) % GENRES.length], GENRES[(i * 5 + h + 1) % GENRES.length]].filter((g, k, a) => a.indexOf(g) === k);
+    return { id: p.id, title: p.title, logline: p.logline, roles: c.roles.slice(0, 2), genres, publishedAt: p.publishedAt };
+  });
 }
 
 const SAMPLE_ANSWERS = [

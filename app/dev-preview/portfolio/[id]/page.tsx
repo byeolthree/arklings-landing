@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CreatorProfile } from "@/components/creators/creator-profile";
-import { SAMPLE_CREATORS, SAMPLE_PROFILE_PAGE_SIZE, sampleDetailOf, sampleProfileOf, samplePlansOf } from "@/components/creators/sample-data";
+import { SAMPLE_CREATORS, sampleDetailOf, sampleProfileOf, sampleWorksOf } from "@/components/creators/sample-data";
 import { WorkDetail } from "@/components/creators/work-detail";
 
 // 디자인 확인용 샘플 미리보기. 실제 DB와 연결되지 않고, 디자인이 끝나면 지운다.
@@ -29,11 +29,11 @@ export default async function WorkDetailPreviewPage({ params, searchParams }: Pr
     authorName: plan.authorName,
     publishedAt: plan.publishedAt,
     roles: plan.authorRoles ?? [],
-    genres: card?.latest.genres ?? [],
+    genres: sampleWorksOf(card ?? SAMPLE_CREATORS[0]).find((w) => w.id === id)?.genres ?? [],
     logline: plan.content.sections[0]?.text ?? "",
   };
 
-  const plans = hasProfile ? samplePlansOf(card).slice(0, SAMPLE_PROFILE_PAGE_SIZE) : [];
+  const works = hasProfile ? sampleWorksOf(card) : [];
   return (
     <>
       <div className="fixed bottom-4 right-4 z-50 max-w-[260px] rounded-lg border border-[#e8dfe3] bg-white/95 px-3 py-2 text-[11px] leading-snug text-[#2a2025] shadow-md">
@@ -46,13 +46,10 @@ export default async function WorkDetailPreviewPage({ params, searchParams }: Pr
       {hasProfile && (
         <CreatorProfile
           creator={sampleProfileOf(card)}
-          plans={plans}
-          total={card.planCount}
-          page={1}
-          pages={1}
+          works={works}
           backHref="/dev-preview/creators"
-          planHref={(pid) => `/dev-preview/portfolio/${pid}`}
-          pageHref={() => closeHref}
+          workHref={(wid) => `/dev-preview/portfolio/${wid}`}
+          applyHref="/collab/new"
         />
       )}
       <WorkDetail work={work} closeHref={closeHref} applyHref="/collab/new" />

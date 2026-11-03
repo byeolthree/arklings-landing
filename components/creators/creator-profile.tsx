@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { formatKstDate } from "@/lib/time";
 import { RoleTags } from "./role-tags";
-import type { CreatorProfileData, PlanCard } from "./types";
+import type { CreatorProfileData, WorkCard } from "./types";
+import { WorkMedia } from "./work-media";
 import "./creators.css";
 
 const TONES = ["teal", "dusty", "sage"] as const;
@@ -12,25 +12,22 @@ function toneOf(handle: string): (typeof TONES)[number] {
   return TONES[n % TONES.length];
 }
 
-// 크리에이터 프로필 화면(프로필 + 그 사람이 공개한 기획안). 데이터를 받기만 하고 읽지 않는다.
+// 크리에이터 프로필 화면. 마이페이지 「크리에이터 등록」에 적은 것(닉네임·역할·소개 글·채널 링크·협업 신청 받는 중)이
+// 그 칸 순서대로 보이고, 아래 포트폴리오는 「포트폴리오 등록」의 작품 카드와 같은 카드다. 데이터를 받기만 하고 읽지 않는다.
 export function CreatorProfile({
   creator,
-  plans,
-  total,
-  page,
-  pages,
+  works,
   backHref,
-  planHref,
-  pageHref,
+  workHref,
+  applyHref,
+  showApply = true,
 }: {
   creator: CreatorProfileData;
-  plans: PlanCard[];
-  total: number;
-  page: number;
-  pages: number;
+  works: WorkCard[];
   backHref: string;
-  planHref: (id: string) => string;
-  pageHref: (page: number) => string;
+  workHref: (id: string) => string;
+  applyHref: string;
+  showApply?: boolean; // 비공개 프로필을 본인이 미리 볼 때는 협업 신청 버튼을 숨긴다(D14)
 }) {
   return (
     <div className="cr">
@@ -48,71 +45,61 @@ export function CreatorProfile({
               <h1 className="cr-prof-name">{creator.name}</h1>
               <RoleTags roles={creator.roles} />
               {creator.bio && <p className="cr-prof-bio">{creator.bio}</p>}
+              {creator.channels && creator.channels.length > 0 && (
+                <ul className="cr-chan" aria-label="채널 링크">
+                  {creator.channels.map((c) => (
+                    <li key={c.label + c.url}>
+                      <a href={c.url} target="_blank" rel="noopener noreferrer">
+                        {c.label} ↗
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {creator.openToCollab && <span className="cr-open">협업 신청 받는 중</span>}
+              {creator.openToCollab && showApply && (
+                <Link href={applyHref} className="btn btn-primary">
+                  이 크리에이터에게 협업 신청 <span className="arrow">→</span>
+                </Link>
+              )}
             </div>
           </header>
 
           <div className="cr-sec-head">
             <h2 className="cr-sec-title">포트폴리오</h2>
-            {total > 0 && <span className="cr-count">기획안 {total}건</span>}
+            {works.length > 0 && <span className="cr-count">작품 {works.length}건</span>}
           </div>
 
-          {total === 0 ? (
+          {works.length === 0 ? (
             <div className="panel cr-state">
-              <h2>아직 올린 기획안이 없어요</h2>
-              <p>공개한 기획안이 생기면 여기에 보여요.</p>
-            </div>
-          ) : plans.length === 0 ? (
-            <div className="panel cr-state">
-              <h2>이 쪽에는 기획안이 없어요</h2>
-              <p>마지막 쪽은 {pages}쪽이에요.</p>
-              <Link href={pageHref(1)} className="btn btn-ghost">
-                첫 쪽으로
-              </Link>
+              <h2>아직 올린 작품이 없어요</h2>
+              <p>공개한 작품이 생기면 여기에 보여요.</p>
             </div>
           ) : (
-            <>
-              <ul className="cr-grid">
-                {plans.map((p) => (
-                  <li key={p.id}>
-                    <Link href={planHref(p.id)} className="panel cr-plan">
-                      <div className="cr-box">
-                        <span className="cr-label">로그라인</span>
-                        <h3 className="cr-box-title">{p.title}</h3>
-                        <p className="cr-box-logline">{p.logline}</p>
-                      </div>
-                      <span className="cr-plan-date">
-                        게시일 <time dateTime={p.publishedAt}>{formatKstDate(p.publishedAt)}</time>
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-              {pages > 1 && (
-                <nav className="pager" aria-label="쪽 이동">
-                  {page > 1 ? (
-                    <Link href={pageHref(page - 1)} className="btn btn-ghost">
-                      ← 이전
-                    </Link>
-                  ) : (
-                    <span className="btn btn-ghost off" aria-hidden="true">
-                      ← 이전
-                    </span>
-                  )}
-                  <span className="now">
-                    {page} / {pages}
-                  </span>
-                  {page < pages ? (
-                    <Link href={pageHref(page + 1)} className="btn btn-ghost">
-                      다음 →
-                    </Link>
-                  ) : (
-                    <span className="btn btn-ghost off" aria-hidden="true">
-                      다음 →
-                    </span>
-                  )}
-                </nav>
-              )}
-            </>
+            <ul className="cr-grid">
+              {works.map((w) => (
+                <li key={w.id}>
+                  <article className="panel cr-work">
+                    <div className="cr-box cr-work-log">
+                      <span className="cr-label">로그라인</span>
+                      <p className="cr-box-logline">{w.logline}</p>
+                    </div>
+                    <WorkMedia href={workHref(w.id)} slides={["〈대표 이미지〉", "〈영상〉"]} />
+                    <h3 className="cr-work-title">
+                      <Link href={workHref(w.id)}>{w.title}</Link>
+                    </h3>
+                    <RoleTags roles={w.roles} />
+                    {w.genres.length > 0 && (
+                      <ul className="cr-genres" aria-label="장르">
+                        {w.genres.map((g) => (
+                          <li key={g}>{g}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </article>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </section>

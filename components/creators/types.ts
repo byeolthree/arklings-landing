@@ -17,7 +17,19 @@ export type CreatorProfileData = {
   handle: string;
   name: string; // 공개 이름
   roles: Role[];
-  bio?: string; // 소개 한 줄 문구(선택). 프로필에서는 줄바꿈되어 모두 보인다
+  bio?: string; // 소개 글(선택). 프로필에서는 줄바꿈되어 모두 보인다
+  channels?: { label: string; url: string }[]; // 채널 링크(이름·주소, 5개까지)
+  openToCollab?: boolean; // 협업 신청 받는 중(켬)
+};
+
+// 프로필의 작품 카드 한 장. 마이페이지 「포트폴리오 등록」의 작품 카드와 같은 값(대표 이미지·영상은 실제 연결 때 더한다).
+export type WorkCard = {
+  id: string;
+  title: string;
+  logline: string;
+  roles: Role[];
+  genres: string[];
+  publishedAt: string;
 };
 
 export type PlanCard = {
