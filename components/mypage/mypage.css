@@ -49,7 +49,7 @@
 .mp .mp-sec { border-top: 1px solid var(--line); }
 .mp .mp-sec.s1 { background: var(--paper); }
 .mp .mp-sec.s2 { background-color: var(--bg); background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 28px 28px; }
-.mp .mp-sec.s3 { background-color: #f7f4f5; background-image: linear-gradient(#ebe4e7 1px, transparent 1px), linear-gradient(90deg, #ebe4e7 1px, transparent 1px); background-size: 28px 28px; }
+.mp .mp-sec.s3 { background-color: #f1eaed; background-image: radial-gradient(#d6c9cf 1.5px, transparent 1.6px); background-size: 20px 20px; }
 .mp .mp-sh { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-bottom: 20px; }
 .mp .mp-sh h2 { font-size: 18px; line-height: 1.4; font-weight: 700; }
 .mp .mp-extra { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13px; }
