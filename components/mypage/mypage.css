@@ -55,7 +55,7 @@
 .mp .mp-extra { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13px; }
 .mp .mp-addr { font-weight: 500; color: var(--title); text-decoration: underline; text-underline-offset: 3px; }
 .mp .mp-state { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #fff; border: 1px solid var(--line); color: var(--body); }
-.mp .mp-state.on { background: color-mix(in srgb, var(--jaju) 8%, #fff); border-color: var(--jaju); color: var(--jaju); }
+.mp .mp-state.on { background: var(--body); border-color: var(--body); color: #fff; }
 .mp .mp-toggle { margin-left: auto; min-height: 30px; padding: 0 12px; font-size: 12px; }
 .mp .mp-chev { width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-135deg); margin-top: 3px; transition: transform .3s var(--ease); }
 .mp .mp-toggle[aria-expanded="false"] .mp-chev { transform: rotate(45deg); margin-top: -3px; }
@@ -84,7 +84,7 @@
 .mp .mp-foot a { color: inherit; text-decoration: underline; }
 
 /* 크리에이터 등록: 카드 안에 프로필 칸을 그대로 올린다. 기획안 화면용 색(청록 선택·자주 보조 버튼)은 이 화면에서 중성 색으로 바꾼다 */
-.mp .pl.mp-pl .opt[aria-pressed="true"], .mp .pl.mp-pl .opt[aria-checked="true"] { background: color-mix(in srgb, var(--jaju) 8%, #fff); border-color: var(--jaju); color: var(--jaju); font-weight: 700; }
+.mp .pl.mp-pl .opt[aria-pressed="true"], .mp .pl.mp-pl .opt[aria-checked="true"] { background: var(--body); border-color: var(--body); color: #fff; }
 .mp .pl.mp-pl .answer { background: var(--bg); }
 .mp .pl.mp-pl .answer:focus { border-color: var(--body); background: #fff; }
 .mp .pl.mp-pl .pp-avail.available { color: var(--body); }
