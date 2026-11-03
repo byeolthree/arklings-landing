@@ -69,7 +69,7 @@ Figma 시안은 초안이다. 시안과 랜딩이 다르면 랜딩을 따른다.
 
 주의:
 - `accent/gold` 배경에는 흰 텍스트를 쓰지 않는다(명도 대비 미달). `neutral/title` 같은 어두운 텍스트를 올린다.
-- Nav 하단 구분선은 `neutral/border`가 아니라 `secondary/teal`이다. 푸터 상단에는 구분선을 두지 않는다(2026-11-03 별뜨리님 지시).
+- Nav 하단 구분선은 `neutral/border`가 아니라 `secondary/teal`이다. 푸터 상단에는 구분선을 두지 않는다.
 - 시안 일부 레이어는 `#292126`, `#574A4F`, `#333`을 하드코딩한다. 토큰이 있으면 `neutral/title`·`neutral/body`를 쓴다.
 
 ### 타이포그래피 (Noto Sans KR 기본)
@@ -116,7 +116,7 @@ Figma 시안은 초안이다. 시안과 랜딩이 다르면 랜딩을 따른다.
 - **배지(국가·상태, 관련 자료)**: 채움. 관련 자료는 `border-radius: 999px`. 스튜디오 유닛 배지는 시안 `12px` 모서리. gold/sage/일부 국가 배지는 어두운 글자.
 - **역할 칩 (홈 협업)**: 페이지 배경 + `1px solid neutral/border`, `border-radius: 20px`, 12px 본문색. 채워진 semantic 배지와 모양이 다르다.
 - **내비게이션 바**: 페이지와 같은 `neutral/background`. 하단 `1px solid secondary/teal`. 좌측 로고, 우측 끝에 Primary 「지금 시작하기」(→ `/planner`). 데스크톱 메뉴 간격 32px, 세로 패딩 24px. 모바일은 로고+햄버거, 세로 패딩 16px.
-- **푸터**: 상단 구분선 없음(2026-11-03 별뜨리님 지시).
+- **푸터**: 상단 구분선 없음.
 - **이미지 자리**: 실제 이미지 없을 때(스튜디오 썸네일) `neutral/background` + `1px solid #8C8C8C`, 진한 회색 박스로 채우지 않는다. 모서리 8px. 데스크톱 높이 200px / 모바일 160px.
 - **필터 칩 (스튜디오)**: 테두리 `#8C8C8C`, `border-radius: 20px`, 데스크톱 13px / 모바일 12px. 펼침 동작은 시안에 없음.
 
