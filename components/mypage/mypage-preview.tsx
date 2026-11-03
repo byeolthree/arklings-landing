@@ -50,15 +50,18 @@ function Section({
 }) {
   return (
     <section id={id} className={`mp-sec ${tone}`} aria-labelledby={`${id}-h`}>
-      <button type="button" className="mp-head" aria-expanded={open} aria-controls={`${id}-body`} onClick={onToggle}>
-        <span className="mp-head-main">
+      <div className="wrap">
+        <div className="mp-sh">
           <h2 id={`${id}-h`}>{title}</h2>
-          {extra}
-        </span>
-        <span className="mp-chev" aria-hidden="true" />
-      </button>
-      <div id={`${id}-body`} className="mp-inner" hidden={!open}>
-        {children}
+          {extra && <div className="mp-extra">{extra}</div>}
+          <button type="button" className="btn btn-ghost mp-toggle" aria-expanded={open} aria-controls={`${id}-body`} onClick={onToggle}>
+            {open ? "접기" : "펼치기"}
+            <span className="mp-chev" aria-hidden="true" />
+          </button>
+        </div>
+        <div id={`${id}-body`} className="mp-card" hidden={!open}>
+          {children}
+        </div>
       </div>
     </section>
   );
@@ -136,8 +139,7 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
         </div>
       </nav>
 
-      <div className="wrap">
-        <div className="mp-body">
+      <div className="mp-body">
           <Section id="mp-basic" tone="s1" title="기본 정보" open={open["mp-basic"]} onToggle={() => toggle("mp-basic")}>
             <dl className="mp-rows">
               <div className="mp-row">
@@ -304,7 +306,6 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
               </div>
             </div>
           </Section>
-        </div>
       </div>
     </div>
   );
