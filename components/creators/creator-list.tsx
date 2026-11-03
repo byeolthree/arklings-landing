@@ -61,7 +61,7 @@ export function CreatorList({
                   className="cr-input"
                   defaultValue={filter.q}
                   maxLength={MAX_QUERY}
-                  placeholder="이름이나 기획안으로 찾기"
+                  placeholder="닉네임이나 작품으로 찾기"
                   autoComplete="off"
                 />
                 <button type="submit" className="btn btn-primary">
@@ -150,11 +150,18 @@ export function CreatorList({
                         </div>
                       </div>
                       <div className="cr-box">
-                        <span className="cr-label">대표 기획안</span>
+                        <span className="cr-label">대표 작품</span>
                         <h3 className="cr-box-title">{c.latest.title}</h3>
                         <p className="cr-box-logline">{c.latest.logline}</p>
                       </div>
                       <RoleTags roles={c.roles} />
+                      {c.latest.genres && c.latest.genres.length > 0 && (
+                        <ul className="cr-genres" aria-label="장르">
+                          {c.latest.genres.map((g) => (
+                            <li key={g}>{g}</li>
+                          ))}
+                        </ul>
+                      )}
                     </Link>
                   </li>
                   );

@@ -5,11 +5,11 @@ import type { PublicContent } from "@/lib/plans";
 // 주인 번호(UUID)는 어디에도 싣지 않는다. 주소에는 공개 주소(handle)만 쓴다.
 export type CreatorCard = {
   handle: string;
-  name: string; // 공개 이름
+  name: string; // 닉네임
   roles: Role[];
-  bio?: string; // 크리에이터를 소개하는 한 줄 문구(선택, 200자 이내). 없으면 카드에서 줄을 숨긴다
-  planCount: number; // 공개한 기획안 수(1 이상인 사람만 목록에 나온다)
-  latest: { title: string; logline: string }; // 가장 최근에 공개한 기획안
+  bio?: string; // 소개 글의 앞부분(선택). 카드에는 두 줄까지 보이고 없으면 그 줄을 숨긴다(D26)
+  planCount: number; // 공개한 작품 수(1 이상인 사람만 목록에 나온다)
+  latest: { title: string; logline: string; genres?: string[] }; // 대표 작품(가장 최근에 공개한 작품)과 그 장르(D37)
 };
 
 // 크리에이터 프로필 화면에 필요한 값(프로필 머리글 + 그 사람이 공개한 기획안 카드들).

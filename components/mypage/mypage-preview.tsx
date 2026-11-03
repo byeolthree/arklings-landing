@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { SAMPLE_CREATORS } from "@/components/creators/sample-data";
 import { PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
 import { ROLES } from "@/lib/collab";
-import { GENRES, WorkEditor } from "@/components/mypage/work-editor";
+import { GENRES } from "@/components/creators/genres";
+import { WorkEditor } from "@/components/mypage/work-editor";
 import type { ProfileValues } from "@/lib/creator-rules";
 
 export type ProfileState = "none" | "public" | "private";
