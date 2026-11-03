@@ -92,6 +92,17 @@
 .mp .pl.mp-pl .answer:focus { border-color: var(--body); background: #fff; }
 .mp .pl.mp-pl .pp-avail.available { color: var(--sage-ink); }
 .mp .pl.mp-pl .pp-form { margin-top: 0; padding: 0; background: transparent; }
+/* 칸 이름은 왼쪽, 칸은 오른쪽(기본 정보와 같은 줄 짜임)으로 나눠 한쪽으로 쏠리지 않게 한다. 작은 화면에서는 위아래로 쌓는다 */
+.mp .pl.mp-pl .pp-field { margin-top: 0; padding: 20px 0; border-bottom: 1px solid var(--line); }
+.mp .pl.mp-pl .pp-field:first-child { padding-top: 0; }
+@media (min-width: 768px) {
+  .mp .pl.mp-pl .pp-field { display: grid; grid-template-columns: 9rem minmax(0, 1fr); column-gap: 24px; align-items: start; }
+  .mp .pl.mp-pl .pp-field > :first-child { grid-column: 1; grid-row: 1; margin-top: 0; padding-top: 10px; }
+  .mp .pl.mp-pl .pp-field > :not(:first-child) { grid-column: 2; }
+  .mp .pl.mp-pl .pp-form > .pp-err, .mp .pl.mp-pl .pp-form > .row-actions { margin-left: calc(9rem + 24px); }
+}
+.mp .pl.mp-pl .pp-form > .row-actions { margin-top: 24px; }
+.mp .pl.mp-pl .pp-form > .pp-err { margin-top: 16px; }
 .mp .mp-pending { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 20px; padding: 12px 16px; border-radius: 12px; background: var(--bg); border-left: 3px solid var(--sage); font-size: 14px; font-weight: 700; color: var(--title); }
 .mp .mp-sample { margin-top: 16px; font-size: 12px; color: var(--body); border: 1px dashed var(--line); border-radius: 8px; padding: 6px 10px; background: #fff; }
 
