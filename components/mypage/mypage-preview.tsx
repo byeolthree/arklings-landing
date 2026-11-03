@@ -284,7 +284,7 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
                   </div>
                   <div className="mp-genres">
                     <span className="mp-tag genre">{GENRES[0]}</span>
-                    <span className="mp-tag genre">{GENRES[1]}</span>
+                    <span className="mp-tag genre">{GENRES[2]}</span>
                   </div>
                 </div>
                 <div className="mp-work-btns">

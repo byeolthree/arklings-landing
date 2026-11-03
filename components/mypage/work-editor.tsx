@@ -6,7 +6,7 @@ import { ROLES, type Role } from "@/lib/collab";
 // 샘플 미리보기용: 펼친 작품 카드(배치도 I). 저장·올리기와 연결되지 않는다.
 const LOGLINE_LABEL = "로그라인 (이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)";
 const LOGLINE_HINT = "어느 날 〈사건〉이 벌어지자, 〈주인공〉은 〈장애물〉을 극복해야 〈목표〉를 달성할 수 있다. 그렇지 않으면 〈위험〉이 닥친다.";
-export const GENRES = ["드라마", "사극", "로맨스", "코미디", "액션", "스릴러", "공포", "미스터리", "범죄", "SF", "판타지", "전쟁", "애니메이션", "다큐멘터리"];
+export const GENRES = ["드라마", "로맨스", "코미디", "액션", "스릴러", "공포", "미스터리", "범죄", "SF", "판타지", "전쟁", "애니메이션", "다큐멘터리"];
 
 type Kind = "plan" | "text" | "image" | "video" | "doc";
 const FOLDABLE: Kind[] = ["image", "video", "doc"];
