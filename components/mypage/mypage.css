@@ -1,5 +1,5 @@
 /* 마이페이지 세 구역(샘플). 배치도 I를 따르고 값(색·카드·버튼·글자)은 랜딩(public/landing.html)과 디자인 토큰을 쓴다.
-   색은 neutral(흰색·배경색·테두리·글자색)과 자주색(primary, 주 버튼에만)만 쓴다. 세컨더리(청록·dusty-blue·muted-sage)는 배경에도 글자·표시에도 넣지 않는다. 배경 무늬는 랜딩의 격자(.fc-right, .ipg-r)와 같은 값.
+   색은 neutral(흰색·배경색·테두리·글자색)과 자주색(primary)만 쓴다. 버튼은 랜딩처럼 두 가지뿐: 자주 바탕 주 버튼, 자주 테두리·글자 보조 버튼(검은 바탕·회색 테두리 버튼은 없다). 선택한 칩은 자주 테두리·글자. 세컨더리(청록·dusty-blue·muted-sage)는 배경에도 글자·표시에도 넣지 않는다. 배경 무늬는 랜딩의 격자(.fc-right, .ipg-r)와 같은 값.
    다른 화면과 겹치지 않게 모두 .mp 안에서만 쓴다. */
 .mp {
   --jaju: #a61e5c; --teal: #1f5a66; --gold: #d89a24;
@@ -21,7 +21,7 @@
 }
 .mp .btn-primary { background: var(--jaju); color: #fff; box-shadow: 0 8px 24px -10px rgba(166,30,92,.55); }
 .mp .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(166,30,92,.65); }
-.mp .btn-ghost { background: transparent; color: var(--title); border-color: color-mix(in srgb, var(--body) 45%, var(--line)); }
+.mp .btn-ghost { background: transparent; color: var(--jaju); }
 .mp .btn-ghost:hover { transform: translateY(-2px); }
 .mp .btn[aria-disabled="true"] { opacity: .45; pointer-events: none; box-shadow: none; }
 .mp a:focus-visible, .mp button:focus-visible, .mp input:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
@@ -38,7 +38,7 @@
 .mp .mp-nav { position: sticky; top: 68px; z-index: 40; background: rgba(250,247,248,.94); backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--line); }
 .mp .mp-tabs { display: flex; justify-content: center; gap: 28px; }
 .mp .mp-tab { border: 0; background: none; font: inherit; font-size: 15px; color: var(--body); padding: 14px 2px; cursor: pointer; position: relative; transition: color .2s; }
-.mp .mp-tab::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--title); transform: scaleX(0); transition: transform .35s var(--ease); }
+.mp .mp-tab::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--jaju); transform: scaleX(0); transition: transform .35s var(--ease); }
 .mp .mp-tab[aria-current="true"] { color: var(--title); font-weight: 700; }
 .mp .mp-tab[aria-current="true"]::after { transform: scaleX(1); }
 @media (max-width: 480px) { .mp .mp-tabs { gap: 18px; } .mp .mp-tab { font-size: 14px; } }
@@ -55,7 +55,7 @@
 .mp .mp-extra { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13px; }
 .mp .mp-addr { font-weight: 500; color: var(--title); text-decoration: underline; text-underline-offset: 3px; }
 .mp .mp-state { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #fff; border: 1px solid var(--line); color: var(--body); }
-.mp .mp-state.on { background: var(--title); border-color: var(--title); color: #fff; }
+.mp .mp-state.on { background: color-mix(in srgb, var(--jaju) 8%, #fff); border-color: var(--jaju); color: var(--jaju); }
 .mp .mp-toggle { margin-left: auto; min-height: 30px; padding: 0 12px; font-size: 12px; }
 .mp .mp-chev { width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-135deg); margin-top: 3px; transition: transform .3s var(--ease); }
 .mp .mp-toggle[aria-expanded="false"] .mp-chev { transform: rotate(45deg); margin-top: -3px; }
@@ -84,9 +84,7 @@
 .mp .mp-foot a { color: inherit; text-decoration: underline; }
 
 /* 크리에이터 등록: 카드 안에 프로필 칸을 그대로 올린다. 기획안 화면용 색(청록 선택·자주 보조 버튼)은 이 화면에서 중성 색으로 바꾼다 */
-.mp .pl.mp-pl .opt[aria-pressed="true"], .mp .pl.mp-pl .opt[aria-checked="true"] { background: var(--title); border-color: var(--title); color: #fff; }
-.mp .pl.mp-pl .btn-ghost { color: var(--title); border-color: color-mix(in srgb, var(--body) 45%, var(--line)); }
-.mp .pl.mp-pl .danger { color: var(--body); }
+.mp .pl.mp-pl .opt[aria-pressed="true"], .mp .pl.mp-pl .opt[aria-checked="true"] { background: color-mix(in srgb, var(--jaju) 8%, #fff); border-color: var(--jaju); color: var(--jaju); font-weight: 700; }
 .mp .pl.mp-pl .answer { background: var(--bg); }
 .mp .pl.mp-pl .answer:focus { border-color: var(--body); background: #fff; }
 .mp .pl.mp-pl .pp-avail.available { color: var(--body); }
@@ -105,7 +103,7 @@
 .mp .pl.mp-pl .pp-form > .row-actions .btn-primary { min-height: 44px; padding: 0 28px; font-size: 14px; }
 @media (max-width: 767px) { .mp .pl.mp-pl .pp-form > .row-actions .btn { flex: 1 1 100%; } }
 .mp .pl.mp-pl .pp-form > .pp-err { margin-top: 16px; }
-.mp .mp-pending { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 20px; padding: 12px 16px; border-radius: 12px; background: var(--bg); border-left: 3px solid var(--title); font-size: 14px; font-weight: 700; color: var(--title); }
+.mp .mp-pending { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 20px; padding: 12px 16px; border-radius: 12px; background: var(--bg); border-left: 3px solid var(--jaju); font-size: 14px; font-weight: 700; color: var(--title); }
 .mp .mp-sample { margin-top: 16px; font-size: 12px; color: var(--body); border: 1px dashed var(--line); border-radius: 8px; padding: 6px 10px; background: #fff; }
 
 /* 포트폴리오 등록 */
