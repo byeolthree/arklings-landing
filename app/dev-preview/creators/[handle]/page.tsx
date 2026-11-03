@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CreatorProfile } from "@/components/creators/creator-profile";
+import type { CreatorCard } from "@/components/creators/types";
 import { SAMPLE_CREATORS, SAMPLE_PROFILE_PAGE_SIZE, sampleProfileOf, samplePlansOf } from "@/components/creators/sample-data";
 
 // 디자인 확인용 샘플 미리보기. 실제 DB와 연결되지 않고, 디자인이 끝나면 지운다.
@@ -13,9 +14,11 @@ const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 export default async function CreatorProfilePreviewPage({ params, searchParams }: Props) {
   const { handle } = await params;
   const sp = await searchParams;
-  const card = SAMPLE_CREATORS.find((c) => c.handle === handle);
+  // my-name = 샘플 마이페이지의 내 프로필(mine=public|private). 이름·글은 자리 표시다.
+  const MINE: CreatorCard = { handle: "my-name", name: "〈닉네임〉", roles: ["script", "video"], planCount: 2, latest: { title: "〈기획안 제목〉", logline: "〈로그라인〉" } };
+  const card = handle === MINE.handle ? MINE : SAMPLE_CREATORS.find((c) => c.handle === handle);
   if (!card) notFound();
-
+  const mine = handle === MINE.handle ? (one(sp.mine) === "private" ? "private" : "public") : undefined;
   const state = one(sp.state); // empty = 공개한 기획안 0건, many = 쪽 나눔 확인용으로 14건
   const requested = Math.max(1, parseInt(one(sp.page) ?? "1", 10) || 1);
   const all = state === "empty" ? [] : samplePlansOf(state === "many" ? { ...card, planCount: 14 } : card);
@@ -28,6 +31,7 @@ export default async function CreatorProfilePreviewPage({ params, searchParams }
   const href = (page: number) => {
     const p = new URLSearchParams();
     if (state) p.set("state", state);
+    if (mine) p.set("mine", mine);
     if (page > 1) p.set("page", String(page));
     const s = p.toString();
     return `${base}${s ? `?${s}` : ""}`;
@@ -43,6 +47,15 @@ export default async function CreatorProfilePreviewPage({ params, searchParams }
         <Link href={`${base}?state=many`} className="underline">기획안 14건</Link> ·{" "}
         <Link href={`${base}?state=empty`} className="underline">기획안 0건</Link> ·{" "}
         <Link href="/dev-preview/creators" className="underline">목록</Link>
+        {mine && (
+          <>
+            <br />
+            내 프로필 미리 보기:{" "}
+            <Link href={`${base}?mine=public`} className={mine === "public" ? "font-bold underline" : "underline"}>공개 중</Link> ·{" "}
+            <Link href={`${base}?mine=private`} className={mine === "private" ? "font-bold underline" : "underline"}>비공개</Link> ·{" "}
+            <Link href={`/dev-preview/mypage?profile=${mine}`} className="underline">마이페이지로</Link>
+          </>
+        )}
       </div>
       <CreatorProfile
         creator={sampleProfileOf(card)}

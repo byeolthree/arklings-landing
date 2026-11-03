@@ -79,6 +79,8 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
   const banner = msg ? MESSAGES[msg] : undefined;
   const exists = profile !== "none";
   const isPublic = profile === "public";
+  // 기획안 화면 샘플: 프로필이 없으면 프로필 칸, 비공개 프로필이 있으면 「프로필도 공개할까요?」, 공개 프로필이면 기획안 화면 그대로
+  const PLANNER_HREF = (profile === "none" ? "/dev-preview/profile-form?state=planner" : profile === "private" ? "/dev-preview/profile-form?state=planner-private" : "/planner");
 
   // 지금 화면에 보이는 구역을 이동 줄에 표시한다.
   useEffect(() => {
@@ -209,7 +211,7 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
             extra={
               exists ? (
                 <>
-                  <Link className="mp-addr" href="/dev-preview/creators/jian-lee">
+                  <Link className="mp-addr" href={`/dev-preview/creators/${SAMPLE_PROFILE.handle}?mine=${isPublic ? "public" : "private"}`}>
                     /creators/{SAMPLE_PROFILE.handle} ↗
                   </Link>
                   <span className={`mp-state ${isPublic ? "on" : ""}`}>{isPublic ? "공개 중" : "비공개"}</span>
@@ -256,11 +258,11 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
               <ul>
                 <li>
                   <span>〈기획안 제목〉</span>
-                  <span>〈공개 중〉 · 열기</span>
+                  <span>〈공개 중〉 · <Link href={PLANNER_HREF}>열기</Link></span>
                 </li>
                 <li>
                   <span>〈기획안 제목〉</span>
-                  <span>〈공개하지 않음〉 · 열기</span>
+                  <span>〈공개하지 않음〉 · <Link href={PLANNER_HREF}>열기</Link></span>
                 </li>
                 <li className="off">
                   <span>〈기획안 제목〉</span>

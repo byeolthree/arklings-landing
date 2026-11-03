@@ -36,7 +36,8 @@ export default async function PlanDetailPreviewPage({ params, searchParams }: Pr
         plan={plan}
         listHref="/dev-preview/creators"
         profileHref={(h) => `/dev-preview/creators/${h}`}
-        applyHref={`/collab/new?plan=${id}`}
+        // 실제 협업 신청 화면은 샘플 번호를 모르므로(DB에 없음) 번호 없이 연다. 실제 화면은 12단계에서 번호를 싣는다.
+        applyHref="/collab/new"
       />
     </>
   );
