@@ -276,6 +276,10 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
                     <span className="mp-tag">{ROLES.script}</span>
                     <span>〈공개 중〉</span>
                   </div>
+                  <div className="mp-genres">
+                    <span className="mp-tag genre">〈장르〉</span>
+                    <span className="mp-tag genre">〈장르〉</span>
+                  </div>
                 </div>
                 <div className="mp-work-btns">
                   <button type="button" className="btn btn-ghost">
@@ -293,6 +297,9 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
                   <div className="mp-work-meta">
                     <span className="mp-tag">{ROLES.art_director}</span>
                     <span>〈공개하지 않음〉</span>
+                  </div>
+                  <div className="mp-genres">
+                    <span className="mp-tag genre">〈장르〉</span>
                   </div>
                 </div>
                 <div className="mp-work-btns">
