@@ -23,6 +23,8 @@ const nextConfig: NextConfig = {
       { source: "/apply", destination: "/collab/new", permanent: false },
       // 예전 기획안 화면 주소. 파일(public/planner.html)은 남겨 두고 새 화면으로 보낸다.
       { source: "/planner.html", destination: "/planner", permanent: false },
+      // design 가지 임시: 랜딩(public/landing.html) 메뉴의 「크리에이터」(/creators)도 샘플 목록으로 보낸다. 12단계에서 실제 목록을 잇고 이 줄은 지운다. main에 합치기 전에 반드시 뺄 것.
+      { source: "/creators", destination: "/dev-preview/creators", permanent: false },
     ];
   },
 };
