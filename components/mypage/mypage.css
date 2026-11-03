@@ -155,17 +155,13 @@
 .mp .we-el:hover, .mp .we-el:focus-within { border-color: var(--line); background: var(--bg); }
 .mp .we-grip { color: var(--body); cursor: grab; line-height: 1.6; user-select: none; }
 .mp .we-main { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-.mp .we-main > .we-media, .mp .we-main > .we-text, .mp .we-main > .we-plan { flex: 1 1 100%; }
+.mp .we-main > .we-media, .mp .we-main > .we-text { flex: 1 1 100%; }
 .mp .we-tools { display: flex; gap: 6px; opacity: 0; }
 .mp .we-el:hover .we-tools, .mp .we-el:focus-within .we-tools { opacity: 1; }
 .mp .we-fold { flex: none; border: 0; background: none; padding: 0; font: inherit; font-size: 13px; color: var(--body); cursor: pointer; }
 .mp .we-line { font-size: 14px; color: var(--title); }
 .mp .we-media { aspect-ratio: 16 / 9; border-radius: 14px; background: var(--bg); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--body); }
 .mp .we-media.doc { aspect-ratio: 4 / 3; max-height: 260px; }
-.mp .we-plan { display: grid; gap: 4px; font-size: 14px; color: var(--body); }
-.mp .we-plan b { color: var(--title); }
-.mp .we-edit { opacity: 0; font-size: 13px; color: var(--body); text-decoration: underline; }
-.mp .we-el:hover .we-edit, .mp .we-el:focus-within .we-edit { opacity: 1; }
 .mp .we-add { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--body); }
 .mp .we-foot { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
 .mp .we-del { margin-left: auto; }

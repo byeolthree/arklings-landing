@@ -274,7 +274,7 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
 
             <div className="mp-works">
               {openWork[0] ? (
-                <WorkEditor isPublic={true} withPlan={true} roles={["video", "script"]} onFold={() => setWork(0, false)} />
+                <WorkEditor isPublic={true} roles={["video", "script"]} onFold={() => setWork(0, false)} />
               ) : (
               <div className="mp-work">
                 <div className="mp-thumb">대표 이미지</div>
@@ -301,7 +301,7 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
               </div>
               )}
               {openWork[1] ? (
-                <WorkEditor isPublic={false} withPlan={false} roles={["art_director"]} onFold={() => setWork(1, false)} />
+                <WorkEditor isPublic={false} roles={["art_director"]} onFold={() => setWork(1, false)} />
               ) : (
               <div className="mp-work">
                 <div className="mp-thumb">대표 이미지</div>

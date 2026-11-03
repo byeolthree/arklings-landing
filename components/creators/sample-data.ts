@@ -3,21 +3,45 @@
 import { SLOT_LABELS } from "@/lib/plans";
 import type { CreatorCard, CreatorProfileData, PlanCard, PlanDetailData } from "./types";
 
+const LOGLINES: Record<string, [string, string, string, string, string]> = {
+  "소금비 내리는 나라": ["소금비가 내리는 날마다 한 사람의 기억이 사라지는 일", "기억을 기록하는 사관", "왕의 기억만 지워지지 않는 비밀", "사라진 기억의 복구", "나라 전체가 기억을 잃는 재앙"],
+  "달빛 아래 두 번째 문": ["밤에만 열리는 문 너머에서 손님이 찾아오는 일", "문을 지키는 파수꾼", "이름을 빼앗으려는 손님의 계략", "자기 이름 지키기", "이름과 함께 존재가 지워지는 비극"],
+  "실이 이어 준 사람들": ["먼 나라와의 약속이 위태로워지는 일", "베 짜는 마을의 여인들", "끊어지는 실처럼 흩어지는 마음", "실 한 올로 약속 지키기", "마을과 먼 나라의 인연이 끊기는 불행"],
+  "붉은 강이 흐르는 밤": ["강이 붉게 물드는 밤이 찾아오는 일", "나루터를 지키는 늙은 뱃사공", "아무도 건너려 하지 않는 두려움", "마지막 배 띄우기", "나루터가 영영 사라지는 파국"],
+  "삼한의 마지막 등불": ["혹독한 겨울이 세 나라를 덮치는 일", "세 나라의 등불지기들", "서로를 믿지 못하는 적대감", "하나의 불씨 나눠 겨울나기", "모든 등불이 꺼지는 암흑"],
+  "지도에 없는 마을": ["지도에 없는 마을을 발견하는 일", "지도를 그리던 청년", "그린 적 없는 지도 속 낯선 선들", "마을의 비밀 밝히기", "자신이 지도 속으로 지워지는 운명"],
+  "바람의 값": ["바람에 값을 매기는 항구에 선원들이 발이 묶이는 일", "값을 치르지 못한 선원들", "바람을 쥔 상인들의 독점", "고향으로 돌아가는 길 찾기", "영영 항구에 갇히는 운명"],
+  "짧은 글": ["큰 일", "청년", "두려움", "용기", "큰 위험"],
+  "나루터의 약속": ["물길이 바뀌어 나루터가 사라지는 일", "두 뱃사공", "서로 다른 쪽으로 갈라진 물길", "같은 자리에서 다시 만나기", "서로를 영영 잃는 이별"],
+  "마지막 봉화": ["아무도 답하지 않는 봉화가 올라오는 일", "봉화대를 지키는 병졸", "끝내 응답이 없는 침묵", "불꽃의 주인 찾기", "변방이 무너지는 참변"],
+  "색을 잃은 도읍": ["도읍의 색이 하나씩 사라지는 일", "늙은 염색 장인", "모든 색을 삼키는 잿빛 기운", "마지막 색 지키기", "도읍이 영영 빛을 잃는 종말"],
+  "이름이 매우 긴 크리에이터": ["공개 이름이 길어 카드를 밀어내는 일", "이름이 긴 서기관", "말줄임 없이 넘치는 글줄", "카드 안에 이름 담기", "화면이 깨지는 혼란"],
+  "여름이 끝나는 날": ["여름의 마지막 날에 시장이 열리는 일", "계절을 잃은 청년", "되팔리는 계절의 값", "잃어버린 여름 되찾기", "영영 계절이 멈추는 재앙"],
+  "아주 아주 긴 제목의 기획안이 카드 안에서 어떻게 잘리는지 확인하기 위한 샘플 제목입니다": ["여러 팀의 일정이 한꺼번에 겹치고 연락이 끊기며 모든 계획이 흔들리기 시작하는 일", "책임을 맡아 모든 팀의 일정을 맞추는 사람", "서로 다른 팀들이 각자 주장하는 어긋난 일정과 끝없는 변경 요구와 쌓여 가는 불신", "모든 팀이 같은 날 같은 장소에서 만나 끝까지 한 편을 완성하기", "몇 달 동안 쌓은 작업이 모두 헛되이 사라지는 참담함"],
+};
+
+// 로그라인은 기획안 화면의 문장 틀(lib/plans.ts의 buildSuggestion 새 틀, 3-14)대로만 만든다: 어느 날 〈사건〉이 벌어지자, 〈주인공〉은 〈장애물〉을 극복해야 〈목표〉를 달성할 수 있다. 그렇지 않으면 〈위험〉이 닥친다.
+// 조사는 틀 그대로(이·은·을·를·이)라 칸 글의 끝소리를 맞췄다(사건·주인공·장애물·위험은 받침으로, 목표는 받침 없이 끝난다).
+const loglineOf = (title: string): string => {
+  const [사건, 주인공, 장애물, 목표, 위험] = LOGLINES[title];
+  return `어느 날 ${사건}이 벌어지자, ${주인공}은 ${장애물}을 극복해야 ${목표}를 달성할 수 있다. 그렇지 않으면 ${위험}이 닥친다.`;
+};
+
 export const SAMPLE_CREATORS: CreatorCard[] = [
-  { handle: "jian-lee", name: "이지안", roles: ["script"], bio: "사라지는 기억과 기록하는 사람을 쓰는 대본 작가예요.", planCount: 3, latest: { title: "소금비 내리는 나라", logline: "소금비가 내리는 날마다 한 사람의 기억이 사라지는 나라에서, 기억을 기록하는 서기가 왕의 기억만 지워지지 않는 이유를 쫓는다.", genres: ["드라마", "판타지"] } },
-  { handle: "seoha-park", name: "박서하", roles: ["video", "producer"], bio: "밤에만 열리는 문 같은 이야기를 영상으로 옮겨요.", planCount: 2, latest: { title: "달빛 아래 두 번째 문", logline: "밤에만 열리는 문을 지키는 소녀가 문 너머에서 온 손님에게 이름을 빼앗길 위기에 처한다.", genres: ["판타지", "미스터리"] } },
-  { handle: "dayun-choi", name: "최다윤", roles: ["history_advisor"], bio: "옛 베 짜기와 복식을 이야기 속에 살려 내는 역사 자문가입니다.", planCount: 1, latest: { title: "실이 이어 준 사람들", logline: "베 짜는 마을의 여인들이 실 한 올로 먼 나라의 약속을 지켜 낸다.", genres: ["드라마"] } },
-  { handle: "hayun-jung", name: "정하윤", roles: ["script", "art_director"], bio: "붉은 강과 나루터처럼 장면이 먼저 떠오르는 글을 써요.", planCount: 5, latest: { title: "붉은 강이 흐르는 밤", logline: "해마다 강이 붉게 물드는 밤, 나루터지기가 마지막 배를 띄우기로 결심한다.", genres: ["드라마", "로맨스"] } },
-  { handle: "dohyun-kim", name: "김도현", roles: ["video"], bio: "짧은 영상으로 세계관의 첫인상을 만듭니다.", planCount: 4, latest: { title: "삼한의 마지막 등불", logline: "서로 다른 세 나라의 등불지기가 같은 불씨를 나눠 가지며 겨울을 난다.", genres: ["전쟁", "드라마"] } },
-  { handle: "seoyun-choi", name: "최서윤", roles: ["other"], bio: "지도에 없는 마을을 찾아다니는 사람.", planCount: 1, latest: { title: "지도에 없는 마을", logline: "지도를 그리던 청년이 지도에 없는 마을에서 자신이 그린 적 없는 지도를 발견한다.", genres: ["미스터리"] } },
-  { handle: "minjun-han", name: "한민준", roles: ["script", "video", "art_director", "producer"], bio: "대본부터 영상, 제작 관리까지 한 편을 끝까지 같이 만들어요.", planCount: 7, latest: { title: "바람의 값", logline: "바람에도 값을 매기는 항구 도시에서, 값을 치르지 못한 선원들이 돌아갈 길을 찾는다.", genres: ["액션", "스릴러", "범죄"] } },
-  { handle: "yuna-oh", name: "오유나", roles: ["art_director"], planCount: 2, latest: { title: "짧은 글", logline: "한 줄 소개가 짧은 경우.", genres: ["애니메이션"] } },
-  { handle: "taeyang-baek", name: "백태양", roles: ["producer"], bio: "책임 프로듀서로 여러 팀의 일정을 맞춥니다.", planCount: 1, latest: { title: "아주 아주 긴 제목의 기획안이 카드 안에서 어떻게 잘리는지 확인하기 위한 샘플 제목입니다", logline: "한 줄 소개도 일부러 길게 적어서 카드 안의 글이 넘치지 않고 말줄임표로 잘리는지 확인합니다. 이 문장은 네 줄을 넘도록 계속 이어집니다. 줄바꿈과 말줄임이 같은 높이를 유지해야 합니다. 마지막 문장까지 모두 보이지는 않습니다.", genres: ["다큐멘터리"] } },
-  { handle: "sora-yoon", name: "윤소라", roles: ["video", "history_advisor"], bio: "물길과 뱃사공 이야기를 좋아하는 영상 크리에이터입니다.", planCount: 3, latest: { title: "나루터의 약속", logline: "물길이 바뀐 뒤에도 같은 자리에서 서로를 기다리는 두 뱃사공의 이야기.", genres: ["드라마", "로맨스"] } },
-  { handle: "junho-seo", name: "서준호", roles: ["script"], bio: "봉화대 같은 짧고 단단한 이야기를 씁니다.", planCount: 2, latest: { title: "마지막 봉화", logline: "봉화대를 지키는 병사가 어느 날 아무도 답하지 않는 불꽃을 올린다.", genres: ["전쟁", "액션"] } },
-  { handle: "hana-kang", name: "강하나", roles: ["art_director", "other"], bio: "색이 사라지는 도읍 같은 장면의 색을 설계해요.", planCount: 6, latest: { title: "색을 잃은 도읍", logline: "색이 하나씩 사라지는 도읍에서 염색장이 마지막 색을 지킨다.", genres: ["판타지", "애니메이션"] } },
-  { handle: "eunseo-jo", name: "조은서아라온다미리내", roles: ["script"], bio: "공개 이름이 길어도 소개 한 줄이 카드 밖으로 넘치지 않는지 확인하는 샘플 소개 문구입니다. 이 문장은 일부러 길게 적었습니다.", planCount: 1, latest: { title: "이름이 매우 긴 크리에이터", logline: "공개 이름이 길 때 이름 칸이 카드를 밀어내지 않고 말줄임표로 잘리는지 확인하는 샘플입니다.", genres: ["드라마", "미스터리"] } },
-  { handle: "gunwoo-lim", name: "임건우", roles: ["video", "script", "producer", "other"], bio: "여름이 끝나는 날의 쓸쓸함을 좋아해요.", planCount: 3, latest: { title: "여름이 끝나는 날", logline: "역할이 네 개일 때 「외 1」로 접히는지 확인하는 샘플입니다.", genres: ["로맨스", "코미디"] } },
+  { handle: "jian-lee", name: "이지안", roles: ["script"], bio: "사라지는 기억과 기록하는 사람을 쓰는 대본 작가예요.", planCount: 3, latest: { title: "소금비 내리는 나라", logline: loglineOf("소금비 내리는 나라"), genres: ["드라마", "판타지"] } },
+  { handle: "seoha-park", name: "박서하", roles: ["video", "producer"], bio: "밤에만 열리는 문 같은 이야기를 영상으로 옮겨요.", planCount: 2, latest: { title: "달빛 아래 두 번째 문", logline: loglineOf("달빛 아래 두 번째 문"), genres: ["판타지", "미스터리"] } },
+  { handle: "dayun-choi", name: "최다윤", roles: ["history_advisor"], bio: "옛 베 짜기와 복식을 이야기 속에 살려 내는 역사 자문가입니다.", planCount: 1, latest: { title: "실이 이어 준 사람들", logline: loglineOf("실이 이어 준 사람들"), genres: ["드라마"] } },
+  { handle: "hayun-jung", name: "정하윤", roles: ["script", "art_director"], bio: "붉은 강과 나루터처럼 장면이 먼저 떠오르는 글을 써요.", planCount: 5, latest: { title: "붉은 강이 흐르는 밤", logline: loglineOf("붉은 강이 흐르는 밤"), genres: ["드라마", "로맨스"] } },
+  { handle: "dohyun-kim", name: "김도현", roles: ["video"], bio: "짧은 영상으로 세계관의 첫인상을 만듭니다.", planCount: 4, latest: { title: "삼한의 마지막 등불", logline: loglineOf("삼한의 마지막 등불"), genres: ["전쟁", "드라마"] } },
+  { handle: "seoyun-choi", name: "최서윤", roles: ["other"], bio: "지도에 없는 마을을 찾아다니는 사람.", planCount: 1, latest: { title: "지도에 없는 마을", logline: loglineOf("지도에 없는 마을"), genres: ["미스터리"] } },
+  { handle: "minjun-han", name: "한민준", roles: ["script", "video", "art_director", "producer"], bio: "대본부터 영상, 제작 관리까지 한 편을 끝까지 같이 만들어요.", planCount: 7, latest: { title: "바람의 값", logline: loglineOf("바람의 값"), genres: ["액션", "스릴러", "범죄"] } },
+  { handle: "yuna-oh", name: "오유나", roles: ["art_director"], planCount: 2, latest: { title: "짧은 글", logline: loglineOf("짧은 글"), genres: ["애니메이션"] } },
+  { handle: "taeyang-baek", name: "백태양", roles: ["producer"], bio: "책임 프로듀서로 여러 팀의 일정을 맞춥니다.", planCount: 1, latest: { title: "아주 아주 긴 제목의 기획안이 카드 안에서 어떻게 잘리는지 확인하기 위한 샘플 제목입니다", logline: loglineOf("아주 아주 긴 제목의 기획안이 카드 안에서 어떻게 잘리는지 확인하기 위한 샘플 제목입니다"), genres: ["다큐멘터리"] } },
+  { handle: "sora-yoon", name: "윤소라", roles: ["video", "history_advisor"], bio: "물길과 뱃사공 이야기를 좋아하는 영상 크리에이터입니다.", planCount: 3, latest: { title: "나루터의 약속", logline: loglineOf("나루터의 약속"), genres: ["드라마", "로맨스"] } },
+  { handle: "junho-seo", name: "서준호", roles: ["script"], bio: "봉화대 같은 짧고 단단한 이야기를 씁니다.", planCount: 2, latest: { title: "마지막 봉화", logline: loglineOf("마지막 봉화"), genres: ["전쟁", "액션"] } },
+  { handle: "hana-kang", name: "강하나", roles: ["art_director", "other"], bio: "색이 사라지는 도읍 같은 장면의 색을 설계해요.", planCount: 6, latest: { title: "색을 잃은 도읍", logline: loglineOf("색을 잃은 도읍"), genres: ["판타지", "애니메이션"] } },
+  { handle: "eunseo-jo", name: "조은서아라온다미리내", roles: ["script"], bio: "공개 이름이 길어도 소개 한 줄이 카드 밖으로 넘치지 않는지 확인하는 샘플 소개 문구입니다. 이 문장은 일부러 길게 적었습니다.", planCount: 1, latest: { title: "이름이 매우 긴 크리에이터", logline: loglineOf("이름이 매우 긴 크리에이터"), genres: ["드라마", "미스터리"] } },
+  { handle: "gunwoo-lim", name: "임건우", roles: ["video", "script", "producer", "other"], bio: "여름이 끝나는 날의 쓸쓸함을 좋아해요.", planCount: 3, latest: { title: "여름이 끝나는 날", logline: loglineOf("여름이 끝나는 날"), genres: ["로맨스", "코미디"] } },
 ];
 
 export const SAMPLE_PAGE_SIZE = 12;
@@ -25,18 +49,18 @@ export const SAMPLE_PAGE_SIZE = 12;
 export const SAMPLE_PROFILE_PAGE_SIZE = 9;
 
 const PLAN_POOL: { title: string; logline: string }[] = [
-  { title: "달빛 아래 두 번째 문", logline: "밤에만 열리는 문을 지키는 소녀가 문 너머에서 온 손님에게 이름을 빼앗길 위기에 처한다." },
-  { title: "실이 이어 준 사람들", logline: "베 짜는 마을의 여인들이 실 한 올로 먼 나라의 약속을 지켜 낸다." },
-  { title: "붉은 강이 흐르는 밤", logline: "해마다 강이 붉게 물드는 밤, 나루터지기가 마지막 배를 띄우기로 결심한다." },
-  { title: "삼한의 마지막 등불", logline: "서로 다른 세 나라의 등불지기가 같은 불씨를 나눠 가지며 겨울을 난다." },
-  { title: "지도에 없는 마을", logline: "지도를 그리던 청년이 지도에 없는 마을에서 자신이 그린 적 없는 지도를 발견한다." },
-  { title: "바람의 값", logline: "바람에도 값을 매기는 항구 도시에서, 값을 치르지 못한 선원들이 돌아갈 길을 찾는다." },
-  { title: "나루터의 약속", logline: "물길이 바뀐 뒤에도 같은 자리에서 서로를 기다리는 두 뱃사공의 이야기." },
-  { title: "마지막 봉화", logline: "봉화대를 지키는 병사가 어느 날 아무도 답하지 않는 불꽃을 올린다." },
-  { title: "색을 잃은 도읍", logline: "색이 하나씩 사라지는 도읍에서 염색장이 마지막 색을 지킨다." },
-  { title: "여름이 끝나는 날", logline: "여름의 마지막 날에만 열리는 시장에서 잃어버린 계절을 되파는 상인을 만난다." },
-  { title: "소금비 내리는 나라", logline: "소금비가 내리는 날마다 한 사람의 기억이 사라지는 나라에서, 기억을 기록하는 서기가 왕의 기억만 지워지지 않는 이유를 쫓는다." },
-  { title: "짧은 글", logline: "한 줄 소개가 짧은 경우." },
+  { title: "달빛 아래 두 번째 문", logline: loglineOf("달빛 아래 두 번째 문") },
+  { title: "실이 이어 준 사람들", logline: loglineOf("실이 이어 준 사람들") },
+  { title: "붉은 강이 흐르는 밤", logline: loglineOf("붉은 강이 흐르는 밤") },
+  { title: "삼한의 마지막 등불", logline: loglineOf("삼한의 마지막 등불") },
+  { title: "지도에 없는 마을", logline: loglineOf("지도에 없는 마을") },
+  { title: "바람의 값", logline: loglineOf("바람의 값") },
+  { title: "나루터의 약속", logline: loglineOf("나루터의 약속") },
+  { title: "마지막 봉화", logline: loglineOf("마지막 봉화") },
+  { title: "색을 잃은 도읍", logline: loglineOf("색을 잃은 도읍") },
+  { title: "여름이 끝나는 날", logline: loglineOf("여름이 끝나는 날") },
+  { title: "소금비 내리는 나라", logline: loglineOf("소금비 내리는 나라") },
+  { title: "짧은 글", logline: loglineOf("짧은 글") },
 ];
 
 // 한 크리에이터의 샘플 기획안 목록(최신 공개 순). 대표 기획안(latest)이 맨 위에 온다.

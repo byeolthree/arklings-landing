@@ -8,13 +8,12 @@ import { ROLES, type Role } from "@/lib/collab";
 const LOGLINE_LABEL = "로그라인 (이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)";
 const LOGLINE_HINT = "어느 날 〈사건〉이 벌어지자, 〈주인공〉은 〈장애물〉을 극복해야 〈목표〉를 달성할 수 있다. 그렇지 않으면 〈위험〉이 닥친다.";
 
-type Kind = "plan" | "text" | "image" | "video" | "doc";
+type Kind = "text" | "image" | "video" | "doc";
 const FOLDABLE: Kind[] = ["image", "video", "doc"];
 const ADD: { kind: Kind; label: string }[] = [
   { kind: "text", label: "글" },
   { kind: "image", label: "이미지" },
   { kind: "video", label: "영상" },
-  { kind: "plan", label: "기획안" },
   { kind: "doc", label: "문서" },
 ];
 
@@ -39,13 +38,6 @@ function Element({ kind, first, last, folded, onFold }: { kind: Kind; first: boo
             {folded ? "▸ 펼치기" : "▾ 접기"}
           </button>
         )}
-        {kind === "plan" && (
-          <div className="we-plan">
-            <b>사이트 기획안</b>
-            <span>사건 〈 〉 · 주인공 〈 〉 · 장애물 〈 〉 · 목표 〈 〉 · 위험 〈 〉</span>
-            <a href="/planner" className="we-edit">기획안 화면에서 고치기</a>
-          </div>
-        )}
         {kind === "text" && <textarea className="we-text" rows={3} placeholder="〈글〉" aria-label="글" />}
         {kind === "image" && (folded ? <span className="we-line">이미지 〈파일 이름〉</span> : <div className="we-media">〈이미지〉</div>)}
         {kind === "video" && (folded ? <span className="we-line">영상 〈제목〉 · youtube.com</span> : <div className="we-media">〈영상〉</div>)}
@@ -56,8 +48,8 @@ function Element({ kind, first, last, folded, onFold }: { kind: Kind; first: boo
   );
 }
 
-export function WorkEditor({ isPublic, withPlan, roles, onFold }: { isPublic: boolean; withPlan: boolean; roles: Role[]; onFold: () => void }) {
-  const [order] = useState<Kind[]>(withPlan ? ["plan", "text", "image", "video", "doc"] : ["text", "image"]);
+export function WorkEditor({ isPublic, roles, onFold }: { isPublic: boolean; roles: Role[]; onFold: () => void }) {
+  const [order] = useState<Kind[]>(isPublic ? ["text", "image", "video", "doc"] : ["text", "image"]);
   const [folded, setFolded] = useState<Partial<Record<Kind, boolean>>>({ video: true, doc: true });
   const [pickRoles, setPickRoles] = useState(false);
   const [myRoles, setMyRoles] = useState<Role[]>(roles);
@@ -117,7 +109,7 @@ export function WorkEditor({ isPublic, withPlan, roles, onFold }: { isPublic: bo
         ))}
         <div className="we-add">
           <span>추가</span>
-          {ADD.filter((a) => withPlan || a.kind !== "plan").map((a) => (
+          {ADD.map((a) => (
             <button key={a.kind} type="button" className="btn btn-ghost">+ {a.label}</button>
           ))}
         </div>
