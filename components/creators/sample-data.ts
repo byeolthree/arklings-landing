@@ -23,7 +23,7 @@ const LOGLINES: Record<string, [string, string, string, string, string]> = {
 
 // 로그라인은 기획안 화면의 문장 틀(lib/plans.ts의 buildSuggestion 새 틀, 3-14)대로만 만든다: 어느 날 〈사건〉이 벌어지자, 〈주인공〉은 〈장애물〉을 극복해야 〈목표〉를 달성할 수 있다. 그렇지 않으면 〈위험〉이 닥친다.
 // 조사는 틀 그대로(이·은·을·를·이)라 칸 글의 끝소리를 맞췄다(사건·주인공·장애물·위험은 받침으로, 목표는 받침 없이 끝난다).
-const loglineOf = (title: string): string => {
+export const loglineOf = (title: string): string => {
   const [사건, 주인공, 장애물, 목표, 위험] = LOGLINES[title];
   return `어느 날 ${사건}이 벌어지자, ${주인공}은 ${장애물}을 극복해야 ${목표}를 달성할 수 있다. 그렇지 않으면 ${위험}이 닥친다.`;
 };
