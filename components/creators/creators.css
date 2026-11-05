@@ -75,6 +75,7 @@
   box-shadow: 0 24px 48px -20px rgba(42,32,37,.45), 0 2px 8px rgba(42,32,37,.08); }
 @media (min-width: 768px) { .cr .cr-filter-panel { left: auto; width: 420px; } }
 .cr .cr-filter-title { font-size: 12px; font-weight: 700; color: var(--teal); letter-spacing: .04em; margin-bottom: 10px; }
+.cr .cr-chips + .cr-filter-title { margin-top: 18px; }
 .cr .cr-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 /* 필터 칩 (테두리 #8C8C8C, 모서리 20px, 데스크톱 13px / 모바일 12px) */
 .cr .cr-fchip { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border: 1px solid #8c8c8c; border-radius: 20px;
@@ -88,6 +89,8 @@
   transition: transform .45s var(--ease), box-shadow .45s var(--ease); }
 @media (min-width: 768px) { .cr .cr-card { padding: 24px; } }
 .cr .cr-card:hover { transform: translateY(-4px); box-shadow: 0 30px 54px -24px rgba(42,32,37,.5), 0 2px 6px rgba(42,32,37,.06); }
+.cr .cr-card-main { display: flex; flex-direction: column; gap: 16px; flex: 1; text-decoration: none; color: inherit; }
+.cr .cr-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .cr .cr-who { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .cr .cr-av { flex: none; display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; font-size: 18px; font-weight: 700; color: #fff; }
 .cr .cr-av.teal { background: var(--teal); }

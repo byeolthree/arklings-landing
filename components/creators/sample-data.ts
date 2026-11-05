@@ -2,7 +2,10 @@
 // 디자인 작업이 끝나 실제 읽기(lib/creators.ts)로 바꾸면 이 파일과 /dev-preview 주소는 지운다.
 import { SLOT_LABELS } from "@/lib/plans";
 import { GENRES } from "./genres";
-import type { CreatorCard, CreatorProfileData, PlanCard, PlanDetailData, WorkCard } from "./types";
+import { WORK_KINDS, type CreatorCard, type CreatorProfileData, type PlanCard, type PlanDetailData, type WorkCard } from "./types";
+
+// 목록·프로필 샘플이 받는 사람 값(협업 받는 중·전체 장르·분량은 작품에서 계산해 더한다)
+type BaseCard = Omit<CreatorCard, "openToCollab" | "genres" | "forms">;
 
 const LOGLINES: Record<string, [string, string, string, string, string]> = {
   "소금비 내리는 나라": ["소금비가 내리는 날마다 한 사람의 기억이 사라지는 일", "기억을 기록하는 사관", "왕의 기억만 지워지지 않는 비밀", "사라진 기억의 복구", "나라 전체가 기억을 잃는 재앙"],
@@ -28,7 +31,7 @@ const loglineOf = (title: string): string => {
   return `어느 날 ${사건}이 벌어지자, ${주인공}은 ${장애물}을 극복해야 ${목표}를 달성할 수 있다. 그렇지 않으면 ${위험}이 닥친다.`;
 };
 
-export const SAMPLE_CREATORS: CreatorCard[] = [
+const RAW_CREATORS: BaseCard[] = [
   { handle: "jian-lee", name: "이지안", roles: ["script"], bio: "사라지는 기억과 기록하는 사람을 쓰는 대본 작가예요.", planCount: 3, latest: { title: "소금비 내리는 나라", logline: loglineOf("소금비 내리는 나라"), genres: ["드라마", "판타지"] } },
   { handle: "seoha-park", name: "박서하", roles: ["video", "producer"], bio: "밤에만 열리는 문 같은 이야기를 영상으로 옮겨요.", planCount: 2, latest: { title: "달빛 아래 두 번째 문", logline: loglineOf("달빛 아래 두 번째 문"), genres: ["판타지", "미스터리"] } },
   { handle: "dayun-choi", name: "최다윤", roles: ["history_advisor"], bio: "옛 베 짜기와 복식을 이야기 속에 살려 내는 역사 자문가입니다.", planCount: 1, latest: { title: "실이 이어 준 사람들", logline: loglineOf("실이 이어 준 사람들"), genres: ["드라마"] } },
@@ -65,7 +68,7 @@ const PLAN_POOL: { title: string; logline: string }[] = [
 ];
 
 // 한 크리에이터의 샘플 기획안 목록(최신 공개 순). 대표 기획안(latest)이 맨 위에 온다.
-export function samplePlansOf(c: CreatorCard): PlanCard[] {
+export function samplePlansOf(c: Pick<BaseCard, "handle" | "planCount" | "latest">): PlanCard[] {
   const n = Math.max(c.planCount, 1);
   return Array.from({ length: n }, (_, i) => {
     const base = i === 0 ? c.latest : PLAN_POOL[(i * 5 + c.handle.length) % PLAN_POOL.length];
@@ -82,17 +85,17 @@ const SAMPLE_EXTRA: Record<string, { about?: string; channels?: { label: string;
   "hayun-jung": { channels: [{ label: "블로그", url: "https://example.com/blog" }], openToCollab: true },
 };
 
-export function sampleProfileOf(c: CreatorCard): CreatorProfileData {
+export function sampleProfileOf(c: BaseCard): CreatorProfileData {
   const x = SAMPLE_EXTRA[c.handle];
   return { handle: c.handle, name: c.name, roles: c.roles, bio: x?.about ?? c.bio, channels: x?.channels, openToCollab: x?.openToCollab ?? true };
 }
 
 // 프로필의 작품 카드(최신 공개 순). 장르는 대표 작품이 가진 것을 쓰고, 나머지는 돌려 가며 붙인 샘플이다.
-export function sampleWorksOf(c: CreatorCard, count = c.planCount): WorkCard[] {
+export function sampleWorksOf(c: BaseCard, count = c.planCount): WorkCard[] {
   return samplePlansOf({ ...c, planCount: count }).map((p, i) => {
     const h = c.handle.length;
     const genres = i === 0 && c.latest.genres ? c.latest.genres : [GENRES[(i * 3 + h) % GENRES.length], GENRES[(i * 5 + h + 1) % GENRES.length]].filter((g, k, a) => a.indexOf(g) === k);
-    return { id: p.id, title: p.title, logline: p.logline, roles: c.roles.slice(0, 2), genres, publishedAt: p.publishedAt };
+    return { id: p.id, title: p.title, logline: p.logline, roles: c.roles.slice(0, 2), genres, kind: WORK_KINDS[(i * 3 + h) % WORK_KINDS.length], form: (i + h) % 3 === 1 ? "short" : "long", publishedAt: p.publishedAt };
   });
 }
 
@@ -125,3 +128,9 @@ export function sampleDetailOf(id: string): PlanDetailData | null {
     },
   };
 }
+
+// 목록 카드 샘플: 협업 받는 중은 프로필과 같은 값, 장르·분량은 그 사람의 작품 카드에서 모은다.
+export const SAMPLE_CREATORS: CreatorCard[] = RAW_CREATORS.map((c) => {
+  const works = sampleWorksOf(c);
+  return { ...c, openToCollab: sampleProfileOf(c).openToCollab ?? true, genres: [...new Set(works.flatMap((w) => w.genres))], forms: [...new Set(works.map((w) => w.form))] };
+});

@@ -12,7 +12,7 @@ type Props = { params: Promise<{ handle: string }>; searchParams: Promise<Record
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 // my-name = 샘플 마이페이지의 내 프로필(mine=public|private). 이름·글은 자리 표시다.
-const MINE: CreatorCard = { handle: "my-name", name: "〈닉네임〉", roles: ["script", "video"], bio: "〈한 줄 소개〉\n〈경력〉\n〈참여한 일〉\n〈하고 싶은 협업〉", planCount: 2, latest: { title: "〈작품 제목〉", logline: "〈로그라인〉", genres: ["〈장르〉"] } };
+const MINE: CreatorCard = { handle: "my-name", name: "〈닉네임〉", roles: ["script", "video"], bio: "〈한 줄 소개〉\n〈경력〉\n〈참여한 일〉\n〈하고 싶은 협업〉", planCount: 2, openToCollab: true, genres: ["〈장르〉"], forms: ["long"], latest: { title: "〈작품 제목〉", logline: "〈로그라인〉", genres: ["〈장르〉"] } };
 
 export default async function CreatorProfilePreviewPage({ params, searchParams }: Props) {
   const { handle } = await params;

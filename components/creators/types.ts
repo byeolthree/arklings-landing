@@ -1,6 +1,12 @@
 import type { Role } from "@/lib/collab";
 import type { PublicContent } from "@/lib/plans";
 
+// 작품의 분량(목록 필터용)과 종류(프로필 작품 카드의 「종류」 표시용). 이름은 별뜨리님 지시(2026-11-05)를 그대로 쓴다.
+export const FORM_LABEL = { long: "롱폼", short: "숏폼" } as const;
+export type WorkForm = keyof typeof FORM_LABEL;
+export const WORK_KINDS = ["로그라인", "아웃라인", "시리즈 바이블", "파일럿", "피치 문서", "피치 영상", "스토리 없는 이미지·영상"] as const;
+export type WorkKind = (typeof WORK_KINDS)[number];
+
 // 크리에이터 목록 카드 한 장에 필요한 값. 실제 읽기(lib/creators.ts)가 생기면 그 결과가 이 모양을 따른다.
 // 주인 번호(UUID)는 어디에도 싣지 않는다. 주소에는 공개 주소(handle)만 쓴다.
 export type CreatorCard = {
@@ -9,6 +15,9 @@ export type CreatorCard = {
   roles: Role[];
   bio?: string; // 소개 글의 앞부분(선택). 카드에는 두 줄까지 보이고 없으면 그 줄을 숨긴다(D26)
   planCount: number; // 공개한 작품 수(1 이상인 사람만 목록에 나온다)
+  openToCollab: boolean; // 협업 신청 받는 중(카드에 표시와 「협업 신청」 버튼)
+  genres: string[]; // 공개한 작품 전체의 장르(목록 필터용)
+  forms: WorkForm[]; // 공개한 작품 전체의 분량(목록 필터용)
   latest: { title: string; logline: string; genres?: string[] }; // 대표 작품(가장 최근에 공개한 작품)과 그 장르(D37)
 };
 
@@ -29,6 +38,8 @@ export type WorkCard = {
   logline: string;
   roles: Role[];
   genres: string[];
+  kind: WorkKind; // 작품 종류
+  form: WorkForm;
   publishedAt: string;
 };
 

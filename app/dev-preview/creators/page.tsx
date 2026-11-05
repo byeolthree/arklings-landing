@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CreatorList } from "@/components/creators/creator-list";
-import { matchesFilter, parseFilter } from "@/components/creators/filter";
+import { matchesFilter, parseFilter, type CreatorFilter } from "@/components/creators/filter";
 import { SAMPLE_CREATORS, SAMPLE_PAGE_SIZE } from "@/components/creators/sample-data";
 
 // 디자인 확인용 샘플 미리보기. 실제 DB와 연결되지 않고, 디자인이 끝나면 지운다.
@@ -15,18 +15,21 @@ export default async function CreatorsPreviewPage({ searchParams }: { searchPara
   const state = one(sp.state); // empty = 크리에이터가 하나도 없음
   const requested = Math.max(1, parseInt(one(sp.page) ?? "1", 10) || 1);
 
-  const filter = parseFilter(one(sp.q), one(sp.role));
+  const filter = parseFilter({ q: one(sp.q), role: one(sp.role), genre: one(sp.genre), form: one(sp.form), open: one(sp.open) });
   const all = (state === "empty" ? [] : SAMPLE_CREATORS).filter((c) => matchesFilter(c, filter));
   const total = all.length;
   const pages = Math.max(1, Math.ceil(total / SAMPLE_PAGE_SIZE));
   const from = (requested - 1) * SAMPLE_PAGE_SIZE;
   const cards = all.slice(from, from + SAMPLE_PAGE_SIZE);
 
-  const href = ({ page, q, role }: { page?: number; q?: string; role?: string }) => {
+  const href = ({ page, q, role, genre, form, open }: Partial<CreatorFilter> & { page?: number }) => {
     const p = new URLSearchParams();
     if (state) p.set("state", state);
     if (q) p.set("q", q);
     if (role) p.set("role", role);
+    if (genre) p.set("genre", genre);
+    if (form) p.set("form", form);
+    if (open) p.set("open", "1");
     if (page && page > 1) p.set("page", String(page));
     const s = p.toString();
     return `/dev-preview/creators${s ? `?${s}` : ""}`;
@@ -51,6 +54,7 @@ export default async function CreatorsPreviewPage({ searchParams }: { searchPara
         filter={filter}
         profileHref={(h) => `/dev-preview/creators/${h}`}
         pageHref={href}
+        applyHref={(c) => `/dev-preview/collab?creator=${c.handle}&roles=${(filter.role ? [filter.role] : c.roles).join(",")}`}
         hiddenFields={state ? { state } : {}}
       />
     </>
