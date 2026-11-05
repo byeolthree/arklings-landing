@@ -168,3 +168,7 @@
 @media (max-width: 767px) { .mp .we-el { flex-wrap: wrap; } .mp .we-tools { flex: 1 1 100%; padding-left: 24px; } .mp .we-del { margin-left: 0; } .mp .we-tools { opacity: 1; } .mp .we-gap .we-mini { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) { .mp *, .mp *::before, .mp *::after { transition: none !important; animation: none !important; } }
+
+/* 누르는 동안 살짝 작아지고 진해진다(잠긴 버튼 제외) */
+.mp .btn:disabled { opacity: .55; pointer-events: none; }
+.mp .btn:not([disabled]):not([aria-disabled="true"]):active, .mp .opt:not([disabled]):active, .mp .we-mini:not([disabled]):active, .mp .mp-tab:active { transform: scale(.97); filter: brightness(.92); }
