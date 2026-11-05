@@ -252,7 +252,7 @@
   }
   .steps { display: grid; gap: 0; }
   .step {
-    padding: 34px 0 34px 28px; border-left: 2px solid var(--line); position: relative;
+    padding: 34px 0 34px 28px; position: relative;
     opacity: .38; transition: opacity .5s var(--ease);
   }
   .step::before {
@@ -650,7 +650,7 @@
     background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
     background-size: 28px 28px;
   }
-  @media (min-width: 980px) { .fc-right { border-top: 0; border-left: 1px solid var(--line); padding: 40px; } }
+  @media (min-width: 980px) { .fc-right { padding: 40px; } }
   .fc-window {
     width: 100%; max-width: 520px; background: #fff; border: 1px solid var(--line); border-radius: 16px;
     box-shadow: 0 30px 60px -36px rgba(42,32,37,.45); overflow: hidden;
@@ -725,7 +725,7 @@
   .pv-src span { font-size: 13px; color: var(--body); }
 
   .pv-side { background: var(--bg); padding: 22px; }
-  @media (min-width: 980px) { .pv-side { border-top: 0; border-left: 1px solid var(--line); padding: 32px 30px; } }
+  @media (min-width: 980px) { .pv-side { padding: 32px 30px; } }
   .pv-side-head { display: flex; justify-content: space-between; align-items: baseline; }
   .pv-side-head b { color: var(--title); font-size: 16px; }
   .pv-side-head span { font-size: 12px; font-weight: 700; color: var(--teal); }
