@@ -5,6 +5,7 @@ import { startLinkIdentity, unlinkProvider } from "@/app/actions/social";
 import { DisplayNameForm } from "@/components/mypage-forms";
 import { PaperCard, PaperPage, outlineBtn } from "@/components/paper-card";
 import { requireUser } from "@/lib/auth";
+import { countNewCollab } from "@/lib/collab-count";
 import { createAuthClient } from "@/lib/supabase/server";
 import { OAUTH_PROVIDERS, PROVIDER_LABEL } from "@/lib/providers";
 import { formatKst } from "@/lib/time";
@@ -65,6 +66,8 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
   } catch {
     plansLoadFailed = true;
   }
+
+  const newCollab = await countNewCollab();
 
   // 로그인 방법: 이미 쓰는 것(해제 가능) / 더할 수 있는 것(추가). 방법은 항상 1개 이상 남는다.
   const linked = Array.from(new Set(user.providers));
@@ -161,6 +164,19 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
               ))}
             </ul>
           )}
+        </section>
+
+        <section className="mt-8 border-t border-[#e8dfe3] pt-6" aria-labelledby="my-collab">
+          <div className="flex items-center justify-between gap-3">
+            <h2 id="my-collab" className="text-[16px] font-bold text-[#292126]">
+              받은 협업 신청
+              {newCollab ? <span className="ml-2 rounded-full bg-jaju px-2 py-0.5 align-middle text-[12px] font-medium text-white">새 신청 {newCollab}건</span> : null}
+            </h2>
+            <Link href="/collab" className={outlineBtn}>
+              받은 협업 신청 보기
+            </Link>
+          </div>
+          <p className="mt-3 text-[13px] text-[#574a4f]">내게 온 협업 신청을 보고, 상세 확인·수정·삭제를 할 수 있어요.</p>
         </section>
 
         <form action={signOut} className="mt-8 border-t border-[#e8dfe3] pt-6">
