@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CollabReply } from "@/components/collab-reply";
 import { DeleteButton } from "@/components/delete-button";
-import { outlineBtn, PaperCard, PaperPage } from "@/components/paper-card";
+import { PaperCard, PaperPage } from "@/components/paper-card";
 import { StatusBadge } from "@/components/status-badge";
 import { requireUser } from "@/lib/auth";
 import { BUCKET } from "@/lib/supabase";
@@ -52,7 +53,24 @@ export default async function CollabDetailPage({ params, searchParams }: Props) 
     else fileUrl = signed.data.signedUrl;
   }
   const isPdf = r.attachment_path?.endsWith(".pdf");
-  const saved = sp.saved === "updated" ? "수정 내용이 저장되었습니다." : null;
+  const savedMessages: Record<string, string> = {
+    updated: "수정 내용이 저장되었습니다.",
+    replied: "답장을 보냈어요.",
+    accepted: "수락으로 바꿨어요.",
+    rejected: "거절로 바꿨어요.",
+    reviewing: "검토 중으로 바꿨어요.",
+  };
+  const mailNotes: Record<string, string> = {
+    mailfailed: " 다만 신청자에게 가는 메일은 보내지 못했어요.",
+    mailfailed_stored: " 사이트에는 남겼지만 신청자에게 가는 메일은 보내지 못했어요.",
+    notstored: " 다만 사이트에 남기지는 못했어요.",
+    nomail: " 신청자의 연락처가 이메일이 아니라서 메일은 보내지 않았어요.",
+  };
+  const savedKey = typeof sp.saved === "string" ? sp.saved : "";
+  const mailKey = typeof sp.mail === "string" ? sp.mail : "";
+  const saved = savedMessages[savedKey] ? savedMessages[savedKey] + (mailNotes[mailKey] ?? "") : null;
+  const onSite = !!r.applicant_id;
+  const canMail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.contact.trim());
 
   return (
     <PaperPage wide>
@@ -96,10 +114,9 @@ export default async function CollabDetailPage({ params, searchParams }: Props) 
           <Row k="최근 수정">{formatKst(r.updated_at)}</Row>
         </dl>
 
-        <div className="mt-6 flex items-start gap-3">
-          <Link href={`/collab/${r.id}/edit`} className={outlineBtn}>수정</Link>
+        <CollabReply id={r.id} canMail={canMail} onSite={onSite}>
           <DeleteButton id={r.id} />
-        </div>
+        </CollabReply>
       </PaperCard>
     </PaperPage>
   );

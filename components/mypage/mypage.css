@@ -36,7 +36,7 @@
 @media (min-width: 768px) { .mp .mp-desc { font-size: 18px; } }
 
 /* 구역 이동 줄: 사이트 상단 메뉴처럼 글자 메뉴. 스크롤해도 메뉴 바로 아래에 붙는다 */
-.mp .mp-nav { position: sticky; top: 68px; z-index: 40; background: var(--hero-bg); border-bottom: 1px solid var(--line); }
+.mp .mp-nav { position: sticky; top: 68px; z-index: 40; background: var(--hero-bg); }
 .mp .mp-tabs { display: flex; justify-content: center; gap: 28px; }
 .mp .mp-tab { border: 0; background: none; font: inherit; font-size: 15px; color: var(--body); padding: 14px 2px; cursor: pointer; position: relative; transition: color .2s; }
 .mp .mp-tab::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--jaju); transform: scaleX(0); transition: transform .35s var(--ease); }
