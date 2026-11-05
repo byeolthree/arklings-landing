@@ -8,6 +8,7 @@ import { authInputCls, FormField } from "@/components/form-field";
 import { CardHeading, PaperCard, primaryBtn, outlineBtn } from "@/components/paper-card";
 import { CONSENT_LABEL } from "@/lib/consent";
 import { SocialButtons } from "@/components/social-buttons";
+import { useStoredValue } from "@/lib/use-stored-value";
 
 const withNext = (path: string, next: string) => `${path}?next=${encodeURIComponent(next)}`;
 
@@ -186,15 +187,32 @@ export function SignupForm({ returnTo }: { returnTo: string }) {
   );
 }
 
+// 「이메일 기억하기」: 이메일만 이 브라우저에 저장한다(비밀번호는 저장하지 않는다. 비밀번호 저장은 브라우저의 저장 기능이 맡는다).
+const REMEMBER_EMAIL_KEY = "arklings.rememberedEmail";
+
 export function LoginForm({ returnTo }: { returnTo: string }) {
   const [state, action, pending] = useActionState<AuthFormState, FormData>(signIn, {});
   const e = state.errors ?? {};
   const v = state.values ?? {};
+  const remembered = useStoredValue(REMEMBER_EMAIL_KEY);
 
   return (
     <PaperCard>
       <CardHeading title="로그인" lines={["가입할 때 쓴 이메일과 비밀번호를 입력해 주세요."]} />
-      <form action={action} noValidate className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5">
+      <form
+        action={action}
+        noValidate
+        className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5"
+        onSubmit={(ev) => {
+          try {
+            const fd = new FormData(ev.currentTarget);
+            if (fd.get("remember") === "on") localStorage.setItem(REMEMBER_EMAIL_KEY, String(fd.get("email") ?? "").trim());
+            else localStorage.removeItem(REMEMBER_EMAIL_KEY);
+          } catch {
+            /* 저장소를 쓸 수 없으면 기억 기능만 건너뛴다 */
+          }
+        }}
+      >
         <input type="hidden" name="next" value={returnTo} />
         <ErrorBox message={state.message} />
         <FormField id="login-email" label="이메일" error={e.email}>
@@ -203,7 +221,8 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
             name="email"
             type="email"
             autoComplete="email"
-            defaultValue={v.email}
+            key={remembered}
+            defaultValue={v.email ?? remembered}
             disabled={pending}
             aria-invalid={e.email ? true : undefined}
             aria-describedby={e.email ? "login-email-error" : undefined}
@@ -222,6 +241,10 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
             className={authInputCls}
           />
         </FormField>
+        <label className="flex items-center gap-2 text-[12px] text-[#6f6469] md:text-[13px]">
+          <input type="checkbox" name="remember" key={remembered ? "on" : "off"} defaultChecked={Boolean(remembered)} disabled={pending} className="size-4 accent-[#a61e5c]" />
+          이메일 기억하기
+        </label>
         <button type="submit" disabled={pending} className={`${primaryBtn} w-full`}>
           {pending ? "로그인 중…" : "로그인"}
         </button>
