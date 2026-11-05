@@ -246,8 +246,8 @@
 .cr:has(.cr-apply-stick) { overflow: clip; }
 
 /* 프로필 맨 위: 대표 이미지·영상 + 아주 큰 닉네임(Spotify 아티스트 화면처럼). 대표가 없으면 닉네임만 크게 */
-.cr .cr-hero { position: relative; display: flex; align-items: flex-end; min-height: clamp(260px, 40vh, 300px); background: var(--hero-bg); color: var(--title); }
-@media (min-width: 768px) { .cr .cr-hero { min-height: clamp(280px, 42vh, 480px); } }
+.cr .cr-hero { position: relative; display: flex; align-items: flex-end; min-height: 300px; background: var(--hero-bg); color: var(--title); }
+@media (min-width: 768px) { .cr .cr-hero { min-height: 480px; } }
 .cr .cr-hero:not(.none) { background: var(--title); color: #fff; }
 .cr .cr-hero-media { position: absolute; inset: 0; display: grid; place-items: center; font-size: 14px; color: rgba(255,255,255,.55); background: var(--title); }
 .cr .cr-hero:not(.none)::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.35), transparent 35%, rgba(0,0,0,.6)); pointer-events: none; }
