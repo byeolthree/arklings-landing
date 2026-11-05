@@ -34,22 +34,49 @@ const SAMPLE_PROFILE: Partial<ProfileValues> = {
 };
 
 // 샘플: 크리에이터를 대표하는 이미지나 영상 한 가지를 고른다(프로필 맨 위와 목록 카드에 걸린다). 파일은 어디에도 올라가지 않는다.
+// 받는 파일(별뜨리님 지시 2026-11-05, 이미지는 D17·D19): 이미지 JPG·PNG·WEBP 5MB 이하, 영상 MP4 10MB 이하.
+const HERO_RULE = {
+  image: { types: ["image/jpeg", "image/png", "image/webp"], max: 5 * 1024 * 1024, accept: "image/jpeg,image/png,image/webp", hint: "JPG, PNG, WEBP · 5MB 이하" },
+  video: { types: ["video/mp4"], max: 10 * 1024 * 1024, accept: "video/mp4", hint: "MP4(H.264) · 10MB 이하 · 가로 1280×720(16:9) · 15~30초 · 소리는 AAC" },
+} as const;
+
 function HeroField() {
   const [kind, setKind] = useState<"image" | "video">("image");
+  const [msg, setMsg] = useState("");
+  const rule = HERO_RULE[kind];
+  function onFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (!f) return setMsg("");
+    if (!(rule.types as readonly string[]).includes(f.type)) {
+      e.target.value = "";
+      return setMsg(kind === "image" ? "JPG, PNG, WEBP 파일만 올릴 수 있어요." : "MP4 파일만 올릴 수 있어요.");
+    }
+    if (f.size > rule.max) {
+      e.target.value = "";
+      return setMsg(`선택한 파일이 ${(f.size / 1024 / 1024).toFixed(1)}MB예요. ${rule.max / 1024 / 1024}MB 이하만 올릴 수 있어요.`);
+    }
+    setMsg("");
+  }
   return (
     <div className="pp-field">
       <span className="pp-label" id="pp-hero-label">
         대표 이미지·영상 <span className="pp-hint-inline">(선택)</span>
       </span>
       <div className="pp-roles" role="group" aria-labelledby="pp-hero-label">
-        <button type="button" className="opt" aria-pressed={kind === "image"} onClick={() => setKind("image")}>
+        <button type="button" className="opt" aria-pressed={kind === "image"} onClick={() => { setKind("image"); setMsg(""); }}>
           이미지
         </button>
-        <button type="button" className="opt" aria-pressed={kind === "video"} onClick={() => setKind("video")}>
+        <button type="button" className="opt" aria-pressed={kind === "video"} onClick={() => { setKind("video"); setMsg(""); }}>
           영상
         </button>
       </div>
-      <input type="file" accept={kind === "image" ? "image/jpeg,image/png" : "video/mp4"} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} />
+      <input key={kind} type="file" accept={rule.accept} onChange={onFile} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
+      <p id="pp-hero-hint" className="len">{rule.hint}</p>
+      {msg && (
+        <p className="pp-err" role="alert">
+          {msg}
+        </p>
+      )}
     </div>
   );
 }
