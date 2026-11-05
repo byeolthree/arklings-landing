@@ -33,9 +33,9 @@ const loglineOf = (title: string): string => {
 };
 
 const RAW_CREATORS: BaseCard[] = [
-  { handle: "jian-lee", name: "별뜨리", roles: ["script"], bio: "사라지는 기억과 기록하는 사람을 쓰는 대본 작가예요.", planCount: 3, latest: { title: "소금비 내리는 나라", logline: loglineOf("소금비 내리는 나라"), genres: ["드라마", "판타지"] } },
+  { handle: "jian-lee", name: "별뜨리", roles: ["video"], bio: "사라지는 기억과 기록하는 사람을 쓰는 대본 작가예요.", planCount: 3, latest: { title: "소금비 내리는 나라", logline: loglineOf("소금비 내리는 나라"), genres: ["드라마", "판타지"] } },
   { handle: "seoha-park", name: "하삘라", roles: ["video", "producer"], bio: "밤에만 열리는 문 같은 이야기를 영상으로 옮겨요.", planCount: 2, latest: { title: "달빛 아래 두 번째 문", logline: loglineOf("달빛 아래 두 번째 문"), genres: ["판타지", "미스터리"] } },
-  { handle: "dayun-choi", name: "morningstar", roles: ["history_advisor"], bio: "옛 베 짜기와 복식을 이야기 속에 살려 내는 역사 자문가입니다.", planCount: 1, latest: { title: "실이 이어 준 사람들", logline: loglineOf("실이 이어 준 사람들"), genres: ["드라마"] } },
+  { handle: "dayun-choi", name: "morningstar", roles: ["art_director"], bio: "옛 베 짜기와 복식을 이야기 속에 살려 내는 역사 자문가입니다.", planCount: 1, latest: { title: "실이 이어 준 사람들", logline: loglineOf("실이 이어 준 사람들"), genres: ["드라마"] } },
   { handle: "hayun-jung", name: "정하윤", roles: ["script", "art_director"], bio: "붉은 강과 나루터처럼 장면이 먼저 떠오르는 글을 써요.", planCount: 5, latest: { title: "붉은 강이 흐르는 밤", logline: loglineOf("붉은 강이 흐르는 밤"), genres: ["드라마", "로맨스"] } },
   { handle: "dohyun-kim", name: "김도현", roles: ["video"], bio: "짧은 영상으로 세계관의 첫인상을 만듭니다.", planCount: 4, latest: { title: "삼한의 마지막 등불", logline: loglineOf("삼한의 마지막 등불"), genres: ["전쟁", "드라마"] } },
   { handle: "seoyun-choi", name: "최서윤", roles: ["other"], bio: "지도에 없는 마을을 찾아다니는 사람.", planCount: 1, latest: { title: "지도에 없는 마을", logline: loglineOf("지도에 없는 마을"), genres: ["미스터리"] } },
@@ -144,7 +144,7 @@ export function sampleDetailOf(id: string): PlanDetailData | null {
 export const SAMPLE_CREATORS: CreatorCard[] = RAW_CREATORS.map((c) => {
   const works = sampleWorksOf(c);
   const hero = heroOf(c);
-  // 대표 영상이 있는 사람과 아트디렉터·영상 제작은 로그라인 대신 대표 이미지·영상을 메인에 건다.
-  const main = hero && (HERO_VIDEO[c.handle] || c.roles[0] === "video" || c.roles[0] === "art_director") ? "media" : "logline";
+  // 역할 첫 칸이 영상 제작·아트디렉터인 사람만 로그라인 대신 대표 이미지·영상을 메인에 걸 수 있다. 영상이 있어도 다른 역할은 대표로 못 건다(별뜨리님 2026-11-05).
+  const main = hero && (c.roles[0] === "video" || c.roles[0] === "art_director") ? "media" : "logline";
   return { ...c, hero, heroSrc: HERO_VIDEO[c.handle], main, openToCollab: sampleProfileOf(c).openToCollab ?? true, genres: [...new Set(works.flatMap((w) => w.genres))], forms: [...new Set(works.map((w) => w.form))] };
 });
