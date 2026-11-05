@@ -62,16 +62,13 @@ function HeroField() {
   const [kind, setKind] = useState<"image" | "video">("image");
   const [msg, setMsg] = useState("");
   const [copied, setCopied] = useState("");
-  const [showText, setShowText] = useState(false);
   const rule = HERO_RULE[kind];
   async function copyPrompt() {
     try {
       await navigator.clipboard.writeText(VIDEO_PROMPT);
       setCopied("복사했어요. 영상 변환 도구에 붙여 넣으세요.");
-      setShowText(false);
     } catch {
-      setCopied("복사하지 못했어요. 아래 글을 직접 선택해서 복사해 주세요.");
-      setShowText(true);
+      setCopied("복사하지 못했어요.");
     }
   }
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -93,10 +90,10 @@ function HeroField() {
         대표 이미지·영상 <span className="pp-hint-inline">(선택)</span>
       </span>
       <div className="pp-roles" role="group" aria-labelledby="pp-hero-label">
-        <button type="button" className="opt" aria-pressed={kind === "image"} onClick={() => { setKind("image"); setMsg(""); }}>
+        <button type="button" className="opt" aria-pressed={kind === "image"} onClick={() => { setKind("image"); setMsg(""); setCopied(""); }}>
           이미지
         </button>
-        <button type="button" className="opt" aria-pressed={kind === "video"} onClick={() => { setKind("video"); setMsg(""); }}>
+        <button type="button" className="opt" aria-pressed={kind === "video"} onClick={() => { setKind("video"); setMsg(""); setCopied(""); }}>
           영상
         </button>
         {kind === "video" && (
@@ -112,7 +109,6 @@ function HeroField() {
       </div>
       <input key={kind} type="file" accept={rule.accept} onChange={onFile} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
       <p id="pp-hero-hint" className="len">{rule.hint}</p>
-      {kind === "video" && showText && <textarea className="answer" readOnly rows={8} value={VIDEO_PROMPT} onFocus={(e) => e.currentTarget.select()} aria-label="영상 변환 프롬프트" />}
       {msg && (
         <p className="pp-err" role="alert">
           {msg}
