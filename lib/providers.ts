@@ -19,6 +19,7 @@ export function isOAuthProvider(v: unknown): v is OAuthProviderId {
 // 카카오는 닉네임·프로필 사진만 받기로 했으므로 이메일 권한(account_email)을 요청하지 않는다
 // (앱에 없는 권한을 요청하면 카카오가 로그인을 거부한다).
 export function oauthOptions(provider: OAuthProviderId): { scopes?: string; queryParams?: Record<string, string> } {
-  if (provider === "kakao") return { scopes: "profile_nickname profile_image" };
+  // Supabase는 카카오 요청에 기본으로 account_email을 붙이고, scopes 옵션은 거기에 더해질 뿐이다. 그래서 scope를 queryParams로 지정해 최종 범위를 직접 정한다.
+  if (provider === "kakao") return { queryParams: { scope: "profile_nickname profile_image" } };
   return {};
 }
