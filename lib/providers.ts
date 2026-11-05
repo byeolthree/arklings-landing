@@ -20,6 +20,5 @@ export function isOAuthProvider(v: unknown): v is OAuthProviderId {
 // (앱에 없는 권한을 요청하면 카카오가 로그인을 거부한다).
 export function oauthOptions(provider: OAuthProviderId): { scopes?: string; queryParams?: Record<string, string> } {
   if (provider === "kakao") return { scopes: "profile_nickname profile_image" };
-  if (provider === "google") return { queryParams: { prompt: "select_account" } };
   return {};
 }
