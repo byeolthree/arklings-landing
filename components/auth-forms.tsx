@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useState } from "react";
+import { useActionState } from "react";
 import { resendConfirmation, signIn, signUp, type AuthFormState } from "@/app/actions/auth";
 import { ConsentDetails } from "@/components/consent-details";
 import { authInputCls, FormField } from "@/components/form-field";
 import { CardHeading, PaperCard, primaryBtn, outlineBtn } from "@/components/paper-card";
 import { CONSENT_LABEL } from "@/lib/consent";
 import { SocialButtons } from "@/components/social-buttons";
+import { useStoredValue } from "@/lib/use-stored-value";
 
 const withNext = (path: string, next: string) => `${path}?next=${encodeURIComponent(next)}`;
 
@@ -193,14 +194,7 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
   const [state, action, pending] = useActionState<AuthFormState, FormData>(signIn, {});
   const e = state.errors ?? {};
   const v = state.values ?? {};
-  const [remembered, setRemembered] = useState("");
-  useEffect(() => {
-    try {
-      setRemembered(localStorage.getItem(REMEMBER_EMAIL_KEY) ?? "");
-    } catch {
-      /* 저장소를 쓸 수 없으면 기억 기능만 건너뛴다 */
-    }
-  }, []);
+  const remembered = useStoredValue(REMEMBER_EMAIL_KEY);
 
   return (
     <PaperCard>

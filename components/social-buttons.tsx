@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState, useEffect, useId, useState } from "react";
+import { useActionState, useId, useState } from "react";
 import { startOAuth } from "@/app/actions/social";
 import type { AuthFormState } from "@/app/actions/auth";
 import { ConsentDetails } from "@/components/consent-details";
 import { CONSENT_LABEL, CONSENT_VERSION } from "@/lib/consent";
 import { outlineBtn } from "@/components/paper-card";
 import { OAUTH_PROVIDERS } from "@/lib/providers";
+import { useStoredValue } from "@/lib/use-stored-value";
 
 const CONSENT_KEY = "arklings.consentVersion";
 
@@ -15,14 +16,9 @@ export function SocialButtons({ returnTo, heading = "또는 다른 방법으로 
   const [state, action, pending] = useActionState<AuthFormState, FormData>(startOAuth, {});
   const consentId = useId();
   // 이 브라우저에서 같은 문구(버전)에 이미 동의했다면 체크가 미리 되어 있다. 보이는 체크칸이라 언제든 풀 수 있다.
-  const [agreed, setAgreed] = useState(false);
-  useEffect(() => {
-    try {
-      if (localStorage.getItem(CONSENT_KEY) === CONSENT_VERSION) setAgreed(true);
-    } catch {
-      /* 저장소를 쓸 수 없으면 기억 기능만 건너뛴다 */
-    }
-  }, []);
+  const storedVersion = useStoredValue(CONSENT_KEY);
+  const [picked, setPicked] = useState<boolean | null>(null); // 사용자가 직접 바꾼 값(없으면 저장된 동의 이력을 따른다)
+  const agreed = picked ?? storedVersion === CONSENT_VERSION;
   return (
     <form
       action={action}
@@ -46,7 +42,7 @@ export function SocialButtons({ returnTo, heading = "또는 다른 방법으로 
       )}
       <div className="flex flex-col gap-2">
         <label htmlFor={consentId} className="flex items-start gap-2 text-[12px] font-medium text-[#6f6469] md:text-[13px]">
-          <input id={consentId} type="checkbox" name="consent" checked={agreed} onChange={(ev) => setAgreed(ev.target.checked)} disabled={pending} className="mt-0.5 size-4 shrink-0 accent-[#a61e5c]" />
+          <input id={consentId} type="checkbox" name="consent" checked={agreed} onChange={(ev) => setPicked(ev.target.checked)} disabled={pending} className="mt-0.5 size-4 shrink-0 accent-[#a61e5c]" />
           <span>{CONSENT_LABEL}</span>
         </label>
         <ConsentDetails />
