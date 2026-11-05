@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { dismissSocialLink, finishSocialLink } from "@/app/actions/social";
 import { CardHeading, PaperCard, PaperPage, outlineBtn, primaryBtn } from "@/components/paper-card";
+import { SubmitButton } from "@/components/submit-button";
 import { getCurrentUser } from "@/lib/auth";
 import { PROVIDER_LABEL } from "@/lib/providers";
 import { findPendingLink } from "@/lib/social-link";
@@ -52,14 +53,10 @@ export default async function LinkSocialPage() {
             이어 주면 {label}로도 이 계정에 로그인할 수 있게 돼요.
           </p>
           <form action={finishSocialLink}>
-            <button type="submit" className={`${primaryBtn} w-full`}>
-              {label} 로그인을 이 계정에 이어 주기
-            </button>
+            <SubmitButton className={`${primaryBtn} w-full`}>{label} 로그인을 이 계정에 이어 주기</SubmitButton>
           </form>
           <form action={dismissSocialLink}>
-            <button type="submit" className={`${outlineBtn} w-full`}>
-              이어 주지 않기
-            </button>
+            <SubmitButton className={`${outlineBtn} w-full`}>이어 주지 않기</SubmitButton>
           </form>
           <Link href="/mypage" className="text-center text-[12px] text-[#6f6469]">
             나중에 하기
