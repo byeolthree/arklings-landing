@@ -9,7 +9,7 @@ import { verifyAttachment } from "@/lib/collab-file";
 import { notifyNewRequest } from "@/lib/collab-notify";
 import { parseForm, UUID_RE, type FieldErrors } from "@/lib/collab";
 import { getOrigin } from "@/lib/origin";
-import { getClientKey, isRateLimited, recordAttempt } from "@/lib/ratelimit";
+import { getClientKey, isRateLimited, RateLimitUnavailable, recordAttempt } from "@/lib/ratelimit";
 import { BUCKET } from "@/lib/supabase";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createAuthClient } from "@/lib/supabase/server";
@@ -23,6 +23,8 @@ export type FormState = {
 const LOGIN_MESSAGE = "로그인이 풀렸어요. 다시 로그인한 뒤 시도해 주세요.";
 const NOT_FOUND = "찾을 수 없는 신청입니다.";
 const UNAVAILABLE = "지금은 저장할 수 없어요. 잠시 뒤에 다시 시도해 주세요.";
+// 개발 화면에서만 원인을 한 줄 덧붙인다(운영 화면에는 내부 오류 글을 내보내지 않는다).
+const devDetail = (e: unknown) => (process.env.NODE_ENV === "production" ? "" : ` [개발 화면 전용: ${e instanceof Error ? e.message : typeof e === "object" && e && "message" in e ? String((e as { message: unknown }).message) : String(e)}]`);
 const PLAN_GONE = "이 기획안은 더 이상 공개되어 있지 않아 신청할 수 없어요. 포트폴리오에서 다른 기획안을 찾아 주세요.";
 
 // 기획안으로 들어온 신청의 받는 사람은 서버가 plan_id로 기획안을 찾아 정한다(화면에서 받는 사람 번호를 받지 않는다).
@@ -85,8 +87,16 @@ export async function createCollab(_prev: FormState, fd: FormData): Promise<Form
       return { message: "짧은 시간에 너무 많이 보내셨어요. 잠시(한 시간쯤) 뒤에 다시 시도해 주세요.", values };
     }
     await recordAttempt(key);
-  } catch {
-    return { message: UNAVAILABLE, values };
+  } catch (e) {
+    if (e instanceof RateLimitUnavailable && e.reason === "table_missing") {
+      // 횟수 표가 이 DB에 없을 뿐이다(0003 전). 초과 제출이 아니므로 「너무 많이 보내셨어요」로 막지 않는다.
+      console.warn(`[collab] submit_attempts 표가 이 DB에 없어 제출 횟수 제한을 확인하지 못했습니다(supabase/migrations/0003 필요): ${e.message}`);
+      // 운영(production)에서는 횟수를 못 세면 안전하게 닫는다. 개발 화면에서는 한 번 보낸 신청이 막히지 않게 횟수 제한만 건너뛴다.
+      if (process.env.NODE_ENV === "production") return { message: UNAVAILABLE, values };
+    } else {
+      console.error("[collab] 제출 횟수 제한을 확인하지 못했습니다.", e);
+      return { message: UNAVAILABLE + devDetail(e), values };
+    }
   }
 
   // 4) 기획안으로 온 신청이면 받는 사람(기획안 주인)을 서버가 찾는다. 아니면 아클링스(운영자)가 받는다.
@@ -131,11 +141,13 @@ export async function createCollab(_prev: FormState, fd: FormData): Promise<Form
       await removeFile(attachment_path);
       // 확인과 저장 사이에 주인이 공개를 끈 경우(DB가 막았다)
       if (error.message.includes("plan_not_public")) return { message: PLAN_GONE, values };
-      return { message: "저장하지 못했습니다. 잠시 후 다시 시도해 주세요.", values };
+      console.error("[collab] 신청을 저장하지 못했습니다.", error);
+      return { message: "저장하지 못했습니다. 잠시 후 다시 시도해 주세요." + devDetail(error), values };
     }
-  } catch {
+  } catch (e) {
     await removeFile(attachment_path);
-    return { message: UNAVAILABLE, values };
+    console.error("[collab] 신청 저장 중 오류", e);
+    return { message: UNAVAILABLE + devDetail(e), values };
   }
 
   // 6) 메일은 응답을 보낸 뒤에 보낸다. 받는 사람(기획안 주인 또는 아클링스)에게 알린다. 메일이 실패해도 접수는 이미 끝나 있다.

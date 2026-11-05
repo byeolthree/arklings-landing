@@ -77,7 +77,7 @@ export default async function CollabListPage({ searchParams }: { searchParams: S
           <ul className="mt-6 divide-y divide-[#e8dfe3] rounded-xl border border-[#e8dfe3]">
             {rows.map((r) => (
               <li key={r.id}>
-                <Link href={`/collab/${r.id}`} className="flex flex-col gap-1.5 px-4 py-4 hover:bg-[#f5ecf0] sm:flex-row sm:items-center sm:justify-between">
+                <Link href={`/collab/${r.id}`} className="flex flex-col gap-1.5 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-[15px] font-medium text-[#292126]">{r.applicant_name}</p>
                     <p className="text-[12px] text-[#574a4f]">

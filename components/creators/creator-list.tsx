@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { ROLES } from "@/lib/collab";
-import { hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
-import { ROLE_TONE } from "./role-tone";
-import type { CreatorCard } from "./types";
+import { activeCount, hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
+import { GENRES } from "./genres";
+import { BlurImage } from "./blur-image";
+import { BlurVideo } from "./blur-video";
+import { RoleTags } from "./role-tags";
+import { FORM_LABEL, type CreatorCard, type WorkForm } from "./types";
 import "./creators.css";
 
 // 자주색(주 색)을 아끼려고, 프로필 원은 보조 색 세 가지(청록·더스티 블루·뮤트 세이지)를 번갈아 쓴다.
@@ -19,6 +22,7 @@ export function CreatorList({
   filter,
   profileHref,
   pageHref,
+  applyHref,
   hiddenFields = {},
 }: {
   cards: CreatorCard[];
@@ -27,12 +31,15 @@ export function CreatorList({
   pages: number;
   filter: CreatorFilter;
   profileHref: (handle: string) => string;
-  // 쪽·검색어·역할을 주소로 바꿔 주는 함수(1쪽이면 page를 생략한다)
-  pageHref: (opts: { page?: number; q?: string; role?: string }) => string;
+  // 쪽·검색어·필터를 주소로 바꿔 주는 함수(1쪽이면 page를 생략한다)
+  pageHref: (opts: Partial<CreatorFilter> & { page?: number }) => string;
+  // 카드의 「협업 신청」이 가는 주소(받는 크리에이터와 역할을 미리 채워 준다)
+  applyHref: (c: CreatorCard) => string;
   // 검색 폼이 함께 보내야 하는 다른 주소 값(예: 샘플 미리보기의 state)
   hiddenFields?: Record<string, string>;
 }) {
   const filtered = hasFilter(filter);
+  const nFilters = activeCount(filter);
   return (
     <div className="cr">
       <section className="cr-top">
@@ -51,6 +58,9 @@ export function CreatorList({
                   <input key={k} type="hidden" name={k} value={v} />
                 ))}
                 {filter.role && <input type="hidden" name="role" value={filter.role} />}
+                {filter.genre && <input type="hidden" name="genre" value={filter.genre} />}
+                {filter.form && <input type="hidden" name="form" value={filter.form} />}
+                {filter.open && <input type="hidden" name="open" value="1" />}
                 <label htmlFor="cr-q" className="sr-only">
                   크리에이터 검색
                 </label>
@@ -61,7 +71,7 @@ export function CreatorList({
                   className="cr-input"
                   defaultValue={filter.q}
                   maxLength={MAX_QUERY}
-                  placeholder="이름이나 기획안으로 찾기"
+                  placeholder="닉네임이나 작품으로 찾기"
                   autoComplete="off"
                 />
                 <button type="submit" className="btn btn-primary">
@@ -74,17 +84,39 @@ export function CreatorList({
                   <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 5h18M6 12h12M10 19h4" />
                   </svg>
-                  필터{filter.role && <span className="cr-badge">1</span>}
+                  필터{nFilters > 0 && <span className="cr-badge">{nFilters}</span>}
                 </summary>
-                <div className="cr-filter-panel" role="group" aria-label="역할로 거르기">
+                <div className="cr-filter-panel" role="group" aria-label="조건으로 거르기">
                   <p className="cr-filter-title">역할</p>
                   <div className="cr-chips">
-                    <Link href={pageHref({ q: filter.q })} className="cr-fchip" aria-current={filter.role ? undefined : "true"}>
+                    <Link href={pageHref({ ...filter, role: undefined })} className="cr-fchip" aria-current={filter.role ? undefined : "true"}>
                       전체
                     </Link>
                     {(Object.keys(ROLES) as (keyof typeof ROLES)[]).map((r) => (
-                      <Link key={r} href={pageHref({ q: filter.q, role: r })} className="cr-fchip" aria-current={filter.role === r ? "true" : undefined}>
+                      <Link key={r} href={pageHref({ ...filter, role: r })} className="cr-fchip" aria-current={filter.role === r ? "true" : undefined}>
                         {ROLES[r]}
+                      </Link>
+                    ))}
+                  </div>
+                  <p className="cr-filter-title">장르</p>
+                  <div className="cr-chips">
+                    <Link href={pageHref({ ...filter, genre: undefined })} className="cr-fchip" aria-current={filter.genre ? undefined : "true"}>
+                      전체
+                    </Link>
+                    {GENRES.map((g) => (
+                      <Link key={g} href={pageHref({ ...filter, genre: g })} className="cr-fchip" aria-current={filter.genre === g ? "true" : undefined}>
+                        {g}
+                      </Link>
+                    ))}
+                  </div>
+                  <p className="cr-filter-title">롱폼 / 숏폼</p>
+                  <div className="cr-chips">
+                    <Link href={pageHref({ ...filter, form: undefined })} className="cr-fchip" aria-current={filter.form ? undefined : "true"}>
+                      전체
+                    </Link>
+                    {(Object.keys(FORM_LABEL) as WorkForm[]).map((f) => (
+                      <Link key={f} href={pageHref({ ...filter, form: f })} className="cr-fchip" aria-current={filter.form === f ? "true" : undefined}>
+                        {FORM_LABEL[f]}
                       </Link>
                     ))}
                   </div>
@@ -97,8 +129,8 @@ export function CreatorList({
               <h2>맞는 크리에이터가 없어요</h2>
               <p>
                 {filter.q ? `「${filter.q}」` : ""}
-                {filter.q && filter.role ? " · " : ""}
-                {filter.role ? ROLES[filter.role] : ""} 조건에 맞는 크리에이터가 아직 없어요.
+                {filter.q && nFilters > 0 ? " · " : ""}
+                {[filter.genre, filter.form && FORM_LABEL[filter.form], filter.role && ROLES[filter.role], filter.open && "협업 받는 중"].filter(Boolean).join(" · ")} 조건에 맞는 크리에이터가 아직 없어요.
               </p>
               <Link href={pageHref({})} className="btn btn-ghost">
                 조건 지우기
@@ -116,7 +148,7 @@ export function CreatorList({
             <div className="panel cr-state">
               <h2>이 쪽에는 크리에이터가 없어요</h2>
               <p>마지막 쪽은 {pages}쪽이에요.</p>
-              <Link href={pageHref({ q: filter.q, role: filter.role })} className="btn btn-ghost">
+              <Link href={pageHref({ ...filter })} className="btn btn-ghost">
                 첫 쪽으로
               </Link>
             </div>
@@ -139,29 +171,52 @@ export function CreatorList({
                   const tone = toneAt(i);
                   return (
                   <li key={c.handle}>
-                    <Link href={profileHref(c.handle)} className="panel cr-card">
-                      <div className="cr-who">
-                        <span className={`cr-av ${tone}`} aria-hidden="true">
-                          {c.name.slice(0, 1)}
-                        </span>
-                        <div className="cr-who-text">
-                          <span className="cr-name">{c.name}</span>
-                          {c.bio && <span className="cr-bio">{c.bio}</span>}
+                    <div className="panel cr-card">
+                      <Link href={profileHref(c.handle)} className="cr-card-main">
+                        <div className="cr-who">
+                          <span className={`cr-av ${tone}`} aria-hidden="true">
+                            {c.name.slice(0, 1)}
+                          </span>
+                          <div className="cr-who-text">
+                            <span className="cr-name">{c.name}</span>
+                            {c.bio && <span className="cr-bio">{c.bio}</span>}
+                          </div>
                         </div>
-                      </div>
-                      <div className="cr-box">
-                        <span className="cr-label">대표 기획안</span>
-                        <h3 className="cr-box-title">{c.latest.title}</h3>
-                        <p className="cr-box-logline">{c.latest.logline}</p>
-                      </div>
-                      <ul className="cr-tags" aria-label="역할">
-                        {c.roles.map((r) => (
-                          <li key={r} className={`cr-tag ${ROLE_TONE[r]}`}>
-                            {ROLES[r]}
-                          </li>
-                        ))}
-                      </ul>
-                    </Link>
+                        {c.main === "media" && c.hero ? (
+                          c.hero === "video" && c.heroSrc ? (
+                            <BlurVideo src={c.heroSrc} className="cr-main-media has-src" label="대표 영상" />
+                          ) : c.hero === "image" && c.heroSrc ? (
+                            <BlurImage src={c.heroSrc} className="cr-main-media has-src" label="대표 이미지" />
+                          ) : (
+                            <div className="cr-main-media" role="img" aria-label={c.hero === "video" ? "대표 영상" : "대표 이미지"}>
+                              {c.hero === "video" ? "▶ 〈대표 영상〉" : "〈대표 이미지〉"}
+                            </div>
+                          )
+                        ) : (
+                          <div className="cr-box">
+                            <span className="cr-label">대표 작품</span>
+                            <h3 className="cr-box-title">{c.latest.title}</h3>
+                            <p className="cr-box-logline">{c.latest.logline}</p>
+                          </div>
+                        )}
+                        <RoleTags roles={c.roles} />
+                        {c.latest.genres && c.latest.genres.length > 0 && (
+                          <ul className="cr-genres" aria-label="장르">
+                            {c.latest.genres.map((g) => (
+                              <li key={g}>{g}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </Link>
+                      {c.openToCollab && (
+                        <div className="cr-card-foot">
+                          <span className="cr-open">협업 받는 중</span>
+                          <Link href={applyHref(c)} className="btn btn-ghost">
+                            협업 신청
+                          </Link>
+                        </div>
+                      )}
+                    </div>
                   </li>
                   );
                 })}
@@ -169,7 +224,7 @@ export function CreatorList({
               {pages > 1 && (
                 <nav className="pager" aria-label="쪽 이동">
                   {page > 1 ? (
-                    <Link href={pageHref({ page: page - 1, q: filter.q, role: filter.role })} className="btn btn-ghost">
+                    <Link href={pageHref({ ...filter, page: page - 1 })} className="btn btn-ghost">
                       ← 이전
                     </Link>
                   ) : (
@@ -181,7 +236,7 @@ export function CreatorList({
                     {page} / {pages}
                   </span>
                   {page < pages ? (
-                    <Link href={pageHref({ page: page + 1, q: filter.q, role: filter.role })} className="btn btn-ghost">
+                    <Link href={pageHref({ ...filter, page: page + 1 })} className="btn btn-ghost">
                       다음 →
                     </Link>
                   ) : (

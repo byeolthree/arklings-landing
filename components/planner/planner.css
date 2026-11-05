@@ -21,7 +21,7 @@
 .pl .btn-primary { background: var(--jaju); color: #fff; box-shadow: 0 8px 24px -10px rgba(166,30,92,.55); }
 .pl .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(166,30,92,.65); }
 .pl .btn-ghost { background: transparent; color: var(--jaju); }
-.pl .btn-ghost:hover { background: var(--jaju); color: #fff; transform: translateY(-2px); }
+.pl .btn-ghost:hover { transform: translateY(-2px); }
 .pl .btn.sm { min-height: 34px; padding: 0 14px; font-size: 13px; }
 .pl .btn[disabled] { opacity: .45; pointer-events: none; }
 .pl .btn:focus-visible, .pl button:focus-visible, .pl a:focus-visible, .pl textarea:focus-visible, .pl input:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
@@ -66,8 +66,8 @@
 .pl .qitem .hint { margin-top: 4px; font-size: 13px; }
 .pl .opts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .pl .opt { min-height: 38px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; font: inherit; font-size: 14px; font-weight: 500; color: var(--title); cursor: pointer; transition: border-color .25s, background .25s, color .25s, transform .25s var(--ease); }
-.pl .opt:hover { border-color: var(--teal); transform: translateY(-2px); }
-.pl .opt[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #fff; }
+.pl .opt:hover { transform: translateY(-2px); }
+.pl .opt[aria-pressed="true"], .pl .opt[aria-checked="true"] { background: var(--teal); border-color: var(--teal); color: #fff; }
 .pl .answer { display: block; width: 100%; margin-top: 14px; min-height: 96px; resize: vertical; padding: 14px 16px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--bg); font: inherit; font-size: 14px; line-height: 1.7; color: var(--title); }
 .pl .answer:focus { outline: none; border-color: var(--teal); background: #fff; }
 .pl input.title-in { min-height: 48px; resize: none; padding: 0 16px; }
@@ -121,3 +121,34 @@
 .pl .danger { color: var(--jaju); }
 
 @media (prefers-reduced-motion: reduce) { .pl *, .pl *::before, .pl *::after { transition: none !important; animation: none !important; } }
+
+/* 포트폴리오에 올리기 → 크리에이터 프로필 칸 */
+.pl .pp-form { margin-top: 16px; padding: 18px; border-radius: 16px; background: var(--tint); }
+@media (min-width: 768px) { .pl .pp-form { padding: 22px 24px; } }
+.pl .pp-title { font-size: 16px; }
+.pl .pp-sub { margin-top: 4px; font-size: 13px; }
+.pl .pp-notice { margin-top: 14px; padding: 10px 14px; border-radius: 10px; background: #fff; border-left: 3px solid var(--teal); font-size: 14px; font-weight: 700; color: var(--title); }
+.pl .pp-notice span { font-size: 12px; font-weight: 400; color: var(--body); }
+.pl .pp-field { margin-top: 16px; }
+.pl .pp-label { display: block; font-size: 13px; font-weight: 700; color: var(--title); }
+.pl .pp-hint, .pl .pp-hint-inline { font-size: 12px; font-weight: 400; color: var(--body); }
+.pl .pp-hint { margin-top: 6px; }
+.pl .pp-handle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; }
+.pl .pp-handle .answer { margin-top: 0; flex: 1 1 140px; min-width: 0; }
+.pl .pp-prefix { flex: none; font-size: 14px; color: var(--body); }
+.pl .pp-roles { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.pl .pp-err { margin-top: 6px; font-size: 12px; font-weight: 700; color: var(--jaju); }
+.pl .pp-form .row-actions { margin-top: 18px; }
+.pl .pp-form .answer[readonly] { background: color-mix(in srgb, var(--line) 50%, #fff); }
+
+.pl .pp-avail { margin-top: 6px; font-size: 12px; font-weight: 700; }
+.pl .pp-avail.available { color: var(--teal); }
+.pl .pp-avail.taken { color: var(--jaju); }
+
+/* 프로필 칸: 첫 열기 안내 두 줄, 역할별 한 줄, 채널 링크 */
+.pl .pp-notice p { margin: 0; }
+.pl .pp-notice p + p { margin-top: 4px; }
+.pl .pp-channels { display: grid; gap: 8px; margin-top: 8px; }
+.pl .pp-channel { display: grid; grid-template-columns: 1fr; gap: 8px; }
+@media (min-width: 768px) { .pl .pp-channel { grid-template-columns: 180px 1fr auto; align-items: center; } }
+.pl .pp-channel .answer { margin-top: 0; }

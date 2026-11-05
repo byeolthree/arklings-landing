@@ -58,8 +58,7 @@
   .btn-primary:hover::after { transform: translateX(120%); }
   .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(166,30,92,.65); }
   .btn-ghost { background: transparent; color: var(--jaju); }
-  .btn-ghost:hover { background: var(--jaju); color: #fff; transform: translateY(-2px); }
-  .hero .btn-ghost:hover { background: transparent; color: var(--jaju); }
+  .btn-ghost:hover { transform: translateY(-2px); }
   .btn .arrow { transition: transform .35s var(--ease); }
   .btn:hover .arrow { transform: translateX(4px); }
   .btn:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
@@ -76,10 +75,8 @@
   .nav-links { display: none; gap: 22px; font-size: 15px; }
   .nav-links span { color: var(--body); }
   .nav-links a.nav-creators { color: var(--body); text-decoration: none; transition: color .2s; }
-  .nav-links a.nav-creators:hover { color: var(--title); }
   .nav-right { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: 15px; }
   .nav-right .mypage { display: none; color: var(--body); text-decoration: none; }
-  .nav-right .mypage:hover { color: var(--jaju); }
   .auth-slot { visibility: hidden; }
   .auth-slot.ready { visibility: visible; }
   .nav .btn { min-height: 36px; padding: 0 16px; font-size: 13px; }
@@ -352,7 +349,7 @@
     font: inherit; font-size: 14px; font-weight: 500; color: var(--title); cursor: pointer;
     transition: border-color .25s, background .25s, color .25s, transform .25s var(--ease);
   }
-  .opt:hover { border-color: var(--teal); transform: translateY(-2px); }
+  .opt:hover { transform: translateY(-2px); }
   .opt[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: #fff; }
   .opt.unknown { border-style: dashed; color: var(--body); }
   .quiz-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; flex-wrap: wrap; }
@@ -453,7 +450,6 @@
   .try-cta { margin-top: 40px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
   .try-cta p { color: rgba(255,255,255,.72); font-size: 14px; }
   .try .btn-ghost { color: #fff; border-color: rgba(255,255,255,.55); }
-  .try .btn-ghost:hover { background: #fff; color: var(--title); border-color: #fff; }
 
   /* ---------- v6: 포트폴리오 공간 ---------- */
   .portfolio { background: var(--bg); }
@@ -1030,7 +1026,6 @@
     .shorts-track > .shorts-slot:first-child, .shorts-track > .shorts-slot:last-child { margin: 0; }
     .shorts-slot { width: 240px; }
     .shorts-nav { display: grid; place-items: center; flex: 0 0 auto; width: 44px; height: 44px; border-radius: 999px; border: 1.5px solid var(--jaju, #A61E5C); background: transparent; color: var(--jaju, #A61E5C); font-size: 20px; cursor: pointer; }
-    .shorts-nav:hover { background: rgba(166,30,92,.08); }
     .shorts-nav:focus-visible { outline: 2px solid var(--jaju, #A61E5C); outline-offset: 3px; }
   }
   /* 7·8섹션 부제목·본문: 다른 섹션과 같은 크기 (부제목 16/13, 본문 14/13) */

@@ -86,7 +86,7 @@ export function CheckEmailCard({ email, returnTo }: { email: string; returnTo: s
         <Link href={withNext("/login", returnTo)} className={`${primaryBtn} w-full`}>
           로그인하러 가기
         </Link>
-        <a href={withNext("/signup", returnTo)} className="text-center text-[12px] text-[#6f6469] hover:text-jaju">
+        <a href={withNext("/signup", returnTo)} className="text-center text-[12px] text-[#6f6469]">
           다른 이메일로 다시 가입하기
         </a>
       </div>
