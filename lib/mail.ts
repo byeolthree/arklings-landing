@@ -55,9 +55,12 @@ export async function sendMail(input: {
     });
     return { ok: true };
   } catch (e) {
-    // 받는 사람 주소나 비밀번호가 로그에 남지 않도록 오류 종류만 적는다.
-    const code = (e as { code?: string; responseCode?: number })?.code ?? (e as { responseCode?: number })?.responseCode ?? "unknown";
-    console.error(`[mail] 발송 실패 (${String(code)})`);
+    // 비밀번호와 받는 사람 주소는 로그에 남기지 않는다.
+    const err = e as { code?: string; responseCode?: number; command?: string; response?: string };
+    const code = err?.code ?? err?.responseCode ?? "unknown";
+    // 원인을 찾을 수 있게 메일 서버가 돌려준 응답 문구(예: "535 5.7.1 …")와 실패한 단계를 함께 남긴다. 이메일 주소는 가리고 길이를 줄인다.
+    const reply = String(err?.response ?? "").replace(/[^\s@<>]+@[^\s@<>]+/g, "***").replace(/\s+/g, " ").slice(0, 160);
+    console.error(`[mail] 발송 실패 (${String(code)}) 단계=${err?.command ?? "?"} 응답코드=${err?.responseCode ?? "?"} 응답=${reply || "없음"}`);
     return { ok: false, reason: "send_failed" };
   }
 }
