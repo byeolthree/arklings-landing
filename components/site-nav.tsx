@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { signOut } from "@/app/actions/auth";
 
 // 랜딩(public/landing.html)의 상단 메뉴와 같은 모양. 가운데 메뉴 글자 중 연결된 화면이 있는 것만 링크(지금은 「크리에이터」), 나머지는 글자로만 둔다.
 const MENU: { label: string; href?: string }[] = [
@@ -14,7 +13,7 @@ const MENU: { label: string; href?: string }[] = [
   { label: "커뮤니티" },
 ];
 
-export function SiteNav({ loggedIn, newCount }: { loggedIn: boolean; newCount?: number | null }) {
+export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -57,17 +56,9 @@ export function SiteNav({ loggedIn, newCount }: { loggedIn: boolean; newCount?: 
         <div className="lk-nav-right">
           {loggedIn ? (
             <>
-              <Link href="/collab" className="lk-textlink">
-                받은 협업 신청{newCount ? ` (${newCount})` : ""}
-              </Link>
               <Link href="/mypage" className="lk-textlink">
                 마이페이지
               </Link>
-              <form action={signOut} style={{ display: "contents" }}>
-                <button type="submit" className="lk-textlink">
-                  로그아웃
-                </button>
-              </form>
             </>
           ) : (
             <Link href={loginHref} className="lk-textlink">
@@ -103,17 +94,9 @@ export function SiteNav({ loggedIn, newCount }: { loggedIn: boolean; newCount?: 
         )}
         {loggedIn ? (
           <>
-            <Link href="/collab" onClick={close} tabIndex={open ? 0 : -1}>
-              받은 협업 신청{newCount ? ` (${newCount})` : ""}
-            </Link>
             <Link href="/mypage" onClick={close} tabIndex={open ? 0 : -1}>
               마이페이지
             </Link>
-            <form action={signOut} style={{ display: "contents" }}>
-              <button type="submit" tabIndex={open ? 0 : -1}>
-                로그아웃
-              </button>
-            </form>
           </>
         ) : (
           <Link href={loginHref} onClick={close} tabIndex={open ? 0 : -1}>

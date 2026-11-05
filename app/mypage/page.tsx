@@ -8,6 +8,8 @@ import "@/components/mypage/mypage.css";
 import { MypagePreview } from "@/components/mypage/mypage-preview";
 import { requireUser } from "@/lib/auth";
 import { countNewCollab } from "@/lib/collab-count";
+import { PAGE_SIZE, ROLES, STATUSES, type CollabRequest } from "@/lib/collab";
+import { formatKstDate } from "@/lib/time";
 import { createAuthClient } from "@/lib/supabase/server";
 import { OAUTH_PROVIDERS, PROVIDER_LABEL } from "@/lib/providers";
 import { formatKst } from "@/lib/time";
@@ -61,6 +63,50 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
   }
 
   const newCollab = await countNewCollab();
+
+  // 받은 협업 신청 목록(최근 것부터). 로그인한 본인의 권한으로 읽어 DB 규칙(RLS)이 내게 온 신청만 돌려준다.
+  let collabRows: CollabRequest[] = [];
+  let collabTotal = 0;
+  let collabLoadFailed = false;
+  try {
+    const { data, count, error } = await (await createAuthClient())
+      .from("collab_requests")
+      .select("*, source_works(title), plans(title)", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(0, PAGE_SIZE - 1);
+    if (error) collabLoadFailed = true;
+    else {
+      collabRows = (data ?? []) as CollabRequest[];
+      collabTotal = count ?? 0;
+    }
+  } catch {
+    collabLoadFailed = true;
+  }
+  const collabList = collabLoadFailed ? (
+    <p role="alert" className="mp-msg err">
+      받은 협업 신청을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
+    </p>
+  ) : collabRows.length === 0 ? (
+    <p className="mp-note">아직 받은 협업 신청이 없습니다.</p>
+  ) : (
+    <div className="mp-plans">
+      <ul>
+        {collabRows.map((r) => (
+          <li key={r.id}>
+            <span>{r.applicant_name}</span>
+            <span>
+              {r.plan_id ? `기획안 「${r.plans?.title ?? "제목 없음"}」` : (r.source_works?.title ?? "전체 협업 제안")} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)} · {STATUSES[r.status]} · <Link href={`/collab/${r.id}`}>열기</Link>
+            </span>
+          </li>
+        ))}
+      </ul>
+      {collabTotal > collabRows.length && (
+        <p className="mp-note" style={{ marginTop: 8 }}>
+          총 {collabTotal}건 중 최근 {collabRows.length}건입니다. <Link href="/collab" style={{ textDecoration: "underline" }}>전체 보기</Link>
+        </p>
+      )}
+    </div>
+  );
 
   // 로그인 방법: 이미 쓰는 것(해제 가능) / 더할 수 있는 것(추가). 방법은 항상 1개 이상 남는다.
   const linked = Array.from(new Set(user.providers));
@@ -163,5 +209,5 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
     </ul>
   );
 
-  return <MypagePreview profile="none" pending={false} basic={basic} plans={plansList} collab={{ newCount: newCollab }} />;
+  return <MypagePreview profile="none" pending={false} basic={basic} plans={plansList} collab={{ newCount: newCollab, content: collabList }} />;
 }

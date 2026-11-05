@@ -171,7 +171,7 @@ export function MypagePreview({
   pending: boolean;
   basic?: React.ReactNode;
   plans?: React.ReactNode;
-  collab?: { newCount: number | null };
+  collab?: { newCount: number | null; content?: React.ReactNode };
 }) {
   const SECTIONS = collab ? [...BASE_SECTIONS, COLLAB_SECTION] : BASE_SECTIONS;
   const [open, setOpen] = useState<Record<SectionId, boolean>>({ "mp-basic": true, "mp-creator": true, "mp-portfolio": true, "mp-collab": true });
@@ -445,9 +445,16 @@ export function MypagePreview({
                 내게 온 협업 신청을 보고, 상세 확인·수정·삭제를 할 수 있어요.
                 {collab.newCount ? ` 새 신청이 ${collab.newCount}건 있어요.` : ""}
               </p>
-              <Link className="btn btn-primary" href="/collab">
-                받은 협업 신청 보기{collab.newCount ? ` (${collab.newCount})` : ""}
-              </Link>
+              {collab.content ?? (
+                <div className="mp-plans">
+                  <ul>
+                    <li>
+                      <span>〈신청자 이름〉</span>
+                      <span>〈작품 · 역할 · 날짜〉 · 〈접수〉</span>
+                    </li>
+                  </ul>
+                </div>
+              )}
             </Section>
           )}
       </div>
