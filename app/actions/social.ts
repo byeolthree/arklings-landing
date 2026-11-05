@@ -205,6 +205,7 @@ export async function finishSocialLink(): Promise<void> {
     const { count, error: countError } = await admin.from("plans").select("id", { count: "exact", head: true }).eq("owner_id", pending.sourceUserId);
     // 개수를 확인하지 못하면 지우지 않는다(안전한 쪽으로 닫힘).
     if (!source?.user || source.user.email || countError || count === null || count > 0) {
+      logStep("이어주기: 임시 계정 확인", { message: `계정있음=${!!source?.user} 이메일있음=${!!source?.user?.email} 기획안수=${count} 기획안조회오류=${countError?.message ?? "없음"}` });
       failure = "link_failed";
     } else {
       const supabase = await createAuthClient();
@@ -213,15 +214,19 @@ export async function finishSocialLink(): Promise<void> {
         options: { redirectTo: await callbackUrl("/mypage?msg=linked"), skipBrowserRedirect: true, ...oauthOptions(pending.provider) },
       });
       if (error || !data?.url) {
+        logStep("이어주기: 로그인 방법 연결 주소 만들기(linkIdentity)", error ?? { message: "주소 없음" });
         failure = error?.code === "manual_linking_disabled" ? "link_disabled" : "link_failed";
       } else {
         const { error: delError } = await admin.auth.admin.deleteUser(pending.sourceUserId);
-        if (delError) failure = "link_failed";
-        else url = data.url;
+        if (delError) {
+          logStep("이어주기: 임시 계정 지우기", delError);
+          failure = "link_failed";
+        } else url = data.url;
       }
     }
   } catch (e) {
     if ((e as { digest?: string })?.digest?.startsWith("NEXT_REDIRECT")) throw e;
+    logStep("이어주기: 예외", e);
     failure = "link_failed";
   }
   if (failure || !url) redirect(`/mypage?msg=${failure ?? "link_failed"}`);
