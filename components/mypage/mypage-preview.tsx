@@ -99,15 +99,17 @@ function HeroField() {
         <button type="button" className="opt" aria-pressed={kind === "video"} onClick={() => { setKind("video"); setMsg(""); }}>
           영상
         </button>
+        {kind === "video" && (
+          <button type="button" className="btn btn-ghost" onClick={copyPrompt}>
+            영상 변환 프롬프트 복사
+          </button>
+        )}
       </div>
       <input key={kind} type="file" accept={rule.accept} onChange={onFile} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
       <p id="pp-hero-hint" className="len">{rule.hint}</p>
       {kind === "video" && (
         <div>
-          <button type="button" className="btn btn-ghost" onClick={copyPrompt}>
-            영상 변환 프롬프트 복사
-          </button>
-          <span role="status" aria-live="polite" className="len" style={{ marginLeft: 8 }}>
+          <span role="status" aria-live="polite" className="len">
             {copied}
           </span>
           {showText && <textarea className="answer" readOnly rows={8} value={VIDEO_PROMPT} onFocus={(e) => e.currentTarget.select()} aria-label="영상 변환 프롬프트" style={{ marginTop: 8 }} />}
