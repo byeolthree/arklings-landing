@@ -40,10 +40,40 @@ const HERO_RULE = {
   video: { types: ["video/mp4"], max: 10 * 1024 * 1024, accept: "video/mp4", hint: "MP4(H.264) · 10MB 이하 · 가로 1280×720(16:9) · 15~30초 · 소리는 AAC" },
 } as const;
 
+const VIDEO_PROMPT = `첨부한 영상을 웹사이트 프로필 맨 위에 거는 「대표 영상」으로 변환해 줘.
+
+[출력 형식]
+- 파일 형식: MP4 (컨테이너 MP4, 영상 H.264, 소리 AAC)
+- 화면 비율: 16:9 가로. 검은 띠(레터박스)를 새로 넣지 말고 원본 비율을 그대로 유지
+- 해상도: 가로 1280 × 세로 720 (1080p 이상으로 만들지 말 것)
+- 초당 장면 수: 30 (원본이 더 높아도 30으로)
+- 길이: 15~30초. 길면 가장 인상적인 구간 하나만 자르고, 페이드 인/아웃은 넣지 않음(반복 재생됨)
+- 영상 비트레이트: 약 1.5 Mbps (최대 2.5 Mbps)
+- 소리: AAC 스테레오 96 kbps. 소리 없는 구간이 있어도 소리 트랙은 남길 것
+- 파일 용량: 6MB 이하 (절대 10MB를 넘지 말 것)
+- 인터넷에서 바로 재생되게 「faststart」(moov atom을 앞쪽으로) 옵션을 켤 것
+- 자막, 로고, 워터마크, 글자를 영상에 새로 입히지 말 것
+
+[확인 후 알려 줄 것]
+- 최종 해상도, 길이, 용량(MB), 영상·소리 비트레이트, 초당 장면 수
+- 원본에서 자른 구간(시작~끝 시간)`;
+
 function HeroField() {
   const [kind, setKind] = useState<"image" | "video">("image");
   const [msg, setMsg] = useState("");
+  const [copied, setCopied] = useState("");
+  const [showText, setShowText] = useState(false);
   const rule = HERO_RULE[kind];
+  async function copyPrompt() {
+    try {
+      await navigator.clipboard.writeText(VIDEO_PROMPT);
+      setCopied("복사했어요. 영상 변환 도구에 붙여 넣으세요.");
+      setShowText(false);
+    } catch {
+      setCopied("복사하지 못했어요. 아래 글을 직접 선택해서 복사해 주세요.");
+      setShowText(true);
+    }
+  }
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return setMsg("");
@@ -72,6 +102,17 @@ function HeroField() {
       </div>
       <input key={kind} type="file" accept={rule.accept} onChange={onFile} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
       <p id="pp-hero-hint" className="len">{rule.hint}</p>
+      {kind === "video" && (
+        <div>
+          <button type="button" className="btn btn-ghost" onClick={copyPrompt}>
+            영상 변환 프롬프트 복사
+          </button>
+          <span role="status" aria-live="polite" className="len" style={{ marginLeft: 8 }}>
+            {copied}
+          </span>
+          {showText && <textarea className="answer" readOnly rows={8} value={VIDEO_PROMPT} onFocus={(e) => e.currentTarget.select()} aria-label="영상 변환 프롬프트" style={{ marginTop: 8 }} />}
+        </div>
+      )}
       {msg && (
         <p className="pp-err" role="alert">
           {msg}
