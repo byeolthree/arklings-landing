@@ -43,9 +43,9 @@ export function CollabReply({ id, canMail, onSite, children }: { id: string; can
         <div className="mt-3 flex items-start justify-between gap-4">
           <p className="min-w-0 flex-1 text-left text-[12px] leading-[1.6] text-[#574a4f]">
             {onSite && canMail
-              ? "신청자가 로그인하고 보낸 신청이에요. 쓴 글은 신청자의 이메일로 보내고 사이트에도 남겨요."
+              ? "신청자가 로그인하고 보낸 신청이에요. 쓴 글은 신청자의 이메일로 보내고 사이트에도 남아요."
               : onSite
-                ? "신청자가 로그인하고 보낸 신청이에요. 연락처가 이메일이 아니라서 글은 사이트에만 남겨요."
+                ? "신청자가 로그인하고 보낸 신청이에요. 연락처가 이메일이 아니라서 글은 사이트에만 남아요."
                 : canMail
                   ? "로그인 없이 보낸 신청이에요. 쓴 글은 신청자의 이메일로만 보내고 사이트에는 남지 않아요."
                   : "로그인 없이 보냈고 연락처도 이메일이 아니라서 사이트에서 글을 보낼 수 없어요. 검토 중·수락·거절만 표시할 수 있어요."}
