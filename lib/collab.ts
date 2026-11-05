@@ -33,6 +33,8 @@ export type CollabRequest = {
   status: Status;
   created_at: string;
   updated_at: string;
+  applicant_id?: string | null; // 로그인하고 보낸 신청이면 그 계정(0008 SQL 전에는 없다)
+  collab_replies?: { message: string; decision: "accepted" | "rejected" | null; created_at: string }[];
   plan_id: string | null; // 기획안으로 들어온 신청이면 그 기획안(지워지면 비워진다)
   source_works?: { title: string } | null;
   plans?: { title: string } | null;

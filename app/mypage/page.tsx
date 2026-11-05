@@ -10,6 +10,7 @@ import { requireUser } from "@/lib/auth";
 import { countNewCollab } from "@/lib/collab-count";
 import { PAGE_SIZE, ROLES, STATUSES, type CollabRequest } from "@/lib/collab";
 import { formatKstDate } from "@/lib/time";
+import { StatusBadge } from "@/components/status-badge";
 import { createAuthClient } from "@/lib/supabase/server";
 import { OAUTH_PROVIDERS, PROVIDER_LABEL } from "@/lib/providers";
 import { formatKst } from "@/lib/time";
@@ -120,11 +121,53 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
   const methods = linked.map((p) => PROVIDER_LABEL[p] ?? p);
   const addable = OAUTH_PROVIDERS.filter((p) => !linked.includes(p.id));
 
-  // 보낸 협업 신청: 신청서에는 보낸 사람의 계정 번호가 저장되지 않아 내가 보낸 것을 가려낼 수 없다(DB 칸 추가가 필요).
+  // 보낸 협업 신청: 로그인하고 보낸 신청만 내 것으로 가려낼 수 있다(신청자 번호는 0008 SQL이 만든다). 로그인 없이 보낸 신청은 알 수 없다.
+  let sentRows: CollabRequest[] = [];
+  let sentUnavailable = false;
+  try {
+    const { data, error } = await (await createAuthClient())
+      .from("collab_requests")
+      .select("id, status, roles, created_at, plan_id, source_works(title), plans(title), collab_replies(message, decision, created_at)")
+      .eq("applicant_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(20);
+    if (error) sentUnavailable = true;
+    else sentRows = (data ?? []) as unknown as CollabRequest[];
+  } catch {
+    sentUnavailable = true;
+  }
   const sentBlock = (
     <div className="mp-plans">
       <h3>보낸 협업 신청</h3>
-      <p className="mp-note">보낸 협업 신청을 보여 주는 기능은 준비 중이에요.</p>
+      {sentUnavailable ? (
+        <p className="mp-note">보낸 협업 신청을 보여 주는 기능은 준비 중이에요.</p>
+      ) : sentRows.length === 0 ? (
+        <p className="mp-note">로그인하고 보낸 협업 신청이 아직 없어요. 로그인 없이 보낸 신청은 여기에 나타나지 않아요.</p>
+      ) : (
+        <ul>
+          {sentRows.map((r) => {
+            const replies = [...(r.collab_replies ?? [])].sort((x, y) => x.created_at.localeCompare(y.created_at));
+            return (
+              <li key={r.id}>
+                <span>
+                  {r.plan_id ? `기획안 「${r.plans?.title ?? "제목 없음"}」` : (r.source_works?.title ?? "전체 협업 제안")} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)}
+                </span>
+                <StatusBadge status={r.status} />
+                {replies.length > 0 && (
+                  <div style={{ width: "100%" }}>
+                    {replies.map((p, i) => (
+                      <p key={i} className="mp-note" style={{ whiteSpace: "pre-wrap", marginTop: 6 }}>
+                        답장 ({formatKstDate(p.created_at)}){p.decision === "accepted" ? " · 수락" : p.decision === "rejected" ? " · 거절" : ""}
+                        {p.message ? `: ${p.message}` : ""}
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
   const collabList = (

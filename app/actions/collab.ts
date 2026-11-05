@@ -7,6 +7,8 @@ import { after } from "next/server";
 import { CONFIRM_FIRST_MESSAGE, getCurrentUser, isConfirmed } from "@/lib/auth";
 import { verifyAttachment } from "@/lib/collab-file";
 import { notifyNewRequest } from "@/lib/collab-notify";
+import { sendMail } from "@/lib/mail";
+import { applicantReply } from "@/lib/mail-templates";
 import { parseForm, UUID_RE, type FieldErrors } from "@/lib/collab";
 import { getOrigin } from "@/lib/origin";
 import { getClientKey, isRateLimited, RateLimitUnavailable, recordAttempt } from "@/lib/ratelimit";
@@ -119,9 +121,9 @@ export async function createCollab(_prev: FormState, fd: FormData): Promise<Form
       attachment_path = up.path!;
     }
 
-    const { error } = await createAdminClient()
-      .from("collab_requests")
-      .insert({
+    // 로그인한 사람이 보낸 신청이면 그 계정을 함께 기록한다(받는 사람의 답장을 사이트에도 남기기 위해). 0008 SQL 전에는 이 칸이 없어 기록만 건너뛴다.
+    const me = await getCurrentUser();
+    const row = {
         id: randomUUID(),
         applicant_name: values.applicant_name,
         contact: values.contact,
@@ -136,7 +138,12 @@ export async function createCollab(_prev: FormState, fd: FormData): Promise<Form
         recipient_kind: ownerId ? "user" : "arklings",
         recipient_id: ownerId,
         plan_id: ownerId ? planId : null,
-      });
+    };
+    const admin = createAdminClient();
+    let { error } = await admin.from("collab_requests").insert((me ? { ...row, applicant_id: me.id } : row) as Record<string, unknown>);
+    if (error && me && /applicant_id/.test(error.message)) {
+      ({ error } = await admin.from("collab_requests").insert(row));
+    }
     if (error) {
       await removeFile(attachment_path);
       // 확인과 저장 사이에 주인이 공개를 끈 경우(DB가 막았다)
@@ -261,4 +268,90 @@ export async function deleteCollab(id: string): Promise<FormState> {
   await removeFile(path);
   revalidatePath("/collab");
   redirect("/collab?deleted=1");
+}
+
+// 받은 신청에 대한 답장·수락·거절. 로그인한 받는 사람 본인의 권한으로 읽고 바꾸므로 DB 규칙(RLS)이 남의 신청은 막는다.
+// 신청자가 로그인한 사람이면(applicant_id가 있으면) 답장을 사이트에도 저장하고, 신청자의 연락처가 이메일이면 메일도 보낸다.
+// 로그인 없이 보낸 신청은 저장하지 않고 이메일로만 보낸다(이메일이 아니면 사이트에서 보낼 수 없다).
+// 0008 SQL 전에는 신청자 번호 칸과 답장 표가 없으므로 그 부분만 건너뛰고 나머지는 그대로 동작한다.
+const MAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const isMissingSchema = (m: string | undefined) => !!m && /applicant_id|collab_replies|schema cache|does not exist/i.test(m);
+export async function replyCollab(id: string, _prev: FormState, fd: FormData): Promise<FormState> {
+  const user = await getCurrentUser();
+  if (!user) return { message: LOGIN_MESSAGE };
+  if (!isConfirmed(user)) return { message: CONFIRM_FIRST_MESSAGE };
+  if (!UUID_RE.test(id)) return { message: NOT_FOUND };
+
+  const decision = String(fd.get("decision") ?? "");
+  if (decision !== "send" && decision !== "accept" && decision !== "reject" && decision !== "review") return { message: "동작을 알 수 없어요. 화면을 새로 열어 다시 시도해 주세요." };
+  const text = String(fd.get("message") ?? "").trim();
+  if (text.length > 1000) return { message: "답장은 1000자 이내로 써 주세요.", values: { message: text } };
+  if (decision === "send" && text.length === 0) return { message: "보낼 답장을 써 주세요.", values: { message: text } };
+
+  let note = "";
+  try {
+    const sb = await createAuthClient();
+    let { data: row } = await sb.from("collab_requests").select("applicant_name, contact, applicant_id").eq("id", id).maybeSingle();
+    if (!row) {
+      // 신청자 번호 칸이 아직 없는 DB(0008 전)에서는 칸 없이 다시 읽는다.
+      const again = await sb.from("collab_requests").select("applicant_name, contact").eq("id", id).maybeSingle();
+      row = again.data ? { ...again.data, applicant_id: null } : null;
+    }
+    if (!row) return { message: NOT_FOUND };
+    const contact = String(row.contact).trim();
+    const canMail = MAIL_RE.test(contact);
+    const onSite = !!row.applicant_id;
+    if (decision === "send" && !canMail && !onSite) {
+      return { message: "신청자의 연락처가 이메일이 아니고 로그인하지 않고 보낸 신청이라 사이트에서 답장을 보낼 수 없어요. 적힌 연락처로 직접 연락해 주세요.", values: { message: text } };
+    }
+
+    if (decision !== "send") {
+      const { data: updated, error } = await sb
+        .from("collab_requests")
+        .update({ status: decision === "accept" ? "accepted" : decision === "reject" ? "rejected" : "reviewing" })
+        .eq("id", id)
+        .select("id");
+      if (error || !updated || updated.length === 0) return { message: "저장하지 못했습니다. 잠시 후 다시 시도해 주세요.", values: { message: text } };
+    }
+
+    // 사이트에 저장: 신청자가 로그인한 사람일 때, 답장 글이 있거나 수락·거절일 때(「검토 중」 표시는 남기지 않는다).
+    let stored = false;
+    if (onSite && decision !== "review") {
+      const { error } = await sb.from("collab_replies").insert({
+        request_id: id,
+        sender_id: user.id,
+        decision: decision === "accept" ? "accepted" : decision === "reject" ? "rejected" : null,
+        message: text,
+      });
+      if (error) {
+        if (!isMissingSchema(error.message)) console.error("[collab] 답장을 저장하지 못했습니다.", error);
+        if (decision === "send") return { message: "답장을 저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요." + devDetail(error), values: { message: text } };
+        note = "notstored";
+      } else {
+        stored = true;
+      }
+    }
+
+    // 메일: 「검토 중」은 받는 사람 쪽 표시일 뿐이라 보내지 않는다. 연락처가 이메일일 때만 보낸다.
+    if (decision !== "review") {
+      if (canMail) {
+        const m = applicantReply(String(row.applicant_name), decision === "accept" ? "accepted" : decision === "reject" ? "rejected" : null, text);
+        const sent = await sendMail({ to: contact, ...m });
+        if (!sent.ok) {
+          // 사이트에 저장됐으면 답장은 전달된 것이다. 저장도 못 했고 일반 답장이면 실패로 알린다.
+          if (decision === "send" && !stored) return { message: "메일을 보내지 못했어요. 잠시 뒤에 다시 시도해 주세요.", values: { message: text } };
+          note = note || (stored ? "mailfailed_stored" : "mailfailed");
+        }
+      } else if (!stored) {
+        note = note || "nomail";
+      }
+    }
+  } catch (e) {
+    console.error("[collab] 답장·수락·거절 처리 중 오류", e);
+    return { message: UNAVAILABLE + devDetail(e), values: { message: text } };
+  }
+  revalidatePath("/collab");
+  revalidatePath(`/collab/${id}`);
+  const saved = decision === "send" ? "replied" : decision === "accept" ? "accepted" : decision === "reject" ? "rejected" : "reviewing";
+  redirect(`/collab/${id}?saved=${saved}${note ? `&mail=${note}` : ""}`);
 }
