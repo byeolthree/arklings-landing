@@ -12,11 +12,12 @@ import { useStoredValue } from "@/lib/use-stored-value";
 const CONSENT_KEY = "arklings.consentVersion";
 
 // 구글·카카오로 계속하기. 동의 체크를 해야만 작동한다(체크하지 않으면 칸 아래에 안내).
-export function SocialButtons({ returnTo, heading = "또는 다른 방법으로 계속하기" }: { returnTo: string; heading?: string }) {
+export function SocialButtons({ returnTo, heading = "또는 다른 방법으로 계속하기", actionLabel = "계속" }: { returnTo: string; heading?: string; actionLabel?: string }) {
   const [state, action, pending] = useActionState<AuthFormState, FormData>(startOAuth, {});
   const consentId = useId();
   // 이 브라우저에서 같은 문구(버전)에 이미 동의했다면 체크가 미리 되어 있다. 보이는 체크칸이라 언제든 풀 수 있다.
   const storedVersion = useStoredValue(CONSENT_KEY);
+  const [clicked, setClicked] = useState(""); // 마지막으로 누른 로그인 방식(누른 버튼에만 「이동 중…」을 보인다)
   const [picked, setPicked] = useState<boolean | null>(null); // 사용자가 직접 바꾼 값(없으면 저장된 동의 이력을 따른다)
   const agreed = picked ?? storedVersion === CONSENT_VERSION;
   return (
@@ -60,9 +61,11 @@ export function SocialButtons({ returnTo, heading = "또는 다른 방법으로 
             name="provider"
             value={p.id}
             disabled={pending}
+            aria-busy={pending && clicked === p.id}
+            onClick={() => setClicked(p.id)}
             className={`${outlineBtn} w-full disabled:opacity-60`}
           >
-            {p.label}로 계속
+            {pending && clicked === p.id ? "이동 중…" : `${p.label}로 ${actionLabel}`}
           </button>
         ))}
       </div>

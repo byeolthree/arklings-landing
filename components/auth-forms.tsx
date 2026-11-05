@@ -282,7 +282,7 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
           가입하기
         </Link>
       </p>
-      <SocialButtons returnTo={returnTo} />
+      <SocialButtons returnTo={returnTo} actionLabel="로그인" />
     </PaperCard>
   );
 }

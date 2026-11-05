@@ -38,7 +38,9 @@ export function CardHeading({ title, lines }: { title: string; lines?: string[] 
   );
 }
 
+// 마우스를 올리면 살짝 떠오르고(색은 바꾸지 않는다), 누르는 동안은 살짝 작아지며 진해진다. 잠긴 버튼은 움직이지 않는다.
+const pressFx = "transition-[transform,filter,background-color] duration-150 hover:not-disabled:-translate-y-px active:not-disabled:scale-[0.97]";
 export const primaryBtn =
-  "inline-flex items-center justify-center rounded-lg bg-jaju px-5 py-2 text-[13px] font-bold text-white disabled:opacity-60";
+  `inline-flex items-center justify-center rounded-lg bg-jaju px-5 py-2 text-[13px] font-bold text-white disabled:opacity-60 ${pressFx} active:not-disabled:brightness-90`;
 export const outlineBtn =
-  "inline-flex items-center justify-center rounded-lg border border-jaju px-5 py-2 text-[13px] font-bold text-jaju";
+  `inline-flex items-center justify-center rounded-lg border border-jaju px-5 py-2 text-[13px] font-bold text-jaju disabled:opacity-60 ${pressFx} active:not-disabled:bg-jaju/10`;

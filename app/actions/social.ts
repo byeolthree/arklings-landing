@@ -15,6 +15,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createAuthClient } from "@/lib/supabase/server";
 
 const UNAVAILABLE = "지금은 이 기능을 쓸 수 없어요. 잠시 뒤에 다시 시도해 주세요.";
+
+// 원인을 찾을 수 있게 어느 단계에서 어떤 오류가 났는지 서버 기록에 남긴다. 이메일 주소는 가리고 길이를 줄인다(비밀번호·열쇠 값은 기록하지 않는다).
+function logStep(step: string, e: unknown) {
+  const err = e as { code?: string; status?: number; message?: string } | null;
+  const msg = String(err?.message ?? e ?? "").replace(/[^\s@<>]+@[^\s@<>]+/g, "***").replace(/\s+/g, " ").slice(0, 160);
+  console.error(`[social] ${step} 실패 코드=${err?.code ?? "?"} 상태=${err?.status ?? "?"} 문구=${msg || "없음"}`);
+}
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const text = (fd: FormData, key: string) => String(fd.get(key) ?? "");
 
@@ -121,7 +128,10 @@ export async function requestEmail(_prev: AuthFormState, fd: FormData): Promise<
   try {
     const admin = createAdminClient();
     const { data: otherId, error: findError } = await admin.rpc("find_user_id_by_email", { p_email: email });
-    if (findError) return { message: UNAVAILABLE, nextStep: "retry", values: { email }, returnTo };
+    if (findError) {
+      logStep("이메일 사용 여부 확인(find_user_id_by_email)", findError);
+      return { message: UNAVAILABLE, nextStep: "retry", values: { email }, returnTo };
+    }
 
     if (otherId && otherId !== user.id) return await sendLinkToExisting(user.id, pickProvider(user.providers), email, origin, returnTo);
 
@@ -134,7 +144,8 @@ export async function requestEmail(_prev: AuthFormState, fd: FormData): Promise<
       if (issue.field === "email") return { errors: { email: issue.message }, values: { email }, returnTo };
       return { message: issue.message, nextStep: issue.next, values: { email }, returnTo };
     }
-  } catch {
+  } catch (e) {
+    logStep("이메일 요청 처리 중 예외", e);
     return { message: UNAVAILABLE, nextStep: "retry", values: { email }, returnTo };
   }
   return { sentTo: email, values: { email }, returnTo };
@@ -151,11 +162,17 @@ async function sendLinkToExisting(
   const { error: saveError } = await admin
     .from("pending_identity_links")
     .upsert({ source_user_id: sourceUserId, provider: provider ?? "kakao", target_email: email, created_at: new Date().toISOString() }, { onConflict: "source_user_id" });
-  if (saveError) return { message: UNAVAILABLE, nextStep: "retry", values: { email }, returnTo };
+  if (saveError) {
+    logStep("이어주기 요청 저장(pending_identity_links)", saveError);
+    return { message: UNAVAILABLE, nextStep: "retry", values: { email }, returnTo };
+  }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return { message: UNAVAILABLE, nextStep: "retry", values: { email }, returnTo };
+  if (!url || !key) {
+    logStep("서버 설정값 확인(NEXT_PUBLIC_SUPABASE_*)", { message: "설정값이 비어 있음" });
+    return { message: UNAVAILABLE, nextStep: "retry", values: { email }, returnTo };
+  }
   // 로그인 기록을 남기지 않는 따로 만든 연결로 보낸다(지금 로그인한 계정 쿠키를 건드리지 않는다).
   const anon = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
   const { error } = await anon.auth.signInWithOtp({
@@ -188,6 +205,7 @@ export async function finishSocialLink(): Promise<void> {
     const { count, error: countError } = await admin.from("plans").select("id", { count: "exact", head: true }).eq("owner_id", pending.sourceUserId);
     // 개수를 확인하지 못하면 지우지 않는다(안전한 쪽으로 닫힘).
     if (!source?.user || source.user.email || countError || count === null || count > 0) {
+      logStep("이어주기: 임시 계정 확인", { message: `계정있음=${!!source?.user} 이메일있음=${!!source?.user?.email} 기획안수=${count} 기획안조회오류=${countError?.message ?? "없음"}` });
       failure = "link_failed";
     } else {
       const supabase = await createAuthClient();
@@ -196,15 +214,19 @@ export async function finishSocialLink(): Promise<void> {
         options: { redirectTo: await callbackUrl("/mypage?msg=linked"), skipBrowserRedirect: true, ...oauthOptions(pending.provider) },
       });
       if (error || !data?.url) {
+        logStep("이어주기: 로그인 방법 연결 주소 만들기(linkIdentity)", error ?? { message: "주소 없음" });
         failure = error?.code === "manual_linking_disabled" ? "link_disabled" : "link_failed";
       } else {
         const { error: delError } = await admin.auth.admin.deleteUser(pending.sourceUserId);
-        if (delError) failure = "link_failed";
-        else url = data.url;
+        if (delError) {
+          logStep("이어주기: 임시 계정 지우기", delError);
+          failure = "link_failed";
+        } else url = data.url;
       }
     }
   } catch (e) {
     if ((e as { digest?: string })?.digest?.startsWith("NEXT_REDIRECT")) throw e;
+    logStep("이어주기: 예외", e);
     failure = "link_failed";
   }
   if (failure || !url) redirect(`/mypage?msg=${failure ?? "link_failed"}`);
