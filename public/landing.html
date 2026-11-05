@@ -399,14 +399,14 @@
   .studio { padding: 0 0 120px; }
   .studio-media { position: relative; height: min(78vh, 720px); overflow: hidden; }
   .studio-media video { position: absolute; inset: 0; width: 100%; height: 115%; object-fit: cover; transform: translateY(var(--py, 0px)); will-change: transform; }
-  .studio-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(250,247,248,0) 60%, var(--bg)); }
+  .studio-media::after { content: ""; position: absolute; inset: 0 0 -2px 0; background: linear-gradient(180deg, rgba(250,247,248,0) 60%, var(--bg) 98%, var(--bg)); }
   .studio-body { position: relative; margin-top: -120px; z-index: 2; }
   .studio-card { max-width: 860px; }
   .studio-card .h2 { font-size: clamp(24px, 3.2vw, 36px); line-height: 1.22; font-weight: 900; }
   .studio-card p.intro { margin-top: 22px; font-size: 17px; line-height: 1.85; }
   .studio-card .ctas { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px; }
 
-  footer.site { }
+  footer.site { background: var(--tint); }
   footer.site .wrap { display: flex; justify-content: space-between; gap: 20px; padding-top: 22px; padding-bottom: 26px; flex-wrap: wrap; }
   footer.site b { color: var(--title); font-size: 18px; }
   footer.site p { font-size: 13px; }
