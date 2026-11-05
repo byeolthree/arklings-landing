@@ -185,11 +185,17 @@ export function CreatorList({
                             {c.bio && <span className="cr-bio">{c.bio}</span>}
                           </div>
                         </div>
-                        <div className="cr-box">
-                          <span className="cr-label">대표 작품</span>
-                          <h3 className="cr-box-title">{c.latest.title}</h3>
-                          <p className="cr-box-logline">{c.latest.logline}</p>
-                        </div>
+                        {c.main === "media" && c.hero ? (
+                          <div className="cr-main-media" role="img" aria-label={c.hero === "video" ? "대표 영상" : "대표 이미지"}>
+                            {c.hero === "video" ? "▶ 〈대표 영상〉" : "〈대표 이미지〉"}
+                          </div>
+                        ) : (
+                          <div className="cr-box">
+                            <span className="cr-label">대표 작품</span>
+                            <h3 className="cr-box-title">{c.latest.title}</h3>
+                            <p className="cr-box-logline">{c.latest.logline}</p>
+                          </div>
+                        )}
                         <RoleTags roles={c.roles} />
                         {c.latest.genres && c.latest.genres.length > 0 && (
                           <ul className="cr-genres" aria-label="장르">

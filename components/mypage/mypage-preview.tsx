@@ -33,6 +33,27 @@ const SAMPLE_PROFILE: Partial<ProfileValues> = {
   openToCollab: true,
 };
 
+// 샘플: 크리에이터를 대표하는 이미지나 영상 한 가지를 고른다(프로필 맨 위와 목록 카드에 걸린다). 파일은 어디에도 올라가지 않는다.
+function HeroField() {
+  const [kind, setKind] = useState<"image" | "video">("image");
+  return (
+    <div className="pp-field">
+      <span className="pp-label" id="pp-hero-label">
+        대표 이미지·영상 <span className="pp-hint-inline">(선택)</span>
+      </span>
+      <div className="pp-roles" role="group" aria-labelledby="pp-hero-label">
+        <button type="button" className="opt" aria-pressed={kind === "image"} onClick={() => setKind("image")}>
+          이미지
+        </button>
+        <button type="button" className="opt" aria-pressed={kind === "video"} onClick={() => setKind("video")}>
+          영상
+        </button>
+      </div>
+      <input type="file" accept={kind === "image" ? "image/jpeg,image/png" : "video/mp4"} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} />
+    </div>
+  );
+}
+
 function Section({
   id,
   tone,
@@ -238,6 +259,7 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
                 initial={exists ? { ...SAMPLE_PROFILE, isPublic } : undefined}
                 onSubmit={onSubmit}
                 checkHandle={checkHandle}
+                heroField={<HeroField />}
               />
             </div>
             {saved && <p className="mp-sample">저장했어요(샘플).</p>}

@@ -4,14 +4,6 @@ import { WORK_KINDS, type CreatorProfileData, type WorkCard } from "./types";
 import { WorkMedia } from "./work-media";
 import "./creators.css";
 
-const TONES = ["teal", "dusty", "sage"] as const;
-// 프로필 원 색은 공개 주소 글자로 정해 같은 사람은 늘 같은 색이다.
-function toneOf(handle: string): (typeof TONES)[number] {
-  let n = 0;
-  for (const ch of handle) n = (n * 31 + ch.charCodeAt(0)) % 1000003;
-  return TONES[n % TONES.length];
-}
-
 // 크리에이터 프로필 화면. 마이페이지 「크리에이터 등록」에 적은 것(닉네임·역할·소개 글·채널 링크·협업 신청 받는 중)이
 // 그 칸 순서대로 보이고, 아래 포트폴리오는 「포트폴리오 등록」의 작품 카드와 같은 카드다. 데이터를 받기만 하고 읽지 않는다.
 export function CreatorProfile({
@@ -33,19 +25,31 @@ export function CreatorProfile({
   const kinds = WORK_KINDS.map((k) => [k, works.filter((w) => w.kind === k).length] as const).filter(([, n]) => n > 0);
   return (
     <div className="cr">
-      <section className="cr-list cr-prof">
-        <div className="wrap">
+      {/* 맨 위: 크리에이터를 대표하는 이미지나 영상 위에 닉네임이 아주 크게 올라간다. 대표를 안 올렸으면 닉네임만 크게 */}
+      <section className={`cr-hero${creator.hero ? "" : " none"}`} aria-labelledby="cr-hero-name">
+        {creator.hero && (
+          <div className="cr-hero-media" role="img" aria-label={creator.hero === "video" ? "대표 영상" : "대표 이미지"}>
+            {creator.hero === "video" ? "▶ 〈대표 영상〉" : "〈대표 이미지〉"}
+          </div>
+        )}
+        <div className="wrap cr-hero-over">
           <Link href={backHref} className="cr-back">
             ← 크리에이터
           </Link>
+          <div className="cr-hero-body">
+            <RoleTags roles={creator.roles} />
+            <h1 id="cr-hero-name" className="cr-hero-name">
+              {creator.name}
+            </h1>
+            {creator.openToCollab && <span className="cr-open">협업 신청 받는 중</span>}
+          </div>
+        </div>
+      </section>
 
+      <section className="cr-list cr-prof">
+        <div className="wrap">
           <header className="cr-prof-head">
-            <span className={`cr-av cr-av-lg ${toneOf(creator.handle)}`} aria-hidden="true">
-              {creator.name.slice(0, 1)}
-            </span>
             <div className="cr-prof-text">
-              <h1 className="cr-prof-name">{creator.name}</h1>
-              <RoleTags roles={creator.roles} />
               {creator.bio && <p className="cr-prof-bio">{creator.bio}</p>}
               {creator.channels && creator.channels.length > 0 && (
                 <ul className="cr-chan" aria-label="채널 링크">
@@ -67,7 +71,6 @@ export function CreatorProfile({
                   ))}
                 </ul>
               )}
-              {creator.openToCollab && <span className="cr-open">협업 신청 받는 중</span>}
             </div>
           </header>
 

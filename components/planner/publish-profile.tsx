@@ -35,6 +35,7 @@ export function PublishProfile({
   onCancel,
   checkHandle,
   submitLabel,
+  heroField,
 }: {
   mode: "create" | "edit";
   context: "mypage" | "planner";
@@ -46,6 +47,8 @@ export function PublishProfile({
   checkHandle?: (handle: string) => Promise<HandleCheck>;
   // 저장 버튼 글. 안 주면 상황에 맞게 정한다(기획안 올리기: 「프로필 저장하고 올리기」, 그 밖: 「프로필 저장」).
   submitLabel?: string;
+  // 역할 칸 아래에 끼우는 칸(마이페이지 샘플의 「대표 이미지·영상」). 안 주면 아무것도 안 보인다.
+  heroField?: React.ReactNode;
 }) {
   const full = context === "mypage";
   const editing = mode === "edit";
@@ -211,6 +214,8 @@ export function PublishProfile({
           </p>
         )}
       </div>
+
+      {heroField}
 
       {/* P2 소개 글 */}
       {full && (

@@ -2,10 +2,11 @@
 // 디자인 작업이 끝나 실제 읽기(lib/creators.ts)로 바꾸면 이 파일과 /dev-preview 주소는 지운다.
 import { SLOT_LABELS } from "@/lib/plans";
 import { GENRES } from "./genres";
-import { WORK_KINDS, type CreatorCard, type CreatorProfileData, type PlanCard, type PlanDetailData, type WorkCard } from "./types";
+import type { Role } from "@/lib/collab";
+import { WORK_KINDS, type CreatorCard, type CreatorProfileData, type HeroKind, type PlanCard, type PlanDetailData, type WorkCard } from "./types";
 
 // 목록·프로필 샘플이 받는 사람 값(협업 받는 중·전체 장르·분량은 작품에서 계산해 더한다)
-type BaseCard = Omit<CreatorCard, "openToCollab" | "genres" | "forms">;
+type BaseCard = Omit<CreatorCard, "openToCollab" | "genres" | "forms" | "hero" | "main">;
 
 const LOGLINES: Record<string, [string, string, string, string, string]> = {
   "소금비 내리는 나라": ["소금비가 내리는 날마다 한 사람의 기억이 사라지는 일", "기억을 기록하는 사관", "왕의 기억만 지워지지 않는 비밀", "사라진 기억의 복구", "나라 전체가 기억을 잃는 재앙"],
@@ -85,9 +86,13 @@ const SAMPLE_EXTRA: Record<string, { about?: string; channels?: { label: string;
   "hayun-jung": { channels: [{ label: "블로그", url: "https://example.com/blog" }], openToCollab: true },
 };
 
+// 샘플의 대표 이미지·영상: 영상 제작은 영상, 그 밖은 이미지. 대표를 안 올린 사람도 둔다(역사 자문·책임 프로듀서 일부).
+const NO_HERO = new Set(["dayun-choi", "taeyang-baek"]);
+const heroOf = (c: { handle: string; roles: Role[] }): HeroKind | undefined => (NO_HERO.has(c.handle) ? undefined : c.roles[0] === "video" ? "video" : "image");
+
 export function sampleProfileOf(c: BaseCard): CreatorProfileData {
   const x = SAMPLE_EXTRA[c.handle];
-  return { handle: c.handle, name: c.name, roles: c.roles, bio: x?.about ?? c.bio, channels: x?.channels, openToCollab: x?.openToCollab ?? true };
+  return { handle: c.handle, name: c.name, roles: c.roles, bio: x?.about ?? c.bio, channels: x?.channels, openToCollab: x?.openToCollab ?? true, hero: heroOf(c) };
 }
 
 // 프로필의 작품 카드(최신 공개 순). 장르는 대표 작품이 가진 것을 쓰고, 나머지는 돌려 가며 붙인 샘플이다.
@@ -132,5 +137,7 @@ export function sampleDetailOf(id: string): PlanDetailData | null {
 // 목록 카드 샘플: 협업 받는 중은 프로필과 같은 값, 장르·분량은 그 사람의 작품 카드에서 모은다.
 export const SAMPLE_CREATORS: CreatorCard[] = RAW_CREATORS.map((c) => {
   const works = sampleWorksOf(c);
-  return { ...c, openToCollab: sampleProfileOf(c).openToCollab ?? true, genres: [...new Set(works.flatMap((w) => w.genres))], forms: [...new Set(works.map((w) => w.form))] };
+  const hero = heroOf(c);
+  const main = hero && (c.roles[0] === "video" || c.roles[0] === "art_director") ? "media" : "logline";
+  return { ...c, hero, main, openToCollab: sampleProfileOf(c).openToCollab ?? true, genres: [...new Set(works.flatMap((w) => w.genres))], forms: [...new Set(works.map((w) => w.form))] };
 });

@@ -244,3 +244,19 @@
 .cr .cr-apply-stick .btn { pointer-events: auto; }
 /* 따라다니는 버튼이 있으려면 바깥이 스크롤 상자가 아니어야 해서, 이 화면만 잘라내기(clip)로 바꾼다(보이는 모양은 같다) */
 .cr:has(.cr-apply-stick) { overflow: clip; }
+
+/* 프로필 맨 위: 대표 이미지·영상 + 아주 큰 닉네임(Spotify 아티스트 화면처럼). 대표가 없으면 닉네임만 크게 */
+.cr .cr-hero { position: relative; display: flex; align-items: flex-end; min-height: 300px; background: var(--hero-bg); color: var(--title); }
+@media (min-width: 768px) { .cr .cr-hero { min-height: 480px; } }
+.cr .cr-hero:not(.none) { background: var(--title); color: #fff; }
+.cr .cr-hero-media { position: absolute; inset: 0; display: grid; place-items: center; font-size: 14px; color: rgba(255,255,255,.55); background: var(--title); }
+.cr .cr-hero:not(.none)::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.35), transparent 35%, rgba(0,0,0,.6)); pointer-events: none; }
+.cr .cr-hero-over { position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: space-between; align-self: stretch; padding-top: 20px; padding-bottom: 28px; gap: 40px; }
+.cr .cr-hero:not(.none) .cr-back { color: #fff; }
+.cr .cr-hero-body { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.cr .cr-hero-name { font-size: clamp(44px, 10vw, 128px); line-height: 1; font-weight: 700; letter-spacing: -0.03em; color: inherit; word-break: keep-all; overflow-wrap: anywhere; }
+.cr .cr-hero:not(.none) .cr-open { color: #fff; border-color: #fff; }
+
+/* 목록 카드 메인: 아트디렉터·영상 제작은 로그라인 대신 대표 이미지·영상 */
+.cr .cr-main-media { height: 160px; display: grid; place-items: center; border-radius: 12px; background: var(--title); color: rgba(255,255,255,.6); font-size: 13px; }
+@media (min-width: 768px) { .cr .cr-main-media { height: 200px; } }
