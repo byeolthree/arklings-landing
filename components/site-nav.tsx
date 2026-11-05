@@ -14,7 +14,7 @@ const MENU: { label: string; href?: string }[] = [
   { label: "커뮤니티" },
 ];
 
-export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
+export function SiteNav({ loggedIn, newCount }: { loggedIn: boolean; newCount?: number | null }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -58,7 +58,7 @@ export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
           {loggedIn ? (
             <>
               <Link href="/collab" className="lk-textlink">
-                받은 협업 신청
+                받은 협업 신청{newCount ? ` (${newCount})` : ""}
               </Link>
               <Link href="/mypage" className="lk-textlink">
                 마이페이지
@@ -104,7 +104,7 @@ export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
         {loggedIn ? (
           <>
             <Link href="/collab" onClick={close} tabIndex={open ? 0 : -1}>
-              받은 협업 신청
+              받은 협업 신청{newCount ? ` (${newCount})` : ""}
             </Link>
             <Link href="/mypage" onClick={close} tabIndex={open ? 0 : -1}>
               마이페이지
