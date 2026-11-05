@@ -275,7 +275,7 @@ export async function replyCollab(id: string, _prev: FormState, fd: FormData): P
   if (!UUID_RE.test(id)) return { message: NOT_FOUND };
 
   const decision = String(fd.get("decision") ?? "");
-  if (decision !== "send" && decision !== "accept" && decision !== "reject") return { message: "동작을 알 수 없어요. 화면을 새로 열어 다시 시도해 주세요." };
+  if (decision !== "send" && decision !== "accept" && decision !== "reject" && decision !== "review") return { message: "동작을 알 수 없어요. 화면을 새로 열어 다시 시도해 주세요." };
   const text = String(fd.get("message") ?? "").trim();
   if (text.length > 1000) return { message: "답장은 1000자 이내로 써 주세요.", values: { message: text } };
   if (decision === "send" && text.length === 0) return { message: "보낼 답장을 써 주세요.", values: { message: text } };
@@ -294,13 +294,16 @@ export async function replyCollab(id: string, _prev: FormState, fd: FormData): P
     if (decision !== "send") {
       const { data: updated, error } = await sb
         .from("collab_requests")
-        .update({ status: decision === "accept" ? "accepted" : "rejected" })
+        .update({ status: decision === "accept" ? "accepted" : decision === "reject" ? "rejected" : "reviewing" })
         .eq("id", id)
         .select("id");
       if (error || !updated || updated.length === 0) return { message: "저장하지 못했습니다. 잠시 후 다시 시도해 주세요.", values: { message: text } };
     }
 
-    if (canMail) {
+    // 「검토 중」은 받는 사람 쪽 표시일 뿐이라 신청자에게 메일을 보내지 않는다.
+    if (decision === "review") {
+      /* 메일 없음 */
+    } else if (canMail) {
       const m = applicantReply(String(row.applicant_name), decision === "accept" ? "accepted" : decision === "reject" ? "rejected" : null, text);
       const sent = await sendMail({ to: contact, ...m });
       if (!sent.ok) {
@@ -316,6 +319,6 @@ export async function replyCollab(id: string, _prev: FormState, fd: FormData): P
   }
   revalidatePath("/collab");
   revalidatePath(`/collab/${id}`);
-  const saved = decision === "send" ? "replied" : decision === "accept" ? "accepted" : "rejected";
+  const saved = decision === "send" ? "replied" : decision === "accept" ? "accepted" : decision === "reject" ? "rejected" : "reviewing";
   redirect(`/collab/${id}?saved=${saved}${note ? `&mail=${note}` : ""}`);
 }

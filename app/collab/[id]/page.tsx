@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CollabReply } from "@/components/collab-reply";
 import { DeleteButton } from "@/components/delete-button";
-import { outlineBtn, PaperCard, PaperPage } from "@/components/paper-card";
+import { PaperCard, PaperPage } from "@/components/paper-card";
 import { StatusBadge } from "@/components/status-badge";
 import { requireUser } from "@/lib/auth";
 import { BUCKET } from "@/lib/supabase";
@@ -58,6 +58,7 @@ export default async function CollabDetailPage({ params, searchParams }: Props) 
     replied: "답장을 보냈어요.",
     accepted: "수락으로 바꿨어요.",
     rejected: "거절로 바꿨어요.",
+    reviewing: "검토 중으로 바꿨어요.",
   };
   const mailNotes: Record<string, string> = {
     mailfailed: " 다만 신청자에게 가는 메일은 보내지 못했어요.",
@@ -110,12 +111,9 @@ export default async function CollabDetailPage({ params, searchParams }: Props) 
           <Row k="최근 수정">{formatKst(r.updated_at)}</Row>
         </dl>
 
-        <CollabReply id={r.id} canMail={canMail} />
-
-        <div className="mt-6 flex items-start gap-3">
-          <Link href={`/collab/${r.id}/edit`} className={outlineBtn}>수정</Link>
+        <CollabReply id={r.id} canMail={canMail}>
           <DeleteButton id={r.id} />
-        </div>
+        </CollabReply>
       </PaperCard>
     </PaperPage>
   );
