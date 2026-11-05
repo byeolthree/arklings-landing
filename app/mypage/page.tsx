@@ -105,7 +105,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
                   .map((p) => (
                     <form key={`un-${p}`} action={unlinkProvider}>
                       <input type="hidden" name="provider" value={p} />
-                      <button type="submit" className="inline-flex items-center justify-center rounded-lg border border-[#e8dfe3] px-5 py-2 text-[13px] font-bold text-[#574a4f] hover:border-destructive hover:text-destructive">
+                      <button type="submit" className="inline-flex items-center justify-center rounded-lg border border-[#e8dfe3] px-5 py-2 text-[13px] font-bold text-[#574a4f]">
                         {PROVIDER_LABEL[p] ?? p} 해제
                       </button>
                     </form>
@@ -148,7 +148,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
             <ul className="mt-3 divide-y divide-[#e8dfe3] border-y border-[#e8dfe3]">
               {plans.map((p) => (
                 <li key={p.id}>
-                  <Link href={`/planner?plan=${p.id}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3 hover:bg-[#f5ecf0]">
+                  <Link href={`/planner?plan=${p.id}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3">
                     <span className="min-w-0 break-words text-[14px] font-medium text-[#292126]">{p.title}</span>
                     <span className="flex items-center gap-2 text-[12px] text-[#574a4f]">
                       <span className={`rounded-full px-2 py-0.5 ${p.is_public ? "bg-teal text-white" : "bg-[#f5ecf0] text-[#292126]"}`}>
@@ -171,7 +171,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
 
         <p className="mt-6 text-[12px] text-[#574a4f]">
           더 이상 쓰지 않으신다면{" "}
-          <Link href="/mypage/withdraw" className="underline hover:text-jaju">
+          <Link href="/mypage/withdraw" className="underline">
             회원 탈퇴
           </Link>
           를 할 수 있어요.

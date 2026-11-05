@@ -39,6 +39,6 @@ export function CardHeading({ title, lines }: { title: string; lines?: string[] 
 }
 
 export const primaryBtn =
-  "inline-flex items-center justify-center rounded-lg bg-jaju px-5 py-2 text-[13px] font-bold text-white hover:opacity-90 disabled:opacity-60";
+  "inline-flex items-center justify-center rounded-lg bg-jaju px-5 py-2 text-[13px] font-bold text-white disabled:opacity-60";
 export const outlineBtn =
-  "inline-flex items-center justify-center rounded-lg border border-jaju px-5 py-2 text-[13px] font-bold text-jaju hover:bg-jaju hover:text-white";
+  "inline-flex items-center justify-center rounded-lg border border-jaju px-5 py-2 text-[13px] font-bold text-jaju";

@@ -19,7 +19,9 @@ export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   // 크리에이터 목록·프로필과 그 사람의 기획안 상세에 있을 때 메뉴의 「크리에이터」를 현재 위치로 보여 준다.
-  const onCreators = pathname.startsWith("/creators") || pathname.startsWith("/portfolio");
+  const onCreators = pathname.startsWith("/creators") || pathname.startsWith("/portfolio") || pathname.startsWith("/dev-preview/creators") || pathname.startsWith("/dev-preview/portfolio");
+  // design 가지에서는 어느 화면에서든 「크리에이터」가 샘플 목록으로 간다(별뜨리님 지시 2026-11-04). 실제 /creators 연결은 12단계에서 한다.
+  const hrefOf = (href: string) => (href === "/creators" ? "/dev-preview/creators" : href);
   // 로그인 화면에서 돌아올 곳. 로그인·가입 화면 자체에서는 붙이지 않는다.
   const loginHref =
     pathname === "/login" || pathname === "/signup" || pathname.startsWith("/auth/")
@@ -44,7 +46,7 @@ export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
         <nav className="lk-nav-links" aria-label="주요 메뉴">
           {MENU.map((m) =>
             m.href ? (
-              <Link key={m.label} href={m.href} aria-current={onCreators ? "page" : undefined}>
+              <Link key={m.label} href={hrefOf(m.href)} aria-current={onCreators ? "page" : undefined}>
                 {m.label}
               </Link>
             ) : (
@@ -92,7 +94,7 @@ export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
       <nav className={`lk-menu${open ? " open" : ""}`} id="lk-menu" aria-label="모바일 메뉴" aria-hidden={!open}>
         {MENU.map((m) =>
           m.href ? (
-            <Link key={m.label} href={m.href} onClick={close} tabIndex={open ? 0 : -1} aria-current={onCreators ? "page" : undefined}>
+            <Link key={m.label} href={hrefOf(m.href)} onClick={close} tabIndex={open ? 0 : -1} aria-current={onCreators ? "page" : undefined}>
               {m.label}
             </Link>
           ) : (

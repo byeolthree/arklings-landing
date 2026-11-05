@@ -24,6 +24,10 @@ type Props = {
   cancelHref: string;
   // 포트폴리오의 기획안으로 들어온 신청이면 값이 있다. 받는 사람은 화면이 아니라 서버가 기획안 번호로 정한다.
   plan?: { id: string; title: string; recipientName: string };
+  // 크리에이터(목록·프로필)에서 들어온 신청이면 값이 있다(기획안 없이). 받는 사람 이름만 보여 주고 칸 모양은 기획안 칸과 같다.
+  creator?: { handle: string; name: string };
+  // 처음 열 때 미리 체크해 둘 역할(신청자가 바꿀 수 있다)
+  prefillRoles?: Role[];
 };
 
 // Figma 입력창: 배경 #faf7f8, 테두리 #e8dfe3, 모서리 8px, 높이 44(모바일 40), 글자 13(모바일 12)
@@ -61,14 +65,14 @@ function Field({
   );
 }
 
-export function CollabForm({ action, works, initial, cancelHref, plan }: Props) {
+export function CollabForm({ action, works, initial, cancelHref, plan, creator, prefillRoles }: Props) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
   const e = state.errors ?? {};
   const v = (k: string, fallback = "") => state.values?.[k] ?? fallback;
 
   const initialRoles = state.values
     ? (state.values.roles ?? "").split(",").filter(Boolean)
-    : (initial?.roles ?? []);
+    : (initial?.roles ?? prefillRoles ?? []);
   const editing = !!initial;
 
   // 파일을 고르는 순간 크기·형식을 검사해 바로 알려 준다(서버에서도 한 번 더 검사한다).
@@ -136,6 +140,15 @@ export function CollabForm({ action, works, initial, cancelHref, plan }: Props) 
             <div className="rounded-lg border border-[#e8dfe3] bg-[#f5ecf0] px-[11px] py-3">
               <p className="text-[13px] font-bold text-[#292126] md:text-[14px]">{plan.title}</p>
               <p className="mt-1 text-[12px] text-[#574a4f] md:text-[13px]">{plan.recipientName}님께 전달됩니다</p>
+            </div>
+          </div>
+        ) : creator ? (
+          <div className="flex flex-col gap-1.5 md:gap-2">
+            <input type="hidden" name="creator_handle" value={creator.handle} />
+            <p className="text-[12px] font-medium text-[#292126] md:text-[13px]">신청 대상 크리에이터</p>
+            <div className="rounded-lg border border-[#e8dfe3] bg-[#f5ecf0] px-[11px] py-3">
+              <p className="text-[13px] font-bold text-[#292126] md:text-[14px]">{creator.name}</p>
+              <p className="mt-1 text-[12px] text-[#574a4f] md:text-[13px]">{creator.name}님께 전달됩니다</p>
             </div>
           </div>
         ) : (
@@ -217,7 +230,7 @@ export function CollabForm({ action, works, initial, cancelHref, plan }: Props) 
         <button type="submit" disabled={pending} className={`${primaryBtn} w-full`}>
           {pending ? "저장 중…" : editing ? "수정 저장" : "신청서 보내기"}
         </button>
-        <Link href={cancelHref} className="-mt-3 text-center text-[12px] text-[#6f6469] hover:text-jaju md:-mt-4">
+        <Link href={cancelHref} className="-mt-3 text-center text-[12px] text-[#6f6469] md:-mt-4">
           취소
         </Link>
       </form>
