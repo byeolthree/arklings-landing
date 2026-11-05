@@ -282,3 +282,6 @@
 
 /* 목록 카드의 대표 영상: 통째로 돌리고 남는 곳은 흐린 같은 영상 */
 .cr .cr-main-media.has-src { display: block; position: relative; overflow: hidden; background: #000; }
+
+/* 누르는 동안 살짝 작아지고 진해진다(잠긴 버튼 제외) */
+.cr .btn:not([disabled]):active { transform: scale(.97); filter: brightness(.92); }

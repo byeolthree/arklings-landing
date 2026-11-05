@@ -11,6 +11,7 @@ import { countNewCollab } from "@/lib/collab-count";
 import { PAGE_SIZE, ROLES, STATUSES, type CollabRequest } from "@/lib/collab";
 import { formatKstDate } from "@/lib/time";
 import { StatusBadge } from "@/components/status-badge";
+import { SubmitButton } from "@/components/submit-button";
 import { createAuthClient } from "@/lib/supabase/server";
 import { OAUTH_PROVIDERS, PROVIDER_LABEL } from "@/lib/providers";
 import { formatKst } from "@/lib/time";
@@ -208,9 +209,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
               {addable.map((p) => (
                 <form key={p.id} action={startLinkIdentity}>
                   <input type="hidden" name="provider" value={p.id} />
-                  <button type="submit" className="btn btn-ghost">
-                    {p.label} 연결하기
-                  </button>
+                  <SubmitButton className="btn btn-ghost">{p.label} 연결하기</SubmitButton>
                 </form>
               ))}
               {!linked.includes("email") && (
@@ -224,9 +223,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
                   .map((p) => (
                     <form key={`un-${p}`} action={unlinkProvider}>
                       <input type="hidden" name="provider" value={p} />
-                      <button type="submit" className="btn btn-ghost">
-                        {PROVIDER_LABEL[p] ?? p} 해제
-                      </button>
+                      <SubmitButton className="btn btn-ghost">{PROVIDER_LABEL[p] ?? p} 해제</SubmitButton>
                     </form>
                   ))}
             </div>
@@ -243,9 +240,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
       </dl>
       <div className="mp-foot">
         <form action={signOut}>
-          <button type="submit" className="btn btn-ghost">
-            로그아웃
-          </button>
+          <SubmitButton className="btn btn-ghost">로그아웃</SubmitButton>
         </form>
         <small>
           더 이상 쓰지 않으신다면 <Link href="/mypage/withdraw">회원 탈퇴</Link>를 할 수 있어요.

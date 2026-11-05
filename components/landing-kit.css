@@ -90,3 +90,6 @@
 @media (max-width: 640px) { .lk-footer .links { align-items: flex-start; } }
 
 @media (prefers-reduced-motion: reduce) { .lk-btn, .lk-btn::after, .lk-burger i, .lk-menu { transition: none !important; } }
+
+/* 누르는 동안 살짝 작아지고 진해진다 */
+.lk-btn:active { transform: scale(.97); filter: brightness(.92); }
