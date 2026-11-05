@@ -1,6 +1,6 @@
 // 로그인 뒤에 돌아갈 주소(next)는 "같은 사이트 안의 경로"만 허용한다.
 // https://…, //…, \… 처럼 다른 사이트로 보낼 수 있는 값은 모두 기본 주소로 바꾼다.
-export const DEFAULT_NEXT = "/mypage";
+export const DEFAULT_NEXT = "/";
 
 const MAX_LENGTH = 300;
 

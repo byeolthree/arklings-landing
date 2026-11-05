@@ -19,11 +19,13 @@ const MESSAGES: Record<string, { text: string; ok?: boolean }> = {
   unlink_last: { text: "로그인 방법이 하나뿐이라 해제할 수 없어요. 다른 방법을 먼저 추가해 주세요." },
 };
 
-const SECTIONS = [
+const BASE_SECTIONS = [
   { id: "mp-basic", label: "기본 정보" },
   { id: "mp-creator", label: "크리에이터 등록" },
   { id: "mp-portfolio", label: "포트폴리오 등록" },
 ] as const;
+const COLLAB_SECTION = { id: "mp-collab", label: "받은 협업 신청" } as const;
+type SectionId = (typeof BASE_SECTIONS)[number]["id"] | typeof COLLAB_SECTION.id;
 
 const SAMPLE_PROFILE: Partial<ProfileValues> = {
   handle: "my-name",
@@ -155,8 +157,24 @@ function Section({
 }
 
 // 샘플 미리보기용: 실제 저장·로그인·DB와 연결되지 않는다. 디자인이 끝나면 지운다.
-export function MypagePreview({ profile, msg, pending }: { profile: ProfileState; msg?: string; pending: boolean }) {
-  const [open, setOpen] = useState({ "mp-basic": true, "mp-creator": true, "mp-portfolio": true });
+// basic·plans·collab을 넘기면 실제 로그인 화면(/mypage)이 되고, 넘기지 않으면 샘플 값으로 그린다.
+export function MypagePreview({
+  profile,
+  msg,
+  pending,
+  basic,
+  plans,
+  collab,
+}: {
+  profile: ProfileState;
+  msg?: string;
+  pending: boolean;
+  basic?: React.ReactNode;
+  plans?: React.ReactNode;
+  collab?: { newCount: number | null };
+}) {
+  const SECTIONS = collab ? [...BASE_SECTIONS, COLLAB_SECTION] : BASE_SECTIONS;
+  const [open, setOpen] = useState<Record<SectionId, boolean>>({ "mp-basic": true, "mp-creator": true, "mp-portfolio": true, "mp-collab": true });
   const [active, setActive] = useState<string>("mp-basic");
   const [saved, setSaved] = useState(false);
   const [showPending, setShowPending] = useState(pending);
@@ -188,7 +206,8 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
       io.disconnect();
       window.removeEventListener("scroll", onScroll);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!collab]);
 
   const toggle = (id: keyof typeof open) => setOpen((cur) => ({ ...cur, [id]: !cur[id] }));
   const go = (id: keyof typeof open) => {
@@ -214,7 +233,7 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
       <div className="mp-top">
         <div className="wrap">
           <h1 className="mp-title">마이페이지</h1>
-          <p className="mp-desc">〈설명 문구〉</p>
+          {!basic && <p className="mp-desc">〈설명 문구〉</p>}
         </div>
       </div>
 
@@ -232,6 +251,8 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
 
       <div className="mp-body">
           <Section id="mp-basic" tone="s1" title="기본 정보" open={open["mp-basic"]} onToggle={() => toggle("mp-basic")}>
+            {basic ?? (
+              <>
             <dl className="mp-rows">
               <div className="mp-row">
                 <dt>닉네임</dt>
@@ -288,6 +309,8 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
                 더 이상 쓰지 않으신다면 <Link href="/mypage/withdraw">회원 탈퇴</Link>를 할 수 있어요.
               </small>
             </div>
+              </>
+            )}
           </Section>
 
           <Section
@@ -342,6 +365,7 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
 
             <div className="mp-plans">
               <h3>내 기획안</h3>
+              {plans ?? (
               <ul>
                 <li>
                   <span>〈기획안 제목〉</span>
@@ -356,6 +380,7 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
                   <span>〈다른 작품에 붙음〉</span>
                 </li>
               </ul>
+              )}
             </div>
 
             <div className="mp-works">
@@ -413,6 +438,18 @@ export function MypagePreview({ profile, msg, pending }: { profile: ProfileState
               )}
             </div>
           </Section>
+
+          {collab && (
+            <Section id="mp-collab" tone="s1" title="받은 협업 신청" open={open["mp-collab"]} onToggle={() => toggle("mp-collab")}>
+              <p className="mp-note" style={{ marginBottom: 12 }}>
+                내게 온 협업 신청을 보고, 상세 확인·수정·삭제를 할 수 있어요.
+                {collab.newCount ? ` 새 신청이 ${collab.newCount}건 있어요.` : ""}
+              </p>
+              <Link className="btn btn-primary" href="/collab">
+                받은 협업 신청 보기{collab.newCount ? ` (${collab.newCount})` : ""}
+              </Link>
+            </Section>
+          )}
       </div>
     </div>
   );
