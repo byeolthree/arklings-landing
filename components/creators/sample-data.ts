@@ -33,9 +33,9 @@ const loglineOf = (title: string): string => {
 };
 
 const RAW_CREATORS: BaseCard[] = [
-  { handle: "jian-lee", name: "이지안", roles: ["script"], bio: "사라지는 기억과 기록하는 사람을 쓰는 대본 작가예요.", planCount: 3, latest: { title: "소금비 내리는 나라", logline: loglineOf("소금비 내리는 나라"), genres: ["드라마", "판타지"] } },
-  { handle: "seoha-park", name: "박서하", roles: ["video", "producer"], bio: "밤에만 열리는 문 같은 이야기를 영상으로 옮겨요.", planCount: 2, latest: { title: "달빛 아래 두 번째 문", logline: loglineOf("달빛 아래 두 번째 문"), genres: ["판타지", "미스터리"] } },
-  { handle: "dayun-choi", name: "최다윤", roles: ["history_advisor"], bio: "옛 베 짜기와 복식을 이야기 속에 살려 내는 역사 자문가입니다.", planCount: 1, latest: { title: "실이 이어 준 사람들", logline: loglineOf("실이 이어 준 사람들"), genres: ["드라마"] } },
+  { handle: "jian-lee", name: "별뜨리", roles: ["script"], bio: "사라지는 기억과 기록하는 사람을 쓰는 대본 작가예요.", planCount: 3, latest: { title: "소금비 내리는 나라", logline: loglineOf("소금비 내리는 나라"), genres: ["드라마", "판타지"] } },
+  { handle: "seoha-park", name: "하삘라", roles: ["video", "producer"], bio: "밤에만 열리는 문 같은 이야기를 영상으로 옮겨요.", planCount: 2, latest: { title: "달빛 아래 두 번째 문", logline: loglineOf("달빛 아래 두 번째 문"), genres: ["판타지", "미스터리"] } },
+  { handle: "dayun-choi", name: "모닝스타", roles: ["history_advisor"], bio: "옛 베 짜기와 복식을 이야기 속에 살려 내는 역사 자문가입니다.", planCount: 1, latest: { title: "실이 이어 준 사람들", logline: loglineOf("실이 이어 준 사람들"), genres: ["드라마"] } },
   { handle: "hayun-jung", name: "정하윤", roles: ["script", "art_director"], bio: "붉은 강과 나루터처럼 장면이 먼저 떠오르는 글을 써요.", planCount: 5, latest: { title: "붉은 강이 흐르는 밤", logline: loglineOf("붉은 강이 흐르는 밤"), genres: ["드라마", "로맨스"] } },
   { handle: "dohyun-kim", name: "김도현", roles: ["video"], bio: "짧은 영상으로 세계관의 첫인상을 만듭니다.", planCount: 4, latest: { title: "삼한의 마지막 등불", logline: loglineOf("삼한의 마지막 등불"), genres: ["전쟁", "드라마"] } },
   { handle: "seoyun-choi", name: "최서윤", roles: ["other"], bio: "지도에 없는 마을을 찾아다니는 사람.", planCount: 1, latest: { title: "지도에 없는 마을", logline: loglineOf("지도에 없는 마을"), genres: ["미스터리"] } },
@@ -87,12 +87,18 @@ const SAMPLE_EXTRA: Record<string, { about?: string; channels?: { label: string;
 };
 
 // 샘플의 대표 이미지·영상: 영상 제작은 영상, 그 밖은 이미지. 대표를 안 올린 사람도 둔다(역사 자문·책임 프로듀서 일부).
-const NO_HERO = new Set(["dayun-choi", "taeyang-baek"]);
-const heroOf = (c: { handle: string; roles: Role[] }): HeroKind | undefined => (NO_HERO.has(c.handle) ? undefined : c.roles[0] === "video" ? "video" : "image");
+const NO_HERO = new Set(["taeyang-baek"]);
+// 맨 위 세 크리에이터는 대표 영상을 한 개씩 건다(샘플 영상 파일은 public/dev-preview, git에는 올리지 않음).
+const HERO_VIDEO: Record<string, string> = {
+  "jian-lee": "/dev-preview/hero-chantalbam.mp4", // 별뜨리: 찬탈밤
+  "seoha-park": "/dev-preview/hero-demo.mp4", // 하삘라: 황룡사
+  "dayun-choi": "/dev-preview/hero-execution.mp4", // 모닝스타: 처형장
+};
+const heroOf = (c: { handle: string; roles: Role[] }): HeroKind | undefined => (NO_HERO.has(c.handle) ? undefined : HERO_VIDEO[c.handle] || c.roles[0] === "video" ? "video" : "image");
 
 export function sampleProfileOf(c: BaseCard): CreatorProfileData {
   const x = SAMPLE_EXTRA[c.handle];
-  return { handle: c.handle, name: c.name, roles: c.roles, bio: x?.about ?? c.bio, channels: x?.channels, openToCollab: x?.openToCollab ?? true, hero: heroOf(c), heroSrc: c.handle === "seoha-park" ? "/dev-preview/hero-demo.mp4" : undefined };
+  return { handle: c.handle, name: c.name, roles: c.roles, bio: x?.about ?? c.bio, channels: x?.channels, openToCollab: x?.openToCollab ?? true, hero: heroOf(c), heroSrc: HERO_VIDEO[c.handle] };
 }
 
 // 프로필의 작품 카드(최신 공개 순). 장르는 대표 작품이 가진 것을 쓰고, 나머지는 돌려 가며 붙인 샘플이다.
