@@ -264,3 +264,8 @@
 /* 맨 위 영역 바로 아래 소개 글을 조금 위로 올린다(맨 위 영역 높이는 그대로) */
 .cr .cr-hero + .cr-prof { padding-top: 12px; }
 .cr .cr-hero + .cr-prof .cr-prof-head { margin-top: 0; }
+
+/* 대표 영상: 통째로(contain) + 흐린 같은 영상을 뒤에 깔아 꽉 찬 것처럼 */
+.cr .cr-hero-media.has-src { display: block; background: #000; overflow: hidden; }
+.cr .cr-hero-bg { position: absolute; top: -40px; left: -40px; width: calc(100% + 80px); height: calc(100% + 80px); object-fit: cover; filter: blur(32px) brightness(.55); }
+.cr .cr-hero-fg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }

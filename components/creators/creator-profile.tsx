@@ -28,9 +28,17 @@ export function CreatorProfile({
       {/* 맨 위: 크리에이터를 대표하는 이미지나 영상 위에 닉네임이 아주 크게 올라간다. 대표를 안 올렸으면 닉네임만 크게 */}
       <section className={`cr-hero${creator.hero ? "" : " none"}`} aria-labelledby="cr-hero-name">
         {creator.hero && (
-          <div className="cr-hero-media" role="img" aria-label={creator.hero === "video" ? "대표 영상" : "대표 이미지"}>
-            {creator.hero === "video" ? "▶ 〈대표 영상〉" : "〈대표 이미지〉"}
-          </div>
+          creator.hero === "video" && creator.heroSrc ? (
+            // 영상은 위아래도 좌우도 자르거나 늘리지 않고 통째로 보여 주고, 남는 곳은 같은 영상을 흐리게 깔아 맨 위 영역이 꽉 찬 것처럼 보이게 한다.
+            <div className="cr-hero-media has-src">
+              <video className="cr-hero-bg" src={creator.heroSrc} muted autoPlay loop playsInline aria-hidden="true" />
+              <video className="cr-hero-fg" src={creator.heroSrc} muted autoPlay loop playsInline aria-label="대표 영상" />
+            </div>
+          ) : (
+            <div className="cr-hero-media" role="img" aria-label={creator.hero === "video" ? "대표 영상" : "대표 이미지"}>
+              {creator.hero === "video" ? "▶ 〈대표 영상〉" : "〈대표 이미지〉"}
+            </div>
+          )
         )}
         <div className="wrap cr-hero-over">
           <Link href={backHref} className="cr-back">

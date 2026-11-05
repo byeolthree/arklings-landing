@@ -34,6 +34,7 @@ export type CreatorProfileData = {
   channels?: { label: string; url: string }[]; // 채널 링크(이름·주소, 5개까지)
   openToCollab?: boolean; // 협업 신청 받는 중(켬)
   hero?: HeroKind; // 프로필 맨 위에 크게 걸리는 대표 이미지 또는 영상(없으면 닉네임만 크게)
+  heroSrc?: string; // 대표 영상·이미지 파일 주소(샘플은 일부만 있고, 없으면 자리 표시)
 };
 
 // 프로필의 작품 카드 한 장. 마이페이지 「포트폴리오 등록」의 작품 카드와 같은 값(대표 이미지·영상은 실제 연결 때 더한다).

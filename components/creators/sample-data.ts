@@ -92,7 +92,7 @@ const heroOf = (c: { handle: string; roles: Role[] }): HeroKind | undefined => (
 
 export function sampleProfileOf(c: BaseCard): CreatorProfileData {
   const x = SAMPLE_EXTRA[c.handle];
-  return { handle: c.handle, name: c.name, roles: c.roles, bio: x?.about ?? c.bio, channels: x?.channels, openToCollab: x?.openToCollab ?? true, hero: heroOf(c) };
+  return { handle: c.handle, name: c.name, roles: c.roles, bio: x?.about ?? c.bio, channels: x?.channels, openToCollab: x?.openToCollab ?? true, hero: heroOf(c), heroSrc: c.handle === "seoha-park" ? "/dev-preview/hero-demo.mp4" : undefined };
 }
 
 // 프로필의 작품 카드(최신 공개 순). 장르는 대표 작품이 가진 것을 쓰고, 나머지는 돌려 가며 붙인 샘플이다.
