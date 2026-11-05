@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ROLES } from "@/lib/collab";
 import { activeCount, hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
 import { GENRES } from "./genres";
+import { BlurVideo } from "./blur-video";
 import { RoleTags } from "./role-tags";
 import { FORM_LABEL, type CreatorCard, type WorkForm } from "./types";
 import "./creators.css";
@@ -182,11 +183,7 @@ export function CreatorList({
                         </div>
                         {c.main === "media" && c.hero ? (
                           c.hero === "video" && c.heroSrc ? (
-                            // 영상은 자르거나 늘리지 않고 통째로 돌리고, 남는 곳은 같은 영상을 흐리게 깔아 채운다(프로필 맨 위와 같은 방식).
-                            <div className="cr-main-media has-src">
-                              <video className="cr-hero-bg" src={c.heroSrc} muted autoPlay loop playsInline preload="metadata" aria-hidden="true" />
-                              <video className="cr-hero-fg" src={c.heroSrc} muted autoPlay loop playsInline preload="metadata" aria-label="대표 영상" />
-                            </div>
+                            <BlurVideo src={c.heroSrc} className="cr-main-media has-src" label="대표 영상" />
                           ) : (
                             <div className="cr-main-media" role="img" aria-label={c.hero === "video" ? "대표 영상" : "대표 이미지"}>
                               {c.hero === "video" ? "▶ 〈대표 영상〉" : "〈대표 이미지〉"}
