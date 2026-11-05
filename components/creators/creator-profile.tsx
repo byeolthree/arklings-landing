@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BlurImage } from "./blur-image";
 import { HeroVideo } from "./hero-video";
 import { RoleTags } from "./role-tags";
 import { WORK_KINDS, type CreatorProfileData, type WorkCard } from "./types";
@@ -31,6 +32,8 @@ export function CreatorProfile({
         {creator.hero && (
           creator.hero === "video" && creator.heroSrc ? (
             <HeroVideo src={creator.heroSrc} />
+          ) : creator.hero === "image" && creator.heroSrc ? (
+            <BlurImage src={creator.heroSrc} className="cr-hero-media has-src" label="대표 이미지" />
           ) : (
             <div className="cr-hero-media" role="img" aria-label={creator.hero === "video" ? "대표 영상" : "대표 이미지"}>
               {creator.hero === "video" ? "▶ 〈대표 영상〉" : "〈대표 이미지〉"}

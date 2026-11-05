@@ -94,11 +94,15 @@ const HERO_VIDEO: Record<string, string> = {
   "seoha-park": "/dev-preview/hero-demo.mp4", // 하삘라: 황룡사
   "dayun-choi": "/dev-preview/hero-execution.mp4", // morningstar: 처형장
 };
+// 대표 이미지 샘플(별뜨리님 이미지, git에는 올리지 않음).
+const HERO_IMAGE: Record<string, string> = {
+  "hayun-jung": "/dev-preview/hero-image-hayun.webp", // 정하윤(네 번째)
+};
 const heroOf = (c: { handle: string; roles: Role[] }): HeroKind | undefined => (NO_HERO.has(c.handle) ? undefined : HERO_VIDEO[c.handle] || c.roles[0] === "video" ? "video" : "image");
 
 export function sampleProfileOf(c: BaseCard): CreatorProfileData {
   const x = SAMPLE_EXTRA[c.handle];
-  return { handle: c.handle, name: c.name, roles: c.roles, bio: x?.about ?? c.bio, channels: x?.channels, openToCollab: x?.openToCollab ?? true, hero: heroOf(c), heroSrc: HERO_VIDEO[c.handle] };
+  return { handle: c.handle, name: c.name, roles: c.roles, bio: x?.about ?? c.bio, channels: x?.channels, openToCollab: x?.openToCollab ?? true, hero: heroOf(c), heroSrc: HERO_VIDEO[c.handle] ?? HERO_IMAGE[c.handle] };
 }
 
 // 프로필의 작품 카드(최신 공개 순). 장르는 대표 작품이 가진 것을 쓰고, 나머지는 돌려 가며 붙인 샘플이다.
@@ -146,5 +150,5 @@ export const SAMPLE_CREATORS: CreatorCard[] = RAW_CREATORS.map((c) => {
   const hero = heroOf(c);
   // 역할 첫 칸이 영상 제작·아트디렉터인 사람만 로그라인 대신 대표 이미지·영상을 메인에 걸 수 있다. 영상이 있어도 다른 역할은 대표로 못 건다(별뜨리님 2026-11-05).
   const main = hero && (c.roles[0] === "video" || c.roles[0] === "art_director") ? "media" : "logline";
-  return { ...c, hero, heroSrc: HERO_VIDEO[c.handle], main, openToCollab: sampleProfileOf(c).openToCollab ?? true, genres: [...new Set(works.flatMap((w) => w.genres))], forms: [...new Set(works.map((w) => w.form))] };
+  return { ...c, hero, heroSrc: HERO_VIDEO[c.handle] ?? HERO_IMAGE[c.handle], main, openToCollab: sampleProfileOf(c).openToCollab ?? true, genres: [...new Set(works.flatMap((w) => w.genres))], forms: [...new Set(works.map((w) => w.form))] };
 });

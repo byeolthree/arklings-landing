@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ROLES } from "@/lib/collab";
 import { activeCount, hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
 import { GENRES } from "./genres";
+import { BlurImage } from "./blur-image";
 import { BlurVideo } from "./blur-video";
 import { RoleTags } from "./role-tags";
 import { FORM_LABEL, type CreatorCard, type WorkForm } from "./types";
@@ -184,6 +185,8 @@ export function CreatorList({
                         {c.main === "media" && c.hero ? (
                           c.hero === "video" && c.heroSrc ? (
                             <BlurVideo src={c.heroSrc} className="cr-main-media has-src" label="대표 영상" />
+                          ) : c.hero === "image" && c.heroSrc ? (
+                            <BlurImage src={c.heroSrc} className="cr-main-media has-src" label="대표 이미지" />
                           ) : (
                             <div className="cr-main-media" role="img" aria-label={c.hero === "video" ? "대표 영상" : "대표 이미지"}>
                               {c.hero === "video" ? "▶ 〈대표 영상〉" : "〈대표 이미지〉"}

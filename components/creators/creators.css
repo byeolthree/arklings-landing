@@ -268,6 +268,7 @@
 /* 대표 영상: 통째로(contain) + 흐린 같은 영상을 뒤에 깔아 꽉 찬 것처럼 */
 .cr .cr-hero-media.has-src { display: block; background: #000; overflow: hidden; }
 .cr .cr-hero-bg { position: absolute; top: -40px; left: -40px; width: calc(100% + 80px); height: calc(100% + 80px); object-fit: cover; filter: blur(40px) brightness(.9) saturate(1.15); }
+.cr img.cr-hero-bg { max-width: none; }
 .cr .cr-hero-fg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: auto; height: auto; max-width: 100%; max-height: 100%; }
 /* 영상과 흐린 배경이 만나는 가장자리를 부드럽게 섞는다. 맞닿는 쪽(영상이 칸보다 가로로 좁으면 좌우, 세로로 짧으면 위아래)만 8% 폭으로. 어느 쪽인지는 blur-video.tsx가 영상 비율로 data-seam에 적는다 */
 .cr [data-seam="x"] > .cr-hero-fg { -webkit-mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%); mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%); }
