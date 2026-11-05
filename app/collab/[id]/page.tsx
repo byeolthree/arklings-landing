@@ -62,11 +62,14 @@ export default async function CollabDetailPage({ params, searchParams }: Props) 
   };
   const mailNotes: Record<string, string> = {
     mailfailed: " 다만 신청자에게 가는 메일은 보내지 못했어요.",
+    mailfailed_stored: " 사이트에는 남겼지만 신청자에게 가는 메일은 보내지 못했어요.",
+    notstored: " 다만 사이트에 남기지는 못했어요.",
     nomail: " 신청자의 연락처가 이메일이 아니라서 메일은 보내지 않았어요.",
   };
   const savedKey = typeof sp.saved === "string" ? sp.saved : "";
   const mailKey = typeof sp.mail === "string" ? sp.mail : "";
   const saved = savedMessages[savedKey] ? savedMessages[savedKey] + (mailNotes[mailKey] ?? "") : null;
+  const onSite = !!r.applicant_id;
   const canMail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.contact.trim());
 
   return (
@@ -111,7 +114,7 @@ export default async function CollabDetailPage({ params, searchParams }: Props) 
           <Row k="최근 수정">{formatKst(r.updated_at)}</Row>
         </dl>
 
-        <CollabReply id={r.id} canMail={canMail}>
+        <CollabReply id={r.id} canMail={canMail} onSite={onSite}>
           <DeleteButton id={r.id} />
         </CollabReply>
       </PaperCard>
