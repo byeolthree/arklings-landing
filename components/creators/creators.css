@@ -240,7 +240,7 @@
 .cr .cr-kinds b { color: var(--title); }
 .cr .cr-work-kind { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--body); }
 .cr .cr-kind { font-weight: 700; color: var(--teal); }
-.cr .cr-apply-stick { position: sticky; bottom: 16px; z-index: 10; display: flex; justify-content: center; margin-top: 24px; pointer-events: none; }
+.cr .cr-apply-stick { position: sticky; bottom: 56px; z-index: 10; display: flex; justify-content: center; margin-top: 24px; pointer-events: none; }
 .cr .cr-apply-stick .btn { pointer-events: auto; }
 /* 따라다니는 버튼이 있으려면 바깥이 스크롤 상자가 아니어야 해서, 이 화면만 잘라내기(clip)로 바꾼다(보이는 모양은 같다) */
 .cr:has(.cr-apply-stick) { overflow: clip; }
@@ -260,3 +260,7 @@
 /* 목록 카드 메인: 아트디렉터·영상 제작은 로그라인 대신 대표 이미지·영상 */
 .cr .cr-main-media { height: 160px; display: grid; place-items: center; border-radius: 12px; background: var(--title); color: rgba(255,255,255,.6); font-size: 13px; }
 @media (min-width: 768px) { .cr .cr-main-media { height: 200px; } }
+
+/* 맨 위 영역 바로 아래 소개 글을 조금 위로 올린다(맨 위 영역 높이는 그대로) */
+.cr .cr-hero + .cr-prof { padding-top: 12px; }
+.cr .cr-hero + .cr-prof .cr-prof-head { margin-top: 0; }
