@@ -7,6 +7,8 @@ import { after } from "next/server";
 import { CONFIRM_FIRST_MESSAGE, getCurrentUser, isConfirmed } from "@/lib/auth";
 import { verifyAttachment } from "@/lib/collab-file";
 import { notifyNewRequest } from "@/lib/collab-notify";
+import { sendMail } from "@/lib/mail";
+import { applicantReply } from "@/lib/mail-templates";
 import { parseForm, UUID_RE, type FieldErrors } from "@/lib/collab";
 import { getOrigin } from "@/lib/origin";
 import { getClientKey, isRateLimited, RateLimitUnavailable, recordAttempt } from "@/lib/ratelimit";
@@ -261,4 +263,59 @@ export async function deleteCollab(id: string): Promise<FormState> {
   await removeFile(path);
   revalidatePath("/collab");
   redirect("/collab?deleted=1");
+}
+
+// 받은 신청에 대한 답장·수락·거절. 로그인한 받는 사람 본인의 권한으로 읽고 바꾸므로 DB 규칙(RLS)이 남의 신청은 막는다.
+// 답장 글은 따로 저장하지 않고(저장할 칸이 없다) 신청자의 이메일로만 보낸다. 연락처가 이메일이 아니면 사이트에서 보낼 수 없다.
+const MAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export async function replyCollab(id: string, _prev: FormState, fd: FormData): Promise<FormState> {
+  const user = await getCurrentUser();
+  if (!user) return { message: LOGIN_MESSAGE };
+  if (!isConfirmed(user)) return { message: CONFIRM_FIRST_MESSAGE };
+  if (!UUID_RE.test(id)) return { message: NOT_FOUND };
+
+  const decision = String(fd.get("decision") ?? "");
+  if (decision !== "send" && decision !== "accept" && decision !== "reject") return { message: "동작을 알 수 없어요. 화면을 새로 열어 다시 시도해 주세요." };
+  const text = String(fd.get("message") ?? "").trim();
+  if (text.length > 1000) return { message: "답장은 1000자 이내로 써 주세요.", values: { message: text } };
+  if (decision === "send" && text.length === 0) return { message: "보낼 답장을 써 주세요.", values: { message: text } };
+
+  let note = "";
+  try {
+    const sb = await createAuthClient();
+    const { data: row } = await sb.from("collab_requests").select("applicant_name, contact").eq("id", id).maybeSingle();
+    if (!row) return { message: NOT_FOUND };
+    const contact = String(row.contact).trim();
+    const canMail = MAIL_RE.test(contact);
+    if (decision === "send" && !canMail) {
+      return { message: "신청자의 연락처가 이메일이 아니라서 사이트에서 답장을 보낼 수 없어요. 적힌 연락처로 직접 연락해 주세요.", values: { message: text } };
+    }
+
+    if (decision !== "send") {
+      const { data: updated, error } = await sb
+        .from("collab_requests")
+        .update({ status: decision === "accept" ? "accepted" : "rejected" })
+        .eq("id", id)
+        .select("id");
+      if (error || !updated || updated.length === 0) return { message: "저장하지 못했습니다. 잠시 후 다시 시도해 주세요.", values: { message: text } };
+    }
+
+    if (canMail) {
+      const m = applicantReply(String(row.applicant_name), decision === "accept" ? "accepted" : decision === "reject" ? "rejected" : null, text);
+      const sent = await sendMail({ to: contact, ...m });
+      if (!sent.ok) {
+        note = decision === "send" ? "failed" : "mailfailed";
+        if (decision === "send") return { message: "메일을 보내지 못했어요. 잠시 뒤에 다시 시도해 주세요.", values: { message: text } };
+      }
+    } else {
+      note = "nomail";
+    }
+  } catch (e) {
+    console.error("[collab] 답장·수락·거절 처리 중 오류", e);
+    return { message: UNAVAILABLE + devDetail(e), values: { message: text } };
+  }
+  revalidatePath("/collab");
+  revalidatePath(`/collab/${id}`);
+  const saved = decision === "send" ? "replied" : decision === "accept" ? "accepted" : "rejected";
+  redirect(`/collab/${id}?saved=${saved}${note ? `&mail=${note}` : ""}`);
 }

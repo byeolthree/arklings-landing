@@ -26,3 +26,19 @@ export function applicantReceipt(applicantName: string) {
     ),
   };
 }
+
+// 받는 사람이 신청자에게 보내는 답장(수락·거절·일반 답장). 보낸 글은 그대로 싣고, 받는 사람의 주소·계정 정보는 싣지 않는다.
+export function applicantReply(applicantName: string, decision: "accepted" | "rejected" | null, message: string) {
+  const name = applicantName.trim().slice(0, 30);
+  const head =
+    decision === "accepted" ? "협업 신청이 수락됐어요" : decision === "rejected" ? "협업 신청 결과를 알려 드려요" : "협업 신청에 답장이 도착했어요";
+  const lead = decision === "accepted" ? `${name}님, 협업 신청이 수락됐어요.` : decision === "rejected" ? `${name}님, 이번 협업 신청은 함께하지 못하게 됐어요.` : `${name}님께 답장이 도착했어요.`;
+  const body = message.trim().slice(0, 1000);
+  return {
+    subject: `[아클링스] ${head}`,
+    text: `${lead}\n${body ? `\n${body}\n` : ""}`,
+    html: wrap(
+      `<h2 style="margin:0 0 12px;color:#2a2025;font-size:18px">${esc(head)}</h2><p style="margin:0 0 ${body ? "16px" : "0"}">${esc(lead)}</p>${body ? `<p style="margin:0;white-space:pre-wrap">${esc(body)}</p>` : ""}`,
+    ),
+  };
+}
