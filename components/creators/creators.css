@@ -279,3 +279,6 @@
 @media (min-width: 768px) { .cr .cr-hero-sound { right: 40px; bottom: 28px; } }
 @media (min-width: 1024px) { .cr .cr-hero-sound { right: 80px; } }
 .cr .cr-hero-sound:hover { background: rgba(0,0,0,.55); }
+
+/* 목록 카드의 대표 영상: 통째로 돌리고 남는 곳은 흐린 같은 영상 */
+.cr .cr-main-media.has-src { display: block; position: relative; overflow: hidden; background: #000; container-type: size; }

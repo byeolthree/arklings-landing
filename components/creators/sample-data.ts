@@ -144,6 +144,7 @@ export function sampleDetailOf(id: string): PlanDetailData | null {
 export const SAMPLE_CREATORS: CreatorCard[] = RAW_CREATORS.map((c) => {
   const works = sampleWorksOf(c);
   const hero = heroOf(c);
-  const main = hero && (c.roles[0] === "video" || c.roles[0] === "art_director") ? "media" : "logline";
-  return { ...c, hero, main, openToCollab: sampleProfileOf(c).openToCollab ?? true, genres: [...new Set(works.flatMap((w) => w.genres))], forms: [...new Set(works.map((w) => w.form))] };
+  // 대표 영상이 있는 사람과 아트디렉터·영상 제작은 로그라인 대신 대표 이미지·영상을 메인에 건다.
+  const main = hero && (HERO_VIDEO[c.handle] || c.roles[0] === "video" || c.roles[0] === "art_director") ? "media" : "logline";
+  return { ...c, hero, heroSrc: HERO_VIDEO[c.handle], main, openToCollab: sampleProfileOf(c).openToCollab ?? true, genres: [...new Set(works.flatMap((w) => w.genres))], forms: [...new Set(works.map((w) => w.form))] };
 });

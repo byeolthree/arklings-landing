@@ -22,6 +22,7 @@ export type CreatorCard = {
   forms: WorkForm[]; // 공개한 작품 전체의 분량(목록 필터용)
   latest: { title: string; logline: string; genres?: string[] }; // 대표 작품(가장 최근에 공개한 작품)과 그 장르(D37)
   hero?: HeroKind; // 크리에이터가 자기를 대표하도록 올린 이미지나 영상(없으면 안 걸림)
+  heroSrc?: string; // 그 파일 주소(샘플은 일부만 있고, 없으면 자리 표시)
   main: "logline" | "media"; // 카드의 메인: 아트디렉터·영상 제작은 로그라인이 아니라 대표 이미지·영상을 걸 수 있다
 };
 
