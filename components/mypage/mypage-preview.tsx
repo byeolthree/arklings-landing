@@ -21,10 +21,10 @@ const MESSAGES: Record<string, { text: string; ok?: boolean }> = {
 
 const BASE_SECTIONS = [
   { id: "mp-basic", label: "기본 정보" },
-  { id: "mp-creator", label: "크리에이터 등록" },
-  { id: "mp-portfolio", label: "포트폴리오 등록" },
+  { id: "mp-creator", label: "크리에이터" },
+  { id: "mp-portfolio", label: "포트폴리오" },
 ] as const;
-const COLLAB_SECTION = { id: "mp-collab", label: "받은 협업 신청" } as const;
+const COLLAB_SECTION = { id: "mp-collab", label: "협업 신청" } as const;
 type SectionId = (typeof BASE_SECTIONS)[number]["id"] | typeof COLLAB_SECTION.id;
 
 const SAMPLE_PROFILE: Partial<ProfileValues> = {
@@ -130,7 +130,7 @@ function Section({
   children,
 }: {
   id: string;
-  tone: "s1" | "s2" | "s3";
+  tone: "s1" | "s2" | "s3" | "s4";
   title: string;
   extra?: React.ReactNode;
   open: boolean;
@@ -440,20 +440,28 @@ export function MypagePreview({
           </Section>
 
           {collab && (
-            <Section id="mp-collab" tone="s1" title="받은 협업 신청" open={open["mp-collab"]} onToggle={() => toggle("mp-collab")}>
-              <p className="mp-note" style={{ marginBottom: 12 }}>
-                내게 온 협업 신청을 보고, 상세 확인·수정·삭제를 할 수 있어요.
-                {collab.newCount ? ` 새 신청이 ${collab.newCount}건 있어요.` : ""}
-              </p>
+            <Section id="mp-collab" tone="s4" title="협업 신청" open={open["mp-collab"]} onToggle={() => toggle("mp-collab")}>
               {collab.content ?? (
-                <div className="mp-plans">
-                  <ul>
-                    <li>
-                      <span>〈신청자 이름〉</span>
-                      <span>〈작품 · 역할 · 날짜〉 · 〈접수〉</span>
-                    </li>
-                  </ul>
-                </div>
+                <>
+                  <div className="mp-plans">
+                    <h3>받은 협업 신청</h3>
+                    <ul>
+                      <li>
+                        <span>〈신청자 이름〉</span>
+                        <span>〈작품 · 역할 · 날짜〉 · 〈접수〉</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="mp-plans">
+                    <h3>보낸 협업 신청</h3>
+                    <ul>
+                      <li>
+                        <span>〈받는 사람〉</span>
+                        <span>〈작품 · 역할 · 날짜〉 · 〈접수〉</span>
+                      </li>
+                    </ul>
+                  </div>
+                </>
               )}
             </Section>
           )}

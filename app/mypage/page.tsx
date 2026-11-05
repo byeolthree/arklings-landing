@@ -82,14 +82,21 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
   } catch {
     collabLoadFailed = true;
   }
-  const collabList = collabLoadFailed ? (
-    <p role="alert" className="mp-msg err">
-      받은 협업 신청을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
-    </p>
+  const receivedBlock = collabLoadFailed ? (
+    <div className="mp-plans">
+      <h3>받은 협업 신청</h3>
+      <p role="alert" className="mp-msg err">
+        받은 협업 신청을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
+      </p>
+    </div>
   ) : collabRows.length === 0 ? (
-    <p className="mp-note">아직 받은 협업 신청이 없습니다.</p>
+    <div className="mp-plans">
+      <h3>받은 협업 신청</h3>
+      <p className="mp-note">아직 받은 협업 신청이 없습니다.</p>
+    </div>
   ) : (
     <div className="mp-plans">
+      <h3>받은 협업 신청</h3>
       <ul>
         {collabRows.map((r) => (
           <li key={r.id}>
@@ -112,6 +119,20 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
   const linked = Array.from(new Set(user.providers));
   const methods = linked.map((p) => PROVIDER_LABEL[p] ?? p);
   const addable = OAUTH_PROVIDERS.filter((p) => !linked.includes(p.id));
+
+  // 보낸 협업 신청: 신청서에는 보낸 사람의 계정 번호가 저장되지 않아 내가 보낸 것을 가려낼 수 없다(DB 칸 추가가 필요).
+  const sentBlock = (
+    <div className="mp-plans">
+      <h3>보낸 협업 신청</h3>
+      <p className="mp-note">보낸 협업 신청을 보여 주는 기능은 준비 중이에요.</p>
+    </div>
+  );
+  const collabList = (
+    <>
+      {receivedBlock}
+      {sentBlock}
+    </>
+  );
 
   const basic = (
     <>

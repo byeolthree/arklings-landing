@@ -47,10 +47,10 @@
 /* 구역 띠: 화면 끝까지 이어지고 구역마다 배경이 다르다 */
 .mp .mp-sec { padding: 40px 0; scroll-margin-top: 130px; }
 @media (min-width: 768px) { .mp .mp-sec { padding: 56px 0; } }
-.mp .mp-sec { border-top: 1px solid var(--line); }
 .mp .mp-sec.s1 { background: var(--paper); }
 .mp .mp-sec.s2 { background-color: var(--bg); background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 28px 28px; }
 .mp .mp-sec.s3 { background: var(--paper); }
+.mp .mp-sec.s4 { background: var(--hero-bg); }
 .mp .mp-sh { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-bottom: 20px; }
 .mp .mp-sh h2 { font-size: 18px; line-height: 1.4; font-weight: 700; }
 .mp .mp-extra { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13px; }
