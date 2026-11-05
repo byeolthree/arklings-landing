@@ -50,7 +50,7 @@ export default async function CreatorProfilePreviewPage({ params, searchParams }
         works={works}
         backHref="/dev-preview/creators"
         workHref={(id) => `/dev-preview/portfolio/${id}`}
-        applyHref="/collab/new"
+        applyHref={`/dev-preview/collab?creator=${card.handle}&roles=${card.roles.join(",")}`}
         showApply={mine !== "private"}
       />
     </>

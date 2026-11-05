@@ -234,3 +234,13 @@
 .cr .cr-work-title { font-size: 16px; line-height: 1.35; font-weight: 700; }
 .cr .cr-work-title a { color: var(--title); text-decoration: none; }
 .cr .cr-work-title a:hover { text-decoration: underline; }
+
+/* 프로필: 종류별 개수 · 작품 카드의 종류 표시 · 따라다니는 협업 신청 버튼 */
+.cr .cr-kinds { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 0; padding: 0; list-style: none; font-size: 14px; color: var(--body); }
+.cr .cr-kinds b { color: var(--title); }
+.cr .cr-work-kind { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 13px; color: var(--body); }
+.cr .cr-kind { font-weight: 700; color: var(--teal); }
+.cr .cr-apply-stick { position: sticky; bottom: 16px; z-index: 10; display: flex; justify-content: center; margin-top: 24px; pointer-events: none; }
+.cr .cr-apply-stick .btn { pointer-events: auto; }
+/* 따라다니는 버튼이 있으려면 바깥이 스크롤 상자가 아니어야 해서, 이 화면만 잘라내기(clip)로 바꾼다(보이는 모양은 같다) */
+.cr:has(.cr-apply-stick) { overflow: clip; }

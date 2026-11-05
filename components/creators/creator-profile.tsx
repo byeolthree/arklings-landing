@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { RoleTags } from "./role-tags";
-import type { CreatorProfileData, WorkCard } from "./types";
+import { WORK_KINDS, type CreatorProfileData, type WorkCard } from "./types";
 import { WorkMedia } from "./work-media";
 import "./creators.css";
 
@@ -29,6 +29,8 @@ export function CreatorProfile({
   applyHref: string;
   showApply?: boolean; // 비공개 프로필을 본인이 미리 볼 때는 협업 신청 버튼을 숨긴다(D14)
 }) {
+  // 종류별 작품 수(작품이 있는 종류만, 정해진 종류 순서대로)
+  const kinds = WORK_KINDS.map((k) => [k, works.filter((w) => w.kind === k).length] as const).filter(([, n]) => n > 0);
   return (
     <div className="cr">
       <section className="cr-list cr-prof">
@@ -56,12 +58,16 @@ export function CreatorProfile({
                   ))}
                 </ul>
               )}
-              {creator.openToCollab && <span className="cr-open">협업 신청 받는 중</span>}
-              {creator.openToCollab && showApply && (
-                <Link href={applyHref} className="btn btn-primary">
-                  이 크리에이터에게 협업 신청 <span className="arrow">→</span>
-                </Link>
+              {kinds.length > 0 && (
+                <ul className="cr-kinds" aria-label="종류별 작품 수">
+                  {kinds.map(([k, n]) => (
+                    <li key={k}>
+                      {k} <b>{n}</b>
+                    </li>
+                  ))}
+                </ul>
               )}
+              {creator.openToCollab && <span className="cr-open">협업 신청 받는 중</span>}
             </div>
           </header>
 
@@ -87,6 +93,9 @@ export function CreatorProfile({
                       <span className="cr-label">로그라인</span>
                       <p className="cr-box-logline">{w.logline}</p>
                     </div>
+                    <p className="cr-work-kind">
+                      <span className="cr-kind">{w.kind}</span>
+                    </p>
                     <WorkMedia href={workHref(w.id)} slides={["〈대표 이미지〉", "〈영상〉"]} />
                     <RoleTags roles={w.roles} />
                     {w.genres.length > 0 && (
@@ -100,6 +109,15 @@ export function CreatorProfile({
                 </li>
               ))}
             </ul>
+          )}
+
+          {/* 스크롤해도 화면 아래에 붙어 있다가, 맨 끝에서는 제자리에 놓인다 */}
+          {creator.openToCollab && showApply && (
+            <div className="cr-apply-stick">
+              <Link href={applyHref} className="btn btn-primary">
+                이 크리에이터에게 협업 신청 <span className="arrow">→</span>
+              </Link>
+            </div>
           )}
         </div>
       </section>
