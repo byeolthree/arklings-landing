@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HeroVideo } from "./hero-video";
 import { RoleTags } from "./role-tags";
 import { WORK_KINDS, type CreatorProfileData, type WorkCard } from "./types";
 import { WorkMedia } from "./work-media";
@@ -29,11 +30,7 @@ export function CreatorProfile({
       <section className={`cr-hero${creator.hero ? "" : " none"}`} aria-labelledby="cr-hero-name">
         {creator.hero && (
           creator.hero === "video" && creator.heroSrc ? (
-            // 영상은 위아래도 좌우도 자르거나 늘리지 않고 통째로 보여 주고, 남는 곳은 같은 영상을 흐리게 깔아 맨 위 영역이 꽉 찬 것처럼 보이게 한다.
-            <div className="cr-hero-media has-src">
-              <video className="cr-hero-bg" src={creator.heroSrc} muted autoPlay loop playsInline aria-hidden="true" />
-              <video className="cr-hero-fg" src={creator.heroSrc} muted autoPlay loop playsInline aria-label="대표 영상" />
-            </div>
+            <HeroVideo src={creator.heroSrc} />
           ) : (
             <div className="cr-hero-media" role="img" aria-label={creator.hero === "video" ? "대표 영상" : "대표 이미지"}>
               {creator.hero === "video" ? "▶ 〈대표 영상〉" : "〈대표 이미지〉"}

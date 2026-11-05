@@ -273,3 +273,9 @@
 /* 영상과 흐린 배경이 만나는 가장자리를 부드럽게 섞는다. 맞닿는 쪽(영상이 영역보다 가로로 좁으면 좌우, 세로로 짧으면 위아래)만 8% 폭으로 */
 @container (min-aspect-ratio: 16/9) { .cr .cr-hero-fg { -webkit-mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%); mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%); } }
 @container (max-aspect-ratio: 16/9) { .cr .cr-hero-fg { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 8%, #000 92%, transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 8%, #000 92%, transparent 100%); } }
+
+/* 대표 영상 소리 켜기·끄기: 오른쪽 아래, 하얀 외곽선 아이콘 */
+.cr .cr-hero-sound { position: absolute; right: 16px; bottom: 16px; z-index: 3; width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: 50%; background: rgba(0,0,0,.35); cursor: pointer; }
+@media (min-width: 768px) { .cr .cr-hero-sound { right: 40px; bottom: 28px; } }
+@media (min-width: 1024px) { .cr .cr-hero-sound { right: 80px; } }
+.cr .cr-hero-sound:hover { background: rgba(0,0,0,.55); }
