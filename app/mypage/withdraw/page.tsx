@@ -24,7 +24,7 @@ export default async function WithdrawPage() {
           <li>이미 내려받거나 메일로 받은 PDF 파일은 그대로 남아 있어요.</li>
         </ul>
         <WithdrawForm />
-        <div className="mt-6 border-t border-[#e8dfe3] pt-5">
+        <div className="mt-6 pt-5">
           <Link href="/mypage" className={outlineBtn}>
             그만두고 마이페이지로
           </Link>

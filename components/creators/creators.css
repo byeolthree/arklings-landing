@@ -137,7 +137,7 @@
 @media (min-width: 768px) { .cr .cr-prof-name { font-size: 32px; } }
 .cr .cr-prof-text .cr-tags { margin: 0; }
 .cr .cr-prof-bio { max-width: 720px; font-size: 15px; line-height: 1.7; color: var(--body); }
-.cr .cr-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 36px 0 16px; padding-top: 20px; border-top: 1px solid var(--line); }
+.cr .cr-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 36px 0 16px; padding-top: 20px; }
 @media (min-width: 768px) { .cr .cr-sec-head { margin-top: 48px; } }
 .cr .cr-sec-title { font-size: 18px; font-weight: 700; }
 .cr .cr-sec-head .cr-count { margin: 0; }
@@ -163,7 +163,7 @@
   padding-left: 16px; border-left: 3px solid var(--teal); }
 @media (min-width: 768px) { .cr .cr-logline { font-size: 20px; padding-left: 20px; } }
 .cr .cr-sheet { margin: 28px 0 0; }
-.cr .cr-sheet-row { display: grid; grid-template-columns: 72px 1fr; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.cr .cr-sheet-row { display: grid; grid-template-columns: 72px 1fr; gap: 12px; padding: 14px 0; }
 @media (min-width: 768px) { .cr .cr-sheet-row { grid-template-columns: 128px 1fr; } }
 .cr .cr-sheet-row:last-child { border-bottom: 0; }
 .cr .cr-sheet-row dt { font-size: 12px; font-weight: 700; color: var(--teal); padding-top: 2px; }
