@@ -118,11 +118,6 @@ export function CreatorList({
                       </Link>
                     ))}
                   </div>
-                  <div className="cr-chips">
-                    <Link href={pageHref({ ...filter, open: filter.open ? undefined : true })} className="cr-fchip" aria-current={filter.open ? "true" : undefined}>
-                      협업 받는 중
-                    </Link>
-                  </div>
                 </div>
               </details>
             </div>
