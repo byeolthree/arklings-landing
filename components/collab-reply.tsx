@@ -5,13 +5,25 @@ import { replyCollab, type FormState } from "@/app/actions/collab";
 import { outlineBtn } from "@/components/paper-card";
 
 // 받은 신청에 답장을 보내거나 검토 중·수락·거절로 바꾼다. 글은 신청자 이메일로만 가고 사이트에는 저장되지 않는다.
-// 버튼은 글칸 밖에 한 줄로 오른쪽에 놓고(form 속성으로 글칸에 연결), 마지막 칸(children)에는 삭제 버튼이 들어온다.
+// 검토 중·수락·거절·삭제(children)는 답장 위에 가운데 정렬로 놓고(form 속성으로 글칸에 연결), 「답장 보내기」만 글칸 아래 오른쪽에 둔다.
 export function CollabReply({ id, canMail, children }: { id: string; canMail: boolean; children?: React.ReactNode }) {
   const [state, action, pending] = useActionState<FormState, FormData>((prev, fd) => replyCollab(id, prev, fd), {});
   const formId = `collab-reply-${id}`;
   return (
     <div className="mt-6">
-      <form id={formId} action={action}>
+      <div className="flex flex-wrap items-start justify-center gap-2">
+        <button type="submit" form={formId} name="decision" value="review" disabled={pending} className={outlineBtn}>
+          검토 중
+        </button>
+        <button type="submit" form={formId} name="decision" value="accept" disabled={pending} className={outlineBtn}>
+          수락
+        </button>
+        <button type="submit" form={formId} name="decision" value="reject" disabled={pending} className="inline-flex items-center justify-center rounded-lg border border-[#e8dfe3] px-5 py-2 text-[13px] font-bold text-[#574a4f]">
+          거절
+        </button>
+        {children}
+      </div>
+      <form id={formId} action={action} className="mt-6">
         <h2 className="text-[16px] font-bold text-[#292126]">답장</h2>
         <p className="mt-1 text-[12px] text-[#574a4f]">
           {canMail
@@ -32,22 +44,12 @@ export function CollabReply({ id, canMail, children }: { id: string; canMail: bo
             {state.message}
           </p>
         )}
+        <div className="mt-3 flex justify-end">
+          <button type="submit" name="decision" value="send" disabled={pending || !canMail} className="inline-flex items-center justify-center rounded-lg bg-jaju px-5 py-2 text-[13px] font-bold text-white disabled:opacity-50">
+            {pending ? "처리 중…" : "답장 보내기"}
+          </button>
+        </div>
       </form>
-      <div className="mt-3 flex flex-wrap items-start justify-end gap-2">
-        <button type="submit" form={formId} name="decision" value="send" disabled={pending || !canMail} className="inline-flex items-center justify-center rounded-lg bg-jaju px-5 py-2 text-[13px] font-bold text-white disabled:opacity-50">
-          {pending ? "처리 중…" : "답장 보내기"}
-        </button>
-        <button type="submit" form={formId} name="decision" value="review" disabled={pending} className={outlineBtn}>
-          검토 중
-        </button>
-        <button type="submit" form={formId} name="decision" value="accept" disabled={pending} className={outlineBtn}>
-          수락
-        </button>
-        <button type="submit" form={formId} name="decision" value="reject" disabled={pending} className="inline-flex items-center justify-center rounded-lg border border-[#e8dfe3] px-5 py-2 text-[13px] font-bold text-[#574a4f]">
-          거절
-        </button>
-        {children}
-      </div>
     </div>
   );
 }
