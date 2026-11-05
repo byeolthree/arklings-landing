@@ -49,10 +49,14 @@ export default async function WorkDetailPreviewPage({ params, searchParams }: Pr
           works={works}
           backHref="/dev-preview/creators"
           workHref={(wid) => `/dev-preview/portfolio/${wid}`}
-          applyHref="/collab/new"
+          applyHref={`/dev-preview/collab?creator=${card.handle}&roles=${card.roles.join(",")}`}
         />
       )}
-      <WorkDetail work={work} closeHref={closeHref} applyHref="/collab/new" />
+      <WorkDetail
+        work={work}
+        closeHref={closeHref}
+        applyHref={`/dev-preview/collab?creator=${card?.handle ?? ""}&plan=${id}&roles=${work.roles.join(",")}`}
+      />
     </>
   );
 }

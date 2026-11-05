@@ -56,7 +56,7 @@ export function WorkDetail({ work, closeHref, applyHref }: { work: WorkDetailDat
 
         <div className="cr-actions">
           <Link href={applyHref} className="btn btn-primary">
-            이 작품에 협업 신청 <span className="arrow">→</span>
+            이 기획안으로 협업 신청 <span className="arrow">→</span>
           </Link>
           <CopyLinkButton />
           <p className="cr-note">신청은 {work.authorName}님께 전달돼요. 로그인하지 않아도 보낼 수 있어요.</p>
