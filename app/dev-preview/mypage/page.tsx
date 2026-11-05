@@ -67,7 +67,7 @@ export default async function MypagePreviewPage({ searchParams }: { searchParams
           </Link>
         </div>
       </details>
-      <MypagePreview key={`${profile}-${msg}-${pending}`} profile={profile} msg={msg} pending={pending} />
+      <MypagePreview key={`${profile}-${msg}-${pending}`} profile={profile} msg={msg} pending={pending} collab={{ newCount: 2 }} />
     </>
   );
 }

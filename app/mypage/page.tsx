@@ -3,9 +3,13 @@ import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
 import { startLinkIdentity, unlinkProvider } from "@/app/actions/social";
 import { DisplayNameForm } from "@/components/mypage-forms";
-import { PaperCard, PaperPage, outlineBtn } from "@/components/paper-card";
+import "@/components/planner/planner.css";
+import "@/components/mypage/mypage.css";
+import { MypagePreview } from "@/components/mypage/mypage-preview";
 import { requireUser } from "@/lib/auth";
 import { countNewCollab } from "@/lib/collab-count";
+import { PAGE_SIZE, ROLES, STATUSES, type CollabRequest } from "@/lib/collab";
+import { formatKstDate } from "@/lib/time";
 import { createAuthClient } from "@/lib/supabase/server";
 import { OAUTH_PROVIDERS, PROVIDER_LABEL } from "@/lib/providers";
 import { formatKst } from "@/lib/time";
@@ -23,15 +27,6 @@ const MESSAGES: Record<string, { text: string; ok?: boolean }> = {
   unlink_failed: { text: "로그인 방법을 해제하지 못했어요. 잠시 뒤에 다시 시도해 주세요." },
   unlink_last: { text: "로그인 방법이 하나뿐이라 해제할 수 없어요. 다른 방법을 먼저 추가해 주세요." },
 };
-
-function Row({ k, children }: { k: string; children: React.ReactNode }) {
-  return (
-    <div className="grid gap-1 py-4 sm:grid-cols-[8.5rem_1fr]">
-      <dt className="text-[13px] text-[#574a4f]">{k}</dt>
-      <dd className="text-[14px] text-[#292126]">{children}</dd>
-    </div>
-  );
-}
 
 export default async function MyPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const user = await requireUser("/mypage");
@@ -69,36 +64,114 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
 
   const newCollab = await countNewCollab();
 
+  // 받은 협업 신청 목록(최근 것부터). 로그인한 본인의 권한으로 읽어 DB 규칙(RLS)이 내게 온 신청만 돌려준다.
+  let collabRows: CollabRequest[] = [];
+  let collabTotal = 0;
+  let collabLoadFailed = false;
+  try {
+    const { data, count, error } = await (await createAuthClient())
+      .from("collab_requests")
+      .select("*, source_works(title), plans(title)", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(0, PAGE_SIZE - 1);
+    if (error) collabLoadFailed = true;
+    else {
+      collabRows = (data ?? []) as CollabRequest[];
+      collabTotal = count ?? 0;
+    }
+  } catch {
+    collabLoadFailed = true;
+  }
+  const receivedBlock = collabLoadFailed ? (
+    <div className="mp-plans">
+      <h3>받은 협업 신청</h3>
+      <p role="alert" className="mp-msg err">
+        받은 협업 신청을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
+      </p>
+    </div>
+  ) : collabRows.length === 0 ? (
+    <div className="mp-plans">
+      <h3>받은 협업 신청</h3>
+      <p className="mp-note">아직 받은 협업 신청이 없습니다.</p>
+    </div>
+  ) : (
+    <div className="mp-plans">
+      <h3>받은 협업 신청</h3>
+      <ul>
+        {collabRows.map((r) => (
+          <li key={r.id}>
+            <span>{r.applicant_name}</span>
+            <span>
+              {r.plan_id ? `기획안 「${r.plans?.title ?? "제목 없음"}」` : (r.source_works?.title ?? "전체 협업 제안")} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)} · {STATUSES[r.status]} · <Link href={`/collab/${r.id}`}>열기</Link>
+            </span>
+          </li>
+        ))}
+      </ul>
+      {collabTotal > collabRows.length && (
+        <p className="mp-note" style={{ marginTop: 8 }}>
+          총 {collabTotal}건 중 최근 {collabRows.length}건입니다. <Link href="/collab" style={{ textDecoration: "underline" }}>전체 보기</Link>
+        </p>
+      )}
+    </div>
+  );
+
   // 로그인 방법: 이미 쓰는 것(해제 가능) / 더할 수 있는 것(추가). 방법은 항상 1개 이상 남는다.
   const linked = Array.from(new Set(user.providers));
   const methods = linked.map((p) => PROVIDER_LABEL[p] ?? p);
   const addable = OAUTH_PROVIDERS.filter((p) => !linked.includes(p.id));
 
-  return (
-    <PaperPage wide>
-      <PaperCard className="!px-5 md:!p-10">
-        <h1 className="text-[20px] font-bold text-[#292126] md:text-[24px]">마이페이지</h1>
+  // 보낸 협업 신청: 신청서에는 보낸 사람의 계정 번호가 저장되지 않아 내가 보낸 것을 가려낼 수 없다(DB 칸 추가가 필요).
+  const sentBlock = (
+    <div className="mp-plans">
+      <h3>보낸 협업 신청</h3>
+      <p className="mp-note">보낸 협업 신청을 보여 주는 기능은 준비 중이에요.</p>
+    </div>
+  );
+  const collabList = (
+    <>
+      {receivedBlock}
+      {sentBlock}
+    </>
+  );
 
-        {banner && (
-          <p role={banner.ok ? "status" : "alert"} className={`mt-3 rounded-lg px-3 py-2 text-[13px] ${banner.ok ? "bg-[#eef7f1] text-[#16794b]" : "border border-destructive/40 bg-destructive/5 text-destructive"}`}>
-            {banner.text}
-          </p>
-        )}
-
-        <dl className="mt-4 divide-y divide-[#e8dfe3] border-y border-[#e8dfe3]">
-          <Row k="로그인 방법">{methods.length > 0 ? methods.join(" · ") : "-"}</Row>
-          <Row k="방법 추가·해제">
-            <div className="flex flex-wrap gap-2">
+  const basic = (
+    <>
+      {banner && (
+        <p role={banner.ok ? "status" : "alert"} className={`mp-msg ${banner.ok ? "ok" : "err"}`}>
+          {banner.text}
+        </p>
+      )}
+      <dl className="mp-rows">
+        <div className="mp-row">
+          <dt>닉네임</dt>
+          <dd>
+            {profileLoadFailed ? (
+              <p role="alert" className="mp-msg err">
+                프로필을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
+              </p>
+            ) : (
+              <DisplayNameForm initial={displayName} />
+            )}
+          </dd>
+        </div>
+        <div className="mp-row">
+          <dt>로그인 방법</dt>
+          <dd>{methods.length > 0 ? methods.join(" · ") : "-"}</dd>
+        </div>
+        <div className="mp-row">
+          <dt>방법 추가·해제</dt>
+          <dd>
+            <div className="mp-btns">
               {addable.map((p) => (
                 <form key={p.id} action={startLinkIdentity}>
                   <input type="hidden" name="provider" value={p.id} />
-                  <button type="submit" className={outlineBtn}>
+                  <button type="submit" className="btn btn-ghost">
                     {p.label} 연결하기
                   </button>
                 </form>
               ))}
               {!linked.includes("email") && (
-                <Link href={`/forgot-password${user.email ? `?email=${encodeURIComponent(user.email)}` : ""}`} className={outlineBtn}>
+                <Link href={`/forgot-password${user.email ? `?email=${encodeURIComponent(user.email)}` : ""}`} className="btn btn-ghost">
                   이메일 로그인 추가(비밀번호 설정)
                 </Link>
               )}
@@ -108,91 +181,54 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
                   .map((p) => (
                     <form key={`un-${p}`} action={unlinkProvider}>
                       <input type="hidden" name="provider" value={p} />
-                      <button type="submit" className="inline-flex items-center justify-center rounded-lg border border-[#e8dfe3] px-5 py-2 text-[13px] font-bold text-[#574a4f]">
+                      <button type="submit" className="btn btn-ghost">
                         {PROVIDER_LABEL[p] ?? p} 해제
                       </button>
                     </form>
                   ))}
             </div>
-            <span className="mt-1 block text-[12px] text-[#8c8c8c]">로그인 방법은 항상 한 가지 이상 남아 있어야 해요.</span>
-          </Row>
-          <Row k="내 이메일">
-            <span className="break-all">{user.email ?? "-"}</span>
-            <span className="mt-0.5 block text-[12px] text-[#8c8c8c]">이 주소는 나에게만 보여요.</span>
-          </Row>
-        </dl>
-
-        <div className="mt-6">
-          {profileLoadFailed ? (
-            <p role="alert" className="text-[13px] text-destructive">
-              프로필을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
-            </p>
-          ) : (
-            <DisplayNameForm initial={displayName} />
-          )}
+            <span className="mp-note">로그인 방법은 항상 한 가지 이상 남아 있어야 해요.</span>
+          </dd>
         </div>
-
-        <section className="mt-8 border-t border-[#e8dfe3] pt-6" aria-labelledby="my-plans">
-          <div className="flex items-center justify-between gap-3">
-            <h2 id="my-plans" className="text-[16px] font-bold text-[#292126]">
-              내 기획안
-            </h2>
-            <Link href="/planner" className={outlineBtn}>
-              새 기획안 쓰기
-            </Link>
-          </div>
-          {plansLoadFailed ? (
-            <p role="alert" className="mt-3 text-[13px] text-destructive">
-              기획안 목록을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
-            </p>
-          ) : plans.length === 0 ? (
-            <p className="mt-3 text-[13px] text-[#574a4f]">아직 저장한 기획안이 없어요. 기획안 화면에서 「임시저장」을 누르면 여기에 나타나요.</p>
-          ) : (
-            <ul className="mt-3 divide-y divide-[#e8dfe3] border-y border-[#e8dfe3]">
-              {plans.map((p) => (
-                <li key={p.id}>
-                  <Link href={`/planner?plan=${p.id}`} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-3">
-                    <span className="min-w-0 break-words text-[14px] font-medium text-[#292126]">{p.title}</span>
-                    <span className="flex items-center gap-2 text-[12px] text-[#574a4f]">
-                      <span className={`rounded-full px-2 py-0.5 ${p.is_public ? "bg-teal text-white" : "bg-[#f5ecf0] text-[#292126]"}`}>
-                        {p.is_public ? "공개 중" : "비공개"}
-                      </span>
-                      {formatKst(p.updated_at)}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <section className="mt-8 border-t border-[#e8dfe3] pt-6" aria-labelledby="my-collab">
-          <div className="flex items-center justify-between gap-3">
-            <h2 id="my-collab" className="text-[16px] font-bold text-[#292126]">
-              받은 협업 신청
-              {newCollab ? <span className="ml-2 rounded-full bg-jaju px-2 py-0.5 align-middle text-[12px] font-medium text-white">새 신청 {newCollab}건</span> : null}
-            </h2>
-            <Link href="/collab" className={outlineBtn}>
-              받은 협업 신청 보기
-            </Link>
-          </div>
-          <p className="mt-3 text-[13px] text-[#574a4f]">내게 온 협업 신청을 보고, 상세 확인·수정·삭제를 할 수 있어요.</p>
-        </section>
-
-        <form action={signOut} className="mt-8 border-t border-[#e8dfe3] pt-6">
-          <button type="submit" className={outlineBtn}>
+        <div className="mp-row">
+          <dt>내 이메일</dt>
+          <dd>
+            <span style={{ wordBreak: "break-all" }}>{user.email ?? "-"}</span>
+            <span className="mp-note">이 주소는 나에게만 보여요.</span>
+          </dd>
+        </div>
+      </dl>
+      <div className="mp-foot">
+        <form action={signOut}>
+          <button type="submit" className="btn btn-ghost">
             로그아웃
           </button>
         </form>
-
-        <p className="mt-6 text-[12px] text-[#574a4f]">
-          더 이상 쓰지 않으신다면{" "}
-          <Link href="/mypage/withdraw" className="underline">
-            회원 탈퇴
-          </Link>
-          를 할 수 있어요.
-        </p>
-      </PaperCard>
-    </PaperPage>
+        <small>
+          더 이상 쓰지 않으신다면 <Link href="/mypage/withdraw">회원 탈퇴</Link>를 할 수 있어요.
+        </small>
+      </div>
+    </>
   );
+
+  const plansList = plansLoadFailed ? (
+    <p role="alert" className="mp-msg err">
+      기획안 목록을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
+    </p>
+  ) : plans.length === 0 ? (
+    <p className="mp-note">아직 저장한 기획안이 없어요. 기획안 화면에서 「임시저장」을 누르면 여기에 나타나요.</p>
+  ) : (
+    <ul>
+      {plans.map((p) => (
+        <li key={p.id}>
+          <span>{p.title}</span>
+          <span>
+            {p.is_public ? "공개 중" : "비공개"} · {formatKst(p.updated_at)} · <Link href={`/planner?plan=${p.id}`}>열기</Link>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+
+  return <MypagePreview profile="none" pending={false} basic={basic} plans={plansList} collab={{ newCount: newCollab, content: collabList }} />;
 }
