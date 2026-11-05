@@ -86,6 +86,10 @@
 - `/privacy`는 이번에 고치지 않는다. 위험에 적을 것: 유튜브·외부 이미지를 방문자 브라우저가 직접 받아 옴 → "실제 운영 전 /privacy(와 P5는 운영자 숨김 기능)에 함께 다룰 것".
 - DB 계획(0008, 파일만 만들고 실행하지 않음): 새 표 `creator_profiles`(+`is_public` 기본 거짓, `about`, `role_notes`, `open_to_collab` 기본 참), `creator_links`(+`image_url`,`thumbnail_url`), `creator_channels`, 공개 보기 `creators_public`·`creator_portfolio_public`, `portfolio_items`에 `author_handle` 추가, 기획안 공개 시 프로필 필요 트리거, 협업 신청의 크리에이터 경로 트리거. 0008은 0007 뒤에 실행(main에 새 코드를 올린 뒤).
 
+## 협업 신청 흐름 더하기 (2026-11-05)
+
+협업 신청 흐름 샘플(a899abf)은 되돌렸다(e1f40e2). 승인된 화면 위에 목록 필터·카드 버튼, 프로필 따라다니는 버튼·종류, 기획안 창 버튼 문구, 신청서 미리 채우기만 더했다. 자세한 것은 계획 문서 0-5. 신청서 샘플은 `/dev-preview/collab`.
+
 ## 지금까지 끝난 단계 (모두 샘플 미리보기까지, 실제 라우트 연결은 12단계)
 1. 「크리에이터」 메뉴 연결(랜딩+사이트 메뉴) — 실제 `/creators`는 아직 404
 2. 목록 `/dev-preview/creators` (검색바·역할 필터는 「필터」 버튼을 눌러야 펼침, 역할 태그 6색, 프로필 원 3색 번갈아)
