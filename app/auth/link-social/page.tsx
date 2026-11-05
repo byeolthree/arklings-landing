@@ -48,12 +48,9 @@ export default async function LinkSocialPage() {
               <dd>{formatKst(pending.createdAt)}</dd>
             </div>
           </dl>
-          <p className="rounded-lg border border-[#d89a24] bg-[#fdf6e7] px-3 py-2 text-[12px] leading-normal text-[#292126] md:text-[13px]">
-            방금 내가 {label}로 가입하면서 이 이메일을 입력한 게 맞을 때만 이어 주세요. 본인이 아니라면 아래 「이어 주지 않기」를 눌러 주세요.
-            이어 주면 {label}로도 이 계정에 로그인할 수 있게 돼요.
-          </p>
+          <p className="text-center text-[13px] leading-normal font-medium text-jaju md:text-[14px]">내가 이메일을 입력한 게 맞을 때만 이어 주세요.</p>
           <form action={finishSocialLink}>
-            <SubmitButton className={`${primaryBtn} w-full`}>{label} 로그인을 이 계정에 이어 주기</SubmitButton>
+            <SubmitButton className={`${primaryBtn} w-full`}>이어 주기</SubmitButton>
           </form>
           <form action={dismissSocialLink}>
             <SubmitButton className={`${outlineBtn} w-full`}>이어 주지 않기</SubmitButton>
