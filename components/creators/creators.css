@@ -254,7 +254,7 @@
 .cr .cr-hero-over { position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: space-between; align-self: stretch; padding-top: 20px; padding-bottom: 28px; gap: 40px; }
 .cr .cr-hero:not(.none) .cr-back { color: #fff; }
 .cr .cr-hero-body { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
-.cr .cr-hero-name { font-size: clamp(44px, 10vw, 128px); line-height: 1; font-weight: 700; letter-spacing: -0.03em; color: inherit; word-break: keep-all; overflow-wrap: anywhere; }
+.cr .cr-hero-name { font-size: clamp(31px, 7vw, 90px); line-height: 1; font-weight: 700; letter-spacing: -0.03em; color: inherit; word-break: keep-all; overflow-wrap: anywhere; }
 .cr .cr-hero:not(.none) .cr-open { color: #fff; border-color: #fff; }
 
 /* 목록 카드 메인: 아트디렉터·영상 제작은 로그라인 대신 대표 이미지·영상 */

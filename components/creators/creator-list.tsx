@@ -85,6 +85,17 @@ export function CreatorList({
                   필터{nFilters > 0 && <span className="cr-badge">{nFilters}</span>}
                 </summary>
                 <div className="cr-filter-panel" role="group" aria-label="조건으로 거르기">
+                  <p className="cr-filter-title">역할</p>
+                  <div className="cr-chips">
+                    <Link href={pageHref({ ...filter, role: undefined })} className="cr-fchip" aria-current={filter.role ? undefined : "true"}>
+                      전체
+                    </Link>
+                    {(Object.keys(ROLES) as (keyof typeof ROLES)[]).map((r) => (
+                      <Link key={r} href={pageHref({ ...filter, role: r })} className="cr-fchip" aria-current={filter.role === r ? "true" : undefined}>
+                        {ROLES[r]}
+                      </Link>
+                    ))}
+                  </div>
                   <p className="cr-filter-title">장르</p>
                   <div className="cr-chips">
                     <Link href={pageHref({ ...filter, genre: undefined })} className="cr-fchip" aria-current={filter.genre ? undefined : "true"}>
@@ -104,17 +115,6 @@ export function CreatorList({
                     {(Object.keys(FORM_LABEL) as WorkForm[]).map((f) => (
                       <Link key={f} href={pageHref({ ...filter, form: f })} className="cr-fchip" aria-current={filter.form === f ? "true" : undefined}>
                         {FORM_LABEL[f]}
-                      </Link>
-                    ))}
-                  </div>
-                  <p className="cr-filter-title">역할</p>
-                  <div className="cr-chips">
-                    <Link href={pageHref({ ...filter, role: undefined })} className="cr-fchip" aria-current={filter.role ? undefined : "true"}>
-                      전체
-                    </Link>
-                    {(Object.keys(ROLES) as (keyof typeof ROLES)[]).map((r) => (
-                      <Link key={r} href={pageHref({ ...filter, role: r })} className="cr-fchip" aria-current={filter.role === r ? "true" : undefined}>
-                        {ROLES[r]}
                       </Link>
                     ))}
                   </div>
