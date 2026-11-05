@@ -74,7 +74,7 @@ export default async function CollabListPage({ searchParams }: { searchParams: S
             <p className="text-[14px] text-[#292126]">{status ? "이 상태의 신청이 없습니다." : "아직 받은 협업 신청이 없습니다."}</p>
           </div>
         ) : (
-          <ul className="mt-6 rounded-xl border border-[#e8dfe3]">
+          <ul className="mt-6 divide-y divide-[#e8dfe3] rounded-xl border border-[#e8dfe3]">
             {rows.map((r) => (
               <li key={r.id}>
                 <Link href={`/collab/${r.id}`} className="flex flex-col gap-1.5 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">

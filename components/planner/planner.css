@@ -40,7 +40,7 @@
 
 .pl .stage { padding-bottom: 40px; }
 .pl .deck { background: var(--paper); border: 1px solid var(--line); border-radius: 28px; box-shadow: 0 30px 60px -40px rgba(42,32,37,.35); overflow: hidden; }
-.pl .crumb { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; font-size: 13px; }
+.pl .crumb { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); font-size: 13px; }
 @media (min-width: 768px) { .pl .crumb { padding: 18px 28px; font-size: 14px; } }
 .pl .crumb b { color: var(--title); }
 .pl .undo-box { display: flex; gap: 6px; }
@@ -57,7 +57,7 @@
 .pl .tmpl b.filled { color: var(--title); }
 
 .pl .qs { display: grid; gap: 0; }
-.pl .qitem { padding: 22px 0; }
+.pl .qitem { padding: 22px 0; border-bottom: 1px solid var(--line); }
 .pl .qitem:first-child { padding-top: 0; }
 .pl .qitem:last-child { border-bottom: 0; }
 .pl .qitem .k { font-size: 12px; font-weight: 700; color: var(--teal); letter-spacing: .06em; }
@@ -80,7 +80,7 @@
 .pl .bad ul { margin: 6px 0 0; padding-left: 18px; font-size: 13px; color: var(--title); }
 .pl .bad li + li { margin-top: 2px; }
 .pl .bad li span { color: var(--body); }
-.pl .check { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px 0; }
+.pl .check { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .pl .check:last-of-type { border-bottom: 0; }
 .pl .qitem .k + .check { margin-top: 6px; }
 .pl .check p { flex: 1 1 260px; font-size: 14px; color: var(--title); }
@@ -89,11 +89,11 @@
 .pl .warn { margin-top: 12px; padding: 12px 14px; border-radius: 12px; background: color-mix(in srgb, var(--gold) 16%, #fff); color: var(--title); font-size: 13px; }
 .pl .row-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 
-.pl .banner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px 20px; background: color-mix(in srgb, var(--gold) 16%, #fff); font-size: 13px; color: var(--title); }
+.pl .banner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px 20px; background: color-mix(in srgb, var(--gold) 16%, #fff); border-bottom: 1px solid var(--line); font-size: 13px; color: var(--title); }
 @media (min-width: 768px) { .pl .banner { padding: 12px 28px; } }
 .pl .banner .grow { flex: 1 1 260px; }
 
-.pl .deck-foot { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px 20px; background: var(--bg); }
+.pl .deck-foot { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 16px 20px; border-top: 1px solid var(--line); background: var(--bg); }
 @media (min-width: 768px) { .pl .deck-foot { padding: 18px 28px; } }
 .pl .foot-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .pl .save-msg { font-size: 13px; color: var(--teal); font-weight: 500; }
@@ -109,11 +109,11 @@
 @media (min-width: 768px) { .pl .panel { padding: 28px; } }
 .pl .panel h2 { font-size: 18px; }
 .pl .panel .sub { margin-top: 4px; font-size: 13px; }
-.pl .pub-box { margin-top: 16px; padding-top: 16px; font-size: 13px; }
+.pl .pub-box { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 13px; }
 .pl .pub-state { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--tint); color: var(--title); }
 .pl .pub-state.on { background: var(--teal); color: #fff; }
 .pl .hist { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 0; }
-.pl .hist li { display: grid; gap: 8px; padding: 14px 0; }
+.pl .hist li { display: grid; gap: 8px; padding: 14px 0; border-top: 1px solid var(--line); }
 .pl .hist .when { font-size: 12px; font-weight: 700; color: var(--teal); }
 .pl .hist .prev { font-size: 14px; color: var(--title); }
 .pl .hist .badge { display: inline-block; margin-left: 6px; padding: 0 8px; border-radius: 999px; background: var(--tint); font-size: 11px; font-weight: 500; color: var(--body); }

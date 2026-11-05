@@ -68,7 +68,7 @@
 
 /* 기본 정보 */
 .mp .mp-rows { margin: 0; }
-.mp .mp-row { display: grid; gap: 6px; padding: 20px 0; }
+.mp .mp-row { display: grid; gap: 6px; padding: 20px 0; border-bottom: 1px solid var(--line); }
 .mp .mp-row:first-child { padding-top: 0; }
 @media (min-width: 768px) { .mp .mp-row { grid-template-columns: 9rem 1fr; gap: 24px; } }
 .mp .mp-row dt { font-size: 13px; font-weight: 500; color: var(--title); }
@@ -92,7 +92,7 @@
 .mp .pl.mp-pl .pp-avail.available { color: var(--body); }
 .mp .pl.mp-pl .pp-form { margin-top: 0; padding: 0; background: transparent; }
 /* 칸 이름은 왼쪽, 칸은 오른쪽(기본 정보와 같은 줄 짜임)으로 나눠 한쪽으로 쏠리지 않게 한다. 작은 화면에서는 위아래로 쌓는다 */
-.mp .pl.mp-pl .pp-field { margin-top: 0; padding: 20px 0; }
+.mp .pl.mp-pl .pp-field { margin-top: 0; padding: 20px 0; border-bottom: 1px solid var(--line); }
 .mp .pl.mp-pl .pp-field:first-child { padding-top: 0; }
 @media (min-width: 768px) {
   .mp .pl.mp-pl .pp-field { display: grid; grid-template-columns: 9rem minmax(0, 1fr); column-gap: 24px; align-items: start; }
@@ -114,13 +114,13 @@
 .mp .mp-plans { margin-top: 24px; padding: 16px 20px; border-radius: 16px; background: #fff; border: 1px solid var(--line); }
 .mp .mp-plans h3 { font-size: 13px; font-weight: 700; color: var(--body); }
 .mp .mp-plans ul { list-style: none; margin: 8px 0 0; padding: 0; }
-.mp .mp-plans li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; padding: 10px 0; font-size: 14px; color: var(--title); }
+.mp .mp-plans li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 14px; color: var(--title); }
 .mp .mp-plans li:first-child { border-top: 0; }
 .mp .mp-plans li.off { color: var(--body); }
 .mp .mp-works { margin-top: 24px; display: grid; gap: 20px; }
 @media (min-width: 768px) { .mp .mp-works { grid-template-columns: 1fr 1fr; } }
 .mp .mp-work { display: flex; flex-direction: column; border-radius: 22px; background: #fff; border: 1px solid var(--line); box-shadow: 0 30px 60px -40px rgba(42,32,37,.35); overflow: hidden; }
-.mp .mp-thumb { aspect-ratio: 16 / 9; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--body); }
+.mp .mp-thumb { aspect-ratio: 16 / 9; background: var(--bg); border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--body); }
 .mp .mp-work-main { padding: 18px 20px 4px; min-width: 0; }
 .mp .mp-work-title { font-size: 16px; font-weight: 700; color: var(--title); }
 .mp .mp-work-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: 12px; }
@@ -163,7 +163,7 @@
 .mp .we-media { aspect-ratio: 16 / 9; border-radius: 14px; background: var(--bg); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--body); }
 .mp .we-media.doc { aspect-ratio: 4 / 3; max-height: 260px; }
 .mp .we-add { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--body); }
-.mp .we-foot { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; padding-top: 16px; }
+.mp .we-foot { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
 .mp .we-del { margin-left: auto; }
 @media (max-width: 767px) { .mp .we-el { flex-wrap: wrap; } .mp .we-tools { flex: 1 1 100%; padding-left: 24px; } .mp .we-del { margin-left: 0; } .mp .we-tools { opacity: 1; } .mp .we-gap .we-mini { opacity: 1; } }
 

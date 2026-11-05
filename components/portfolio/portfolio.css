@@ -57,7 +57,7 @@
 .pf .pf-card-logline { margin-top: 10px; font-size: 14px; line-height: 1.7; color: var(--body);
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .pf .pf-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--body); }
-.pf .pf-card .pf-meta { margin-top: auto; padding-top: 18px; }
+.pf .pf-card .pf-meta { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--line); }
 .pf .pf-card-logline + .pf-meta { margin-top: 18px; }
 .pf .pf-av { flex: none; display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
   background: var(--jaju); color: #fff; font-size: 12px; font-weight: 700; }
@@ -99,7 +99,7 @@
   padding-left: 16px; border-left: 3px solid var(--jaju); }
 @media (min-width: 768px) { .pf .pf-logline { font-size: 20px; padding-left: 20px; } }
 .pf .pf-sheet { margin: 28px 0 0; }
-.pf .sheet-row { display: grid; grid-template-columns: 72px 1fr; gap: 12px; padding: 14px 0; }
+.pf .sheet-row { display: grid; grid-template-columns: 72px 1fr; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
 @media (min-width: 768px) { .pf .sheet-row { grid-template-columns: 128px 1fr; } }
 .pf .sheet-row:last-child { border-bottom: 0; }
 .pf .sheet-row dt { font-size: 12px; font-weight: 700; color: var(--teal); padding-top: 2px; }

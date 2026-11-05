@@ -65,7 +65,7 @@ export default async function CollabDetailPage({ params, searchParams }: Props) 
           <StatusBadge status={r.status} />
         </div>
 
-        <dl className="mt-4">
+        <dl className="mt-4 divide-y divide-[#e8dfe3] border-y border-[#e8dfe3]">
           <Row k="연락처">{r.contact}</Row>
           <Row k="SNS 아이디">{r.sns_handle}</Row>
           {r.plan_id ? (

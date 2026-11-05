@@ -13,7 +13,7 @@ export function SocialButtons({ returnTo, heading = "또는 다른 방법으로 
   const [state, action, pending] = useActionState<AuthFormState, FormData>(startOAuth, {});
   const consentId = useId();
   return (
-    <form action={action} noValidate className="mt-6 flex flex-col gap-3 pt-5">
+    <form action={action} noValidate className="mt-6 flex flex-col gap-3 border-t border-[#e8dfe3] pt-5">
       <input type="hidden" name="next" value={returnTo} />
       <p className="text-center text-[12px] text-[#6f6469]">{heading}</p>
       {state.message && (
