@@ -121,7 +121,7 @@ export async function createCollab(_prev: FormState, fd: FormData): Promise<Form
       attachment_path = up.path!;
     }
 
-    // 로그인한 사람이 보낸 신청이면 그 계정을 함께 기록한다(받는 사람의 답장을 사이트에도 남기기 위해). 0008 SQL 전에는 이 칸이 없어 기록만 건너뛴다.
+    // 로그인한 사람이 보낸 신청이면 그 계정을 함께 기록한다(받는 사람의 답장을 사이트에도 남기기 위해).
     const me = await getCurrentUser();
     const row = {
         id: randomUUID(),
@@ -140,10 +140,7 @@ export async function createCollab(_prev: FormState, fd: FormData): Promise<Form
         plan_id: ownerId ? planId : null,
     };
     const admin = createAdminClient();
-    let { error } = await admin.from("collab_requests").insert((me ? { ...row, applicant_id: me.id } : row) as Record<string, unknown>);
-    if (error && me && /applicant_id/.test(error.message)) {
-      ({ error } = await admin.from("collab_requests").insert(row));
-    }
+    const { error } = await admin.from("collab_requests").insert((me ? { ...row, applicant_id: me.id } : row) as Record<string, unknown>);
     if (error) {
       await removeFile(attachment_path);
       // 확인과 저장 사이에 주인이 공개를 끈 경우(DB가 막았다)
@@ -273,9 +270,7 @@ export async function deleteCollab(id: string): Promise<FormState> {
 // 받은 신청에 대한 답장·수락·거절. 로그인한 받는 사람 본인의 권한으로 읽고 바꾸므로 DB 규칙(RLS)이 남의 신청은 막는다.
 // 신청자가 로그인한 사람이면(applicant_id가 있으면) 답장을 사이트에도 저장하고, 신청자의 연락처가 이메일이면 메일도 보낸다.
 // 로그인 없이 보낸 신청은 저장하지 않고 이메일로만 보낸다(이메일이 아니면 사이트에서 보낼 수 없다).
-// 0008 SQL 전에는 신청자 번호 칸과 답장 표가 없으므로 그 부분만 건너뛰고 나머지는 그대로 동작한다.
 const MAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const isMissingSchema = (m: string | undefined) => !!m && /applicant_id|collab_replies|schema cache|does not exist/i.test(m);
 export async function replyCollab(id: string, _prev: FormState, fd: FormData): Promise<FormState> {
   const user = await getCurrentUser();
   if (!user) return { message: LOGIN_MESSAGE };
@@ -291,12 +286,7 @@ export async function replyCollab(id: string, _prev: FormState, fd: FormData): P
   let note = "";
   try {
     const sb = await createAuthClient();
-    let { data: row } = await sb.from("collab_requests").select("applicant_name, contact, applicant_id").eq("id", id).maybeSingle();
-    if (!row) {
-      // 신청자 번호 칸이 아직 없는 DB(0008 전)에서는 칸 없이 다시 읽는다.
-      const again = await sb.from("collab_requests").select("applicant_name, contact").eq("id", id).maybeSingle();
-      row = again.data ? { ...again.data, applicant_id: null } : null;
-    }
+    const { data: row } = await sb.from("collab_requests").select("applicant_name, contact, applicant_id").eq("id", id).maybeSingle();
     if (!row) return { message: NOT_FOUND };
     const contact = String(row.contact).trim();
     const canMail = MAIL_RE.test(contact);
@@ -324,7 +314,7 @@ export async function replyCollab(id: string, _prev: FormState, fd: FormData): P
         message: text,
       });
       if (error) {
-        if (!isMissingSchema(error.message)) console.error("[collab] 답장을 저장하지 못했습니다.", error);
+        console.error("[collab] 답장을 저장하지 못했습니다.", error);
         if (decision === "send") return { message: "답장을 저장하지 못했어요. 잠시 뒤에 다시 시도해 주세요." + devDetail(error), values: { message: text } };
         note = "notstored";
       } else {

@@ -165,6 +165,7 @@ export function MypagePreview({
   basic,
   plans,
   collab,
+  hideSamples = false,
 }: {
   profile: ProfileState;
   msg?: string;
@@ -172,8 +173,11 @@ export function MypagePreview({
   basic?: React.ReactNode;
   plans?: React.ReactNode;
   collab?: { newCount: number | null; content?: React.ReactNode };
+  // true이면 아직 저장 기능이 없는 샘플 구역(크리에이터 등록, 포트폴리오 작품)을 숨기고 진짜 「내 기획안」 목록만 보여 준다(실제 사이트용).
+  hideSamples?: boolean;
 }) {
-  const SECTIONS = collab ? [...BASE_SECTIONS, COLLAB_SECTION] : BASE_SECTIONS;
+  const baseSections: readonly { id: SectionId; label: string }[] = hideSamples ? [{ id: "mp-basic", label: "기본 정보" }, { id: "mp-portfolio", label: "내 기획안" }] : BASE_SECTIONS;
+  const SECTIONS: readonly { id: SectionId; label: string }[] = collab ? [...baseSections, COLLAB_SECTION] : baseSections;
   const [open, setOpen] = useState<Record<SectionId, boolean>>({ "mp-basic": true, "mp-creator": true, "mp-portfolio": true, "mp-collab": true });
   const [active, setActive] = useState<string>("mp-basic");
   const [saved, setSaved] = useState(false);
@@ -313,6 +317,7 @@ export function MypagePreview({
             )}
           </Section>
 
+          {!hideSamples && (
           <Section
             id="mp-creator"
             tone="s2"
@@ -351,8 +356,10 @@ export function MypagePreview({
             </div>
             {saved && <p className="mp-sample">저장했어요(샘플).</p>}
           </Section>
+          )}
 
-          <Section id="mp-portfolio" tone="s3" title="포트폴리오 등록" open={open["mp-portfolio"]} onToggle={() => toggle("mp-portfolio")}>
+          <Section id="mp-portfolio" tone="s3" title={hideSamples ? "내 기획안" : "포트폴리오 등록"} open={open["mp-portfolio"]} onToggle={() => toggle("mp-portfolio")}>
+            {!hideSamples && (
             <div className="mp-top-row">
               <div className="mp-count">
                 <span>〈작품 4 / 12〉</span>
@@ -362,6 +369,7 @@ export function MypagePreview({
                 〈작품 추가〉
               </button>
             </div>
+            )}
 
             <div className="mp-plans">
               <h3>내 기획안</h3>
@@ -383,6 +391,7 @@ export function MypagePreview({
               )}
             </div>
 
+            {!hideSamples && (
             <div className="mp-works">
               {openWork[0] ? (
                 <WorkEditor isPublic={true} roles={["video", "script"]} onFold={() => setWork(0, false)} />
@@ -437,6 +446,7 @@ export function MypagePreview({
               </div>
               )}
             </div>
+            )}
           </Section>
 
           {collab && (

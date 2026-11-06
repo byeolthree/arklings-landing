@@ -260,7 +260,7 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
         <div className="mt-4 rounded-lg bg-[#faf7f8] px-4 py-3 text-[12px] leading-normal text-[#574a4f] md:text-[13px]">
           <p>구글·카카오로 가입했거나 비밀번호를 정한 적이 없다면 아래 방법을 써 보세요.</p>
           <ul className="mt-1.5 list-disc pl-4">
-            <li>아래 「구글로 계속」「카카오로 계속」 버튼</li>
+            <li>아래 「구글로 로그인」「카카오로 로그인」 버튼</li>
             <li>
               <Link href={`/forgot-password${v.email ? `?email=${encodeURIComponent(v.email)}` : ""}`} className="text-jaju underline">
                 비밀번호 설정 메일 받기
