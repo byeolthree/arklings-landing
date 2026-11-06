@@ -47,12 +47,10 @@ export default async function CollabListPage({ searchParams }: { searchParams: S
   return (
     <PaperPage wide>
       <PaperCard className="!px-5 md:!p-10">
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <h1 className="text-[20px] font-bold text-[#292126] md:text-[24px]">받은 협업 신청</h1>
-            <p className="mt-1 text-[13px] text-[#574a4f]">총 {total}건</p>
-          </div>
-                  </div>
+        <div>
+          <h1 className="text-[20px] font-bold text-[#292126] md:text-[24px]">받은 협업 신청</h1>
+          <p className="mt-1 text-[13px] text-[#574a4f]">총 {total}건</p>
+        </div>
 
         {one(sp.deleted) && (
           <p role="status" className="mt-5 rounded-lg border border-sage bg-sage/20 px-3 py-2 text-[13px] text-title">
