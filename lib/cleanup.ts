@@ -22,8 +22,13 @@ export type CleanupResult = {
 };
 
 export function cutoffDate(now: Date = new Date()): Date {
+  // 달 끝 날짜에서 어긋나지 않게(예: 5월 31일 - 3개월 = 2월 31일 → 3월 3일이 되지 않게) 그 달의 마지막 날로 맞춘다.
   const d = new Date(now);
+  const day = d.getUTCDate();
+  d.setUTCDate(1);
   d.setUTCMonth(d.getUTCMonth() - RETENTION_MONTHS);
+  const lastDay = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
+  d.setUTCDate(Math.min(day, lastDay));
   return d;
 }
 

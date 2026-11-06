@@ -268,5 +268,5 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
     </ul>
   );
 
-  return <MypagePreview profile="none" pending={false} basic={basic} plans={plansList} collab={{ newCount: newCollab, content: collabList }} />;
+  return <MypagePreview profile="none" pending={false} basic={basic} plans={plansList} collab={{ newCount: newCollab, content: collabList }} hideSamples={process.env.VERCEL_ENV === "production"} />;
 }
