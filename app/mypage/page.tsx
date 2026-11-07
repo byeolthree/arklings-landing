@@ -300,7 +300,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
       plans={plansList}
       collab={{ newCount: newCollab, content: collabList }}
       creator={creatorData ? <CreatorProfileForm profile={creatorData.profile} /> : failed}
-      portfolio={creatorData ? <PortfolioManager works={creatorData.works} usedBytes={creatorData.usedBytes} hasProfile={Boolean(creatorData.profile)} openWorkId={workParam} plans={plansList} nickname={displayName} /> : failed}
+      portfolio={creatorData ? <PortfolioManager works={creatorData.works} usedBytes={creatorData.usedBytes} hasProfile={Boolean(creatorData.profile)} openWorkId={workParam} nickname={displayName} /> : failed}
     />
   );
 }
