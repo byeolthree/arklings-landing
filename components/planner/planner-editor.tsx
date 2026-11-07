@@ -10,9 +10,10 @@ import {
   getRevision,
   mailPlanPdf,
   savePlan,
-  setPlanPublic,
   updateRevision,
 } from "@/app/actions/plans";
+import { checkHandle as checkHandleAction, publishPlanAsWork, unpublishPlanWork } from "@/app/actions/creators";
+import { PublishProfile, type HandleCheck } from "./publish-profile";
 import {
   buildSuggestion,
   emptyDraft,
@@ -33,6 +34,8 @@ type Props = {
   loggedIn: boolean;
   displayName: string;
   panel: PlanPanel | null;
+  creatorProfile?: "none" | "private" | "public"; // 내 크리에이터 프로필 상태(없음·비공개·공개)
+  workId?: string | null; // 이 기획안이 붙은 작품(없으면 null)
 };
 
 type Msg = { text: string; err?: boolean } | null;
@@ -106,9 +109,13 @@ function YesNo({ idx, label, value, onPick }: { idx: number; label: string; valu
   );
 }
 
-export function PlannerEditor({ loggedIn, displayName, panel: initialPanel }: Props) {
+export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, creatorProfile = "public", workId: initialWorkId = null }: Props) {
   const router = useRouter();
   const [panel, setPanel] = useState<PlanPanel | null>(initialPanel);
+  const [profileState, setProfileState] = useState(creatorProfile);
+  const [workId, setWorkId] = useState<string | null>(initialWorkId);
+  const [showProfile, setShowProfile] = useState(false); // 프로필이 없을 때 공개 주소·역할을 받는 칸
+  const [ask, setAsk] = useState<{ resolve: (v: boolean | null) => void } | null>(null); // 「프로필도 공개할까요?」
   const plan = panel?.plan ?? null;
   const revisions = panel?.revisions ?? [];
   const planId = plan?.id ?? null;
@@ -271,13 +278,52 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel }: Pr
     router.replace("/mypage");
   }
 
+  // 「프로필도 공개할까요?」를 한 번 묻는다(D13). true = 프로필도 공개, false = 프로필은 그대로(비공개), null = 취소. 어느 쪽을 골라도 작품은 올라간다.
+  function askProfilePublic(): Promise<boolean | null> {
+    return new Promise((resolve) => setAsk({ resolve }));
+  }
+  function answer(v: boolean | null) {
+    ask?.resolve(v);
+    setAsk(null);
+  }
+
+  async function publish(profile?: { handle: string; roles: string[] }, profilePublic?: boolean) {
+    if (!planId) return null;
+    const r = await run("public", () => publishPlanAsWork(planId, draft, { profile, profilePublic }));
+    if (!r) return null;
+    if (!r.ok) {
+      setMsg({ text: r.error, err: true });
+      return r;
+    }
+    if (r.panel) setPanel(r.panel);
+    setWorkId(r.workId);
+    setProfileState(profilePublic || profileState === "public" ? "public" : "private");
+    setShowProfile(false);
+    setMsg({ text: "포트폴리오에 올렸어요. 이 기획안이 들어간 작품이 만들어졌고, 지금 화면의 완성 내용이 공개용으로 저장됐어요." });
+    return r;
+  }
+
   async function onPublic(makePublic: boolean) {
     if (!planId) return;
-    const r = await run("public", () => setPlanPublic(planId, makePublic, draft));
-    if (!r) return;
-    if (!r.ok) return setMsg({ text: r.error, err: true });
-    if (r.panel) setPanel(r.panel);
-    setMsg({ text: makePublic ? "포트폴리오에 올렸어요. 지금 화면의 완성 내용이 공개용으로 저장됐어요." : "포트폴리오에서 내렸어요. 공개용 사본도 지웠어요." });
+    if (!makePublic) {
+      const r = await run("public", () => unpublishPlanWork(planId));
+      if (!r) return;
+      if (!r.ok) return setMsg({ text: r.error, err: true });
+      if (r.panel) setPanel(r.panel);
+      return setMsg({ text: "포트폴리오에서 내렸어요. 작품도 함께 내려갔고 공개용 사본도 지웠어요." });
+    }
+    if (profileState === "none") return setShowProfile(true); // 공개 주소·역할을 먼저 받는다
+    if (profileState === "private") {
+      const choice = await askProfilePublic();
+      if (choice === null) return;
+      return void (await publish(undefined, choice));
+    }
+    await publish();
+  }
+
+  async function checkProfileHandle(handle: string): Promise<HandleCheck> {
+    const r = await checkHandleAction(handle);
+    return r.ok ? (r.available ? "available" : "taken") : "error";
   }
 
   async function onPdf() {
@@ -562,8 +608,8 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel }: Pr
                       {plan.isPublic && plan.publishedAt && <span> · 공개 내용 저장 {plan.publishedAt}</span>}
                     </p>
                     <p style={{ marginTop: 6 }}>
-                      올리면 공개 이름 <b>「{displayName || "이름 없음"}」</b>과 이 기획안의 완성 내용이 포트폴리오에서 누구에게나 보여요. 이메일과 임시저장 이력은 공개되지 않아요.
-                      공개 이름은 마이페이지에서 바꿀 수 있고, 바꾸면 포트폴리오에도 바로 반영돼요. 올릴지 말지는 직접 고르세요. 언제든 내릴 수 있어요.
+                      올리면 이 기획안이 들어간 작품이 만들어지고, 닉네임 <b>「{displayName || "이름 없음"}」</b>과 이 기획안의 완성 내용이 포트폴리오에서 누구에게나 보여요. 이메일과 임시저장 이력은 공개되지 않아요.
+                      닉네임은 마이페이지에서 바꿀 수 있고, 바꾸면 포트폴리오에도 바로 반영돼요. 올릴지 말지는 직접 고르세요. 언제든 내릴 수 있어요.
                     </p>
                     <div className="row-actions">
                       <button type="button" className="btn btn-primary sm" onClick={() => onPublic(true)} disabled={busy !== null}>
@@ -571,9 +617,11 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel }: Pr
                       </button>
                       {plan.isPublic && (
                         <>
-                          <a className="btn btn-ghost sm" href={`/portfolio/${plan.id}`} target="_blank" rel="noopener noreferrer">
-                            포트폴리오에서 보기
-                          </a>
+                          {workId && (
+                            <a className="btn btn-ghost sm" href={`/portfolio/${workId}`} target="_blank" rel="noopener noreferrer">
+                              포트폴리오에서 보기
+                            </a>
+                          )}
                           <button type="button" className="btn btn-ghost sm" onClick={() => onPublic(false)} disabled={busy !== null}>
                             포트폴리오에서 내리기
                           </button>
@@ -583,6 +631,42 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel }: Pr
                         기획안 통째로 삭제
                       </button>
                     </div>
+                    {showProfile && (
+                      <div style={{ marginTop: 12 }}>
+                        <p>
+                          작품을 올리려면 크리에이터 프로필이 필요해요. 공개 주소와 역할만 적어 주세요. 나머지는 마이페이지에서 채울 수 있어요.
+                        </p>
+                        <PublishProfile
+                          mode="create"
+                          context="planner"
+                          checkHandle={checkProfileHandle}
+                          onCancel={() => setShowProfile(false)}
+                          onSubmit={async (v) => {
+                            const choice = await askProfilePublic();
+                            if (choice === null) return { ok: false, error: "올리기를 취소했어요." };
+                            const r = await publish({ handle: v.handle, roles: v.roles }, choice);
+                            if (!r) return { ok: false, error: "처리하지 못했어요. 잠시 뒤에 다시 시도해 주세요." };
+                            return r.ok ? { ok: true } : { ok: false, error: r.error, errors: r.fieldErrors as never };
+                          }}
+                        />
+                      </div>
+                    )}
+                    {ask && (
+                      <div role="dialog" aria-label="프로필 공개" className="pub-box" style={{ marginTop: 12 }}>
+                        <p>프로필도 공개할까요? 어느 쪽을 골라도 작품은 포트폴리오에 올라가요.</p>
+                        <div className="row-actions">
+                          <button type="button" className="btn btn-primary sm" onClick={() => answer(true)}>
+                            프로필도 공개
+                          </button>
+                          <button type="button" className="btn btn-ghost sm" onClick={() => answer(false)}>
+                            프로필은 비공개로 두기
+                          </button>
+                          <button type="button" className="btn btn-ghost sm" onClick={() => answer(null)}>
+                            취소
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </>
               )}

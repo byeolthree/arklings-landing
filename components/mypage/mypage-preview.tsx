@@ -166,6 +166,8 @@ export function MypagePreview({
   plans,
   collab,
   hideSamples = false,
+  creator,
+  portfolio,
 }: {
   profile: ProfileState;
   msg?: string;
@@ -175,8 +177,12 @@ export function MypagePreview({
   collab?: { newCount: number | null; content?: React.ReactNode };
   // true이면 아직 저장 기능이 없는 샘플 구역(크리에이터 등록, 포트폴리오 작품)을 숨기고 진짜 「내 기획안」 목록만 보여 준다(실제 사이트용).
   hideSamples?: boolean;
+  // 실제 「크리에이터 등록」·「포트폴리오 등록」 구역(저장되는 진짜 화면). 주면 샘플 대신 이것을 그린다.
+  creator?: React.ReactNode;
+  portfolio?: React.ReactNode;
 }) {
-  const baseSections: readonly { id: SectionId; label: string }[] = hideSamples ? [{ id: "mp-basic", label: "기본 정보" }, { id: "mp-portfolio", label: "내 기획안" }] : BASE_SECTIONS;
+  const showCreator = !hideSamples || creator !== undefined;
+  const baseSections: readonly { id: SectionId; label: string }[] = !showCreator ? [{ id: "mp-basic", label: "기본 정보" }, { id: "mp-portfolio", label: "내 기획안" }] : BASE_SECTIONS;
   const SECTIONS: readonly { id: SectionId; label: string }[] = collab ? [...baseSections, COLLAB_SECTION] : baseSections;
   const [open, setOpen] = useState<Record<SectionId, boolean>>({ "mp-basic": true, "mp-creator": true, "mp-portfolio": true, "mp-collab": true });
   const [active, setActive] = useState<string>("mp-basic");
@@ -317,13 +323,13 @@ export function MypagePreview({
             )}
           </Section>
 
-          {!hideSamples && (
+          {showCreator && (
           <Section
             id="mp-creator"
             tone="s2"
             title="크리에이터 등록"
             extra={
-              exists ? (
+              creator === undefined && exists ? (
                 <>
                   <Link className="mp-addr" href={`/dev-preview/creators/${SAMPLE_PROFILE.handle}?mine=${isPublic ? "public" : "private"}`}>
                     /creators/{SAMPLE_PROFILE.handle} ↗
@@ -335,6 +341,7 @@ export function MypagePreview({
             open={open["mp-creator"]}
             onToggle={() => toggle("mp-creator")}
           >
+            {creator !== undefined ? creator : (<>
             {showPending && (
               <div className="mp-pending">
                 <span>〈저장 뒤 올라갈 작품: 제목〉</span>
@@ -355,11 +362,12 @@ export function MypagePreview({
               />
             </div>
             {saved && <p className="mp-sample">저장했어요(샘플).</p>}
+            </>)}
           </Section>
           )}
 
-          <Section id="mp-portfolio" tone="s3" title={hideSamples ? "내 기획안" : "포트폴리오 등록"} open={open["mp-portfolio"]} onToggle={() => toggle("mp-portfolio")}>
-            {!hideSamples && (
+          <Section id="mp-portfolio" tone="s3" title={!showCreator ? "내 기획안" : "포트폴리오 등록"} open={open["mp-portfolio"]} onToggle={() => toggle("mp-portfolio")}>
+            {showCreator && portfolio === undefined && (
             <div className="mp-top-row">
               <div className="mp-count">
                 <span>〈작품 4 / 12〉</span>
@@ -391,7 +399,8 @@ export function MypagePreview({
               )}
             </div>
 
-            {!hideSamples && (
+            {showCreator && portfolio !== undefined && portfolio}
+            {showCreator && portfolio === undefined && (
             <div className="mp-works">
               {openWork[0] ? (
                 <WorkEditor isPublic={true} roles={["video", "script"]} onFold={() => setWork(0, false)} />

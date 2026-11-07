@@ -1,80 +1,68 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache } from "react";
-import { CopyLinkButton } from "@/components/portfolio/copy-link-button";
-import { UUID_RE } from "@/lib/collab";
-import { getPortfolio } from "@/lib/portfolio";
-import { formatKstDate } from "@/lib/time";
-import "@/components/portfolio/portfolio.css";
+import { CreatorProfile } from "@/components/creators/creator-profile";
+import { WorkDetail } from "@/components/creators/work-detail";
+import { getCurrentUser } from "@/lib/auth";
+import { toProfileData, toWorkCard } from "@/lib/creator-cards";
+import { getCreator, getWork, listCreatorWorks, UUID_QUERY, type WorkDetail as WorkDetailData } from "@/lib/creators";
+import { loadMyCreator } from "@/lib/creators-mine";
+import { createAuthClient } from "@/lib/supabase/server";
+import type { CreatorProfile as CreatorProfileData } from "@/lib/creators";
+import type { WorkListItem } from "@/lib/creators";
 
-export const dynamic = "force-dynamic"; // 공개를 끄거나 지우면 바로 404가 되도록 열 때마다 새로 읽는다
+export const dynamic = "force-dynamic"; // 내리거나 지우면 바로 404가 되도록 열 때마다 새로 읽는다
 
 type Props = { params: Promise<{ id: string }> };
+type Loaded = { work: WorkDetailData; profile: CreatorProfileData; works: WorkListItem[]; preview: boolean };
 
-// 제목(metadata)과 본문이 같은 요청 안에서 한 번만 읽도록
-const load = cache(async (id: string) => (UUID_RE.test(id) ? getPortfolio(id) : null));
+// /portfolio/<작품 번호>는 작품 공유 주소다(D29). 공개된 작품이면 누구나, 아니면 주인만 본다. 프로필 화면 위에 작품 창이 열린다(D28).
+const load = cache(async (id: string): Promise<Loaded | null> => {
+  if (!UUID_QUERY.test(id)) return null;
+  const work = await getWork(id);
+  if (work) {
+    const [profile, works] = await Promise.all([getCreator(work.authorHandle), listCreatorWorks(work.authorHandle)]);
+    if (profile) return { work, profile, works, preview: false };
+  }
+  const user = await getCurrentUser();
+  if (!user?.emailConfirmed) return null;
+  const mine = await loadMyCreator(user.id);
+  const w = mine.works.find((x) => x.id === id);
+  if (!w || !mine.profile) return null;
+  let name = mine.profile.handle;
+  try {
+    const sb = await createAuthClient();
+    const { data } = await sb.from("profiles").select("display_name").eq("id", user.id).maybeSingle();
+    name = (data as { display_name?: string } | null)?.display_name || name;
+  } catch {
+    // 이름을 못 읽어도 미리 보기는 연다
+  }
+  return {
+    work: { ...w, authorHandle: mine.profile.handle, authorName: name },
+    profile: { handle: mine.profile.handle, name, roles: mine.profile.roles, bio: mine.profile.bio, channels: mine.profile.channels, openToCollab: mine.profile.openToCollab },
+    works: mine.works.filter((x) => x.isPublic),
+    preview: true,
+  };
+});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const plan = await load((await params).id);
-  return plan ? { title: `${plan.title} · 포트폴리오`, description: plan.logline.slice(0, 120) } : { title: "찾을 수 없는 기획안" };
+  const data = await load((await params).id);
+  if (!data) return { title: "찾을 수 없는 작품" };
+  return { title: `${data.work.title} · 포트폴리오`, description: data.work.logline.slice(0, 120) || undefined, robots: data.preview ? { index: false } : undefined };
 }
 
-export default async function PortfolioDetailPage({ params }: Props) {
-  const plan = await load((await params).id);
-  if (!plan) notFound();
-
+export default async function WorkPage({ params }: Props) {
+  const data = await load((await params).id);
+  if (!data) notFound();
+  const { work, profile, works, preview } = data;
   return (
-    <div className="pf">
-      <section className="pf-top">
-        <div className="wrap narrow">
-          <Link href="/portfolio" className="pf-back">← 포트폴리오</Link>
-          <div className="pf-head">
-            <span className="live"><i aria-hidden="true" />게시 중</span>
-            <h1 className="pf-title">{plan.title}</h1>
-            <div className="pf-meta">
-              <span className="pf-av" aria-hidden="true">{plan.authorName.slice(0, 1)}</span>
-              <span className="name">{plan.authorName}</span>
-              <span className="sep" aria-hidden="true">·</span>
-              <span>
-                게시일 <time dateTime={plan.publishedAt}>{formatKstDate(plan.publishedAt)}</time>
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="pf-detail-body">
-        <div className="wrap narrow">
-          <article className="panel pf-doc">
-            {plan.content.sections.map((s) => (
-              <div key={s.id}>
-                <h2 className="pf-label">{s.label}</h2>
-                <p className="pf-logline">{s.text}</p>
-              </div>
-            ))}
-            {plan.content.answers.length > 0 && (
-              <dl className="pf-sheet">
-                {plan.content.answers.map((a) => (
-                  <div key={a.label} className="sheet-row">
-                    <dt>{a.label}</dt>
-                    <dd>{a.text}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-          </article>
-
-          <div className="pf-actions">
-            {/* 받는 사람은 서버가 기획안 번호로 주인을 찾아 정한다. 주소에는 기획안 번호만 싣는다. */}
-            <Link href={`/collab/new?plan=${plan.id}`} className="btn btn-primary">
-              이 기획안에 협업 신청 <span className="arrow">→</span>
-            </Link>
-            <CopyLinkButton />
-            <p className="note">신청은 {plan.authorName}님께 전달돼요. 로그인하지 않아도 보낼 수 있어요.</p>
-          </div>
-        </div>
-      </section>
-    </div>
+    <>
+      <CreatorProfile creator={toProfileData(profile)} works={works.map(toWorkCard)} backHref="/creators" workHref={(id) => `/portfolio/${id}`} privateNote={preview && !works.some((w) => w.id === work.id)} />
+      <WorkDetail
+        work={{ title: work.title, authorName: work.authorName, publishedAt: work.publishedAt, roles: work.roles, genres: work.genres, logline: work.logline, blocks: work.blocks }}
+        closeHref={`/creators/${work.authorHandle}`}
+        // 「이 작품에 협업 신청」은 협업 신청 쪽 코드가 작품을 받게 되는 0010 이후에 연다.
+      />
+    </>
   );
 }

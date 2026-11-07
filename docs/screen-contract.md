@@ -91,18 +91,19 @@
 | 정리 작업 | `/api/cron/cleanup` | 비밀값 | 없음 | 화면 없음 |
 | 인증 돌아오는 길 | `/auth/callback`, `/auth/confirm` | - | 없음 | 화면 없음. 만지지 않는다 |
 
-## 크리에이터 (2026-11-07 줄 추가, `dev` ebde7b4 기준 · DB는 0009 실행 완료)
+## 크리에이터 (2026-11-07 줄 추가·5·6단계 반영, `dev` ebde7b4 기준 · DB는 0009 실행 완료)
 
 읽기는 `lib/creators.ts` 한 곳이고 DB의 공개용 보기 4개(`creators_public`, `creator_channels_public`, `creator_works_public`, `creator_blocks_public`)에서만 읽는다. 주인 번호·이메일은 화면·주소·화면 소스 어디에도 내지 않는다. 파일(이미지·PDF)은 비공개 보관함 `creator-works`에 있고 보여 줄 때만 짧은 임시 주소(10분)를 만든다. 쓰기는 모두 `app/actions/creators.ts`의 Server Action이며 맨 위에서 로그인·이메일 확인을 다시 하고, 로그인한 본인 연결(`createAuthClient`)과 RLS로 실행한다. 글자 수·개수 규칙은 `lib/creator-rules.ts` 한 곳.
 
 | 화면 | 주소 | 로그인 필요 | 부르는 처리 함수 | 입력 칸 / 인자 | 화면에 받는 데이터 | 이동 |
 |---|---|---|---|---|---|---|
-| 크리에이터 목록 | `/creators?q=&role=&genre=&form=&open=&page=` | 아니요 | 없음(읽기만: `listCreators(filter, page)`) | 주소 값 `q`(30자), `role`(역할 하나), `genre`(장르 하나), `form`(long·short), `open`(1), `page` | `cards[]`(`CreatorCard`와 같은 값: `handle`, `name`, `roles`, `bio`(앞부분), `planCount`(공개 작품 수), `openToCollab`, `genres`, `forms`, `latest`(없을 수 있음), `hero`, `heroSrc`(임시 주소)), `total`, 쪽 수(`CREATOR_PAGE_SIZE`). 공개 프로필만, 작품 0건이어도 나온다(D7) | 카드 `/creators/<handle>`, 협업 신청 `/collab/new?creator=<handle>`(0010 뒤에 열림), 비었을 때 「기획안 만들기」 `/planner`·「크리에이터 프로필 만들기」 `/mypage` |
+| 크리에이터 목록 | `/creators?q=&role=&genre=&form=&open=&page=` | 아니요 | 없음(읽기만: `listCreators(filter, page)`) | 주소 값 `q`(30자), `role`(역할 하나), `genre`(장르 하나), `form`(long·short), `open`(1), `page` | `cards[]`(`CreatorCard`와 같은 값: `handle`, `name`, `roles`, `bio`(앞부분), `planCount`(공개 작품 수), `openToCollab`, `genres`, `forms`, `latest`(없을 수 있음), `hero`, `heroSrc`(임시 주소)), `total`, 쪽 수(`CREATOR_PAGE_SIZE`). 공개 프로필만, 공개한 작품이 1건 이상인 크리에이터만 나온다(별뜨리님 결정 2026-11-07, 프로필만으로는 등록되지 않음) | 카드 `/creators/<handle>`, 협업 신청 `/collab/new?creator=<handle>`(0010 뒤에 열림), 비었을 때 「기획안 만들기」 `/planner`·「크리에이터 프로필 만들기」 `/mypage` |
 | 크리에이터 프로필 | `/creators/<handle>` (작품 창: `?work=<작품 번호>`) | 아니요 (본인은 비공개도 봄) | 없음(읽기만: `getCreator(handle)`, `listCreatorWorks(handle)`, `getWork(id)`) | 없음 | 프로필(`handle`, `name`, `roles`, `bio`, `channels[]`, `openToCollab`, `hero`·`heroSrc`), 작품 카드 `WorkCard[]`(`id`, `title`, `logline`, `roles`, `genres`, `kind`, `form`, `publishedAt`), 작품 상세(`WorkDetailData`: 위 값 + 순서대로 `blocks[]` 글·이미지·영상·문서, 파일은 임시 주소). 공개가 아니고 본인도 아니면 404. 본인이 비공개 프로필을 열면 「비공개 상태입니다」 표시와 협업 신청 버튼 숨김(D13) | 작품 창 닫기 `/creators/<handle>`, 「이 작품에 협업 신청」·「이 크리에이터에게 협업 신청」은 0010 뒤에 `/collab/new?…` |
 | 작품 공유 주소 | `/portfolio/<작품 번호>` | 아니요 | 없음(읽기만: `getWork(id)`) | 없음 | 위 작품 상세. 공개가 아니면 404 | 「프로필 보기」 `/creators/<handle>` (D29) |
 | 마이페이지 · 크리에이터 등록 구역 | `/mypage` 안 | 예 | `saveCreatorProfile`, `setProfilePublic`, `checkHandle` | `handle`, `roles`(여러 개), `bio`(소개 글 500자, 선택), `channels`(이름 20자·https 주소, 5개까지), `openToCollab`, `isPublic` | 내 프로필·채널(로그인한 본인 연결로 읽음). 결과 `{ok:true, created, handle}` / `{ok:false, error, fieldErrors?}` | 내 프로필 주소 `/creators/<handle>` |
 | 마이페이지 · 포트폴리오 등록 구역 | `/mypage` 안 | 예 | `createWork`, `updateWork`, `deleteWork`, `setWorkPublic`, `addTextBlock`, `updateTextBlock`, `addVideoBlock`, `prepareFileUpload`→(브라우저가 보관함에 직접 올림)→`finishFileUpload`, `moveBlock`, `reorderBlocks`, `deleteBlock` | 작품: `title`(60자), `roles`, `genres`, `kind`, `form`, `logline`(띄어쓰기 뺀 200자), `planId`. 요소: 글 5000자, 유튜브 주소, 이미지 JPG·PNG·WEBP 5MB, PDF 10MB, 사람당 합계 20MB, 작품 12개, 작품당 요소 20개 | 내 작품·요소(본인 연결로 읽음), 용량·개수 | 작품 창은 위와 같음 |
-| 기획안 화면 · 포트폴리오에 올리기 | `/planner` | 예 | **정해지지 않음. 아래 「보고」 참고** | - | - | - |
+| 기획안 화면 · 포트폴리오에 올리기 | `/planner` | 예 | `publishPlanAsWork(planId, draft, {profile?:{handle,roles}, profilePublic?})`(프로필이 없으면 공개 주소·역할로 만든 뒤 그 기획안이 붙은 작품 하나를 만들어 올림), `unpublishPlanWork(planId)`(작품과 기획안을 함께 내림), `checkHandle` | 프로필 없음이면 공개 주소·역할 칸, 있으면 「프로필도 공개할까요?」(비공개일 때만, D13) | `PlannerEditor` props `creatorProfile`(none·private·public), `workId` | 「포트폴리오에서 보기」 `/portfolio/<작품 번호>` |
+| 옛 포트폴리오 목록 | `/portfolio` | 아니요 | 없음 | 없음 | 없음 | `/creators`로 이동(D29로 작품 단위가 됨) |
 
 처리 함수 결과 모양: `{ ok: true, …값 } | { ok: false, error, needLogin?, fieldErrors? }` (기획안 동작과 같은 모양).
 
@@ -115,3 +116,6 @@
 ## 지난 판: 새 디자인 참고 시안 (위 「크리에이터」 줄이 대신한다)
 
 별뜨리님이 보여 주신 Figma 시안 「크리에이터 포트폴리오 탐색」(Desktop 1440 / Mobile 375)과 「크리에이터 프로필」은 **지금 코드에 없는 화면**이다. 코드에 있는 비슷한 화면은 `/portfolio`(기획안 목록)뿐이고, 크리에이터·프로필 화면의 처리 함수·데이터는 아직 없다. 이 화면들을 만들려면 먼저 어떤 데이터를 쓸지 정하고 이 표에 줄을 더해 승인받는다. 랜딩과 시안이 다르면 랜딩을 따른다.
+
+
+채널 링크 저장(`saveCreatorProfile`·`saveChannels`)은 DB 함수 `replace_creator_channels`(`0011_creator_channels_replace.sql`, 사용자가 실행)를 한 번 불러 한 트랜잭션으로 바꾼다. 0011을 실행하기 전에는 채널 링크 저장이 실패한다.

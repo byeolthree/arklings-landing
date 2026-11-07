@@ -15,13 +15,15 @@ export function CreatorProfile({
   workHref,
   applyHref,
   showApply = true,
+  privateNote = false,
 }: {
   creator: CreatorProfileData;
   works: WorkCard[];
   backHref: string;
   workHref: (id: string) => string;
-  applyHref: string;
-  showApply?: boolean; // 비공개 프로필을 본인이 미리 볼 때는 협업 신청 버튼을 숨긴다(D14)
+  applyHref?: string; // 안 주면 협업 신청 버튼을 숨긴다
+  showApply?: boolean;
+  privateNote?: boolean; // 비공개 프로필을 본인이 미리 볼 때 「비공개 상태입니다」 표시(D13) // 비공개 프로필을 본인이 미리 볼 때는 협업 신청 버튼을 숨긴다(D14)
 }) {
   // 종류별 작품 수(작품이 있는 종류만, 정해진 종류 순서대로)
   const kinds = WORK_KINDS.map((k) => [k, works.filter((w) => w.kind === k).length] as const).filter(([, n]) => n > 0);
@@ -45,6 +47,7 @@ export function CreatorProfile({
             ← 크리에이터
           </Link>
           <div className="cr-hero-body">
+            {privateNote && <span className="cr-open">비공개 상태입니다</span>}
             <RoleTags roles={creator.roles} />
             <h1 id="cr-hero-name" className="cr-hero-name">
               {creator.name}
@@ -104,10 +107,12 @@ export function CreatorProfile({
                       <span className="cr-label">로그라인</span>
                       <p className="cr-box-logline">{w.logline}</p>
                     </div>
-                    <p className="cr-work-kind">
-                      <span className="cr-kind">{w.kind}</span>
-                    </p>
-                    <WorkMedia href={workHref(w.id)} slides={["〈대표 이미지〉", "〈영상〉"]} />
+                    {w.kind && (
+                      <p className="cr-work-kind">
+                        <span className="cr-kind">{w.kind}</span>
+                      </p>
+                    )}
+                    {(w.slides ?? ["〈대표 이미지〉", "〈영상〉"]).length > 0 && <WorkMedia href={workHref(w.id)} slides={w.slides ?? ["〈대표 이미지〉", "〈영상〉"]} />}
                     <RoleTags roles={w.roles} />
                     {w.genres.length > 0 && (
                       <ul className="cr-genres" aria-label="장르">
@@ -123,7 +128,7 @@ export function CreatorProfile({
           )}
 
           {/* 스크롤해도 화면 아래에 붙어 있다가, 맨 끝에서는 제자리에 놓인다 */}
-          {creator.openToCollab && showApply && (
+          {creator.openToCollab && showApply && applyHref && (
             <div className="cr-apply-stick">
               <Link href={applyHref} className="btn btn-primary">
                 이 크리에이터에게 협업 신청 <span className="arrow">→</span>

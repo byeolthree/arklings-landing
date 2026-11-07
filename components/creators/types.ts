@@ -45,9 +45,10 @@ export type WorkCard = {
   logline: string;
   roles: Role[];
   genres: string[];
-  kind: WorkKind; // 작품 종류
-  form: WorkForm;
+  kind: WorkKind | null; // 작품 종류(실제 작품은 비어 있을 수 있다)
+  form: WorkForm | null;
   publishedAt: string;
+  slides?: string[]; // 카드에 걸 대표 이미지·영상 자리(안 주면 샘플 자리 표시, 빈 목록이면 안 보임)
 };
 
 export type PlanCard = {

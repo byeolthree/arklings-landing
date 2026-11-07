@@ -130,11 +130,12 @@ function toListItem(r: CreatorRow, heroUrls: Map<string, string>): CreatorListIt
   };
 }
 
-// 공개 프로필 목록. 최근에 만든 순서로 page쪽(1부터)의 CREATOR_PAGE_SIZE명과 전체 인원을 돌려준다.
+// 공개 프로필 중 공개한 작품이 1건 이상인 크리에이터 목록. 최근에 만든 순서로 page쪽(1부터)의 CREATOR_PAGE_SIZE명과 전체 인원을 돌려준다.
 export async function listCreators(filter: CreatorFilterInput, page: number): Promise<{ items: CreatorListItem[]; total: number }> {
   const sb = getSupabase();
   const from = (Math.max(1, page) - 1) * CREATOR_PAGE_SIZE;
-  let query = sb.from("creators_public").select(CREATOR_COLUMNS, { count: "exact" });
+  // 프로필만으로는 목록에 나오지 않는다. 공개한 작품이 1건 이상인 크리에이터만 나온다(별뜨리님 결정 2026-11-07).
+  let query = sb.from("creators_public").select(CREATOR_COLUMNS, { count: "exact" }).gte("work_count", 1);
   if (filter.role) query = query.contains("roles", [filter.role]);
   if (filter.genre) query = query.contains("genres", [filter.genre]);
   if (filter.form) query = query.contains("forms", [filter.form]);
@@ -152,7 +153,7 @@ export async function listCreators(filter: CreatorFilterInput, page: number): Pr
   if (error) {
     // 마지막 쪽보다 뒤의 쪽(?page=99)은 오류가 아니라 「이 쪽에는 없어요」로 보여 준다.
     if (error.code === "PGRST103") {
-      let countQuery = sb.from("creators_public").select("public_handle", { count: "exact", head: true });
+      let countQuery = sb.from("creators_public").select("public_handle", { count: "exact", head: true }).gte("work_count", 1);
       if (filter.role) countQuery = countQuery.contains("roles", [filter.role]);
       if (filter.genre) countQuery = countQuery.contains("genres", [filter.genre]);
       if (filter.form) countQuery = countQuery.contains("forms", [filter.form]);

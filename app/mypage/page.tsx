@@ -6,6 +6,8 @@ import { DisplayNameForm } from "@/components/mypage-forms";
 import "@/components/planner/planner.css";
 import "@/components/mypage/mypage.css";
 import { MypagePreview } from "@/components/mypage/mypage-preview";
+import { CreatorProfileForm, PortfolioManager } from "@/components/mypage/creator-forms";
+import { loadMyCreator, type MyCreatorData } from "@/lib/creators-mine";
 import { requireUser } from "@/lib/auth";
 import { countNewCollab } from "@/lib/collab-count";
 import { PAGE_SIZE, ROLES, STATUSES, type CollabRequest } from "@/lib/collab";
@@ -62,6 +64,14 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
     else plans = (data ?? []) as PlanRow[];
   } catch {
     plansLoadFailed = true;
+  }
+
+  // 내 크리에이터 프로필·작품(비공개 포함, 본인 권한으로 읽는다). 못 읽으면 그 구역만 안내하고 나머지는 그대로 보여 준다.
+  let creatorData: MyCreatorData | null = null;
+  try {
+    creatorData = await loadMyCreator(user.id);
+  } catch {
+    creatorData = null;
   }
 
   const newCollab = await countNewCollab();
@@ -268,5 +278,20 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
     </ul>
   );
 
-  return <MypagePreview profile="none" pending={false} basic={basic} plans={plansList} collab={{ newCount: newCollab, content: collabList }} hideSamples={process.env.VERCEL_ENV === "production"} />;
+  const failed = (
+    <p role="alert" className="mp-msg err">
+      불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
+    </p>
+  );
+  return (
+    <MypagePreview
+      profile="none"
+      pending={false}
+      basic={basic}
+      plans={plansList}
+      collab={{ newCount: newCollab, content: collabList }}
+      creator={creatorData ? <CreatorProfileForm profile={creatorData.profile} /> : failed}
+      portfolio={creatorData ? <PortfolioManager works={creatorData.works} usedBytes={creatorData.usedBytes} hasProfile={Boolean(creatorData.profile)} /> : failed}
+    />
+  );
 }

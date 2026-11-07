@@ -150,5 +150,5 @@ export const SAMPLE_CREATORS: CreatorCard[] = RAW_CREATORS.map((c) => {
   const hero = heroOf(c);
   // 역할 첫 칸이 영상 제작·아트디렉터인 사람만 로그라인 대신 대표 이미지·영상을 메인에 걸 수 있다. 영상이 있어도 다른 역할은 대표로 못 건다(별뜨리님 2026-11-05).
   const main = hero && (c.roles[0] === "video" || c.roles[0] === "art_director") ? "media" : "logline";
-  return { ...c, hero, heroSrc: HERO_VIDEO[c.handle] ?? HERO_IMAGE[c.handle], main, openToCollab: sampleProfileOf(c).openToCollab ?? true, genres: [...new Set(works.flatMap((w) => w.genres))], forms: [...new Set(works.map((w) => w.form))] };
+  return { ...c, hero, heroSrc: HERO_VIDEO[c.handle] ?? HERO_IMAGE[c.handle], main, openToCollab: sampleProfileOf(c).openToCollab ?? true, genres: [...new Set(works.flatMap((w) => w.genres))], forms: [...new Set(works.map((w) => w.form).filter((f): f is NonNullable<typeof f> => f !== null))] };
 });
