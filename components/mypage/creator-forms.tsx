@@ -92,21 +92,11 @@ export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
 
 // ── 포트폴리오 등록 ─────────────────────────────────────────────────────────────────
 export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null, nickname = "" }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null; nickname?: string }) {
-  // 편집 칸은 한 번에 하나만 펼쳐서 화면이 끝없이 길어지지 않게 한다. 처음에는 기획안에서 넘어온 작품(없으면 맨 위 작품)이 펼쳐져 있고, 나머지는 카드로 접혀 있다.
-  const [openWork, setOpenWork] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : (works[0]?.id ?? null));
-  // 작품이 하나도 없으면 「포트폴리오 등록」답게 새 작품 편집 칸이 바로 열려 있다(목록이 아니라 등록 화면).
-  const [adding, setAdding] = useState(false);
-  const [newClosed, setNewClosed] = useState(false);
-  const showNew = adding || (works.length === 0 && !newClosed);
-  const openId = showNew ? "new" : openWork;
-  const setOpenId = (id: string | null) => {
-    setAdding(id === "new");
-    if (id === "new") setNewClosed(false);
-    else {
-      setOpenWork(id);
-      setNewClosed(true);
-    }
-  };
+  // 등록 화면에는 편집 칸 하나만 보인다. 이미 등록한 작품을 카드로 늘어놓지 않는다(그건 남들이 보는 포트폴리오 화면의 모양이다).
+  // 기획안 화면의 「포트폴리오 작성하기」로 넘어오면(?work=) 그 작품의 편집 칸이, 아니면 새 작품 칸이 보인다.
+  const [current, setCurrent] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : null);
+  const [formKey, setFormKey] = useState(0);
+  const cur = current ? (works.find((w) => w.id === current) ?? null) : null;
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const router = useRouter();
@@ -132,7 +122,15 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
             파일 {mb(usedBytes)} / {mb(QUOTA_BYTES)}
           </span>
         </div>
-        <button type="button" className="btn btn-primary" onClick={() => setOpenId("new")} disabled={works.length >= WORK_LIMIT || showNew}>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => {
+            setCurrent(null);
+            setFormKey((k) => k + 1);
+          }}
+          disabled={works.length >= WORK_LIMIT || !cur}
+        >
           작품 추가
         </button>
       </div>
@@ -144,52 +142,14 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
       )}
 
       <div className="mp-works">
-        {showNew && <WorkEditor key="new" work={null} nickname={nickname} onClose={() => setOpenId(null)} onCreated={(id) => setOpenId(id)} />}
-        {works.map((w) =>
-          openId === w.id ? (
-            <WorkEditor key={w.id} work={w} nickname={nickname} onClose={() => setOpenId(null)} onTogglePublic={() => togglePublic(w)} busyOuter={busy} />
-          ) : (
-            <div className="mp-work" key={w.id}>
-              <WorkThumb />
-              <div className="mp-work-main">
-                <p className="mp-work-title">{w.title}</p>
-                <div className="mp-work-meta">
-                  {w.roles.map((r) => (
-                    <span key={r} className="mp-tag">
-                      {ROLES[r]}
-                    </span>
-                  ))}
-                  <span>{w.isPublic ? "공개 중" : "공개하지 않음"}</span>
-                </div>
-                {w.genres.length > 0 && (
-                  <div className="mp-genres">
-                    {w.genres.map((g) => (
-                      <span key={g} className="mp-tag genre">
-                        {g}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div className="mp-work-btns">
-                <button type="button" className="btn btn-ghost" onClick={() => togglePublic(w)} disabled={busy}>
-                  {w.isPublic ? "포트폴리오에서 내리기" : "포트폴리오에 올리기"}
-                </button>
-                <button type="button" className="btn btn-ghost" onClick={() => setOpenId(w.id)}>
-                  펼쳐서 꾸미기 ▾
-                </button>
-              </div>
-            </div>
-          ),
+        {cur ? (
+          <WorkEditor key={cur.id} work={cur} nickname={nickname} onClose={() => setCurrent(null)} onTogglePublic={() => togglePublic(cur)} busyOuter={busy} />
+        ) : (
+          <WorkEditor key={`new${formKey}`} work={null} nickname={nickname} onClose={() => setFormKey((k) => k + 1)} onCreated={(id) => setCurrent(id)} />
         )}
       </div>
-          </>
+    </>
   );
-}
-
-// 접은 작품 카드의 대표 이미지 자리: 승인받은 샘플 그대로 「대표 이미지」 회색 칸만 둔다(실제 이미지는 이 화면에 걸지 않는다).
-function WorkThumb() {
-  return <div className="mp-thumb">대표 이미지</div>;
 }
 
 type SlotKind = "text" | "image" | "video" | "doc";
@@ -303,9 +263,11 @@ function WorkEditor({
             {work.isPublic ? "포트폴리오에서 내리기" : "포트폴리오에 올리기"}
           </button>
         )}
-        <button type="button" className="btn btn-ghost we-close" onClick={onClose}>
-          접기 ▴
-        </button>
+        {work && (
+          <button type="button" className="btn btn-ghost we-close" onClick={onClose}>
+            접기 ▴
+          </button>
+        )}
       </div>
 
       <div className="we-head">
