@@ -266,7 +266,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
   const workByPlan = new Map((creatorData?.works ?? []).filter((w) => w.planId).map((w) => [w.planId as string, w]));
   const planStatus = (p: { id: string; is_public: boolean }) => {
     const w = workByPlan.get(p.id);
-    return w ? (w.isPublic ? "공개 중" : "공개하지 않음 (작품 작성 중)") : creatorData ? "공개하지 않음" : p.is_public ? "공개 중" : "공개하지 않음";
+    return w ? (w.isPublic ? "공개 중" : "공개하지 않음") : creatorData ? "공개하지 않음" : p.is_public ? "공개 중" : "공개하지 않음";
   };
   const plansList = plansLoadFailed ? (
     <p role="alert" className="mp-msg err">

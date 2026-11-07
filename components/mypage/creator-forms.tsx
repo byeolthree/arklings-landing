@@ -23,10 +23,9 @@ import {
   updateWork,
 } from "@/app/actions/creators";
 import { GENRES } from "@/components/creators/genres";
-import { FORM_LABEL, WORK_KINDS } from "@/components/creators/types";
 import { PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
 import { ROLES, type Role } from "@/lib/collab";
-import { BLOCK_LIMIT, countLoglineChars, LOGLINE_MAX, QUOTA_BYTES, TITLE_MAX, WORK_LIMIT, type ProfileErrors, type ProfileValues } from "@/lib/creator-rules";
+import { BLOCK_LIMIT, QUOTA_BYTES, TITLE_MAX, WORK_LIMIT, type ProfileErrors, type ProfileValues } from "@/lib/creator-rules";
 import { kindOfMime, uploadToSlot } from "@/lib/creator-upload-client";
 import type { MyBlock, MyProfile, MyWork } from "@/lib/creators-mine";
 
@@ -93,8 +92,14 @@ export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
 
 // ── 포트폴리오 등록 ─────────────────────────────────────────────────────────────────
 export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null, plans, nickname = "" }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null; plans?: ReactNode; nickname?: string }) {
-  // 기획안 화면의 「포트폴리오 작성하기」로 넘어오면 그 작품의 편집 칸을 열어 둔다.
-  const [openId, setOpenId] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : null);
+  // 편집 칸은 한 번에 하나만 펼쳐서 화면이 끝없이 길어지지 않게 한다. 처음에는 기획안에서 넘어온 작품(없으면 맨 위 작품)이 펼쳐져 있고, 나머지는 카드로 접혀 있다.
+  const [openWork, setOpenWork] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : (works[0]?.id ?? null));
+  const [adding, setAdding] = useState(false);
+  const openId = adding ? "new" : openWork;
+  const setOpenId = (id: string | null) => {
+    setAdding(id === "new");
+    if (id !== "new") setOpenWork(id);
+  };
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const router = useRouter();
@@ -121,7 +126,7 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
           </span>
         </div>
         <button type="button" className="btn btn-primary" onClick={() => setOpenId("new")} disabled={works.length >= WORK_LIMIT || openId === "new"}>
-          + 작품 추가
+          작품 추가
         </button>
       </div>
       {plans !== undefined && (
@@ -172,11 +177,6 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
                 <button type="button" className="btn btn-ghost" onClick={() => setOpenId(w.id)}>
                   펼쳐서 꾸미기 ▾
                 </button>
-                {w.isPublic && (
-                  <Link className="btn btn-ghost" href={`/portfolio/${w.id}`}>
-                    보기
-                  </Link>
-                )}
               </div>
             </div>
           ),
@@ -222,14 +222,13 @@ function WorkEditor({
   const [title, setTitle] = useState(work?.title ?? "");
   const [roles, setRoles] = useState<Role[]>(work?.roles ?? []);
   const [genres, setGenres] = useState<string[]>(work?.genres ?? []);
-  const [kind, setKind] = useState(work?.kind ?? "");
-  const [form, setForm] = useState<string>(work?.form ?? "");
+  const [kind] = useState(work?.kind ?? "");
+  const [form] = useState<string>(work?.form ?? "");
   const [logline, setLogline] = useState(work?.logline ?? "");
   const [errs, setErrs] = useState<Record<string, string>>({});
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const [pickRoles, setPickRoles] = useState((work?.roles.length ?? 0) === 0);
-  const loglineChars = countLoglineChars(logline);
 
   const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
@@ -276,7 +275,7 @@ function WorkEditor({
       </div>
 
       <div className="we-head">
-        <input className="we-title" type="text" placeholder="작품 제목" aria-label="작품 제목" value={title} maxLength={TITLE_MAX} onChange={(e) => setTitle(e.target.value)} aria-invalid={errs.title ? true : undefined} />
+        <input className="we-title" type="text" placeholder="〈작품 제목〉" aria-label="작품 제목" value={title} maxLength={TITLE_MAX} onChange={(e) => setTitle(e.target.value)} aria-invalid={errs.title ? true : undefined} />
         {errs.title && <p className="mp-msg err" role="alert">{errs.title}</p>}
         <p className="we-by">
           {nickname || "닉네임"}
@@ -309,24 +308,6 @@ function WorkEditor({
             </button>
           ))}
         </div>
-        <div className="we-pick">
-          <select className="mp-input" aria-label="작품 종류" value={kind} onChange={(e) => setKind(e.target.value)}>
-            <option value="">작품 종류 (선택)</option>
-            {WORK_KINDS.map((k) => (
-              <option key={k} value={k}>
-                {k}
-              </option>
-            ))}
-          </select>
-          <select className="mp-input" aria-label="분량" value={form} onChange={(e) => setForm(e.target.value)}>
-            <option value="">분량 (선택)</option>
-            {Object.entries(FORM_LABEL).map(([k, v]) => (
-              <option key={k} value={k}>
-                {v}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
 
       <div className="we-logline">
@@ -334,9 +315,6 @@ function WorkEditor({
           <span className="we-label">로그라인 (이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)</span>
           <textarea className="we-text" rows={3} value={logline} onChange={(e) => setLogline(e.target.value)} placeholder="어느 날 〈사건〉이 벌어지자, 〈주인공〉은 〈장애물〉을 극복해야 〈목표〉를 달성할 수 있다. 그렇지 않으면 〈위험〉이 닥친다." />
         </label>
-        <p className={`mp-note${loglineChars > LOGLINE_MAX ? " err" : ""}`}>
-          띄어쓰기를 뺀 {loglineChars} / {LOGLINE_MAX}자
-        </p>
         {errs.logline && <p className="mp-msg err" role="alert">{errs.logline}</p>}
       </div>
 
@@ -434,7 +412,7 @@ function BlockList({ work, onMessage }: { work: MyWork; onMessage: (m: { text: s
             +
           </button>
         </div>
-        <div className="we-el">
+        <div className="we-el" tabIndex={0}>
           <span className="we-grip" aria-hidden="true">⠿</span>
           <div className="we-main">
             {b.id === work.blocks.find((x: MyBlock) => x.kind === "image" || x.kind === "video")?.id && <span className="we-cover">대표</span>}
@@ -469,7 +447,7 @@ function BlockList({ work, onMessage }: { work: MyWork; onMessage: (m: { text: s
               </div>
             ))}
           </div>
-          <div className="we-tools" style={{ opacity: 1 }}>
+          <div className="we-tools">
             <button type="button" className="we-mini" aria-label="위로" disabled={busy || i === 0} onClick={() => run(() => moveBlock(b.id, "up"))}>↑</button>
             <button type="button" className="we-mini" aria-label="아래로" disabled={busy || i === work.blocks.length - 1} onClick={() => run(() => moveBlock(b.id, "down"))}>↓</button>
             <button type="button" className="we-mini" aria-label="지우기" disabled={busy} onClick={() => { if (window.confirm("이 요소를 지울까요? 되돌릴 수 없어요.")) void run(() => deleteBlock(b.id)); }}>지우기</button>
@@ -493,7 +471,7 @@ function BlockList({ work, onMessage }: { work: MyWork; onMessage: (m: { text: s
       )}
 
       <div className="we-add">
-        <span>추가 ({work.blocks.length} / {BLOCK_LIMIT}){insertAt !== null && ` · ${insertAt + 1}번째 자리에 들어가요`}</span>
+        <span>추가</span>
         <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => { setAdding("text"); setDraft(""); }}>+ 글</button>
         <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => imgInput.current?.click()}>+ 이미지</button>
         <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => { setAdding("video"); setDraft(""); }}>+ 영상</button>
@@ -501,7 +479,6 @@ function BlockList({ work, onMessage }: { work: MyWork; onMessage: (m: { text: s
         <input ref={imgInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => { void upload(e.target.files?.[0], "image"); e.target.value = ""; }} />
         <input ref={docInput} type="file" accept="application/pdf" hidden onChange={(e) => { void upload(e.target.files?.[0], "document"); e.target.value = ""; }} />
       </div>
-      <p className="mp-note">이미지 JPG·PNG·WEBP 5MB 이하, PDF 10MB 이하, 영상은 유튜브 주소로 붙여요.</p>
     </div>
   );
 }
