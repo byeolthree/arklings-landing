@@ -149,7 +149,7 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
             <WorkEditor key={w.id} work={w} nickname={nickname} onClose={() => setOpenId(null)} onTogglePublic={() => togglePublic(w)} busyOuter={busy} />
           ) : (
             <div className="mp-work" key={w.id}>
-              <WorkThumb work={w} />
+              <WorkThumb />
               <div className="mp-work-main">
                 <p className="mp-work-title">{w.title}</p>
                 <div className="mp-work-meta">
@@ -187,20 +187,9 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
   );
 }
 
-// 접은 작품 카드의 대표 이미지: 작품 맨 위의 이미지·영상(영상은 유튜브가 주는 그림). 없으면 「대표 이미지」 자리만 보인다.
-function WorkThumb({ work }: { work: MyWork }) {
-  const b = work.blocks.find((x) => x.kind === "image" || x.kind === "video");
-  const src = b ? (b.kind === "image" ? b.src : b.kind === "video" ? `https://i.ytimg.com/vi/${b.youtubeId}/hqdefault.jpg` : null) : null;
-  return (
-    <div className="mp-thumb" style={src ? { position: "relative", overflow: "hidden" } : undefined}>
-      {src ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-      ) : (
-        "대표 이미지"
-      )}
-    </div>
-  );
+// 접은 작품 카드의 대표 이미지 자리: 승인받은 샘플 그대로 「대표 이미지」 회색 칸만 둔다(실제 이미지는 이 화면에 걸지 않는다).
+function WorkThumb() {
+  return <div className="mp-thumb">대표 이미지</div>;
 }
 
 function WorkEditor({
