@@ -262,6 +262,12 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
     </>
   );
 
+  // 기획안은 작품 안에서만 공개된다(D29). 그 기획안이 붙은 작품이 올라가 있으면 「공개 중」, 아니면 「공개하지 않음」.
+  const workByPlan = new Map((creatorData?.works ?? []).filter((w) => w.planId).map((w) => [w.planId as string, w]));
+  const planStatus = (p: { id: string; is_public: boolean }) => {
+    const w = workByPlan.get(p.id);
+    return w ? (w.isPublic ? "공개 중" : "공개하지 않음 (작품 작성 중)") : creatorData ? "공개하지 않음" : p.is_public ? "공개 중" : "공개하지 않음";
+  };
   const plansList = plansLoadFailed ? (
     <p role="alert" className="mp-msg err">
       기획안 목록을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
@@ -274,7 +280,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
         <li key={p.id}>
           <span>{p.title}</span>
           <span>
-            {p.is_public ? "공개 중" : "비공개"} · {formatKst(p.updated_at)} · <Link href={`/planner?plan=${p.id}`}>열기</Link>
+            {planStatus(p)} · {formatKst(p.updated_at)} · <Link href={`/planner?plan=${p.id}`}>열기</Link>
           </span>
         </li>
       ))}
@@ -294,7 +300,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
       plans={plansList}
       collab={{ newCount: newCollab, content: collabList }}
       creator={creatorData ? <CreatorProfileForm profile={creatorData.profile} /> : failed}
-      portfolio={creatorData ? <PortfolioManager works={creatorData.works} usedBytes={creatorData.usedBytes} hasProfile={Boolean(creatorData.profile)} openWorkId={workParam} /> : failed}
+      portfolio={creatorData ? <PortfolioManager works={creatorData.works} usedBytes={creatorData.usedBytes} hasProfile={Boolean(creatorData.profile)} openWorkId={workParam} plans={plansList} nickname={displayName} /> : failed}
     />
   );
 }

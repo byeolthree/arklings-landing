@@ -379,6 +379,7 @@ export function MypagePreview({
             </div>
             )}
 
+            {!(showCreator && portfolio !== undefined) && (
             <div className="mp-plans">
               <h3>내 기획안</h3>
               {plans ?? (
@@ -398,6 +399,7 @@ export function MypagePreview({
               </ul>
               )}
             </div>
+            )}
 
             {showCreator && portfolio !== undefined && portfolio}
             {showCreator && portfolio === undefined && (

@@ -4,7 +4,7 @@
 // 모든 저장은 app/actions/creators.ts의 Server Action이 하고(서버가 로그인·이메일 확인·글자 수를 다시 검사한다), 끝나면 서버에서 다시 읽는다(router.refresh).
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import {
   addTextBlock,
   addVideoBlock,
@@ -15,6 +15,7 @@ import {
   finishFileUpload,
   moveBlock,
   prepareFileUpload,
+  reorderBlocks,
   saveCreatorProfile,
   setProfilePublic,
   setWorkPublic,
@@ -91,7 +92,7 @@ export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
 }
 
 // ── 포트폴리오 등록 ─────────────────────────────────────────────────────────────────
-export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null }) {
+export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null, plans, nickname = "" }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null; plans?: ReactNode; nickname?: string }) {
   // 기획안 화면의 「포트폴리오 작성하기」로 넘어오면 그 작품의 편집 칸을 열어 둔다.
   const [openId, setOpenId] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : null);
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
@@ -123,6 +124,12 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
           + 작품 추가
         </button>
       </div>
+      {plans !== undefined && (
+        <div className="mp-plans">
+          <h3>내 기획안</h3>
+          {plans}
+        </div>
+      )}
       {!hasProfile && <p className="mp-note">작품을 포트폴리오에 올리려면 먼저 위의 「크리에이터 등록」에서 프로필을 만들어 주세요.</p>}
       {msg && (
         <p role={msg.err ? "alert" : "status"} className={`mp-msg ${msg.err ? "err" : "ok"}`}>
@@ -131,12 +138,13 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
       )}
 
       <div className="mp-works">
-        {openId === "new" && <WorkEditor key="new" work={null} onClose={() => setOpenId(null)} onCreated={(id) => setOpenId(id)} />}
+        {openId === "new" && <WorkEditor key="new" work={null} nickname={nickname} onClose={() => setOpenId(null)} onCreated={(id) => setOpenId(id)} />}
         {works.map((w) =>
           openId === w.id ? (
-            <WorkEditor key={w.id} work={w} onClose={() => setOpenId(null)} onTogglePublic={() => togglePublic(w)} busyOuter={busy} />
+            <WorkEditor key={w.id} work={w} nickname={nickname} onClose={() => setOpenId(null)} onTogglePublic={() => togglePublic(w)} busyOuter={busy} />
           ) : (
             <div className="mp-work" key={w.id}>
+              <WorkThumb work={w} />
               <div className="mp-work-main">
                 <p className="mp-work-title">{w.title}</p>
                 <div className="mp-work-meta">
@@ -179,14 +187,32 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
   );
 }
 
+// 접은 작품 카드의 대표 이미지: 작품 맨 위의 이미지·영상(영상은 유튜브가 주는 그림). 없으면 「대표 이미지」 자리만 보인다.
+function WorkThumb({ work }: { work: MyWork }) {
+  const b = work.blocks.find((x) => x.kind === "image" || x.kind === "video");
+  const src = b ? (b.kind === "image" ? b.src : b.kind === "video" ? `https://i.ytimg.com/vi/${b.youtubeId}/hqdefault.jpg` : null) : null;
+  return (
+    <div className="mp-thumb">
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }} />
+      ) : (
+        "대표 이미지"
+      )}
+    </div>
+  );
+}
+
 function WorkEditor({
   work,
+  nickname,
   onClose,
   onCreated,
   onTogglePublic,
   busyOuter,
 }: {
   work: MyWork | null;
+  nickname: string;
   onClose: () => void;
   onCreated?: (id: string) => void;
   onTogglePublic?: () => void;
@@ -202,6 +228,7 @@ function WorkEditor({
   const [errs, setErrs] = useState<Record<string, string>>({});
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pickRoles, setPickRoles] = useState((work?.roles.length ?? 0) === 0);
   const loglineChars = countLoglineChars(logline);
 
   const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
@@ -251,13 +278,29 @@ function WorkEditor({
       <div className="we-head">
         <input className="we-title" type="text" placeholder="작품 제목" aria-label="작품 제목" value={title} maxLength={TITLE_MAX} onChange={(e) => setTitle(e.target.value)} aria-invalid={errs.title ? true : undefined} />
         {errs.title && <p className="mp-msg err" role="alert">{errs.title}</p>}
-        <div className="we-pick" role="group" aria-label="역할">
-          {(Object.keys(ROLES) as Role[]).map((r) => (
-            <button key={r} type="button" className="opt" aria-pressed={roles.includes(r)} onClick={() => setRoles(toggle(roles, r))}>
+        <p className="we-by">
+          {nickname || "닉네임"}
+          {work && ` · ${new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" })}`}
+        </p>
+        <div className="we-tags">
+          {roles.map((r) => (
+            <span key={r} className="mp-tag">
               {ROLES[r]}
-            </button>
+            </span>
           ))}
+          <button type="button" className="we-mini" aria-expanded={pickRoles} aria-label="역할 고르기" onClick={() => setPickRoles(!pickRoles)}>
+            +
+          </button>
         </div>
+        {pickRoles && (
+          <div className="we-pick" role="group" aria-label="역할">
+            {(Object.keys(ROLES) as Role[]).map((r) => (
+              <button key={r} type="button" className="opt" aria-pressed={roles.includes(r)} onClick={() => setRoles(toggle(roles, r))}>
+                {ROLES[r]}
+              </button>
+            ))}
+          </div>
+        )}
         {errs.roles && <p className="mp-msg err" role="alert">{errs.roles}</p>}
         <div className="we-pick" role="group" aria-label="장르">
           {GENRES.map((g) => (
@@ -305,11 +348,16 @@ function WorkEditor({
         </p>
       )}
       <div className="we-foot">
+        {work && (
+          <Link className="btn btn-ghost" href={`/portfolio/${work.id}`} target="_blank" rel="noopener noreferrer">
+            미리 보기
+          </Link>
+        )}
         <button type="button" className="btn btn-primary" onClick={save} disabled={disabled}>
           {busy ? "저장하는 중…" : "저장"}
         </button>
         <button type="button" className="btn btn-ghost" onClick={onClose} disabled={disabled}>
-          닫기
+          취소
         </button>
         {work && (
           <button type="button" className="btn btn-ghost we-del" onClick={removeWork} disabled={disabled}>
@@ -326,6 +374,7 @@ function BlockList({ work, onMessage }: { work: MyWork; onMessage: (m: { text: s
   const router = useRouter();
   const [folded, setFolded] = useState<Record<string, boolean>>({});
   const [adding, setAdding] = useState<null | "text" | "video">(null);
+  const [insertAt, setInsertAt] = useState<number | null>(null); // 요소 사이의 「+」를 누르면 새 요소가 그 자리에 들어간다
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [edits, setEdits] = useState<Record<string, string>>({});
@@ -333,12 +382,22 @@ function BlockList({ work, onMessage }: { work: MyWork; onMessage: (m: { text: s
   const docInput = useRef<HTMLInputElement>(null);
   const full = work.blocks.length >= BLOCK_LIMIT;
 
-  async function run(fn: () => Promise<{ ok: boolean; error?: string }>, okText?: string) {
+  async function run(fn: () => Promise<{ ok: boolean; error?: string; id?: string }>, okText?: string) {
     setBusy(true);
     onMessage(null);
     const r = await fn();
+    if (!r.ok) {
+      setBusy(false);
+      return onMessage({ text: r.error ?? "처리하지 못했어요.", err: true }), false;
+    }
+    // 새 요소가 생겼고 「여기에 넣기」로 자리를 골랐다면 그 자리로 옮긴다.
+    if (insertAt !== null && r.id) {
+      const ids = work.blocks.map((b: MyBlock) => b.id);
+      ids.splice(Math.min(insertAt, ids.length), 0, r.id);
+      await reorderBlocks(work.id, ids);
+      setInsertAt(null);
+    }
     setBusy(false);
-    if (!r.ok) return onMessage({ text: r.error ?? "처리하지 못했어요.", err: true }), false;
     if (okText) onMessage({ text: okText });
     router.refresh();
     return true;
@@ -369,7 +428,14 @@ function BlockList({ work, onMessage }: { work: MyWork; onMessage: (m: { text: s
     <div className="we-body">
       {/* 작품 안에서 맨 위에 있는 이미지·영상이 그 작품의 대표다(순서는 ↑↓로 바꾼다). */}
       {work.blocks.map((b: MyBlock, i) => (
-        <div key={b.id} className="we-el">
+        <div key={b.id}>
+        <div className="we-gap">
+          <button type="button" className="we-mini" aria-label="여기에 요소 넣기" aria-pressed={insertAt === i} onClick={() => setInsertAt(insertAt === i ? null : i)}>
+            +
+          </button>
+        </div>
+        <div className="we-el">
+          <span className="we-grip" aria-hidden="true">⠿</span>
           <div className="we-main">
             {b.id === work.blocks.find((x: MyBlock) => x.kind === "image" || x.kind === "video")?.id && <span className="we-cover">대표</span>}
             {b.kind !== "text" && (
@@ -409,6 +475,7 @@ function BlockList({ work, onMessage }: { work: MyWork; onMessage: (m: { text: s
             <button type="button" className="we-mini" aria-label="지우기" disabled={busy} onClick={() => { if (window.confirm("이 요소를 지울까요? 되돌릴 수 없어요.")) void run(() => deleteBlock(b.id)); }}>지우기</button>
           </div>
         </div>
+        </div>
       ))}
 
       {adding && (
@@ -426,7 +493,7 @@ function BlockList({ work, onMessage }: { work: MyWork; onMessage: (m: { text: s
       )}
 
       <div className="we-add">
-        <span>추가 ({work.blocks.length} / {BLOCK_LIMIT})</span>
+        <span>추가 ({work.blocks.length} / {BLOCK_LIMIT}){insertAt !== null && ` · ${insertAt + 1}번째 자리에 들어가요`}</span>
         <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => { setAdding("text"); setDraft(""); }}>+ 글</button>
         <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => imgInput.current?.click()}>+ 이미지</button>
         <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => { setAdding("video"); setDraft(""); }}>+ 영상</button>
