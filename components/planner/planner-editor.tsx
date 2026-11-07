@@ -112,6 +112,8 @@ function YesNo({ idx, label, value, onPick }: { idx: number; label: string; valu
 export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, creatorProfile = "public", workId: initialWorkId = null }: Props) {
   const router = useRouter();
   const [panel, setPanel] = useState<PlanPanel | null>(initialPanel);
+  // 화면을 연 뒤에 다른 창에서 로그인했을 수 있다. 열 때의 값(loggedIn)만 믿지 않고, 서버가 로그인했다고 답하면 이 값을 맞춘다.
+  const [authed, setAuthed] = useState(loggedIn);
   const [profileState, setProfileState] = useState(creatorProfile);
   const [workId, setWorkId] = useState<string | null>(initialWorkId);
   const [showProfile, setShowProfile] = useState(false); // 프로필이 없을 때 공개 주소·역할을 받는 칸
@@ -131,6 +133,17 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, crea
 
   const loginHref = `/login?next=${encodeURIComponent(planId ? `/planner?plan=${planId}` : "/planner")}`;
   const signupHref = `/signup?next=${encodeURIComponent(planId ? `/planner?plan=${planId}` : "/planner")}`;
+
+  // 서버가 화면을 다시 읽어 새 값을 넘겨 주면(router.refresh) 로그인 상태·프로필 상태를 맞춘다.
+  useEffect(() => {
+    if (loggedIn) setAuthed(true);
+  }, [loggedIn]);
+  useEffect(() => {
+    setProfileState(creatorProfile);
+  }, [creatorProfile]);
+  useEffect(() => {
+    setWorkId(initialWorkId);
+  }, [initialWorkId]);
 
   const draftRef = useRef(draft);
   useEffect(() => {
@@ -208,7 +221,6 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, crea
   }
 
   async function onSave() {
-    if (!loggedIn) return needLogin("저장");
     const r = await run("save", () => savePlan(planId, draft));
     if (!r) return;
     if (!r.ok) {
@@ -219,6 +231,13 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, crea
     setLastSaved(draft);
     clearLocal(localKey(planId));
     if (r.panel) setPanel(r.panel);
+    if (!authed) {
+      // 화면을 연 뒤에 로그인한 경우: 이름·프로필 상태를 새로 읽으려고 이 기획안 주소로 다시 연다(저장된 내용이 그대로 열린다).
+      setAuthed(true);
+      clearLocal(LOCAL_BASE);
+      router.replace(`/planner?plan=${r.planId}`);
+      return;
+    }
     if (!planId) {
       clearLocal(LOCAL_BASE);
       // 화면을 다시 불러오지 않고 주소만 바꿔 둔다(쓰던 내용과 되돌리기 기록이 그대로 남는다).
@@ -327,12 +346,16 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, crea
   }
 
   async function onPdf() {
-    if (!loggedIn) return needLogin("내려받기");
     const r = await run("pdf", () => downloadPlanPdf(draft));
     if (!r) return;
     if (!r.ok) {
       if (r.needLogin) return needLogin("내려받기");
       return setMsg({ text: r.error, err: true });
+    }
+    if (!authed) {
+      setAuthed(true);
+      setLoginPrompt(null);
+      router.refresh();
     }
     const bytes = Uint8Array.from(atob(r.base64), (c) => c.charCodeAt(0));
     const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
@@ -347,12 +370,16 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, crea
   }
 
   async function onMail() {
-    if (!loggedIn) return needLogin("메일 받기");
     const r = await run("mail", () => mailPlanPdf(draft));
     if (!r) return;
     if (!r.ok) {
       if (r.needLogin) return needLogin("메일 받기");
       return setMsg({ text: r.error, err: true });
+    }
+    if (!authed) {
+      setAuthed(true);
+      setLoginPrompt(null);
+      router.refresh();
     }
     setMsg({ text: `${r.to} 로 PDF를 보냈어요. 안 보이면 스팸함도 확인해 주세요.` });
   }
@@ -530,7 +557,7 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, crea
                 </p>
                 <p className="save-note">
                   쓰는 내용은 이 기기에 자동으로 보관돼요.
-                  {loggedIn ? (dirty ? " 아직 서버에 저장하지 않은 내용이 있어요." : "") : " 서버에 저장하려면 로그인이 필요해요."}
+                  {authed ? (dirty ? " 아직 서버에 저장하지 않은 내용이 있어요." : "") : " 서버에 저장하려면 로그인이 필요해요."}
                 </p>
               </div>
               <div className="foot-actions">
@@ -547,7 +574,7 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, crea
             </div>
           </div>
 
-          {loginPrompt && !loggedIn && (
+          {loginPrompt && !authed && (
             <div className="notice login" role="alert">
               <b>저장하려면 로그인이 필요합니다.</b>
               <p style={{ marginTop: 4 }}>
@@ -564,7 +591,7 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, crea
             </div>
           )}
 
-          {loggedIn && (
+          {authed && (
             <section className="panel" aria-labelledby="pl-hist-h">
               <h2 id="pl-hist-h">{plan ? "임시저장 이력" : "내 기획안"}</h2>
               {!plan ? (
