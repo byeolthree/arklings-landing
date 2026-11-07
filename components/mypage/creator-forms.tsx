@@ -192,10 +192,10 @@ function WorkThumb({ work }: { work: MyWork }) {
   const b = work.blocks.find((x) => x.kind === "image" || x.kind === "video");
   const src = b ? (b.kind === "image" ? b.src : b.kind === "video" ? `https://i.ytimg.com/vi/${b.youtubeId}/hqdefault.jpg` : null) : null;
   return (
-    <div className="mp-thumb">
+    <div className="mp-thumb" style={src ? { position: "relative", overflow: "hidden" } : undefined}>
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "inherit" }} />
+        <img src={src} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
       ) : (
         "대표 이미지"
       )}
