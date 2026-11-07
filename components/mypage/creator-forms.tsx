@@ -198,6 +198,34 @@ function WorkThumb() {
   return <div className="mp-thumb">대표 이미지</div>;
 }
 
+type SlotKind = "text" | "image" | "video" | "doc";
+type Slot = { id: string; kind: SlotKind; text: string; url: string; file: File | null };
+let slotSeq = 0;
+const newSlot = (kind: SlotKind): Slot => ({ id: `s${++slotSeq}`, kind, text: "", url: "", file: null });
+
+// 새로 만든 작품에 채운 칸을 순서대로 넣는다. 실패하면 이유 한 줄을 돌려준다(성공이면 null).
+async function addSlots(workId: string, slots: Slot[]): Promise<string | null> {
+  for (const sl of slots) {
+    if (sl.kind === "text" && sl.text.trim()) {
+      const r = await addTextBlock(workId, sl.text);
+      if (!r.ok) return `글을 넣지 못했어요. ${r.error}`;
+    } else if (sl.kind === "video" && sl.url.trim()) {
+      const r = await addVideoBlock(workId, sl.url);
+      if (!r.ok) return `영상을 넣지 못했어요. ${r.error}`;
+    } else if ((sl.kind === "image" || sl.kind === "doc") && sl.file) {
+      const kind = sl.kind === "image" ? "image" : "document";
+      if (kindOfMime(sl.file.type) !== kind) return kind === "image" ? "JPG, PNG, WEBP 이미지만 올릴 수 있어요." : "PDF 파일만 올릴 수 있어요.";
+      const slot = await prepareFileUpload(workId, { kind, type: sl.file.type, size: sl.file.size });
+      if (!slot.ok) return slot.error;
+      const up = await uploadToSlot(slot.path, slot.token, sl.file);
+      if (!up.ok) return up.error;
+      const fin = await finishFileUpload(workId, { path: slot.path, kind, name: sl.file.name });
+      if (!fin.ok) return fin.error;
+    }
+  }
+  return null;
+}
+
 function WorkEditor({
   work,
   nickname,
@@ -224,6 +252,16 @@ function WorkEditor({
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const [pickRoles, setPickRoles] = useState((work?.roles.length ?? 0) === 0);
+  // 새 작품: 승인 샘플처럼 글·이미지·영상·문서 칸이 처음부터 있고 순서를 바꾸거나 지울 수 있다. 「저장」을 누르면 작품을 만든 뒤 채운 칸을 이 순서대로 넣는다.
+  const [slots, setSlots] = useState<Slot[]>(() => (work ? [] : (["text", "image", "video", "doc"] as SlotKind[]).map(newSlot)));
+  const moveSlot = (i: number, d: -1 | 1) => setSlots((cur) => {
+    const next = [...cur];
+    const j = i + d;
+    if (j < 0 || j >= next.length) return cur;
+    [next[i], next[j]] = [next[j], next[i]];
+    return next;
+  });
+  const patchSlot = (id: string, patch: Partial<Slot>) => setSlots((cur) => cur.map((x) => (x.id === id ? { ...x, ...patch } : x)));
 
   const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
 
@@ -238,9 +276,16 @@ function WorkEditor({
       setErrs(r.fieldErrors ?? {});
       return setMsg({ text: r.error, err: true });
     }
+    if (!work) {
+      // 채운 칸을 위에서부터 차례로 넣는다. 하나라도 안 되면 그 이유를 보여 주고, 만든 작품은 남아서 이어서 고칠 수 있다.
+      const failed = await addSlots(r.id, slots);
+      router.refresh();
+      onCreated?.(r.id);
+      if (failed) return setMsg({ text: `작품은 저장했어요. ${failed}`, err: true });
+      return setMsg({ text: "저장했어요." });
+    }
     setMsg({ text: "저장했어요." });
     router.refresh();
-    if (!work) onCreated?.(r.id);
   }
 
   async function removeWork() {
@@ -316,12 +361,44 @@ function WorkEditor({
       {work ? (
         <BlockList work={work} onMessage={setMsg} />
       ) : (
-        // 새 작품도 승인 샘플처럼 「추가」 줄이 처음부터 보인다. 요소는 작품이 저장돼야 들어가므로, 누르면 먼저 작품을 저장하고(제목이 비어 있으면 안내) 저장 뒤 같은 칸에서 요소를 넣는다.
         <div className="we-body">
+          {slots.map((sl, i) => (
+            <div key={sl.id}>
+              <div className="we-gap">
+                <button type="button" className="we-mini" aria-label="여기에 요소 넣기" onClick={() => setSlots((cur) => [...cur.slice(0, i), newSlot("text"), ...cur.slice(i)])}>
+                  +
+                </button>
+              </div>
+              <div className="we-el" tabIndex={0}>
+                <span className="we-grip" aria-hidden="true">⠿</span>
+                <div className="we-main">
+                  {sl.kind === "text" && <textarea className="we-text" rows={3} placeholder="〈글〉" aria-label="글" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
+                  {sl.kind === "image" && (
+                    <label className="we-line">
+                      이미지 (JPG·PNG·WEBP){" "}
+                      <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="이미지 파일" onChange={(e) => patchSlot(sl.id, { file: e.target.files?.[0] ?? null })} />
+                    </label>
+                  )}
+                  {sl.kind === "video" && <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={sl.url} onChange={(e) => patchSlot(sl.id, { url: e.target.value })} style={{ flex: "1 1 100%" }} />}
+                  {sl.kind === "doc" && (
+                    <label className="we-line">
+                      문서 (PDF){" "}
+                      <input type="file" accept="application/pdf" aria-label="문서 파일" onChange={(e) => patchSlot(sl.id, { file: e.target.files?.[0] ?? null })} />
+                    </label>
+                  )}
+                </div>
+                <div className="we-tools">
+                  <button type="button" className="we-mini" aria-label="위로" disabled={i === 0} onClick={() => moveSlot(i, -1)}>↑</button>
+                  <button type="button" className="we-mini" aria-label="아래로" disabled={i === slots.length - 1} onClick={() => moveSlot(i, 1)}>↓</button>
+                  <button type="button" className="we-mini" aria-label="지우기" onClick={() => setSlots((cur) => cur.filter((x) => x.id !== sl.id))}>지우기</button>
+                </div>
+              </div>
+            </div>
+          ))}
           <div className="we-add">
             <span>추가</span>
-            {["글", "이미지", "영상", "문서"].map((l) => (
-              <button key={l} type="button" className="btn btn-ghost" disabled={disabled} onClick={save}>
+            {([["text", "글"], ["image", "이미지"], ["video", "영상"], ["doc", "문서"]] as [SlotKind, string][]).map(([k, l]) => (
+              <button key={k} type="button" className="btn btn-ghost" onClick={() => setSlots((cur) => [...cur, newSlot(k)])}>
                 + {l}
               </button>
             ))}
