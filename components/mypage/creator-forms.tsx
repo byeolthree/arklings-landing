@@ -94,11 +94,18 @@ export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
 export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null, plans, nickname = "" }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null; plans?: ReactNode; nickname?: string }) {
   // 편집 칸은 한 번에 하나만 펼쳐서 화면이 끝없이 길어지지 않게 한다. 처음에는 기획안에서 넘어온 작품(없으면 맨 위 작품)이 펼쳐져 있고, 나머지는 카드로 접혀 있다.
   const [openWork, setOpenWork] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : (works[0]?.id ?? null));
+  // 작품이 하나도 없으면 「포트폴리오 등록」답게 새 작품 편집 칸이 바로 열려 있다(목록이 아니라 등록 화면).
   const [adding, setAdding] = useState(false);
-  const openId = adding ? "new" : openWork;
+  const [newClosed, setNewClosed] = useState(false);
+  const showNew = adding || (works.length === 0 && !newClosed);
+  const openId = showNew ? "new" : openWork;
   const setOpenId = (id: string | null) => {
     setAdding(id === "new");
-    if (id !== "new") setOpenWork(id);
+    if (id === "new") setNewClosed(false);
+    else {
+      setOpenWork(id);
+      setNewClosed(true);
+    }
   };
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -125,7 +132,7 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
             파일 {mb(usedBytes)} / {mb(QUOTA_BYTES)}
           </span>
         </div>
-        <button type="button" className="btn btn-primary" onClick={() => setOpenId("new")} disabled={works.length >= WORK_LIMIT || openId === "new"}>
+        <button type="button" className="btn btn-primary" onClick={() => setOpenId("new")} disabled={works.length >= WORK_LIMIT || showNew}>
           작품 추가
         </button>
       </div>
@@ -143,7 +150,7 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
       )}
 
       <div className="mp-works">
-        {openId === "new" && <WorkEditor key="new" work={null} nickname={nickname} onClose={() => setOpenId(null)} onCreated={(id) => setOpenId(id)} />}
+        {showNew && <WorkEditor key="new" work={null} nickname={nickname} onClose={() => setOpenId(null)} onCreated={(id) => setOpenId(id)} />}
         {works.map((w) =>
           openId === w.id ? (
             <WorkEditor key={w.id} work={w} nickname={nickname} onClose={() => setOpenId(null)} onTogglePublic={() => togglePublic(w)} busyOuter={busy} />
@@ -182,8 +189,7 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
           ),
         )}
       </div>
-      {works.length === 0 && openId !== "new" && <p className="mp-note">아직 작품이 없어요. 「+ 작품 추가」로 첫 작품을 만들어 보세요.</p>}
-    </>
+          </>
   );
 }
 
