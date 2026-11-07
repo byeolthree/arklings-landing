@@ -4,7 +4,7 @@
 // 모든 저장은 app/actions/creators.ts의 Server Action이 하고(서버가 로그인·이메일 확인·글자 수를 다시 검사한다), 끝나면 서버에서 다시 읽는다(router.refresh).
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState } from "react";
 import {
   addTextBlock,
   addVideoBlock,
@@ -91,7 +91,7 @@ export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
 }
 
 // ── 포트폴리오 등록 ─────────────────────────────────────────────────────────────────
-export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null, plans, nickname = "" }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null; plans?: ReactNode; nickname?: string }) {
+export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null, nickname = "" }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null; nickname?: string }) {
   // 편집 칸은 한 번에 하나만 펼쳐서 화면이 끝없이 길어지지 않게 한다. 처음에는 기획안에서 넘어온 작품(없으면 맨 위 작품)이 펼쳐져 있고, 나머지는 카드로 접혀 있다.
   const [openWork, setOpenWork] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : (works[0]?.id ?? null));
   // 작품이 하나도 없으면 「포트폴리오 등록」답게 새 작품 편집 칸이 바로 열려 있다(목록이 아니라 등록 화면).
@@ -136,12 +136,6 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
           작품 추가
         </button>
       </div>
-      {plans !== undefined && (
-        <div className="mp-plans">
-          <h3>내 기획안</h3>
-          {plans}
-        </div>
-      )}
       {!hasProfile && <p className="mp-note">작품을 포트폴리오에 올리려면 먼저 위의 「크리에이터 등록」에서 프로필을 만들어 주세요.</p>}
       {msg && (
         <p role={msg.err ? "alert" : "status"} className={`mp-msg ${msg.err ? "err" : "ok"}`}>

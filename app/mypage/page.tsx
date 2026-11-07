@@ -16,7 +16,6 @@ import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/submit-button";
 import { createAuthClient } from "@/lib/supabase/server";
 import { OAUTH_PROVIDERS, PROVIDER_LABEL } from "@/lib/providers";
-import { formatKst } from "@/lib/time";
 
 export const metadata: Metadata = { title: "마이페이지", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -49,24 +48,6 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
     else displayName = data?.display_name ?? "";
   } catch {
     profileLoadFailed = true;
-  }
-
-  // 내 기획안 목록(내 것만). 불러오지 못해도 마이페이지의 다른 부분은 그대로 보여 준다.
-  type PlanRow = { id: string; title: string; is_public: boolean; updated_at: string };
-  let plans: PlanRow[] = [];
-  let plansLoadFailed = false;
-  try {
-    const supabase = await createAuthClient();
-    const { data, error } = await supabase
-      .from("plans")
-      .select("id, title, is_public, updated_at")
-      .eq("owner_id", user.id)
-      .order("updated_at", { ascending: false })
-      .limit(30);
-    if (error) plansLoadFailed = true;
-    else plans = (data ?? []) as PlanRow[];
-  } catch {
-    plansLoadFailed = true;
   }
 
   // 내 크리에이터 프로필·작품(비공개 포함, 본인 권한으로 읽는다). 못 읽으면 그 구역만 안내하고 나머지는 그대로 보여 준다.
@@ -262,31 +243,6 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
     </>
   );
 
-  // 기획안은 작품 안에서만 공개된다(D29). 그 기획안이 붙은 작품이 올라가 있으면 「공개 중」, 아니면 「공개하지 않음」.
-  const workByPlan = new Map((creatorData?.works ?? []).filter((w) => w.planId).map((w) => [w.planId as string, w]));
-  const planStatus = (p: { id: string; is_public: boolean }) => {
-    const w = workByPlan.get(p.id);
-    return w ? (w.isPublic ? "공개 중" : "공개하지 않음") : creatorData ? "공개하지 않음" : p.is_public ? "공개 중" : "공개하지 않음";
-  };
-  const plansList = plansLoadFailed ? (
-    <p role="alert" className="mp-msg err">
-      기획안 목록을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
-    </p>
-  ) : plans.length === 0 ? (
-    <p className="mp-note">아직 저장한 기획안이 없어요. 기획안 화면에서 「저장」을 누르면 여기에 나타나요.</p>
-  ) : (
-    <ul>
-      {plans.map((p) => (
-        <li key={p.id}>
-          <span>{p.title}</span>
-          <span>
-            {planStatus(p)} · {formatKst(p.updated_at)} · <Link href={`/planner?plan=${p.id}`}>열기</Link>
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
-
   const failed = (
     <p role="alert" className="mp-msg err">
       불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
@@ -297,7 +253,6 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
       profile="none"
       pending={false}
       basic={basic}
-      plans={plansList}
       collab={{ newCount: newCollab, content: collabList }}
       creator={creatorData ? <CreatorProfileForm profile={creatorData.profile} /> : failed}
       portfolio={creatorData ? <PortfolioManager works={creatorData.works} usedBytes={creatorData.usedBytes} hasProfile={Boolean(creatorData.profile)} openWorkId={workParam} nickname={displayName} /> : failed}
