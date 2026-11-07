@@ -106,7 +106,9 @@ export function validateCreatorProfile(input: ProfileInput):
   const handleError = validateHandle(handle);
   if (handleError) errors.handle = handleError;
 
-  const roles = Array.from(new Set((Array.isArray(input.roles) ? input.roles : []).filter(isRole)));
+  // 프로필 역할은 순서가 없다. 누른 순서가 남지 않게 항상 양식 순서(ROLES)로 정렬해 저장한다.
+  const picked = new Set((Array.isArray(input.roles) ? input.roles : []).filter(isRole));
+  const roles = (Object.keys(ROLES) as Role[]).filter((r) => picked.has(r));
   if (roles.length === 0) errors.roles = "역할을 하나 이상 골라 주세요.";
 
   const about = String(input.about ?? "").replace(/\r\n/g, "\n").trim();

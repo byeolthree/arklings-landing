@@ -14,6 +14,8 @@ export function toProfileData(p: CreatorProfile): CreatorProfileData {
 }
 
 export function toCreatorCard(c: CreatorListItem): CreatorCard {
+  // 영상 제작·아트디렉터이고 가장 최근 작품의 대표(맨 위 이미지·영상)가 있으면 카드 메인에 건다. 아니면 로그라인.
+  const media = Boolean(c.cover);
   return {
     handle: c.handle,
     name: c.name,
@@ -24,8 +26,8 @@ export function toCreatorCard(c: CreatorListItem): CreatorCard {
     genres: c.genres,
     forms: c.forms,
     latest: c.latest ?? { title: "", logline: "" },
-    hero: c.hero,
-    heroSrc: c.heroSrc,
-    main: "logline", // 대표 이미지·영상을 카드 메인으로 걸지는 아직 정해지지 않았다
+    hero: media ? "image" : c.hero,
+    heroSrc: media ? c.cover : c.heroSrc,
+    main: media ? "media" : "logline",
   };
 }

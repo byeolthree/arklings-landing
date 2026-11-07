@@ -26,6 +26,7 @@ export type CreatorListItem = {
   latest: { title: string; logline: string; genres: string[] } | null; // 가장 최근에 올린 작품(작품이 없으면 null)
   hero?: HeroKind;
   heroSrc?: string; // 대표 이미지·영상의 임시 주소
+  cover?: string; // 가장 최근 공개 작품의 대표(작품 안 맨 위 이미지·영상)의 그림 주소. 영상 제작·아트디렉터 역할이 있는 사람만 채워진다
 };
 
 export type CreatorProfile = {
@@ -170,7 +171,41 @@ export async function listCreators(filter: CreatorFilterInput, page: number): Pr
   }
   const rows = (data ?? []) as unknown as CreatorRow[];
   const heroUrls = await signPublicFiles(rows.map((r) => r.hero_path));
-  return { items: rows.map((r) => toListItem(r, heroUrls)), total: count ?? 0 };
+  // 대표 이미지·영상을 카드 맨 위에 거는 것은 역할에 영상 제작이나 아트디렉터가 있는 사람만이다(별뜨리님 규칙).
+  const covers = await loadCovers(rows.filter((r) => asRoles(r.roles).some((x) => x === "video" || x === "art_director")).map((r) => r.public_handle));
+  return { items: rows.map((r) => ({ ...toListItem(r, heroUrls), cover: covers.get(r.public_handle) })), total: count ?? 0 };
+}
+
+// 그 크리에이터들의 가장 최근 공개 작품에서 맨 위에 있는 이미지·영상을 찾아 그림 주소로 돌려준다(없으면 그 사람은 빠진다).
+// 영상은 유튜브라서 유튜브가 주는 대표 그림을 쓴다.
+async function loadCovers(handles: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (handles.length === 0) return out;
+  const sb = getSupabase();
+  const works = await sb.from("creator_works_public").select("id, author_handle").in("author_handle", handles).order("published_at", { ascending: false }).order("id", { ascending: false });
+  if (works.error) return out;
+  const latest = new Map<string, string>(); // handle → 가장 최근 작품 번호
+  for (const w of (works.data ?? []) as { id: string; author_handle: string }[]) if (!latest.has(w.author_handle)) latest.set(w.author_handle, w.id);
+  const ids = Array.from(latest.values());
+  if (ids.length === 0) return out;
+  const blocks = await sb
+    .from("creator_blocks_public")
+    .select("work_id, kind, file_path, youtube_id, position")
+    .in("work_id", ids)
+    .in("kind", ["image", "video"])
+    .order("position", { ascending: true })
+    .order("id", { ascending: true });
+  if (blocks.error) return out;
+  const firstByWork = new Map<string, { kind: string; file_path: string | null; youtube_id: string | null }>();
+  for (const b of (blocks.data ?? []) as { work_id: string; kind: string; file_path: string | null; youtube_id: string | null }[]) if (!firstByWork.has(b.work_id)) firstByWork.set(b.work_id, b);
+  const urls = await signPublicFiles(Array.from(firstByWork.values()).map((b) => b.file_path));
+  for (const [handle, workId] of latest) {
+    const b = firstByWork.get(workId);
+    if (!b) continue;
+    const src = b.kind === "video" ? (b.youtube_id ? `https://i.ytimg.com/vi/${b.youtube_id}/hqdefault.jpg` : null) : b.file_path ? (urls.get(b.file_path) ?? null) : null;
+    if (src) out.set(handle, src);
+  }
+  return out;
 }
 
 // 공개 프로필 하나. 없거나 비공개면 null(화면은 404로 보여 준다. 본인 미리 보기는 화면이 따로 처리한다).

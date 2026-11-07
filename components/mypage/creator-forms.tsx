@@ -367,9 +367,11 @@ function BlockList({ work, onMessage }: { work: MyWork; onMessage: (m: { text: s
 
   return (
     <div className="we-body">
+      {/* 작품 안에서 맨 위에 있는 이미지·영상이 그 작품의 대표다(순서는 ↑↓로 바꾼다). */}
       {work.blocks.map((b: MyBlock, i) => (
         <div key={b.id} className="we-el">
           <div className="we-main">
+            {b.id === work.blocks.find((x: MyBlock) => x.kind === "image" || x.kind === "video")?.id && <span className="we-cover">대표</span>}
             {b.kind !== "text" && (
               <button type="button" className="we-fold" aria-expanded={!folded[b.id]} onClick={() => setFolded({ ...folded, [b.id]: !folded[b.id] })}>
                 {folded[b.id] ? "▸ 펼치기" : "▾ 접기"}
