@@ -313,7 +313,21 @@ function WorkEditor({
         {errs.logline && <p className="mp-msg err" role="alert">{errs.logline}</p>}
       </div>
 
-      {work ? <BlockList work={work} onMessage={setMsg} /> : <p className="mp-note">작품을 저장하면 글·이미지·영상·문서를 넣을 수 있어요.</p>}
+      {work ? (
+        <BlockList work={work} onMessage={setMsg} />
+      ) : (
+        // 새 작품도 승인 샘플처럼 「추가」 줄이 처음부터 보인다. 요소는 작품이 저장돼야 들어가므로, 누르면 먼저 작품을 저장하고(제목이 비어 있으면 안내) 저장 뒤 같은 칸에서 요소를 넣는다.
+        <div className="we-body">
+          <div className="we-add">
+            <span>추가</span>
+            {["글", "이미지", "영상", "문서"].map((l) => (
+              <button key={l} type="button" className="btn btn-ghost" disabled={disabled} onClick={save}>
+                + {l}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {msg && (
         <p role={msg.err ? "alert" : "status"} className={`mp-msg ${msg.err ? "err" : "ok"}`}>
