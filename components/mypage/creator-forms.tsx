@@ -76,7 +76,7 @@ export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
           key={profile ? `${profile.handle}-${profile.roles.join()}-${profile.bio}-${profile.channels.length}-${profile.openToCollab}-${profile.isPublic}` : "new"}
           mode={profile ? "edit" : "create"}
           context="mypage"
-          initial={profile ?? undefined}
+          initial={profile ? { ...profile, about: profile.bio } : undefined}
           onSubmit={onSubmit}
           checkHandle={check}
         />
