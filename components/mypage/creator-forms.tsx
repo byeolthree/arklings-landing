@@ -91,8 +91,9 @@ export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
 }
 
 // ── 포트폴리오 등록 ─────────────────────────────────────────────────────────────────
-export function PortfolioManager({ works, usedBytes, hasProfile }: { works: MyWork[]; usedBytes: number; hasProfile: boolean }) {
-  const [openId, setOpenId] = useState<string | null>(null);
+export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null }) {
+  // 기획안 화면의 「포트폴리오 작성하기」로 넘어오면 그 작품의 편집 칸을 열어 둔다.
+  const [openId, setOpenId] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : null);
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const router = useRouter();

@@ -61,7 +61,7 @@
 
 **기획안 화면 구조 변경 (2026-11-07, 별뜨리님 지시)** — 처리 함수 이름·인자·반환 모양은 그대로이고, 화면 쪽만 이렇게 바뀐다.
 - 「임시저장」이라는 말을 없애고 단추·안내·이력 이름을 「저장」으로 쓴다(`savePlan` 이름은 그대로). 서버 오류 문구(`app/actions/plans.ts`의 「임시저장은 … 100건까지」)는 서버 파일이라 별뜨리님 승인 전에는 그대로 둔다.
-- 세 단계: **01 로그라인**(쓰기·「저장」·「저장 이력」은 이 단계 위쪽), **02 모아 보기**(저장한 내용 보기, 「PDF 내려받기」「메일로 받기」, 「포트폴리오에 올리기」·「내리기」), **03 편집**(내용이 정해지기 전까지 탭만 있고 눌리지 않음). 「저장」을 누르면 02로 넘어간다. PDF·메일·올리기는 01에서 없앤다.
+- 세 단계: **01 로그라인**(쓰기·「저장」·「저장 이력」은 이 단계 위쪽), **02 모아 보기**(저장한 내용 보기, 「PDF 내려받기」「메일로 받기」, 「포트폴리오 작성하기」), **03 편집**(내용이 정해지기 전까지 탭만 있고 눌리지 않음). 「저장」을 누르면 02로 넘어간다. PDF·메일·올리기는 01에서 없앤다.
 - 로그인 여부는 화면이 열릴 때의 `loggedIn` 값으로 먼저 막지 않는다. 저장·PDF·메일은 항상 처리 함수를 부르고, 결과가 `needLogin`일 때만 안내를 띄운다. 성공하면 화면의 로그인 상태를 맞춘다. 로그인하지 않은 채로 「저장」을 누르면 이 브라우저(`localStorage`)에만 저장하고 「로그인하지 않아 이 브라우저에만 임시로 저장돼요」를 띄운 뒤 02로 넘어간다.
 - `PlannerEditor` props 추가: `initialStep`(1 또는 2, 주소 `?step=`; 기획안 번호가 없거나 내 기획안이 아니면 1). 02 주소는 `/planner?plan=<id>&step=2`.
 - 7번(제안 문장): 「아클링스 제안 문장으로 되돌리기」「제안 문장을 가져와서 고치기」 두 단추를 없애고, 글칸 아래에 「제안 문장」 카드와 「이 문장으로 바꾸기」(바꾸기 전 글은 되돌리기·「바꾸기 전 내 글 되살리기」로 남음)를 둔다. 평가(LLM 호출) 자리는 코드에 주석으로만 비워 두고 화면에는 단추를 두지 않는다.
@@ -109,7 +109,7 @@
 | 작품 공유 주소 | `/portfolio/<작품 번호>` | 아니요 | 없음(읽기만: `getWork(id)`) | 없음 | 위 작품 상세. 공개가 아니면 404 | 「프로필 보기」 `/creators/<handle>` (D29) |
 | 마이페이지 · 크리에이터 등록 구역 | `/mypage` 안 | 예 | `saveCreatorProfile`, `setProfilePublic`, `checkHandle` | `handle`, `roles`(여러 개), `bio`(소개 글 500자, 선택), `channels`(이름 20자·https 주소, 5개까지), `openToCollab`, `isPublic` | 내 프로필·채널(로그인한 본인 연결로 읽음). 결과 `{ok:true, created, handle}` / `{ok:false, error, fieldErrors?}` | 내 프로필 주소 `/creators/<handle>` |
 | 마이페이지 · 포트폴리오 등록 구역 | `/mypage` 안 | 예 | `createWork`, `updateWork`, `deleteWork`, `setWorkPublic`, `addTextBlock`, `updateTextBlock`, `addVideoBlock`, `prepareFileUpload`→(브라우저가 보관함에 직접 올림)→`finishFileUpload`, `moveBlock`, `reorderBlocks`, `deleteBlock` | 작품: `title`(60자), `roles`, `genres`, `kind`, `form`, `logline`(띄어쓰기 뺀 200자), `planId`. 요소: 글 5000자, 유튜브 주소, 이미지 JPG·PNG·WEBP 5MB, PDF 10MB, 사람당 합계 20MB, 작품 12개, 작품당 요소 20개 | 내 작품·요소(본인 연결로 읽음), 용량·개수 | 작품 창은 위와 같음 |
-| 기획안 화면 · 포트폴리오에 올리기 | `/planner` | 예 | `publishPlanAsWork(planId, draft, {profile?:{handle,roles}, profilePublic?})`(프로필이 없으면 공개 주소·역할로 만든 뒤 그 기획안이 붙은 작품 하나를 만들어 올림), `unpublishPlanWork(planId)`(작품과 기획안을 함께 내림), `checkHandle` | 프로필 없음이면 공개 주소·역할 칸, 있으면 「프로필도 공개할까요?」(비공개일 때만, D13) | `PlannerEditor` props `creatorProfile`(none·private·public), `workId` | 「포트폴리오에서 보기」 `/portfolio/<작품 번호>` |
+| 기획안 화면 · 포트폴리오 작성하기 | `/planner?plan=<id>&step=2` | 예 | `startWorkFromPlan(planId, draft)`(2026-11-07 별뜨리님 지시: 기획안 화면에서 바로 올리지 않는다. 그 기획안이 붙은 작품을 비공개로 만들고(제목·로그라인은 기획안에서, 역할은 「대본」을 먼저 골라 둠) 마이페이지 포트폴리오 등록으로 넘어가 마저 쓴 뒤 거기서 올린다. 이미 있으면 그 작품 번호만 돌려줌. 프로필이 없으면 `needProfile`) | 없음(입력은 마이페이지에서) | `PlannerEditor` props `workId`, `workPublic`(이전의 `creatorProfile`은 없앰) | 「포트폴리오 작성하기」→`/mypage?work=<작품 번호>#mp-portfolio`(그 작품 편집 칸이 열림), 프로필이 없으면 `/mypage?msg=need_profile#mp-creator`, 올라가 있으면 「포트폴리오에서 보기」 `/portfolio/<작품 번호>`. 이전의 `publishPlanAsWork`·`unpublishPlanWork`는 없앰(내리기는 마이페이지 작품에서) |
 | 옛 포트폴리오 목록 | `/portfolio` | 아니요 | 없음 | 없음 | 없음 | `/creators`로 이동(D29로 작품 단위가 됨) |
 
 처리 함수 결과 모양: `{ ok: true, …값 } | { ok: false, error, needLogin?, fieldErrors? }` (기획안 동작과 같은 모양).

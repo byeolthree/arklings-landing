@@ -29,12 +29,15 @@ const MESSAGES: Record<string, { text: string; ok?: boolean }> = {
   link_disabled: { text: "로그인 방법 추가·해제는 지금 준비 중이에요. 잠시 뒤에 다시 시도해 주세요." },
   link_none: { text: "이어 줄 요청이 없거나 시간이 지났어요. 카카오 화면에서 다시 시도해 주세요." },
   unlink_failed: { text: "로그인 방법을 해제하지 못했어요. 잠시 뒤에 다시 시도해 주세요." },
+  need_profile: { text: "포트폴리오를 작성하려면 먼저 아래 「크리에이터 등록」에서 프로필을 만들어 주세요. 만든 뒤 기획안 화면에서 「포트폴리오 작성하기」를 다시 눌러 주세요." },
   unlink_last: { text: "로그인 방법이 하나뿐이라 해제할 수 없어요. 다른 방법을 먼저 추가해 주세요." },
 };
 
 export default async function MyPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const user = await requireUser("/mypage");
-  const msgKey = (await searchParams).msg;
+  const sp = await searchParams;
+  const msgKey = sp.msg;
+  const workParam = typeof sp.work === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(sp.work) ? sp.work : null;
   const banner = typeof msgKey === "string" ? MESSAGES[msgKey] : undefined;
 
   let displayName = "";
@@ -291,7 +294,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
       plans={plansList}
       collab={{ newCount: newCollab, content: collabList }}
       creator={creatorData ? <CreatorProfileForm profile={creatorData.profile} /> : failed}
-      portfolio={creatorData ? <PortfolioManager works={creatorData.works} usedBytes={creatorData.usedBytes} hasProfile={Boolean(creatorData.profile)} /> : failed}
+      portfolio={creatorData ? <PortfolioManager works={creatorData.works} usedBytes={creatorData.usedBytes} hasProfile={Boolean(creatorData.profile)} openWorkId={workParam} /> : failed}
     />
   );
 }

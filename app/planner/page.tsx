@@ -38,20 +38,20 @@ export default async function PlannerPage({ searchParams }: { searchParams: Sear
   const panel = planParam ? await loadPlanPanel(planParam, user.id) : null;
   if (planParam && !panel) notFound();
 
-  // 내 크리에이터 프로필 상태와, 이 기획안이 붙은 작품(포트폴리오에서 보기 링크용)
-  let creatorProfile: "none" | "private" | "public" = "none";
+  // 이 기획안이 붙은 작품(있으면 「이어서 작성하기」, 올라가 있으면 「포트폴리오에서 보기」)
   let workId: string | null = null;
-  try {
-    const sb = await createAuthClient();
-    const { data: cp } = await sb.from("creator_profiles").select("is_public").eq("user_id", user.id).maybeSingle();
-    if (cp) creatorProfile = (cp as { is_public: boolean }).is_public ? "public" : "private";
-    if (panel) {
-      const { data: w } = await sb.from("creator_works").select("id").eq("owner_id", user.id).eq("plan_id", panel.plan.id).maybeSingle();
-      workId = (w as { id: string } | null)?.id ?? null;
+  let workPublic = false;
+  if (panel) {
+    try {
+      const sb = await createAuthClient();
+      const { data: w } = await sb.from("creator_works").select("id, is_public").eq("owner_id", user.id).eq("plan_id", panel.plan.id).maybeSingle();
+      const row = w as { id: string; is_public: boolean } | null;
+      workId = row?.id ?? null;
+      workPublic = row?.is_public ?? false;
+    } catch {
+      // 못 읽으면 작품이 없는 것처럼 보인다(누르면 서버가 다시 확인한다)
     }
-  } catch {
-    // 읽지 못하면 프로필이 없는 것처럼 보여 준다(올릴 때 서버가 다시 확인한다)
   }
 
-  return <PlannerEditor key={planParam ?? "new"} loggedIn displayName={displayName} panel={panel} creatorProfile={creatorProfile} workId={workId} initialStep={panel && stepParam === "2" ? 2 : 1} />;
+  return <PlannerEditor key={planParam ?? "new"} loggedIn displayName={displayName} panel={panel} workId={workId} workPublic={workPublic} initialStep={panel && stepParam === "2" ? 2 : 1} />;
 }

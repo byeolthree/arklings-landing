@@ -26,8 +26,7 @@ import {
 import { createUploadSlot, fileBelongsTo, inspectUploaded, maxBytesOf, removeOwnFiles } from "@/lib/creator-files";
 import { createAuthClient } from "@/lib/supabase/server";
 import { getSupabase } from "@/lib/supabase";
-import { setPlanPublic } from "@/app/actions/plans";
-import { loglineText, parseDraft, titleOrDefault, type PlanPanel } from "@/lib/plans";
+import { loglineText, parseDraft, titleOrDefault } from "@/lib/plans";
 
 export type Fail = { ok: false; error: string; needLogin?: boolean; fieldErrors?: Record<string, string> };
 type Ok<T = object> = { ok: true } & T;
@@ -459,100 +458,42 @@ async function writeOrder(sb: Sb, userId: string, workId: string, ids: string[])
   return { ok: true };
 }
 
-// ── 기획안 화면의 「포트폴리오에 올리기」 (D29·D32·D13) ───────────────────────────────────────
-// 기획안은 작품 안에서만 공개된다. 순서: (프로필이 없으면 공개 주소·역할만으로 프로필 만들기) → 그 기획안이 붙은 작품 만들기·갱신(비공개) →
-// 기획안 공개 → 작품 공개. 프로필 공개 여부는 화면이 먼저 묻고 profilePublic으로 넘긴다(어느 쪽을 골라도 작품은 올라간다).
-export async function publishPlanAsWork(
+// ── 기획안 화면의 「포트폴리오 작성하기」 (D29·D32) ───────────────────────────────────────
+// 기획안 화면에서 바로 올리지 않는다. 그 기획안이 붙은 작품(비공개)을 만들어 두고, 화면은 마이페이지의 포트폴리오 등록으로 넘어가
+// 역할·장르·글·이미지를 마저 쓴 뒤 거기서 올리게 한다. 이미 그 기획안의 작품이 있으면 그 작품 번호만 돌려준다(고쳐 둔 내용을 덮지 않는다).
+// 작품 역할은 기획안이 글이라 「대본」을 먼저 골라 둔다(마이페이지에서 바꿀 수 있다). 프로필이 없으면 작품을 만들지 않고 needProfile을 돌려준다.
+export async function startWorkFromPlan(
   planId: string,
   draft: unknown,
-  opts: { profile?: { handle: string; roles: string[] }; profilePublic?: boolean },
-): Promise<Ok<{ workId: string; handle: string; panel: PlanPanel | null }> | Fail> {
+): Promise<Ok<{ workId: string }> | (Fail & { needProfile?: true })> {
   const auth = await needUser();
   if (!("user" in auth)) return auth;
   const { user, sb } = auth;
   if (!UUID.test(String(planId))) return { ok: false, error: "찾을 수 없는 기획안이에요." };
 
-  // 내 기획안만
   const plan = await sb.from("plans").select("id").eq("id", planId).eq("owner_id", user.id).maybeSingle();
   if (plan.error) return { ok: false, error: UNAVAILABLE };
   if (!plan.data) return { ok: false, error: "찾을 수 없는 기획안이에요." };
 
-  // 프로필
-  const existing = await sb.from("creator_profiles").select("public_handle, roles, is_public").eq("user_id", user.id).maybeSingle();
-  if (existing.error) return { ok: false, error: UNAVAILABLE };
-  let handle: string;
-  let roles: string[];
-  if (existing.data) {
-    const row = existing.data as { public_handle: string; roles: string[]; is_public: boolean };
-    handle = row.public_handle;
-    roles = row.roles;
-    if (opts.profilePublic === true && !row.is_public) {
-      const upd = await sb.from("creator_profiles").update({ is_public: true }).eq("user_id", user.id);
-      if (upd.error) return { ok: false, error: dbMessage(upd.error) };
-    }
-  } else {
-    const checked = validateCreatorProfile({ handle: opts.profile?.handle ?? "", roles: opts.profile?.roles ?? [], isPublic: opts.profilePublic === true });
-    if (!checked.ok) {
-      const errors: ProfileErrors = checked.errors;
-      return { ok: false, error: Object.values(errors)[0] ?? "공개 주소와 역할을 확인해 주세요.", fieldErrors: errors };
-    }
-    const ins = await sb.from("creator_profiles").insert({ user_id: user.id, public_handle: checked.value.handle, roles: checked.value.roles, bio: "", open_to_collab: true, is_public: checked.value.isPublic });
-    if (ins.error) {
-      const msg = dbMessage(ins.error);
-      return ins.error.code === "23505" ? { ok: false, error: msg, fieldErrors: { handle: msg } } : { ok: false, error: msg };
-    }
-    handle = checked.value.handle;
-    roles = checked.value.roles;
-  }
+  const found = await sb.from("creator_works").select("id").eq("owner_id", user.id).eq("plan_id", planId).maybeSingle();
+  if (found.error) return { ok: false, error: UNAVAILABLE };
+  if (found.data) return { ok: true, workId: (found.data as { id: string }).id };
 
-  // 이 기획안이 붙은 작품(있으면 갱신, 없으면 새로 만든다). 제목·로그라인은 기획안에서 가져온다.
+  const profile = await sb.from("creator_profiles").select("public_handle").eq("user_id", user.id).maybeSingle();
+  if (profile.error) return { ok: false, error: UNAVAILABLE };
+  if (!profile.data) return { ok: false, error: "작품을 만들려면 먼저 크리에이터 프로필을 만들어 주세요.", needProfile: true };
+
   const parsed = parseDraft(draft);
   if (!parsed.ok) return { ok: false, error: parsed.error };
   const title = titleOrDefault(parsed.draft.title, parsed.draft).slice(0, 60) || "제목 없는 작품";
-  const logline = loglineText(parsed.draft).trim();
-  const lw = validateWork({ title, roles, logline, planId });
+  const lw = validateWork({ title, roles: ["script"], logline: loglineText(parsed.draft).trim(), planId });
   if (!lw.ok) return workFail(lw.errors);
-
-  const found = await sb.from("creator_works").select("id").eq("owner_id", user.id).eq("plan_id", planId).maybeSingle();
-  if (found.error) return { ok: false, error: UNAVAILABLE };
-  let workId: string;
-  if (found.data) {
-    workId = (found.data as { id: string }).id;
-    const upd = await sb.from("creator_works").update({ title: lw.value.title, logline: lw.value.logline }).eq("id", workId).eq("owner_id", user.id).select("id");
-    if (upd.error || !upd.data?.length) return { ok: false, error: upd.error ? dbMessage(upd.error) : WORK_NOT_FOUND };
-  } else {
-    const ins = await sb
-      .from("creator_works")
-      .insert({ owner_id: user.id, title: lw.value.title, roles: lw.value.roles, genres: [], logline: lw.value.logline, plan_id: planId })
-      .select("id")
-      .single();
-    if (ins.error || !ins.data) return { ok: false, error: dbMessage(ins.error) };
-    workId = (ins.data as { id: string }).id;
-  }
-
-  // 기획안 공개(공개용 사본 저장) → 작품 공개
-  const pub = await setPlanPublic(planId, true, draft);
-  if (!pub.ok) return { ok: false, error: pub.error };
-  const up = await sb.from("creator_works").update({ is_public: true }).eq("id", workId).eq("owner_id", user.id).select("id");
-  if (up.error || !up.data?.length) {
-    await setPlanPublic(planId, false, draft);
-    return { ok: false, error: up.error ? dbMessage(up.error) : WORK_NOT_FOUND };
-  }
-  refresh(handle);
-  revalidatePath(`/portfolio/${workId}`);
-  return { ok: true, workId, handle, panel: pub.panel };
-}
-
-// 기획안 화면의 「포트폴리오에서 내리기」: 그 기획안이 붙은 작품을 내리고(DB가 기획안도 함께 비공개로 돌린다), 공개용 사본도 지운다.
-export async function unpublishPlanWork(planId: string): Promise<Ok<{ panel: PlanPanel | null }> | Fail> {
-  const auth = await needUser();
-  if (!("user" in auth)) return auth;
-  if (!UUID.test(String(planId))) return { ok: false, error: "찾을 수 없는 기획안이에요." };
-  const w = await auth.sb.from("creator_works").update({ is_public: false }).eq("owner_id", auth.user.id).eq("plan_id", planId).select("id");
-  if (w.error) return { ok: false, error: dbMessage(w.error) };
-  const r = await setPlanPublic(planId, false, null);
-  if (!r.ok) return { ok: false, error: r.error };
+  const ins = await sb
+    .from("creator_works")
+    .insert({ owner_id: user.id, title: lw.value.title, roles: lw.value.roles, genres: [], logline: lw.value.logline, plan_id: planId })
+    .select("id")
+    .single();
+  if (ins.error || !ins.data) return { ok: false, error: dbMessage(ins.error) };
   refresh();
-  for (const row of (w.data ?? []) as { id: string }[]) revalidatePath(`/portfolio/${row.id}`);
-  return { ok: true, panel: r.panel };
+  return { ok: true, workId: (ins.data as { id: string }).id };
 }
