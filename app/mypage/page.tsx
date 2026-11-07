@@ -264,7 +264,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
       기획안 목록을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
     </p>
   ) : plans.length === 0 ? (
-    <p className="mp-note">아직 저장한 기획안이 없어요. 기획안 화면에서 「임시저장」을 누르면 여기에 나타나요.</p>
+    <p className="mp-note">아직 저장한 기획안이 없어요. 기획안 화면에서 「저장」을 누르면 여기에 나타나요.</p>
   ) : (
     <ul>
       {plans.map((p) => (

@@ -59,6 +59,13 @@
 |---|---|---|---|---|---|---|---|
 | 기획안 | `/planner`, `/planner?plan=<id>` | 쓰기는 아니요(이 기기 브라우저 `localStorage`에 자동 보관), 서버 저장·PDF·메일은 예. 로그인 안 하고 `?plan=`이면 `/login?next=`로 이동 | 쓰기·PDF 열림, **저장·이력·공개·메일은 안 됨**(0004) | `savePlan(planId, draft)`, `getRevision(planId, revisionId)`, `updateRevision(planId, revisionId, draft)`, `deleteRevision(planId, revisionId)`, `deletePlan(planId)`, `setPlanPublic(planId, makePublic, draft)`, `downloadPlanPdf(draft)`, `mailPlanPdf(draft)` | 폼이 아니라 `draft` 객체(`PlanDraft`: `title`, `slots[]`, `checks`, `edited`). 질문·검사 문구는 `components/planner/questions.ts` | `PlannerEditor` props: `loggedIn`, `displayName`(`profiles.display_name`, 못 읽으면 빈 글자), `panel`(`PlanPanel`: `plan{id,isPublic,publishedAt}`, `revisions[{id,createdAt,preview,edited}]`, `latest`). 로그인 안 하면 `loggedIn=false`, `panel=null`. 내 기획안이 아니거나 없는 번호는 404. 처리 함수는 `{ok:true,…}`/`{ok:false,error,needLogin?}`를 돌려줌 | 로그인 `/login?next=/planner`, 가입 `/signup?next=/planner`, 기획안 삭제 뒤 `/mypage`. 이메일이 없거나 확인 전이면 `/auth/add-email?next=`로 이동 |
 
+**기획안 화면 구조 변경 (2026-11-07, 별뜨리님 지시)** — 처리 함수 이름·인자·반환 모양은 그대로이고, 화면 쪽만 이렇게 바뀐다.
+- 「임시저장」이라는 말을 없애고 단추·안내·이력 이름을 「저장」으로 쓴다(`savePlan` 이름은 그대로). 서버 오류 문구(`app/actions/plans.ts`의 「임시저장은 … 100건까지」)는 서버 파일이라 별뜨리님 승인 전에는 그대로 둔다.
+- 세 단계: **01 로그라인**(쓰기·「저장」·「저장 이력」은 이 단계 위쪽), **02 모아 보기**(저장한 내용 보기, 「PDF 내려받기」「메일로 받기」, 「포트폴리오에 올리기」·「내리기」), **03 편집**(내용이 정해지기 전까지 탭만 있고 눌리지 않음). 「저장」을 누르면 02로 넘어간다. PDF·메일·올리기는 01에서 없앤다.
+- 로그인 여부는 화면이 열릴 때의 `loggedIn` 값으로 먼저 막지 않는다. 저장·PDF·메일은 항상 처리 함수를 부르고, 결과가 `needLogin`일 때만 안내를 띄운다. 성공하면 화면의 로그인 상태를 맞춘다. 로그인하지 않은 채로 「저장」을 누르면 이 브라우저(`localStorage`)에만 저장하고 「로그인하지 않아 이 브라우저에만 임시로 저장돼요」를 띄운 뒤 02로 넘어간다.
+- `PlannerEditor` props 추가: `initialStep`(1 또는 2, 주소 `?step=`; 기획안 번호가 없거나 내 기획안이 아니면 1). 02 주소는 `/planner?plan=<id>&step=2`.
+- 7번(제안 문장): 「아클링스 제안 문장으로 되돌리기」「제안 문장을 가져와서 고치기」 두 단추를 없애고, 글칸 아래에 「제안 문장」 카드와 「이 문장으로 바꾸기」(바꾸기 전 글은 되돌리기·「바꾸기 전 내 글 되살리기」로 남음)를 둔다. 평가(LLM 호출) 자리는 코드에 주석으로만 비워 두고 화면에는 단추를 두지 않는다.
+
 기획안 화면은 한 부품(`planner-editor.tsx`)이 처리 함수를 직접 부른다. 디자인을 새로 만들 때도 이 호출 모양(인자 순서, 반환값)을 그대로 쓴다. `useUndo`(`use-undo.ts`)와 `localStorage` 키(`arklings-planner-draft…`)도 유지한다.
 
 ## 포트폴리오

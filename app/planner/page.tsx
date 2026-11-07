@@ -8,11 +8,12 @@ import { createAuthClient } from "@/lib/supabase/server";
 export const metadata: Metadata = { title: "기획안 만들기" };
 export const dynamic = "force-dynamic";
 
-type SearchParams = Promise<{ plan?: string | string[] }>;
+type SearchParams = Promise<{ plan?: string | string[]; step?: string | string[] }>;
 
 export default async function PlannerPage({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const planParam = Array.isArray(params.plan) ? params.plan[0] : params.plan;
+  const stepParam = Array.isArray(params.step) ? params.step[0] : params.step;
   const user = await getCurrentUser();
 
   // 로그인하지 않았으면 기획안은 브라우저 안에서만 쓴다(서버에 저장하지 않는다).
@@ -52,5 +53,5 @@ export default async function PlannerPage({ searchParams }: { searchParams: Sear
     // 읽지 못하면 프로필이 없는 것처럼 보여 준다(올릴 때 서버가 다시 확인한다)
   }
 
-  return <PlannerEditor key={planParam ?? "new"} loggedIn displayName={displayName} panel={panel} creatorProfile={creatorProfile} workId={workId} />;
+  return <PlannerEditor key={planParam ?? "new"} loggedIn displayName={displayName} panel={panel} creatorProfile={creatorProfile} workId={workId} initialStep={panel && stepParam === "2" ? 2 : 1} />;
 }
