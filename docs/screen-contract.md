@@ -91,6 +91,27 @@
 | 정리 작업 | `/api/cron/cleanup` | 비밀값 | 없음 | 화면 없음 |
 | 인증 돌아오는 길 | `/auth/callback`, `/auth/confirm` | - | 없음 | 화면 없음. 만지지 않는다 |
 
-## 새 디자인 참고 시안 (아직 계약 없음)
+## 크리에이터 (2026-11-07 줄 추가, `dev` ebde7b4 기준 · DB는 0009 실행 완료)
+
+읽기는 `lib/creators.ts` 한 곳이고 DB의 공개용 보기 4개(`creators_public`, `creator_channels_public`, `creator_works_public`, `creator_blocks_public`)에서만 읽는다. 주인 번호·이메일은 화면·주소·화면 소스 어디에도 내지 않는다. 파일(이미지·PDF)은 비공개 보관함 `creator-works`에 있고 보여 줄 때만 짧은 임시 주소(10분)를 만든다. 쓰기는 모두 `app/actions/creators.ts`의 Server Action이며 맨 위에서 로그인·이메일 확인을 다시 하고, 로그인한 본인 연결(`createAuthClient`)과 RLS로 실행한다. 글자 수·개수 규칙은 `lib/creator-rules.ts` 한 곳.
+
+| 화면 | 주소 | 로그인 필요 | 부르는 처리 함수 | 입력 칸 / 인자 | 화면에 받는 데이터 | 이동 |
+|---|---|---|---|---|---|---|
+| 크리에이터 목록 | `/creators?q=&role=&genre=&form=&open=&page=` | 아니요 | 없음(읽기만: `listCreators(filter, page)`) | 주소 값 `q`(30자), `role`(역할 하나), `genre`(장르 하나), `form`(long·short), `open`(1), `page` | `cards[]`(`CreatorCard`와 같은 값: `handle`, `name`, `roles`, `bio`(앞부분), `planCount`(공개 작품 수), `openToCollab`, `genres`, `forms`, `latest`(없을 수 있음), `hero`, `heroSrc`(임시 주소)), `total`, 쪽 수(`CREATOR_PAGE_SIZE`). 공개 프로필만, 작품 0건이어도 나온다(D7) | 카드 `/creators/<handle>`, 협업 신청 `/collab/new?creator=<handle>`(0010 뒤에 열림), 비었을 때 「기획안 만들기」 `/planner`·「크리에이터 프로필 만들기」 `/mypage` |
+| 크리에이터 프로필 | `/creators/<handle>` (작품 창: `?work=<작품 번호>`) | 아니요 (본인은 비공개도 봄) | 없음(읽기만: `getCreator(handle)`, `listCreatorWorks(handle)`, `getWork(id)`) | 없음 | 프로필(`handle`, `name`, `roles`, `bio`, `channels[]`, `openToCollab`, `hero`·`heroSrc`), 작품 카드 `WorkCard[]`(`id`, `title`, `logline`, `roles`, `genres`, `kind`, `form`, `publishedAt`), 작품 상세(`WorkDetailData`: 위 값 + 순서대로 `blocks[]` 글·이미지·영상·문서, 파일은 임시 주소). 공개가 아니고 본인도 아니면 404. 본인이 비공개 프로필을 열면 「비공개 상태입니다」 표시와 협업 신청 버튼 숨김(D13) | 작품 창 닫기 `/creators/<handle>`, 「이 작품에 협업 신청」·「이 크리에이터에게 협업 신청」은 0010 뒤에 `/collab/new?…` |
+| 작품 공유 주소 | `/portfolio/<작품 번호>` | 아니요 | 없음(읽기만: `getWork(id)`) | 없음 | 위 작품 상세. 공개가 아니면 404 | 「프로필 보기」 `/creators/<handle>` (D29) |
+| 마이페이지 · 크리에이터 등록 구역 | `/mypage` 안 | 예 | `saveCreatorProfile`, `setProfilePublic`, `checkHandle` | `handle`, `roles`(여러 개), `bio`(소개 글 500자, 선택), `channels`(이름 20자·https 주소, 5개까지), `openToCollab`, `isPublic` | 내 프로필·채널(로그인한 본인 연결로 읽음). 결과 `{ok:true, created, handle}` / `{ok:false, error, fieldErrors?}` | 내 프로필 주소 `/creators/<handle>` |
+| 마이페이지 · 포트폴리오 등록 구역 | `/mypage` 안 | 예 | `createWork`, `updateWork`, `deleteWork`, `setWorkPublic`, `addTextBlock`, `updateTextBlock`, `addVideoBlock`, `prepareFileUpload`→(브라우저가 보관함에 직접 올림)→`finishFileUpload`, `moveBlock`, `reorderBlocks`, `deleteBlock` | 작품: `title`(60자), `roles`, `genres`, `kind`, `form`, `logline`(띄어쓰기 뺀 200자), `planId`. 요소: 글 5000자, 유튜브 주소, 이미지 JPG·PNG·WEBP 5MB, PDF 10MB, 사람당 합계 20MB, 작품 12개, 작품당 요소 20개 | 내 작품·요소(본인 연결로 읽음), 용량·개수 | 작품 창은 위와 같음 |
+| 기획안 화면 · 포트폴리오에 올리기 | `/planner` | 예 | **정해지지 않음. 아래 「보고」 참고** | - | - | - |
+
+처리 함수 결과 모양: `{ ok: true, …값 } | { ok: false, error, needLogin?, fieldErrors? }` (기획안 동작과 같은 모양).
+
+**코드 전에 보고한 것 (2026-11-07):**
+
+1. 파일 올리기는 Server Action으로 받지 않는다. `next.config.ts`의 요청 크기 한도가 4.5MB이고 Vercel도 4.5MB라서 5MB 이미지·10MB PDF가 통과하지 못한다. 그래서 `prepareFileUpload`가 올릴 자리(1회용 주소)를 주고, 브라우저가 보관함에 직접 올리고, `finishFileUpload`가 서버에서 크기·파일 앞 글자·용량을 다시 검사한 뒤에 요소를 만든다. 통과하지 못하면 올린 파일을 지운다.
+2. 기획안 화면의 「포트폴리오에 올리기」(`setPlanPublic`)와 `/portfolio`·`/portfolio/<id>`(`listPortfolio`·`getPortfolio`)는 기획안 단위로 만들어져 있어서 D29(작품 단위)로 바꾸려면 호출 모양이 바뀐다. 별뜨리님 확인 전에는 고치지 않는다.
+3. 정해지지 않은 것: D36(접힌 요소의 공개 범위), 대표 이미지·영상이 사람당 20MB에 드는지. DB의 20MB 검사(0009)는 지금 작품 요소의 이미지·PDF만 센다. 프로필 대표 파일 올리기는 정해질 때까지 만들지 않는다.
+
+## 지난 판: 새 디자인 참고 시안 (위 「크리에이터」 줄이 대신한다)
 
 별뜨리님이 보여 주신 Figma 시안 「크리에이터 포트폴리오 탐색」(Desktop 1440 / Mobile 375)과 「크리에이터 프로필」은 **지금 코드에 없는 화면**이다. 코드에 있는 비슷한 화면은 `/portfolio`(기획안 목록)뿐이고, 크리에이터·프로필 화면의 처리 함수·데이터는 아직 없다. 이 화면들을 만들려면 먼저 어떤 데이터를 쓸지 정하고 이 표에 줄을 더해 승인받는다. 랜딩과 시안이 다르면 랜딩을 따른다.
