@@ -9,6 +9,8 @@ import { CONFIRM_FIRST_MESSAGE, getCurrentUser, isConfirmed, type CurrentUser } 
 import {
   BLOCK_LIMIT,
   QUOTA_BYTES,
+  parseSubKind,
+  type BlockKind,
   parseYoutubeId,
   validateCreatorProfile,
   validateChannels,
@@ -63,6 +65,8 @@ function dbMessage(e: DbError): string {
   if (m.includes("creator_profile_required")) return "작품을 올리려면 먼저 크리에이터 프로필을 만들어 주세요.";
   if (m.includes("email_not_confirmed")) return CONFIRM_FIRST_MESSAGE;
   if (m.includes("work_plan_not_owned")) return "내 기획안만 붙일 수 있어요.";
+  if (m.includes("creator_work_blocks_sub_kind")) return "고를 수 없는 종류예요.";
+  if (m.includes("sub_kind")) return "요소 종류를 저장하려면 데이터베이스 준비(0012)가 먼저 필요해요. 종류를 비우고 저장하거나 잠시 뒤에 다시 시도해 주세요.";
   if (e?.code === "23505" && m.includes("plan_id")) return "이 기획안은 이미 다른 작품에 붙어 있어요.";
   if (e?.code === "23505") return "이미 쓰고 있는 공개 주소예요. 다른 주소를 적어 주세요.";
   if (e?.code === "42501") return "이 동작을 할 수 있는 권한이 없어요.";
@@ -295,13 +299,36 @@ async function insertBlock(sb: Sb, userId: string, workId: string, row: Record<s
   return { ok: true, id: (data as { id: string }).id };
 }
 
-export async function addTextBlock(workId: string, body: string): Promise<Ok<{ id: string }> | Fail> {
+const SUBKIND_BAD = "고를 수 없는 종류예요.";
+
+// subKind는 선택(0012 이후): 글(문서) 요소의 세부 종류. 목록에 없는 글자는 거절한다.
+export async function addTextBlock(workId: string, body: string, subKind?: string | null): Promise<Ok<{ id: string }> | Fail> {
   const auth = await needUser();
   if (!("user" in auth)) return auth;
   const text = validateTextBlock(body);
   if (!text.ok) return { ok: false, error: text.error };
+  const sub = parseSubKind("text", subKind);
+  if (sub === undefined) return { ok: false, error: SUBKIND_BAD };
   if (!(await ownWork(auth.sb, auth.user.id, workId))) return { ok: false, error: WORK_NOT_FOUND };
-  return insertBlock(auth.sb, auth.user.id, workId, { kind: "text", body: text.value });
+  return insertBlock(auth.sb, auth.user.id, workId, { kind: "text", body: text.value, ...(sub ? { sub_kind: sub } : {}) });
+}
+
+// 요소의 세부 종류를 고치거나(subKind=null이면 비움) 처음 정한다. 이미지 요소에는 세부 종류가 없다.
+export async function setBlockSubKind(blockId: string, subKind: string | null): Promise<Ok | Fail> {
+  const auth = await needUser();
+  if (!("user" in auth)) return auth;
+  if (!UUID.test(String(blockId))) return { ok: false, error: BLOCK_NOT_FOUND };
+  const row = await auth.sb.from("creator_work_blocks").select("kind, work_id").eq("id", blockId).eq("owner_id", auth.user.id).maybeSingle();
+  if (row.error) return { ok: false, error: UNAVAILABLE };
+  if (!row.data) return { ok: false, error: BLOCK_NOT_FOUND };
+  const { kind, work_id } = row.data as { kind: BlockKind; work_id: string };
+  const sub = parseSubKind(kind, subKind);
+  if (sub === undefined) return { ok: false, error: SUBKIND_BAD };
+  const { error } = await auth.sb.from("creator_work_blocks").update({ sub_kind: sub }).eq("id", blockId).eq("owner_id", auth.user.id);
+  if (error) return { ok: false, error: dbMessage(error) };
+  refresh();
+  revalidatePath(`/portfolio/${work_id}`);
+  return { ok: true };
 }
 
 export async function updateTextBlock(blockId: string, body: string): Promise<Ok | Fail> {
@@ -325,13 +352,15 @@ export async function updateTextBlock(blockId: string, body: string): Promise<Ok
 }
 
 // 유튜브 주소를 붙인다(watch?v=, youtu.be/, shorts/). 영상 파일 직접 올리기는 이번에 하지 않는다(D18).
-export async function addVideoBlock(workId: string, url: string): Promise<Ok<{ id: string }> | Fail> {
+export async function addVideoBlock(workId: string, url: string, subKind?: string | null): Promise<Ok<{ id: string }> | Fail> {
   const auth = await needUser();
   if (!("user" in auth)) return auth;
+  const sub = parseSubKind("video", subKind);
+  if (sub === undefined) return { ok: false, error: SUBKIND_BAD };
   const id = parseYoutubeId(url);
   if (!id) return { ok: false, error: "유튜브 주소(youtube.com/watch?v=…, youtu.be/…, youtube.com/shorts/…)만 붙일 수 있어요." };
   if (!(await ownWork(auth.sb, auth.user.id, workId))) return { ok: false, error: WORK_NOT_FOUND };
-  return insertBlock(auth.sb, auth.user.id, workId, { kind: "video", youtube_id: id });
+  return insertBlock(auth.sb, auth.user.id, workId, { kind: "video", youtube_id: id, ...(sub ? { sub_kind: sub } : {}) });
 }
 
 const EXT_OF: Record<string, { kind: FileKind; ext: "jpg" | "png" | "webp" | "pdf" }> = {
@@ -388,7 +417,7 @@ const cleanFileName = (n: string) => String(n ?? "").replace(/[\u0000-\u001f\u00
 
 // 파일 올리기 2단계: 보관함에 올라온 파일을 서버가 직접 읽어 크기·파일 앞 글자·용량을 다시 검사하고, 통과하면 요소를 만든다.
 // 통과하지 못하면 올라온 파일을 지운다. 이 사람에게 발급한 자리(파일 이름 표식)가 아니면 아무것도 하지 않는다.
-export async function finishFileUpload(workId: string, upload: { path: string; kind: FileKind; name: string }): Promise<Ok<{ id: string }> | Fail> {
+export async function finishFileUpload(workId: string, upload: { path: string; kind: FileKind; name: string; subKind?: string | null }): Promise<Ok<{ id: string }> | Fail> {
   const auth = await needUser();
   if (!("user" in auth)) return auth;
   const { user, sb } = auth;
@@ -400,6 +429,8 @@ export async function finishFileUpload(workId: string, upload: { path: string; k
     await removeOwnFiles(user.id, [path]);
     return { ok: false, error };
   };
+  const sub = parseSubKind(kind === "document" ? "document" : "image", upload?.subKind);
+  if (sub === undefined) return fail(SUBKIND_BAD);
 
   if (!(await ownWork(sb, user.id, workId))) return fail(WORK_NOT_FOUND);
   // 같은 파일로 요소를 두 번 만들면 하나를 지울 때 다른 하나의 파일이 사라진다. 이미 쓰고 있는 파일이면 거절한다(파일은 지우지 않는다).
@@ -421,6 +452,7 @@ export async function finishFileUpload(workId: string, upload: { path: string; k
     file_path: path,
     file_name: cleanFileName(upload.name) || null,
     file_bytes: looked.size,
+    ...(sub ? { sub_kind: sub } : {}),
   });
   if (!res.ok) await removeOwnFiles(user.id, [path]);
   return res;

@@ -20,10 +20,14 @@ export function mediaOfBlocks(blocks: MyBlock[]): WorkMediaItem[] {
   return out;
 }
 
-// 작품의 「대표」: 작품 안에서 맨 위에 있는 이미지·영상이 그 작품의 대표이고, 없으면 로그라인이다(마이페이지 접은 목록의 「대표」 칸).
-export function representativeOf(w: Pick<MyWork, "blocks">): "영상" | "이미지" | "로그라인" {
+// 작품의 「대표」(마이페이지 접은 목록의 「대표」 칸, 시안 02): 작품 안에서 맨 위에 있는 이미지·영상이 그 작품의 대표이고, 없으면 로그라인이다.
+// 영상은 고른 세부 종류로 「티저 영상」처럼, 이미지는 「컨셉 이미지」로 보인다(세부 종류를 안 골랐으면 「영상」).
+export function representativeOf(w: Pick<MyWork, "blocks">): string {
   const first = w.blocks.find((b) => b.kind === "image" || b.kind === "video");
-  return first ? (first.kind === "video" ? "영상" : "이미지") : "로그라인";
+  if (!first) return "로그라인";
+  if (first.kind === "image") return "컨셉 이미지";
+  if (!first.sub) return "영상";
+  return first.sub.endsWith("영상") ? first.sub : `${first.sub} 영상`;
 }
 
 export function toProfileData(p: CreatorProfile): CreatorProfileData {

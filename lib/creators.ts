@@ -52,10 +52,10 @@ export type WorkListItem = {
 };
 
 export type WorkBlock =
-  | { id: string; kind: "text"; body: string }
+  | { id: string; kind: "text"; body: string; sub?: string }
   | { id: string; kind: "image"; fileName: string | null; src: string | null }
-  | { id: string; kind: "video"; youtubeId: string }
-  | { id: string; kind: "document"; fileName: string | null; fileBytes: number | null; src: string | null };
+  | { id: string; kind: "video"; youtubeId: string; sub?: string }
+  | { id: string; kind: "document"; fileName: string | null; fileBytes: number | null; src: string | null; sub?: string };
 
 export type WorkDetail = WorkListItem & {
   authorHandle: string;
@@ -104,6 +104,7 @@ type BlockRow = {
   file_name: string | null;
   file_bytes: number | null;
   youtube_id: string | null;
+  sub_kind?: string | null; // 0012 이후
 };
 
 const asRoles = (v: string[] | null | undefined): Role[] => (v ?? []).filter(isRole);
@@ -272,23 +273,22 @@ export async function getWork(id: string): Promise<WorkDetail | null> {
   if (!data) return null;
   const row = data as unknown as WorkRow;
 
-  const blocksRes = await sb
-    .from("creator_blocks_public")
-    .select("id, position, kind, body, file_path, file_name, file_bytes, youtube_id")
-    .eq("work_id", id)
-    .order("position", { ascending: true })
-    .order("id", { ascending: true })
-    .limit(20);
+  const readBlocks = (cols: string) =>
+    sb.from("creator_blocks_public").select(cols).eq("work_id", id).order("position", { ascending: true }).order("id", { ascending: true }).limit(20);
+  let blocksRes = await readBlocks("id, position, kind, body, file_path, file_name, file_bytes, youtube_id, sub_kind");
+  // 0012(요소 세부 종류) 실행 전에는 sub_kind 칸이 없다. 그때는 세부 종류만 빼고 읽는다. 0012를 실행한 뒤에 이 분기는 지운다.
+  if (blocksRes.error?.message.includes("sub_kind")) blocksRes = await readBlocks("id, position, kind, body, file_path, file_name, file_bytes, youtube_id");
   if (blocksRes.error) throw new Error(blocksRes.error.message);
   const rows = (blocksRes.data ?? []) as unknown as BlockRow[];
   const urls = await signPublicFiles(rows.map((b) => b.file_path));
 
   const blocks: WorkBlock[] = [];
   for (const b of rows) {
-    if (b.kind === "text" && b.body) blocks.push({ id: b.id, kind: "text", body: b.body });
-    else if (b.kind === "video" && b.youtube_id) blocks.push({ id: b.id, kind: "video", youtubeId: b.youtube_id });
+    const sub = b.sub_kind ?? undefined;
+    if (b.kind === "text" && b.body) blocks.push({ id: b.id, kind: "text", body: b.body, sub });
+    else if (b.kind === "video" && b.youtube_id) blocks.push({ id: b.id, kind: "video", youtubeId: b.youtube_id, sub });
     else if (b.kind === "image") blocks.push({ id: b.id, kind: "image", fileName: b.file_name, src: b.file_path ? (urls.get(b.file_path) ?? null) : null });
-    else if (b.kind === "document") blocks.push({ id: b.id, kind: "document", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null });
+    else if (b.kind === "document") blocks.push({ id: b.id, kind: "document", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, sub });
   }
   return { ...toWorkItem(row), authorHandle: row.author_handle, authorName: row.author_name, blocks };
 }

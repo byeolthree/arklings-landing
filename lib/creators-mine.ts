@@ -35,17 +35,20 @@ type WorkRow = {
 };
 type BlockRow = {
   id: string; work_id: string; position: number; kind: "text" | "image" | "video" | "document";
-  body: string | null; file_path: string | null; file_name: string | null; file_bytes: number | null; youtube_id: string | null;
+  body: string | null; file_path: string | null; file_name: string | null; file_bytes: number | null; youtube_id: string | null; sub_kind?: string | null;
 };
 
 export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
   const sb = await createAuthClient();
-  const [prof, chans, works, blocks] = await Promise.all([
+  const readBlocks = (cols: string) => sb.from("creator_work_blocks").select(cols).eq("owner_id", userId).order("position", { ascending: true }).order("created_at", { ascending: true });
+  const [prof, chans, works, firstBlocks] = await Promise.all([
     sb.from("creator_profiles").select("public_handle, roles, bio, open_to_collab, is_public").eq("user_id", userId).maybeSingle(),
     sb.from("creator_channels").select("label, url, position").eq("user_id", userId).order("position", { ascending: true }),
     sb.from("creator_works").select("id, title, roles, genres, kind, form, logline, plan_id, is_public, first_published_at, created_at, updated_at").eq("owner_id", userId).order("sort_order", { ascending: true }).order("created_at", { ascending: false }),
-    sb.from("creator_work_blocks").select("id, work_id, position, kind, body, file_path, file_name, file_bytes, youtube_id").eq("owner_id", userId).order("position", { ascending: true }).order("created_at", { ascending: true }),
+    readBlocks("id, work_id, position, kind, body, file_path, file_name, file_bytes, youtube_id, sub_kind"),
   ]);
+  // 0012(요소 세부 종류) 실행 전에는 sub_kind 칸이 없다. 그때는 세부 종류만 빼고 읽는다. 0012를 실행한 뒤에 이 분기는 지운다.
+  const blocks = firstBlocks.error?.message.includes("sub_kind") ? await readBlocks("id, work_id, position, kind, body, file_path, file_name, file_bytes, youtube_id") : firstBlocks;
   for (const r of [prof, chans, works, blocks]) if (r.error) throw new Error(r.error.message);
 
   const brows = (blocks.data ?? []) as unknown as BlockRow[];
@@ -55,10 +58,11 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
   for (const b of brows) {
     used += b.file_bytes ?? 0;
     const list = byWork.get(b.work_id) ?? [];
-    if (b.kind === "text" && b.body) list.push({ id: b.id, kind: "text", body: b.body });
-    else if (b.kind === "video" && b.youtube_id) list.push({ id: b.id, kind: "video", youtubeId: b.youtube_id });
+    const sub = b.sub_kind ?? undefined;
+    if (b.kind === "text" && b.body) list.push({ id: b.id, kind: "text", body: b.body, sub });
+    else if (b.kind === "video" && b.youtube_id) list.push({ id: b.id, kind: "video", youtubeId: b.youtube_id, sub });
     else if (b.kind === "image") list.push({ id: b.id, kind: "image", fileName: b.file_name, src: b.file_path ? (urls.get(b.file_path) ?? null) : null });
-    else if (b.kind === "document") list.push({ id: b.id, kind: "document", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null });
+    else if (b.kind === "document") list.push({ id: b.id, kind: "document", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, sub });
     byWork.set(b.work_id, list);
   }
 

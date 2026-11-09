@@ -18,6 +18,7 @@ import {
   reorderBlocks,
   reorderWorks,
   saveCreatorProfile,
+  setBlockSubKind,
   setProfilePublic,
   setWorkPublic,
   updateTextBlock,
@@ -26,7 +27,7 @@ import {
 import { GENRES } from "@/components/creators/genres";
 import { PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
 import { ROLES, type Role } from "@/lib/collab";
-import { BLOCK_LIMIT, QUOTA_BYTES, TITLE_MAX, WORK_LIMIT, type ProfileErrors, type ProfileValues } from "@/lib/creator-rules";
+import { BLOCK_LIMIT, DOC_SUBKINDS, QUOTA_BYTES, TITLE_MAX, VIDEO_SUBKINDS, WORK_LIMIT, type ProfileErrors, type ProfileValues } from "@/lib/creator-rules";
 import { representativeOf } from "@/lib/creator-cards";
 import { kindOfMime, uploadToSlot } from "@/lib/creator-upload-client";
 import type { MyBlock, MyProfile, MyWork } from "@/lib/creators-mine";
@@ -285,18 +286,31 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
 }
 
 type SlotKind = "text" | "image" | "video" | "doc";
-type Slot = { id: string; kind: SlotKind; text: string; url: string; file: File | null };
+type Slot = { id: string; kind: SlotKind; text: string; url: string; file: File | null; sub: string };
 let slotSeq = 0;
-const newSlot = (kind: SlotKind): Slot => ({ id: `s${++slotSeq}`, kind, text: "", url: "", file: null });
+const newSlot = (kind: SlotKind): Slot => ({ id: `s${++slotSeq}`, kind, text: "", url: "", file: null, sub: "" });
+
+// 요소 종류 칩(시안 01). 영상은 티저·예고편…, 글·문서는 시놉시스·트리트먼트…를 고른다. 다시 누르면 비운다. 고른 것은 요소의 sub_kind(0012)에 저장된다.
+function SubChips({ items, value, onPick, label, disabled }: { items: readonly string[]; value: string; onPick: (v: string) => void; label: string; disabled?: boolean }) {
+  return (
+    <div className="we-pick" role="group" aria-label={label}>
+      {items.map((x) => (
+        <button key={x} type="button" className="opt" aria-pressed={value === x} disabled={disabled} onClick={() => onPick(value === x ? "" : x)}>
+          {x}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 // 새로 만든 작품에 채운 칸을 순서대로 넣는다. 실패하면 이유 한 줄을 돌려준다(성공이면 null).
 async function addSlots(workId: string, slots: Slot[]): Promise<string | null> {
   for (const sl of slots) {
     if (sl.kind === "text" && sl.text.trim()) {
-      const r = await addTextBlock(workId, sl.text);
+      const r = await addTextBlock(workId, sl.text, sl.sub || null);
       if (!r.ok) return `글을 넣지 못했어요. ${r.error}`;
     } else if (sl.kind === "video" && sl.url.trim()) {
-      const r = await addVideoBlock(workId, sl.url);
+      const r = await addVideoBlock(workId, sl.url, sl.sub || null);
       if (!r.ok) return `영상을 넣지 못했어요. ${r.error}`;
     } else if ((sl.kind === "image" || sl.kind === "doc") && sl.file) {
       const kind = sl.kind === "image" ? "image" : "document";
@@ -305,7 +319,7 @@ async function addSlots(workId: string, slots: Slot[]): Promise<string | null> {
       if (!slot.ok) return slot.error;
       const up = await uploadToSlot(slot.path, slot.token, sl.file);
       if (!up.ok) return up.error;
-      const fin = await finishFileUpload(workId, { path: slot.path, kind, name: sl.file.name });
+      const fin = await finishFileUpload(workId, { path: slot.path, kind, name: sl.file.name, subKind: kind === "document" ? sl.sub || null : null });
       if (!fin.ok) return fin.error;
     }
   }
@@ -476,6 +490,8 @@ export function WorkEditor({
               <div className="we-el" tabIndex={0}>
                 <span className="we-grip" aria-hidden="true">⠿</span>
                 <div className="we-main">
+                  {sl.kind === "video" && <SubChips items={VIDEO_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="영상 종류" />}
+                  {(sl.kind === "text" || sl.kind === "doc") && <SubChips items={DOC_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="문서 종류" />}
                   {sl.kind === "text" && <textarea className="we-text" rows={3} placeholder="〈글〉" aria-label="글" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
                   {sl.kind === "image" && (
                     <label className="we-line">
@@ -484,6 +500,7 @@ export function WorkEditor({
                     </label>
                   )}
                   {sl.kind === "video" && <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={sl.url} onChange={(e) => patchSlot(sl.id, { url: e.target.value })} style={{ flex: "1 1 100%" }} />}
+                  {sl.kind === "video" && <p className="mp-note" style={{ flex: "1 1 100%" }}>유튜브 주소로 넣으면 용량 제한 없이 올릴 수 있어요.</p>}
                   {sl.kind === "doc" && (
                     <label className="we-line">
                       문서 (PDF){" "}
@@ -606,6 +623,15 @@ function BlockList({ work, onMessage }: { work: MyWork; onMessage: (m: { text: s
           <span className="we-grip" aria-hidden="true">⠿</span>
           <div className="we-main">
             {b.id === work.blocks.find((x: MyBlock) => x.kind === "image" || x.kind === "video")?.id && <span className="we-cover">대표</span>}
+            {(b.kind === "video" || b.kind === "text" || b.kind === "document") && (
+              <SubChips
+                items={b.kind === "video" ? VIDEO_SUBKINDS : DOC_SUBKINDS}
+                value={b.sub ?? ""}
+                disabled={busy}
+                label={b.kind === "video" ? "영상 종류" : "문서 종류"}
+                onPick={(v) => void run(() => setBlockSubKind(b.id, v || null))}
+              />
+            )}
             {b.kind !== "text" && (
               <button type="button" className="we-fold" aria-expanded={!folded[b.id]} onClick={() => setFolded({ ...folded, [b.id]: !folded[b.id] })}>
                 {folded[b.id] ? "▸ 펼치기" : "▾ 접기"}
