@@ -114,11 +114,9 @@ export function WorkEditor({ isPublic, roles, onFold }: { isPublic: boolean; rol
       </div>
 
       <div className="we-foot">
-        <div className="we-foot-l">
-          <button type="button" className="btn btn-ghost">미리 보기</button>
-          <button type="button" className="btn btn-ghost we-del">작품 지우기</button>
-        </div>
+        <button type="button" className="btn btn-ghost">미리 보기</button>
         <button type="button" className="btn btn-ghost" onClick={onFold}>취소</button>
+        <button type="button" className="btn btn-ghost we-del">삭제</button>
         <button type="button" className="btn btn-primary">저장</button>
       </div>
     </div>

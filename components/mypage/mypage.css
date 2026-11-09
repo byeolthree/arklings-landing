@@ -234,7 +234,6 @@
 .mp .we-media.doc { aspect-ratio: 4 / 3; max-height: 260px; }
 .mp .we-add { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--body); }
 .mp .we-foot { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
-.mp .we-foot-l { display: flex; flex-wrap: wrap; gap: 8px; margin-right: auto; }
 @media (max-width: 767px) { .mp .we-el { flex-wrap: wrap; } .mp .we-tools { flex: 1 1 100%; padding-left: 24px; } .mp .we-tools { opacity: 1; } .mp .we-gap .we-mini { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) { .mp *, .mp *::before, .mp *::after { transition: none !important; animation: none !important; } }
@@ -257,3 +256,7 @@
 /* 대표 이미지·영상: 칩 줄의 오른쪽 끝에 「파일 선택」 (좁으면 다음 줄로) */
 .mp .pp-roles .pp-file-end { margin-left: auto; }
 @media (max-width: 767px) { .mp .we-pick.we-sub { flex-wrap: wrap; } }
+/* 시안 01: 문서 첨부 점선 상자(글자 왼쪽, 파일 고르기 오른쪽 끝), 이미지 큰 칸 */
+.mp .we-drop-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.mp .we-imgbox { width: 100%; margin-top: 8px; min-height: 240px; cursor: pointer; font: inherit; overflow: hidden; padding: 0; }
+.mp .we-imgbox img { width: 100%; max-height: 360px; object-fit: contain; }

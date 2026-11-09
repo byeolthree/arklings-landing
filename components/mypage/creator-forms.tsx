@@ -4,7 +4,7 @@
 // 모든 저장은 app/actions/creators.ts의 Server Action이 하고(서버가 로그인·이메일 확인·글자 수를 다시 검사한다), 끝나면 서버에서 다시 읽는다(router.refresh).
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   addTextBlock,
   addVideoBlock,
@@ -37,6 +37,108 @@ import type { MyProfile, MyWork } from "@/lib/creators-mine";
 
 const LOGLINE_FRAME = "어느 날 〈사건〉이 벌어지자, 〈주인공〉은 〈장애물〉을 극복해야 〈목표〉를 달성할 수 있다. 그렇지 않으면 〈위험〉이 닥친다.";
 const mb = (n: number) => `${(n / 1024 / 1024).toFixed(1)}MB`;
+
+// 시안 01: 문서 요소 아래의 점선 상자 「외부 문서 첨부 (PDF · 10MB 이하)」와 오른쪽 끝의 「파일 고르기」.
+function DocFilePick({ file, onFile, disabled }: { file?: File | null; onFile: (f: File | null) => void; disabled?: boolean }) {
+  const [msg, setMsg] = useState("");
+  function pick(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
+    const f = input.files?.[0];
+    if (!f) return;
+    if (f.type !== "application/pdf") {
+      input.value = "";
+      return setMsg("PDF 파일만 올릴 수 있어요.");
+    }
+    if (f.size > 10 * 1024 * 1024) {
+      input.value = "";
+      return setMsg(`선택한 파일이 ${mb(f.size)}예요. 10MB 이하만 올릴 수 있어요.`);
+    }
+    setMsg("");
+    onFile(f);
+    input.value = "";
+  }
+  return (
+    <div className="we-drop we-drop-doc" style={{ flex: "1 1 100%" }}>
+      <div className="we-drop-row">
+        <span className="mp-note">외부 문서 첨부 (PDF · 10MB 이하)</span>
+        <label className="btn btn-ghost" style={{ cursor: "pointer" }}>
+          파일 고르기
+          <input type="file" accept="application/pdf" hidden disabled={disabled} onChange={pick} aria-label="문서 파일" />
+        </label>
+      </div>
+      {file && (
+        <span className="len">
+          {file.name} ({mb(file.size)}){" "}
+          <button type="button" className="we-mini" onClick={() => onFile(null)} disabled={disabled}>
+            선택 취소
+          </button>
+        </span>
+      )}
+      {msg && (
+        <p className="pp-err" role="alert">
+          {msg}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// 시안 01: 이미지 요소 = 「▾ 접기 · 이미지 (JPG·PNG·WEBP, 5MB 이하)」 줄 + 이미지가 들어갈 큰 칸(눌러서 고른다).
+function ImageSlotBox({ file, onFile }: { file: File | null; onFile: (f: File | null) => void }) {
+  const [fold, setFold] = useState(false);
+  const [msg, setMsg] = useState("");
+  const ref = useRef<HTMLInputElement>(null);
+  const url = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
+  useEffect(() => () => { if (url) URL.revokeObjectURL(url); }, [url]);
+  function pick(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(f.type)) {
+      e.target.value = "";
+      return setMsg("JPG, PNG, WEBP 이미지만 올릴 수 있어요.");
+    }
+    if (f.size > 5 * 1024 * 1024) {
+      e.target.value = "";
+      return setMsg(`선택한 파일이 ${mb(f.size)}예요. 5MB 이하만 올릴 수 있어요.`);
+    }
+    setMsg("");
+    onFile(f);
+  }
+  return (
+    <div style={{ flex: "1 1 100%" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+        <button type="button" className="we-fold" aria-expanded={!fold} onClick={() => setFold(!fold)}>
+          {fold ? "▸ 펼치기" : "▾ 접기"}
+        </button>
+        <span className="mp-note">· 이미지 (JPG·PNG·WEBP, 5MB 이하)</span>
+      </div>
+      {!fold && (
+        <button type="button" className="we-media we-imgbox" onClick={() => ref.current?.click()} aria-label="이미지 고르기">
+          {url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={url} alt={file?.name ?? "고른 이미지"} />
+          ) : (
+            "이미지"
+          )}
+        </button>
+      )}
+      <input ref={ref} type="file" accept="image/jpeg,image/png,image/webp" hidden aria-label="이미지 파일" onChange={pick} />
+      {file && (
+        <span className="len">
+          {file.name} ({mb(file.size)}){" "}
+          <button type="button" className="we-mini" onClick={() => { onFile(null); if (ref.current) ref.current.value = ""; }}>
+            선택 취소
+          </button>
+        </span>
+      )}
+      {msg && (
+        <p className="pp-err" role="alert">
+          {msg}
+        </p>
+      )}
+    </div>
+  );
+}
 
 // 영상 요소의 「영상 파일 첨부」(2026-11-09 D18 개정, 시안 01): 규칙 안내, 「영상 변환 프롬프트 복사」, 「파일 고르기」. 형식(MP4)·크기(10MB)를 고르는 순간 검사한다.
 // 규칙 글과 프롬프트는 대표 영상 칸과 같은 글(hero-guide.ts)이다. 파일을 고르면 onFile로 넘기고, 올리는 일은 부르는 쪽이 한다.
@@ -545,10 +647,22 @@ async function addSlots(workId: string, slots: Slot[]): Promise<{ error: string 
   for (const sl of slots) {
     if (sl.kind === "logline") {
       order.push(LOGLINE_TOKEN);
-    } else if (sl.kind === "text" && sl.text.trim()) {
-      const r = await addTextBlock(workId, sl.text, sl.sub || null);
-      if (!r.ok) return { error: `문서를 넣지 못했어요. ${r.error}`, order };
-      order.push(r.id);
+    } else if (sl.kind === "text" && (sl.text.trim() || sl.file)) {
+      if (sl.text.trim()) {
+        const r = await addTextBlock(workId, sl.text, sl.sub || null);
+        if (!r.ok) return { error: `문서를 넣지 못했어요. ${r.error}`, order };
+        order.push(r.id);
+      }
+      if (sl.file) {
+        if (kindOfMime(sl.file.type) !== "document") return { error: "PDF 파일만 올릴 수 있어요.", order };
+        const slot = await prepareFileUpload(workId, { kind: "document", type: sl.file.type, size: sl.file.size });
+        if (!slot.ok) return { error: slot.error, order };
+        const up = await uploadToSlot(slot.path, slot.token, sl.file);
+        if (!up.ok) return { error: up.error, order };
+        const fin = await finishFileUpload(workId, { path: slot.path, kind: "document", name: sl.file.name, subKind: sl.sub || null });
+        if (!fin.ok) return { error: fin.error, order };
+        order.push(fin.id);
+      }
     } else if (sl.kind === "video" && sl.url.trim() && sl.file) {
       return { error: "영상은 유튜브 주소와 파일 중 하나만 넣어 주세요.", order };
     } else if (sl.kind === "video" && sl.url.trim()) {
@@ -780,12 +894,8 @@ export function WorkEditor({
                   {sl.kind === "video" && <SubChips items={VIDEO_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="영상 종류" />}
                   {sl.kind === "text" && <SubChips items={DOC_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="문서 종류" />}
                   {sl.kind === "text" && <textarea className="we-text" rows={3} placeholder="〈문서〉" aria-label="문서" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
-                  {sl.kind === "image" && (
-                    <label className="we-line">
-                      <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="이미지 파일" onChange={(e) => patchSlot(sl.id, { file: e.target.files?.[0] ?? null })} />{" "}
-                      이미지 (JPG·PNG·WEBP)
-                    </label>
-                  )}
+                  {sl.kind === "text" && <DocFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
+                  {sl.kind === "image" && <ImageSlotBox file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
                   {sl.kind === "video" && <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={sl.url} onChange={(e) => patchSlot(sl.id, { url: e.target.value })} />}
                   {sl.kind === "video" && <p className="mp-note" style={{ flex: "1 1 100%" }}>유튜브 주소로 넣으면 용량 제한 없이 올릴 수 있어요.</p>}
                   {sl.kind === "video" && <VideoFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
@@ -815,21 +925,19 @@ export function WorkEditor({
         </p>
       )}
       <div className="we-foot">
-        <div className="we-foot-l">
-          {work && (
-            <Link className="btn btn-ghost" href={`/portfolio/${work.id}`} target="_blank" rel="noopener noreferrer">
-              미리 보기
-            </Link>
-          )}
-          {work && (
-            <button type="button" className="btn btn-ghost we-del" onClick={removeWork} disabled={disabled}>
-              작품 지우기
-            </button>
-          )}
-        </div>
+        {work && (
+          <Link className="btn btn-ghost" href={`/portfolio/${work.id}`} target="_blank" rel="noopener noreferrer">
+            미리 보기
+          </Link>
+        )}
         <button type="button" className="btn btn-ghost" onClick={onClose} disabled={disabled}>
           취소
         </button>
+        {work && (
+          <button type="button" className="btn btn-ghost we-del" onClick={removeWork} disabled={disabled}>
+            삭제
+          </button>
+        )}
         <button type="button" className="btn btn-primary" onClick={save} disabled={disabled}>
           {busy ? "저장하는 중…" : "저장"}
         </button>
@@ -843,6 +951,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
   const router = useRouter();
   const [folded, setFolded] = useState<Record<string, boolean>>({});
   const [adding, setAdding] = useState<null | "text" | "video">(null);
+  const [draftDoc, setDraftDoc] = useState<File | null>(null);
   const [insertAt, setInsertAt] = useState<number | null>(null); // 요소 사이의 「+」를 누르면 새 요소가 그 자리에 들어간다
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
@@ -884,10 +993,19 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
   }
 
   async function add() {
+    if (adding === "text" && !draft.trim() && draftDoc) {
+      const f = draftDoc;
+      setDraftDoc(null);
+      setAdding(null);
+      return void upload(f, "document");
+    }
     const ok = await run(() => (adding === "text" ? addTextBlock(work.id, draft) : addVideoBlock(work.id, draft)));
     if (ok) {
+      const f = adding === "text" ? draftDoc : null;
       setDraft("");
       setAdding(null);
+      setDraftDoc(null);
+      if (f) void upload(f, "document");
     }
   }
 
@@ -1017,9 +1135,10 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
             ) : (
               <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="https://youtu.be/…" value={draft} onChange={(e) => setDraft(e.target.value)} style={{ flex: "1 1 100%" }} />
             )}
+            {adding === "text" && <DocFilePick file={draftDoc} onFile={setDraftDoc} disabled={busy} />}
             {adding === "video" && <VideoFilePick disabled={busy} onFile={(f) => { if (f) { setAdding(null); setDraft(""); void upload(f, "video"); } }} />}
             <button type="button" className="btn btn-primary" disabled={busy} onClick={add}>추가</button>
-            <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => { setAdding(null); setDraft(""); }}>취소</button>
+            <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => { setAdding(null); setDraft(""); setDraftDoc(null); }}>취소</button>
           </div>
         </div>
       )}
