@@ -1087,6 +1087,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
                 {folded[b.id] ? "▸ 펼치기" : "▾ 접기"}
               </button>
             )}
+            {b && b.kind === "image" && <span className="mp-note">· 이미지 (JPG·PNG·WEBP, 5MB 이하)</span>}
             {b && b.kind === "text" && (
               <>
                 <textarea className="we-text" rows={3} aria-label="문서" value={edits[b.id] ?? b.body} onChange={(e) => setEdits({ ...edits, [b.id]: e.target.value })} />
@@ -1095,6 +1096,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
                     문서 저장
                   </button>
                 )}
+                <DocFilePick file={null} onFile={(f) => { if (f) void upload(f, "document"); }} disabled={busy} />
               </>
             )}
             {b && b.kind === "image" && (folded[b.id] ? <span className="we-line">이미지 {b.fileName ?? ""}</span> : b.src ? (
