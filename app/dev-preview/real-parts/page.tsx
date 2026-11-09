@@ -7,6 +7,7 @@ import { CreatorProfileForm, PortfolioManager } from "@/components/mypage/creato
 import { RegisterScreen } from "@/components/register/register-screen";
 import { SiteNav } from "@/components/site-nav";
 import { WorkDetail } from "@/components/creators/work-detail";
+import { StatusBadge } from "@/components/status-badge";
 import { RegisterHeader } from "@/components/register/register-steps";
 import type { MyWork } from "@/lib/creators-mine";
 import type { WorkCard } from "@/components/creators/types";
@@ -45,6 +46,13 @@ export default async function RealPartsPreview({ searchParams }: { searchParams:
             </div>
           </div>
         </section>
+      )}
+      {part === "status" && (
+        <div style={{ display: "flex", gap: 8, padding: 24 }}>
+          {(["received", "reviewing", "accepted", "rejected"] as const).map((x) => (
+            <StatusBadge key={x} status={x} />
+          ))}
+        </div>
       )}
       {part === "hero" && (
         <section className="mp-sec s2">
