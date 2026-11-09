@@ -4,9 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SAMPLE_CREATORS } from "@/components/creators/sample-data";
 import { PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
-import { ROLES } from "@/lib/collab";
-import { GENRES } from "@/components/creators/genres";
-import { WorkEditor } from "@/components/mypage/work-editor";
+import { PortfolioManage } from "@/components/mypage/portfolio-manage";
 import type { ProfileValues } from "@/lib/creator-rules";
 
 export type ProfileState = "none" | "public" | "private";
@@ -18,6 +16,9 @@ const MESSAGES: Record<string, { text: string; ok?: boolean }> = {
   link_failed: { text: "로그인 방법을 바꾸지 못했어요. 잠시 뒤에 다시 시도해 주세요." },
   unlink_last: { text: "로그인 방법이 하나뿐이라 해제할 수 없어요. 다른 방법을 먼저 추가해 주세요." },
 };
+
+// 「내 기획안」 목록은 둘 자리가 정해질 때까지 화면에서 뺐다(2026-11-09 지시).
+const SHOW_PLANS = false;
 
 const BASE_SECTIONS = [
   { id: "mp-basic", label: "기본 정보" },
@@ -127,6 +128,7 @@ function Section({
   extra,
   open,
   onToggle,
+  noToggle,
   children,
 }: {
   id: string;
@@ -135,6 +137,7 @@ function Section({
   extra?: React.ReactNode;
   open: boolean;
   onToggle: () => void;
+  noToggle?: boolean; // 접기 버튼이 없는 구역(포트폴리오 등록: 맨 윗줄이 접힌 등록 화면)
   children: React.ReactNode;
 }) {
   return (
@@ -143,10 +146,12 @@ function Section({
         <div className="mp-sh">
           <h2 id={`${id}-h`}>{title}</h2>
           {extra && <div className="mp-extra">{extra}</div>}
-          <button type="button" className="btn btn-ghost mp-toggle" aria-expanded={open} aria-controls={`${id}-body`} onClick={onToggle}>
-            {open ? "접기" : "펼치기"}
-            <span className="mp-chev" aria-hidden="true" />
-          </button>
+          {!noToggle && (
+            <button type="button" className="btn btn-ghost mp-toggle" aria-expanded={open} aria-controls={`${id}-body`} onClick={onToggle}>
+              {open ? "접기" : "펼치기"}
+              <span className="mp-chev" aria-hidden="true" />
+            </button>
+          )}
         </div>
         <div id={`${id}-body`} className="mp-card" hidden={!open}>
           {children}
@@ -178,8 +183,6 @@ export function MypagePreview({
   const [active, setActive] = useState<string>("mp-basic");
   const [saved, setSaved] = useState(false);
   const [showPending, setShowPending] = useState(pending);
-  const [openWork, setOpenWork] = useState<[boolean, boolean]>([true, true]);
-  const setWork = (i: 0 | 1, v: boolean) => setOpenWork((cur) => (i === 0 ? [v, cur[1]] : [cur[0], v]));
   const banner = msg ? MESSAGES[msg] : undefined;
   const exists = profile !== "none";
   const isPublic = profile === "public";
@@ -352,91 +355,30 @@ export function MypagePreview({
             {saved && <p className="mp-sample">저장했어요(샘플).</p>}
           </Section>
 
-          <Section id="mp-portfolio" tone="s3" title="포트폴리오 등록" open={open["mp-portfolio"]} onToggle={() => toggle("mp-portfolio")}>
-            <div className="mp-top-row">
-              <div className="mp-count">
-                <span>〈작품 4 / 12〉</span>
-                <span>〈파일 12MB / 20MB〉</span>
+          <Section id="mp-portfolio" tone="s3" title="포트폴리오 등록" open={open["mp-portfolio"]} onToggle={() => toggle("mp-portfolio")} noToggle>
+            <PortfolioManage />
+            {/* 「내 기획안」 목록: 둘 자리가 정해지지 않아 화면에서만 뺐다(코드는 남겨 둔다) */}
+            {SHOW_PLANS && (
+              <div className="mp-plans">
+                <h3>내 기획안</h3>
+                {plans ?? (
+                  <ul>
+                    <li>
+                      <span>〈기획안 제목〉</span>
+                      <span>〈공개 중〉 · <Link href={PLANNER_HREF}>열기</Link></span>
+                    </li>
+                    <li>
+                      <span>〈기획안 제목〉</span>
+                      <span>〈공개하지 않음〉 · <Link href={PLANNER_HREF}>열기</Link></span>
+                    </li>
+                    <li className="off">
+                      <span>〈기획안 제목〉</span>
+                      <span>〈다른 작품에 붙음〉</span>
+                    </li>
+                  </ul>
+                )}
               </div>
-              <button type="button" className="btn btn-primary">
-                〈작품 추가〉
-              </button>
-            </div>
-
-            <div className="mp-plans">
-              <h3>내 기획안</h3>
-              {plans ?? (
-              <ul>
-                <li>
-                  <span>〈기획안 제목〉</span>
-                  <span>〈공개 중〉 · <Link href={PLANNER_HREF}>열기</Link></span>
-                </li>
-                <li>
-                  <span>〈기획안 제목〉</span>
-                  <span>〈공개하지 않음〉 · <Link href={PLANNER_HREF}>열기</Link></span>
-                </li>
-                <li className="off">
-                  <span>〈기획안 제목〉</span>
-                  <span>〈다른 작품에 붙음〉</span>
-                </li>
-              </ul>
-              )}
-            </div>
-
-            <div className="mp-works">
-              {openWork[0] ? (
-                <WorkEditor isPublic={true} roles={["video", "script"]} onFold={() => setWork(0, false)} />
-              ) : (
-              <div className="mp-work">
-                <div className="mp-thumb">대표 이미지</div>
-                <div className="mp-work-main">
-                  <p className="mp-work-title">〈작품 제목〉</p>
-                  <div className="mp-work-meta">
-                    <span className="mp-tag">{ROLES.video}</span>
-                    <span className="mp-tag">{ROLES.script}</span>
-                    <span>〈공개 중〉</span>
-                  </div>
-                  <div className="mp-genres">
-                    <span className="mp-tag genre">{GENRES[0]}</span>
-                    <span className="mp-tag genre">{GENRES[2]}</span>
-                  </div>
-                </div>
-                <div className="mp-work-btns">
-                  <button type="button" className="btn btn-ghost">
-                    포트폴리오에서 내리기
-                  </button>
-                  <button type="button" className="btn btn-ghost" onClick={() => setWork(0, true)}>
-                    펼쳐서 꾸미기 ▾
-                  </button>
-                </div>
-              </div>
-              )}
-              {openWork[1] ? (
-                <WorkEditor isPublic={false} roles={["art_director"]} onFold={() => setWork(1, false)} />
-              ) : (
-              <div className="mp-work">
-                <div className="mp-thumb">대표 이미지</div>
-                <div className="mp-work-main">
-                  <p className="mp-work-title">〈작품 제목〉</p>
-                  <div className="mp-work-meta">
-                    <span className="mp-tag">{ROLES.art_director}</span>
-                    <span>〈공개하지 않음〉</span>
-                  </div>
-                  <div className="mp-genres">
-                    <span className="mp-tag genre">{GENRES[0]}</span>
-                  </div>
-                </div>
-                <div className="mp-work-btns">
-                  <button type="button" className="btn btn-ghost">
-                    포트폴리오에 올리기
-                  </button>
-                  <button type="button" className="btn btn-ghost" onClick={() => setWork(1, true)}>
-                    펼쳐서 꾸미기 ▾
-                  </button>
-                </div>
-              </div>
-              )}
-            </div>
+            )}
           </Section>
 
           {collab && (

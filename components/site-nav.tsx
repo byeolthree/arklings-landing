@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { signOut } from "@/app/actions/auth";
 
 // 랜딩(public/landing.html)의 상단 메뉴와 같은 모양. 가운데 메뉴 글자 중 연결된 화면이 있는 것만 링크(지금은 「크리에이터」), 나머지는 글자로만 둔다.
@@ -45,15 +45,16 @@ export function SiteNav({ loggedIn }: { loggedIn: boolean }) {
   const [open, setOpen] = useState(false);
   const [drop, setDrop] = useState<Drop>(null);
   const [scrolled, setScrolled] = useState(false);
-  const [sampleOut, setSampleOut] = useState(false);
   const pathname = usePathname();
   const navRef = useRef<HTMLDivElement>(null);
 
   // 샘플 미리보기(/dev-preview) 화면은 로그인한 모습으로 보여 준다(주소 끝에 ?nav=out을 붙이면 로그아웃한 모습). 실제 화면은 서버가 알려 준 로그인 여부를 그대로 쓴다.
   const isSample = pathname.startsWith("/dev-preview");
-  useEffect(() => {
-    setSampleOut(new URLSearchParams(window.location.search).get("nav") === "out");
-  }, [pathname]);
+  const sampleOut = useSyncExternalStore(
+    () => () => {},
+    () => new URLSearchParams(window.location.search).get("nav") === "out",
+    () => false,
+  );
   const isIn = isSample ? !sampleOut : loggedIn;
 
   // 크리에이터 목록·프로필과 그 사람의 기획안 상세에 있을 때 메뉴의 「크리에이터」를 현재 위치로 보여 준다.
