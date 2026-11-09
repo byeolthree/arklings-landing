@@ -84,7 +84,10 @@ export default async function CollabListPage({ searchParams }: { searchParams: S
                       {collabTargetOf(r, names).text} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)}
                     </p>
                   </div>
-                  <StatusBadge status={r.status} />
+                  <span className="flex items-center gap-3">
+                    <StatusBadge status={r.status} />
+                    <span className="inline-flex h-9 items-center rounded-lg border border-[#574a50] px-4 text-[13px] font-bold text-[#574a50]">열기</span>
+                  </span>
                 </Link>
               </li>
             ))}

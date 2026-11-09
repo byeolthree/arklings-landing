@@ -153,7 +153,7 @@ export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; ne
               <div className="lk-drop" role="menu">
                 {isIn ? (
                   <>
-                    <Link role="menuitem" href="/mypage#mp-basic" onClick={shut}>
+                    <Link role="menuitem" href="/mypage" onClick={shut}>
                       기본 정보
                     </Link>
                     <Link role="menuitem" href="/portfolio/new?step=profile" onClick={shut}>
@@ -161,6 +161,9 @@ export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; ne
                     </Link>
                     <Link role="menuitem" href="/portfolio/new" onClick={shut}>
                       포트폴리오 등록
+                    </Link>
+                    <Link role="menuitem" href="/mypage/collab" onClick={shut}>
+                      협업 신청
                     </Link>
                     <hr />
                     <form action={signOut}>

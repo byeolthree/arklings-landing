@@ -1,24 +1,28 @@
 import Link from "next/link";
 
-// 등록 흐름의 단계 칩(시안 01): 로그인·가입 → 이메일 확인 → 프로필 등록 → 포트폴리오 등록. 지금 단계만 진하게 칠한다.
-const STEPS = ["로그인·가입", "이메일 확인", "프로필 등록", "포트폴리오 등록"] as const;
+// 마이페이지 네 화면의 맨 위 띠(시안 01·12·13, D39·D42): 제목은 늘 「마이페이지」, 칩 이름은 「기본 정보 · 프로필 등록 · 포트폴리오 등록 · 협업 신청」이다.
+// 지금 화면의 칩만 진하게 칠하고, 나머지는 누르면 그 화면으로 간다.
+const STEPS = ["기본 정보", "프로필 등록", "포트폴리오 등록", "협업 신청"] as const;
 export type Step = (typeof STEPS)[number];
 
-export function RegisterHeader({ title, current, hrefs }: { title: string; current: Step; hrefs?: Partial<Record<Step, string>> }) {
+const HREFS: Record<Step, string> = {
+  "기본 정보": "/mypage",
+  "프로필 등록": "/portfolio/new?step=profile",
+  "포트폴리오 등록": "/portfolio/new",
+  "협업 신청": "/mypage/collab",
+};
+
+export function RegisterHeader({ current }: { title?: string; current: Step }) {
   return (
     <div className="rg-top">
       <div className="rg-wrap">
-        <h1 className="rg-title">{title}</h1>
-        <p className="rg-desc">〈설명 문구〉</p>
-        <ol className="rg-steps" aria-label="등록 순서">
-          {STEPS.map((s) => {
-            const href = hrefs?.[s];
-            return (
-              <li key={s} aria-current={s === current ? "step" : undefined}>
-                {href && s !== current ? <Link href={href}>{s}</Link> : s}
-              </li>
-            );
-          })}
+        <h1 className="rg-title">마이페이지</h1>
+        <ol className="rg-steps" aria-label="마이페이지 이동">
+          {STEPS.map((s) => (
+            <li key={s} aria-current={s === current ? "step" : undefined}>
+              {s === current ? s : <Link href={HREFS[s]}>{s}</Link>}
+            </li>
+          ))}
         </ol>
       </div>
     </div>
