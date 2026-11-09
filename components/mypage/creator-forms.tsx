@@ -351,11 +351,12 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
 }
 
 // ── 크리에이터 등록 ─────────────────────────────────────────────────────────────────
-export function CreatorProfileForm({ profile, workCount = 0 }: { profile: MyProfile | null; workCount?: number }) {
+export function CreatorProfileForm({ profile, workCount = 0, showSaved = false }: { profile: MyProfile | null; workCount?: number; showSaved?: boolean }) {
   const router = useRouter();
   const [note, setNote] = useState("");
-  // 작품 없이 프로필만 저장했을 때 뜨는 안내 창. 창이 떠 있는 동안에는 화면을 새로 읽지 않는다(새로 읽으면 이 창이 있는 화면이 바뀐다).
-  const [savedPopup, setSavedPopup] = useState(false);
+  // 작품 없이 프로필만 저장했을 때 뜨는 안내 창. 저장하면 주소에 ?saved=1을 붙이고, 창은 서버가 그 주소를 보고 그린다(저장 직후 화면을 다시 읽어도 사라지지 않는다).
+  const [dismissed, setDismissed] = useState(false);
+  const savedPopup = showSaved && !dismissed;
   const [busy, setBusy] = useState(false);
   // 프로필을 만들기 전에 고른 대표 파일: 프로필을 만든 직후에 올린다.
   const [pendingHero, setPendingHero] = useState<{ file: File; kind: "image" | "video" } | null>(null);
@@ -375,7 +376,8 @@ export function CreatorProfileForm({ profile, workCount = 0 }: { profile: MyProf
       setNote(err ? `프로필은 저장했어요. 대표 파일은 올리지 못했어요. ${err}` : "프로필과 대표 파일을 저장했어요.");
     }
     if (workCount === 0) {
-      setSavedPopup(true);
+      setDismissed(false);
+      router.replace("/portfolio/new?step=profile&saved=1");
       return { ok: true };
     }
     router.refresh();
@@ -447,8 +449,8 @@ export function CreatorProfileForm({ profile, workCount = 0 }: { profile: MyProf
               type="button"
               className="mp-modal-close"
               onClick={() => {
-                setSavedPopup(false);
-                router.refresh();
+                setDismissed(true);
+                router.replace("/portfolio/new?step=profile");
               }}
             >
               닫기

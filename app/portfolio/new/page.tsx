@@ -59,7 +59,7 @@ export default async function PortfolioNewPage({ searchParams }: { searchParams:
         <div className="rg-prof">
           <div className="rg-wrap rg-prof-wrap">
             <div className="rg-prof-card mp-card">
-              <CreatorProfileForm profile={data.profile} workCount={data.works.length} />
+              <CreatorProfileForm profile={data.profile} workCount={data.works.length} showSaved={sp.saved === "1"} />
             </div>
           </div>
         </div>
