@@ -60,7 +60,7 @@
 .lk-nav .lk-btn { min-height: 36px; padding: 0 16px; font-size: 13px; }
 @media (min-width: 768px) { .lk-logo { font-size: 24px; } }
 @media (min-width: 900px) { .lk-nav-links, .lk-nav-right .lk-textlink { display: flex; } }
-.lk-burger { display: none; position: relative; width: 40px; height: 40px; margin-right: -8px; border: 0; background: none; cursor: pointer; border-radius: 10px; }
+.lk-burger { display: none; position: relative; width: 40px; height: 40px; margin-left: -8px; margin-right: -12px; border: 0; background: none; cursor: pointer; border-radius: 10px; }
 .lk-burger i { position: absolute; left: 10px; right: 10px; height: 2px; border-radius: 2px; background: var(--title); transition: transform .3s var(--ease), opacity .2s; }
 .lk-burger i:nth-child(1) { top: 13px; } .lk-burger i:nth-child(2) { top: 19px; } .lk-burger i:nth-child(3) { top: 25px; }
 .lk-burger[aria-expanded="true"] i:nth-child(1) { transform: translateY(6px) rotate(45deg); }
@@ -68,7 +68,6 @@
 .lk-burger[aria-expanded="true"] i:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 .lk-menu { display: none; }
 @media (max-width: 899px) {
-  .lk-nav-cta { display: none !important; }
   .lk-burger { display: block; }
   .lk-menu { display: grid; position: absolute; left: 0; right: 0; top: 100%; padding: 8px 20px 16px;
     background: rgba(250,247,248,.98); box-shadow: 0 18px 30px -24px rgba(42,32,37,.4);
@@ -93,3 +92,28 @@
 
 /* 누르는 동안 살짝 작아지고 진해진다 */
 .lk-btn:active { transform: scale(.97); filter: brightness(.92); }
+
+/* ---------- 상단 메뉴 오른쪽 아이콘 셋(＋ · 사람 · 종)과 드롭다운 ---------- */
+.lk-nav { position: relative; }
+.lk-icons { gap: 8px; }
+.lk-ico-wrap { position: relative; }
+.lk-ico { position: relative; display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--jaju); background: #fff; color: var(--jaju); cursor: pointer; text-decoration: none; padding: 0; }
+.lk-ico.lk-ico-fill { background: var(--jaju); color: #fff; }
+.lk-badge { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #c83a3a; color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
+.lk-drop { position: absolute; z-index: 60; right: 0; top: calc(100% + 10px); min-width: 188px; padding: 10px 8px; background: #fff; border-radius: 16px;
+  box-shadow: 0 24px 48px -20px rgba(42,32,37,.45), 0 2px 8px rgba(42,32,37,.08); }
+.lk-drop > a, .lk-drop > span, .lk-drop form > button { display: block; width: 100%; padding: 11px 14px; border: 0; background: none; font: inherit; font-size: 15px; color: var(--title); text-align: left; text-decoration: none; cursor: pointer; border-radius: 10px; }
+.lk-drop > span { cursor: default; }
+.lk-drop > a[aria-current="page"] { color: var(--jaju); font-weight: 700; }
+.lk-drop-cap { padding: 6px 14px 4px; font-size: 12px; color: var(--body); }
+.lk-drop hr { margin: 6px 12px; border: 0; border-top: 1px solid var(--line); }
+.lk-drop-bell { width: 320px; padding: 14px 12px 8px; }
+.lk-drop-title { padding: 0 8px 10px; font-size: 14px; font-weight: 700; color: var(--title); }
+.lk-drop-bell ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.lk-drop-bell li a { display: block; padding: 12px 14px; border-radius: 12px; background: var(--bg); color: var(--title); text-decoration: none; font-size: 14px; line-height: 1.55; }
+.lk-drop-bell li small { display: block; margin-top: 4px; font-size: 12px; color: var(--body); }
+.lk-drop-bell .lk-drop-all { display: block; margin-top: 10px; padding: 12px 8px 8px; border-top: 1px solid var(--line); text-align: center; color: var(--jaju); font-weight: 700; font-size: 14px; text-decoration: none; }
+@media (max-width: 899px) {
+  .lk-nav { gap: 12px; }
+  .lk-drop-bell { position: fixed; left: 8px; right: 8px; top: 72px; width: auto; }
+}
