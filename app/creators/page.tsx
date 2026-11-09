@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { CreatorList } from "@/components/creators/creator-list";
 import { parseFilter, type CreatorFilter } from "@/components/creators/filter";
+import { CreatorListSkeleton } from "@/components/creators/state-views";
 import { toCreatorCard } from "@/lib/creator-cards";
 import { CREATOR_PAGE_SIZE, listCreators } from "@/lib/creators";
 
@@ -10,7 +12,16 @@ export const dynamic = "force-dynamic"; // 공개를 끄면 바로 목록에서 
 type SP = Promise<Record<string, string | string[] | undefined>>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
-export default async function CreatorsPage({ searchParams }: { searchParams: SP }) {
+// 불러오는 중 모양은 이 페이지 안에서 보여 준다. app/creators/loading.tsx는 이 아래 모든 주소(/creators/<주소>)를 감싸 못 찾음 응답 코드를 200으로 굳히므로 없앤다.
+export default function CreatorsPage({ searchParams }: { searchParams: SP }) {
+  return (
+    <Suspense fallback={<CreatorListSkeleton />}>
+      <CreatorsContent searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function CreatorsContent({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
   const requested = Math.max(1, parseInt(one(sp.page) ?? "1", 10) || 1);
   const filter = parseFilter({ q: one(sp.q), role: one(sp.role), genre: one(sp.genre), form: one(sp.form), open: one(sp.open) });
