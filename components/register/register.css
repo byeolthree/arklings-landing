@@ -101,7 +101,9 @@
 .rg .we-top-btns .btn-primary { box-shadow: 0 8px 16px -8px rgba(166,30,92,.55); }
 /* 제목·작성자 줄·장르 칩 */
 .rg .we-head { margin-top: 16px; }
-.rg .we-title { border: 0; padding: 0; font-size: 24px; line-height: 31px; font-weight: 400; color: var(--title); }
+.rg .we-title { border: 0; border-bottom: 1px solid var(--line); padding: 0 0 6px; font-size: 24px; line-height: 31px; font-weight: 400; color: var(--title); }
+.rg .we-title:focus { outline: none; border-bottom-color: var(--primary, #A61E5C); }
+.rg .mp-state { cursor: pointer; font-family: inherit; }
 .rg .we-title::placeholder { color: #b6abb0; }
 .rg .we-by { margin-top: 8px; font-size: 14px; line-height: 22px; }
 .rg .we-pick { gap: 8px; margin-top: 14px; }

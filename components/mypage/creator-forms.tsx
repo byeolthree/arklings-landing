@@ -744,6 +744,7 @@ export function WorkEditor({
   const [errs, setErrs] = useState<Record<string, string>>({});
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [newPublic, setNewPublic] = useState(true);
   // 새 작품: 승인 샘플처럼 글·이미지·영상·문서 칸이 처음부터 있고 순서를 바꾸거나 지울 수 있다. 「저장」을 누르면 작품을 만든 뒤 채운 칸을 이 순서대로 넣는다.
   const [slots, setSlots] = useState<Slot[]>(() => (work ? [] : (["video", "logline", "text", "image"] as SlotKind[]).map(newSlot)));
   const dragSlot = useRef<string | null>(null);
@@ -793,8 +794,15 @@ export function WorkEditor({
         const m = await reorderWorkItems(r.id, order);
         if (!m.ok) moved = m.error;
       }
+      // 「공개 중」으로 두고 저장했으면 만든 작품을 올린다. 올리지 못하면 이유를 보여 주고 작품은 비공개로 남는다.
+      let publishErr: string | null = null;
+      if (newPublic) {
+        const p = await setWorkPublic(r.id, true);
+        if (!p.ok) publishErr = p.error;
+      }
       router.refresh();
       onCreated?.(r.id);
+      if (publishErr) return setMsg({ text: `작품은 저장했어요. 공개로 올리지는 못했어요. ${publishErr}`, err: true });
       if (failed) return setMsg({ text: `작품은 저장했어요. ${failed}`, err: true });
       if (moved) return setMsg({ text: `작품은 저장했어요. 로그라인 자리는 저장하지 못했어요. ${moved}`, err: true });
       return setMsg({ text: "저장했어요." });
@@ -815,20 +823,29 @@ export function WorkEditor({
   }
 
   const disabled = busy || busyOuter;
+  // 새 작품은 처음부터 「공개 중」. 저장할 때 이 값대로 올린다. 이미 있는 작품은 누르는 즉시 바뀐다.
+  const shownPublic = work ? work.isPublic : newPublic;
+  function togglePublicChip() {
+    if (work) return onTogglePublic?.();
+    setNewPublic((v) => !v);
+  }
   return (
     <div className="mp-work we">
-      <div className="we-top">
-        <span className="we-state">{work ? (work.isPublic ? "공개 중" : "공개하지 않음") : "공개하지 않음"}</span>
-        {topNote && <span className="we-note">{topNote}</span>}
-        <span className="we-top-btns">
+      <div className="we-top" style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center" }}>
+        <span className="we-note">{topNote}</span>
+        <button
+          type="button"
+          className={`mp-state ${shownPublic ? "on" : ""}`}
+          onClick={togglePublicChip}
+          disabled={disabled}
+          aria-label={shownPublic ? "공개 중. 누르면 비공개로 바꿉니다" : "비공개. 누르면 공개로 바꿉니다"}
+        >
+          {shownPublic ? "공개 중" : "비공개"}
+        </button>
+        <span className="we-top-btns" style={{ justifySelf: "end" }}>
           {work && (
             <button type="button" className="btn btn-ghost we-close" onClick={onClose}>
               접기 ▴
-            </button>
-          )}
-          {work && onTogglePublic && (
-            <button type="button" className="btn btn-primary" onClick={onTogglePublic} disabled={disabled}>
-              {work.isPublic ? "포트폴리오에서 내리기" : "포트폴리오에 올리기"}
             </button>
           )}
         </span>
@@ -838,7 +855,7 @@ export function WorkEditor({
         <input className="we-title" type="text" placeholder="〈제목〉" aria-label="작품 제목" value={title} maxLength={TITLE_MAX} onChange={(e) => setTitle(e.target.value)} aria-invalid={errs.title ? true : undefined} />
         {errs.title && <p className="mp-msg err" role="alert">{errs.title}</p>}
         <p className="we-by">
-          {nickname || "닉네임"} · {work && work.isPublic ? new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" }) : "게시 전"}
+          {nickname || "닉네임"} · {work && work.isPublic ? new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" }) : work || !newPublic ? "비공개" : "저장하면 공개"}
         </p>
         {errs.roles && <p className="mp-msg err" role="alert">{errs.roles}</p>}
         <div className="we-pick" role="group" aria-label="장르">
