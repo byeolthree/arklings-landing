@@ -11,10 +11,10 @@ const LOGLINE_HINT = "어느 날 〈사건〉이 벌어지자, 〈주인공〉�
 type Kind = "text" | "image" | "video" | "doc";
 const FOLDABLE: Kind[] = ["image", "video", "doc"];
 const ADD: { kind: Kind; label: string }[] = [
-  { kind: "text", label: "글" },
+  { kind: "text", label: "문서" },
   { kind: "image", label: "이미지" },
   { kind: "video", label: "영상" },
-  { kind: "doc", label: "문서" },
+  { kind: "doc", label: "문서(PDF)" },
 ];
 
 function Tools({ first, last }: { first: boolean; last: boolean }) {
@@ -38,7 +38,7 @@ function Element({ kind, first, last, folded, onFold }: { kind: Kind; first: boo
             {folded ? "▸ 펼치기" : "▾ 접기"}
           </button>
         )}
-        {kind === "text" && <textarea className="we-text" rows={3} placeholder="〈글〉" aria-label="글" />}
+        {kind === "text" && <textarea className="we-text" rows={3} placeholder="〈문서〉" aria-label="문서" />}
         {kind === "image" && (folded ? <span className="we-line">이미지 〈파일 이름〉</span> : <div className="we-media">〈이미지〉</div>)}
         {kind === "video" && (folded ? <span className="we-line">영상 〈제목〉 · youtube.com</span> : <div className="we-media">〈영상〉</div>)}
         {kind === "doc" && (folded ? <span className="we-line">문서(PDF) 〈파일 이름〉 · 4.8MB</span> : <div className="we-media doc">〈문서〉</div>)}

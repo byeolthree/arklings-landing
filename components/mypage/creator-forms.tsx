@@ -545,7 +545,7 @@ async function addSlots(workId: string, slots: Slot[]): Promise<{ error: string 
       order.push(LOGLINE_TOKEN);
     } else if (sl.kind === "text" && sl.text.trim()) {
       const r = await addTextBlock(workId, sl.text, sl.sub || null);
-      if (!r.ok) return { error: `글을 넣지 못했어요. ${r.error}`, order };
+      if (!r.ok) return { error: `문서를 넣지 못했어요. ${r.error}`, order };
       order.push(r.id);
     } else if (sl.kind === "video" && sl.url.trim() && sl.file) {
       return { error: "영상은 유튜브 주소와 파일 중 하나만 넣어 주세요.", order };
@@ -660,7 +660,7 @@ export function WorkEditor({
 
   async function removeWork() {
     if (!work) return onClose();
-    if (!window.confirm(`「${work.title}」을 지울까요? 안에 올린 글·이미지·문서도 함께 지워지고 되돌릴 수 없어요.`)) return;
+    if (!window.confirm(`「${work.title}」을 지울까요? 안에 올린 문서·이미지·영상도 함께 지워지고 되돌릴 수 없어요.`)) return;
     setBusy(true);
     const r = await deleteWork(work.id);
     setBusy(false);
@@ -777,7 +777,7 @@ export function WorkEditor({
                   )}
                   {sl.kind === "video" && <SubChips items={VIDEO_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="영상 종류" />}
                   {(sl.kind === "text" || sl.kind === "doc") && <SubChips items={DOC_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="문서 종류" />}
-                  {sl.kind === "text" && <textarea className="we-text" rows={3} placeholder="〈글〉" aria-label="글" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
+                  {sl.kind === "text" && <textarea className="we-text" rows={3} placeholder="〈문서〉" aria-label="문서" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
                   {sl.kind === "image" && (
                     <label className="we-line">
                       <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="이미지 파일" onChange={(e) => patchSlot(sl.id, { file: e.target.files?.[0] ?? null })} />{" "}
@@ -804,7 +804,7 @@ export function WorkEditor({
           ))}
           <div className="we-add">
             <span>추가</span>
-            {([["text", "글"], ["image", "이미지"], ["video", "영상"], ["doc", "문서"]] as [SlotKind, string][]).map(([k, l]) => (
+            {([["text", "문서"], ["image", "이미지"], ["video", "영상"], ["doc", "문서(PDF)"]] as [SlotKind, string][]).map(([k, l]) => (
               <button key={k} type="button" className="btn btn-ghost" onClick={() => setSlots((cur) => [...cur, newSlot(k)])}>
                 + {l}
               </button>
@@ -974,10 +974,10 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
             )}
             {b && b.kind === "text" && (
               <>
-                <textarea className="we-text" rows={3} aria-label="글" value={edits[b.id] ?? b.body} onChange={(e) => setEdits({ ...edits, [b.id]: e.target.value })} />
+                <textarea className="we-text" rows={3} aria-label="문서" value={edits[b.id] ?? b.body} onChange={(e) => setEdits({ ...edits, [b.id]: e.target.value })} />
                 {edits[b.id] !== undefined && edits[b.id] !== b.body && (
-                  <button type="button" className="btn btn-ghost" disabled={busy} onClick={async () => { if (await run(() => updateTextBlock(b.id, edits[b.id]), "글을 저장했어요.")) setEdits((cur) => Object.fromEntries(Object.entries(cur).filter(([k]) => k !== b.id))); }}>
-                    글 저장
+                  <button type="button" className="btn btn-ghost" disabled={busy} onClick={async () => { if (await run(() => updateTextBlock(b.id, edits[b.id]), "문서를 저장했어요.")) setEdits((cur) => Object.fromEntries(Object.entries(cur).filter(([k]) => k !== b.id))); }}>
+                    문서 저장
                   </button>
                 )}
               </>
@@ -1016,7 +1016,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
         <div className="we-el">
           <div className="we-main">
             {adding === "text" ? (
-              <textarea className="we-text" rows={3} aria-label="새 글" placeholder="글을 입력해 주세요" value={draft} onChange={(e) => setDraft(e.target.value)} />
+              <textarea className="we-text" rows={3} aria-label="새 문서" placeholder="문서를 입력해 주세요" value={draft} onChange={(e) => setDraft(e.target.value)} />
             ) : (
               <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="https://youtu.be/…" value={draft} onChange={(e) => setDraft(e.target.value)} style={{ flex: "1 1 100%" }} />
             )}
@@ -1029,10 +1029,10 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
 
       <div className="we-add">
         <span>추가</span>
-        <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => { setAdding("text"); setDraft(""); }}>+ 글</button>
+        <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => { setAdding("text"); setDraft(""); }}>+ 문서</button>
         <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => imgInput.current?.click()}>+ 이미지</button>
         <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => { setAdding("video"); setDraft(""); }}>+ 영상</button>
-        <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => docInput.current?.click()}>+ 문서</button>
+        <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => docInput.current?.click()}>+ 문서(PDF)</button>
         <input ref={imgInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => { void upload(e.target.files?.[0], "image"); e.target.value = ""; }} />
         <input ref={docInput} type="file" accept="application/pdf" hidden onChange={(e) => { void upload(e.target.files?.[0], "document"); e.target.value = ""; }} />
       </div>

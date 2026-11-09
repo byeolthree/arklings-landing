@@ -206,9 +206,9 @@ export function validateWork(input: WorkInput):
 
 export function validateTextBlock(raw: string): { ok: true; value: string } | { ok: false; error: string } {
   const body = String(raw ?? "").replace(/\r\n/g, "\n").trim();
-  if (!body) return { ok: false, error: "글을 입력해 주세요." };
-  if (body.length > TEXT_BLOCK_MAX) return { ok: false, error: `글은 ${TEXT_BLOCK_MAX}자 이내로 적어 주세요.` };
-  if (BAD_TEXT_RE.test(body)) return { ok: false, error: "글에 쓸 수 없는 문자가 있어요." };
+  if (!body) return { ok: false, error: "문서를 입력해 주세요." };
+  if (body.length > TEXT_BLOCK_MAX) return { ok: false, error: `문서는 ${TEXT_BLOCK_MAX}자 이내로 적어 주세요.` };
+  if (BAD_TEXT_RE.test(body)) return { ok: false, error: "문서에 쓸 수 없는 문자가 있어요." };
   return { ok: true, value: body };
 }
 
