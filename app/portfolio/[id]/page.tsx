@@ -59,7 +59,7 @@ export default async function WorkPage({ params }: Props) {
     <>
       <CreatorProfile creator={toProfileData(profile)} works={works.map((w) => toWorkCard(w))} backHref="/creators" workHref={(id) => `/portfolio/${id}`} privateNote={preview && !works.some((w) => w.id === work.id)} />
       <WorkDetail
-        work={{ title: work.title, authorName: work.authorName, publishedAt: work.publishedAt, roles: work.roles, genres: work.genres, logline: work.logline, blocks: work.blocks }}
+        work={{ title: work.title, authorName: work.authorName, publishedAt: work.publishedAt, roles: work.roles, genres: work.genres, logline: work.logline, blocks: work.blocks, loglinePosition: work.loglinePosition }}
         closeHref={`/creators/${work.authorHandle}`}
         // 본인이 비공개 미리 보기로 열었을 때는 협업 신청 버튼을 숨긴다(D13·D14).
         applyHref={preview || !profile.openToCollab ? undefined : `/collab/new?work=${work.id}`}

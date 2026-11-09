@@ -6,6 +6,7 @@ import { CreatorProfile } from "@/components/creators/creator-profile";
 import { PortfolioManager } from "@/components/mypage/creator-forms";
 import { RegisterScreen } from "@/components/register/register-screen";
 import { SiteNav } from "@/components/site-nav";
+import { WorkDetail } from "@/components/creators/work-detail";
 import { RegisterHeader } from "@/components/register/register-steps";
 import type { MyWork } from "@/lib/creators-mine";
 import type { WorkCard } from "@/components/creators/types";
@@ -14,11 +15,11 @@ import type { WorkCard } from "@/components/creators/types";
 export const metadata: Metadata = { title: "진짜 부품 모양 확인(샘플)", robots: { index: false, follow: false } };
 
 const LOG = "어느 날 〈사건〉이 벌어지자, 〈주인공〉은 〈장애물〉을 극복해야 〈목표〉를 달성할 수 있다. 그렇지 않으면 〈위험〉이 닥친다.";
-const W = (id: string, title: string, pub: boolean, blocks: MyWork["blocks"], day: string): MyWork => ({
-  id, title, logline: LOG, roles: ["script"], genres: ["드라마", "스릴러"], kind: "아웃라인", form: "long", publishedAt: day, updatedAt: day, isPublic: pub, planId: null, blocks,
+const W = (id: string, title: string, pub: boolean, blocks: MyWork["blocks"], day: string, loglinePosition = 0): MyWork => ({
+  id, title, logline: LOG, roles: ["script"], genres: ["드라마", "스릴러"], kind: "아웃라인", form: "long", publishedAt: day, updatedAt: day, loglinePosition, isPublic: pub, planId: null, blocks,
 });
 const works: MyWork[] = [
-  W("11111111-1111-4111-8111-111111111111", "샘플 작품 하나", true, [{ id: "b1", kind: "video", youtubeId: "dQw4w9WgXcQ" }], "2026-11-07T03:00:00Z"),
+  W("11111111-1111-4111-8111-111111111111", "샘플 작품 하나", true, [{ id: "b1", kind: "video", youtubeId: "dQw4w9WgXcQ", sub: "티저" }, { id: "b1b", kind: "text", body: "시놉시스 글", sub: "시놉시스" }, { id: "b1c", kind: "image", fileName: "a.png", src: null }], "2026-11-07T03:00:00Z", 1),
   W("22222222-2222-4222-8222-222222222222", "샘플 작품 둘", true, [{ id: "b2", kind: "text", body: "글" }], "2026-11-05T03:00:00Z"),
   W("33333333-3333-4333-8333-333333333333", "샘플 작품 셋(비공개)", false, [], "2026-11-02T03:00:00Z"),
 ];
@@ -29,7 +30,7 @@ export default async function RealPartsPreview({ searchParams }: { searchParams:
   const part = typeof sp.part === "string" ? sp.part : "list";
   return (
     <div className="mp rg">
-      <p style={{ padding: "8px 16px", fontSize: 12 }}>샘플: 진짜 부품에 가짜 값. 보기: ?part=list · ?part=register · ?part=profile · ?part=header</p>
+      <p style={{ padding: "8px 16px", fontSize: 12 }}>샘플: 진짜 부품에 가짜 값. 보기: ?part=list · ?part=register · ?part=profile · ?part=header · ?part=edit · ?part=detail</p>
       {part === "header" && (
         <div style={{ minHeight: 420, background: "#000" }}>
           <SiteNav loggedIn newCount={2} notices={[{ id: "n1", text: "〈신청자 이름〉님이 「악의 꽃」에 협업을 신청했어요", when: "오늘 14:20" }, { id: "n2", text: "〈신청자 이름〉님이 「사다함의 꿈」에 협업을 신청했어요", when: "어제 18:05" }]} />
@@ -44,6 +45,15 @@ export default async function RealPartsPreview({ searchParams }: { searchParams:
             </div>
           </div>
         </section>
+      )}
+      {part === "detail" && (
+        <WorkDetail work={{ title: "샘플 작품 하나", authorName: "별뜨리", publishedAt: "2026-11-07T03:00:00Z", roles: ["script"], genres: ["드라마"], logline: LOG, loglinePosition: 1, blocks: [{ id: "x1", kind: "video", youtubeId: "dQw4w9WgXcQ", sub: "티저" }, { id: "x2", kind: "text", body: "시놉시스 글(로그라인 뒤)" }, { id: "x3", kind: "text", body: "둘째 글" }] }} closeHref="/dev-preview/real-parts?part=list" />
+      )}
+      {part === "edit" && (
+        <>
+          <RegisterHeader title="포트폴리오 등록" current="포트폴리오 등록" />
+          <div className="rg-main"><div className="rg-wrap"><RegisterScreen works={works} usedBytes={12 * 1024 * 1024} nickname="별뜨리" openWorkId={works[0].id} /></div></div>
+        </>
       )}
       {part === "register" && (
         <>

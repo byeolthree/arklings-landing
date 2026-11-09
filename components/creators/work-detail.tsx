@@ -3,6 +3,8 @@ import { CopyLinkButton } from "@/components/portfolio/copy-link-button";
 import { formatKstDate } from "@/lib/time";
 import type { Role } from "@/lib/collab";
 import type { WorkBlock } from "@/lib/creators";
+import { orderItems } from "@/lib/creator-cards";
+import { LOGLINE_TOKEN } from "@/lib/creator-rules";
 import { RoleTags } from "./role-tags";
 import "./creators.css";
 
@@ -14,6 +16,7 @@ export type WorkDetailData = {
   genres: string[];
   logline: string;
   blocks?: WorkBlock[]; // 실제 요소(만든 사람이 정한 순서). 안 주면 샘플 자리 표시
+  loglinePosition?: number; // 로그라인 앞에 있는 요소의 개수(0이면 맨 위, D35-2). 안 주면 맨 위
 };
 
 // 작품 상세 창: 마이페이지 「포트폴리오 등록」의 펼친 작품 카드와 같은 모양이고 편집용 버튼(↑↓·지우기·손잡이·토글·저장·취소·+ 추가)만 없다. 사이트 기획안 요소는 두지 않는다(로그라인이 다섯 칸을 한 문장으로 엮은 것이므로, 별뜨리님 승인 2026-11-04).
@@ -44,14 +47,14 @@ export function WorkDetail({ work, closeHref, applyHref }: { work: WorkDetailDat
           )}
         </header>
 
-        <div className="cr-w-box">
-          <h2 className="cr-label">로그라인</h2>
-          <p>{work.logline}</p>
-        </div>
-
         {work.blocks ? (
-          work.blocks.map((b) =>
-            b.kind === "text" ? (
+          orderItems(work.blocks, work.loglinePosition ?? 0).map((b) =>
+            b === LOGLINE_TOKEN ? (
+              <div key="logline" className="cr-w-box">
+                <h2 className="cr-label">로그라인</h2>
+                <p>{work.logline}</p>
+              </div>
+            ) : b.kind === "text" ? (
               <div key={b.id} className="cr-w-el">
                 <p className="cr-w-text" style={{ whiteSpace: "pre-wrap" }}>{b.body}</p>
               </div>
@@ -87,6 +90,10 @@ export function WorkDetail({ work, closeHref, applyHref }: { work: WorkDetailDat
           )
         ) : (
           <>
+            <div className="cr-w-box">
+              <h2 className="cr-label">로그라인</h2>
+              <p>{work.logline}</p>
+            </div>
             <div className="cr-w-el">
               <p className="cr-w-text">〈글〉</p>
             </div>

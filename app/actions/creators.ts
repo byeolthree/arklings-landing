@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import { CONFIRM_FIRST_MESSAGE, getCurrentUser, isConfirmed, type CurrentUser } from "@/lib/auth";
 import {
   BLOCK_LIMIT,
+  LOGLINE_TOKEN,
   QUOTA_BYTES,
   parseSubKind,
   type BlockKind,
@@ -65,6 +66,7 @@ function dbMessage(e: DbError): string {
   if (m.includes("creator_profile_required")) return "작품을 올리려면 먼저 크리에이터 프로필을 만들어 주세요.";
   if (m.includes("email_not_confirmed")) return CONFIRM_FIRST_MESSAGE;
   if (m.includes("work_plan_not_owned")) return "내 기획안만 붙일 수 있어요.";
+  if (m.includes("logline_position")) return "로그라인 위치를 저장하려면 데이터베이스 준비(0013)가 먼저 필요해요. 로그라인을 맨 위에 두고 저장하거나 잠시 뒤에 다시 시도해 주세요.";
   if (m.includes("creator_work_blocks_sub_kind")) return "고를 수 없는 종류예요.";
   if (m.includes("sub_kind")) return "요소 종류를 저장하려면 데이터베이스 준비(0012)가 먼저 필요해요. 종류를 비우고 저장하거나 잠시 뒤에 다시 시도해 주세요.";
   if (e?.code === "23505" && m.includes("plan_id")) return "이 기획안은 이미 다른 작품에 붙어 있어요.";
@@ -456,6 +458,29 @@ export async function finishFileUpload(workId: string, upload: { path: string; k
   });
   if (!res.ok) await removeOwnFiles(user.id, [path]);
   return res;
+}
+
+// 작품 안의 로그라인 블록과 요소를 한꺼번에 원하는 순서로 저장한다(D35-2). items에는 이 작품의 요소 번호 전부와 글자 「logline」 하나가 들어 있어야 한다.
+// 로그라인 위치(logline_position)는 로그라인 앞에 있는 요소의 개수로 저장하고, 요소는 로그라인을 뺀 순서대로 position을 다시 매긴다. 맨 위에 놓인 것이 작품의 「대표」다.
+export async function reorderWorkItems(workId: string, items: string[]): Promise<Ok | Fail> {
+  const auth = await needUser();
+  if (!("user" in auth)) return auth;
+  if (!UUID.test(String(workId)) || !Array.isArray(items)) return { ok: false, error: WORK_NOT_FOUND };
+  const want = items.map(String);
+  if (want.filter((x) => x === LOGLINE_TOKEN).length !== 1 || want.length > BLOCK_LIMIT + 1) return { ok: false, error: "요소 목록이 바뀌었어요. 새로고침한 뒤 다시 옮겨 주세요." };
+  const blockIds = want.filter((x) => x !== LOGLINE_TOKEN);
+  if (new Set(blockIds).size !== blockIds.length) return { ok: false, error: "요소 목록이 바뀌었어요. 새로고침한 뒤 다시 옮겨 주세요." };
+  if (!(await ownWork(auth.sb, auth.user.id, workId))) return { ok: false, error: WORK_NOT_FOUND };
+  const all = await auth.sb.from("creator_work_blocks").select("id").eq("work_id", workId).eq("owner_id", auth.user.id);
+  if (all.error) return { ok: false, error: UNAVAILABLE };
+  const have = new Set(((all.data ?? []) as { id: string }[]).map((r) => r.id));
+  if (blockIds.length !== have.size || !blockIds.every((id) => have.has(id))) return { ok: false, error: "요소 목록이 바뀌었어요. 새로고침한 뒤 다시 옮겨 주세요." };
+  // 로그라인 위치를 먼저 저장한다(이 칸이 아직 없으면 여기서 멈춰 아무것도 바뀌지 않는다).
+  const pos = want.indexOf(LOGLINE_TOKEN);
+  const w = await auth.sb.from("creator_works").update({ logline_position: pos }).eq("id", workId).eq("owner_id", auth.user.id).select("id");
+  if (w.error) return { ok: false, error: dbMessage(w.error) };
+  if (!w.data?.length) return { ok: false, error: WORK_NOT_FOUND };
+  return writeOrder(auth.sb, auth.user.id, workId, blockIds);
 }
 
 // 요소를 지운다. 올린 파일이 있으면 보관함에서도 지운다.

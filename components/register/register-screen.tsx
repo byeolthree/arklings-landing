@@ -10,11 +10,11 @@ import type { MyWork } from "@/lib/creators-mine";
 const FRAME = "어느 날 〈사건〉이 벌어지자, 〈주인공〉은 〈장애물〉을 극복해야 〈목표〉를 달성할 수 있다. 그렇지 않으면 〈위험〉이 닥친다.";
 const mb = (n: number) => `${(n / 1024 / 1024).toFixed(1)}MB`;
 
-function PreviewCard({ p, kind }: { p: WorkPreview; kind: "video" | "image" | "logline" }) {
+function PreviewCard({ p, kind }: { p: WorkPreview; kind: "video" | "image" | "doc" | "logline" }) {
   return (
     <div className="rg-pcard">
       <p className="rg-pcard-title">{p.title || "〈제목〉"}</p>
-      {kind === "logline" ? <p className="rg-pcard-log">{p.logline || FRAME}</p> : <div className="rg-pcard-media">{kind === "video" ? "영상" : "이미지"}</div>}
+      {kind === "logline" ? <p className="rg-pcard-log">{p.logline || FRAME}</p> : <div className="rg-pcard-media">{kind === "video" ? "영상" : kind === "doc" ? "문서" : "이미지"}</div>}
       <div className="rg-pcard-tags">
         {p.roles.length > 0 && (
           <ul className="rg-roles">
@@ -50,10 +50,6 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId }: { wor
         <p className="rg-count">
           내 포트폴리오 {works.length} / {WORK_LIMIT} · 파일 {mb(usedBytes)} / {mb(QUOTA_BYTES)}
         </p>
-        <p className="rg-rep-note">
-          <span className="rg-rep-tag">대표</span>
-          맨 위에 놓은 이미지·영상이 대표입니다. 없으면 로그라인이 보입니다. 포트폴리오 카드에 이것이 보입니다.
-        </p>
         {cur ? (
           <WorkEditor key={cur.id} work={cur} nickname={nickname} onClose={() => setCurrent(null)} onPreview={setPreview} />
         ) : (
@@ -74,14 +70,14 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId }: { wor
       <aside className="rg-side" aria-label="포트폴리오 화면에 보일 카드">
         <h2 className="rg-side-h">포트폴리오 화면에 보일 카드</h2>
         <div>
-          <p className="rg-side-sub">맨 위가 {preview.top === "video" ? "영상" : preview.top === "image" ? "이미지" : "로그라인"}일 때 (지금 왼쪽 모습)</p>
+          <p className="rg-side-sub">맨 위가 {preview.top === "video" ? "영상" : preview.top === "image" ? "이미지" : preview.top === "doc" ? "문서" : "로그라인"}일 때 (지금 왼쪽 모습)</p>
           <PreviewCard p={preview} kind={preview.top} />
         </div>
         <div>
           <p className="rg-side-sub">맨 위가 {other === "video" ? "영상" : "로그라인"}일 때</p>
           <PreviewCard p={preview} kind={other} />
         </div>
-        <p className="rg-side-note">역할과 장르는 왼쪽에서 고른 것이 보입니다. 맨 위 요소를 바꾸면 이 카드가 바로 바뀝니다.</p>
+        <p className="rg-side-note">역할은 왼쪽에서 고른 것이 보입니다. 왼쪽 맨 위 요소를 끌어 바꾸면 이 카드가 바로 바뀝니다.</p>
       </aside>
     </div>
   );

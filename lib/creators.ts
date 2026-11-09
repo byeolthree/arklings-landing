@@ -61,6 +61,7 @@ export type WorkDetail = WorkListItem & {
   authorHandle: string;
   authorName: string;
   blocks: WorkBlock[]; // 만든 사람이 정한 순서
+  loglinePosition: number; // 로그라인 앞에 있는 요소의 개수(0이면 맨 위, D35-2). 요소 수보다 크면 맨 아래로 본다
 };
 
 type CreatorRow = {
@@ -268,16 +269,21 @@ export async function listCreatorWorks(handle: string): Promise<WorkListItem[]> 
 export async function getWork(id: string): Promise<WorkDetail | null> {
   if (!UUID_QUERY.test(String(id ?? ""))) return null;
   const sb = getSupabase();
-  const { data, error } = await sb.from("creator_works_public").select(WORK_COLUMNS).eq("id", id).maybeSingle();
+  let res = await sb.from("creator_works_public").select(`${WORK_COLUMNS}, logline_position`).eq("id", id).maybeSingle();
+  // 0013(로그라인 위치) 실행 전에는 logline_position 칸이 없다. 그때는 로그라인을 맨 위로 본다. 0013을 실행한 뒤에 이 분기는 지운다.
+  if (res.error?.message.includes("logline_position")) res = await sb.from("creator_works_public").select(WORK_COLUMNS).eq("id", id).maybeSingle();
+  const { data, error } = res;
   if (error) throw new Error(error.message);
   if (!data) return null;
-  const row = data as unknown as WorkRow;
+  const row = data as unknown as WorkRow & { logline_position?: number | null };
 
-  const readBlocks = (cols: string) =>
-    sb.from("creator_blocks_public").select(cols).eq("work_id", id).order("position", { ascending: true }).order("id", { ascending: true }).limit(20);
-  let blocksRes = await readBlocks("id, position, kind, body, file_path, file_name, file_bytes, youtube_id, sub_kind");
-  // 0012(요소 세부 종류) 실행 전에는 sub_kind 칸이 없다. 그때는 세부 종류만 빼고 읽는다. 0012를 실행한 뒤에 이 분기는 지운다.
-  if (blocksRes.error?.message.includes("sub_kind")) blocksRes = await readBlocks("id, position, kind, body, file_path, file_name, file_bytes, youtube_id");
+  const blocksRes = await sb
+    .from("creator_blocks_public")
+    .select("id, position, kind, body, file_path, file_name, file_bytes, youtube_id, sub_kind")
+    .eq("work_id", id)
+    .order("position", { ascending: true })
+    .order("id", { ascending: true })
+    .limit(20);
   if (blocksRes.error) throw new Error(blocksRes.error.message);
   const rows = (blocksRes.data ?? []) as unknown as BlockRow[];
   const urls = await signPublicFiles(rows.map((b) => b.file_path));
@@ -290,7 +296,7 @@ export async function getWork(id: string): Promise<WorkDetail | null> {
     else if (b.kind === "image") blocks.push({ id: b.id, kind: "image", fileName: b.file_name, src: b.file_path ? (urls.get(b.file_path) ?? null) : null });
     else if (b.kind === "document") blocks.push({ id: b.id, kind: "document", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, sub });
   }
-  return { ...toWorkItem(row), authorHandle: row.author_handle, authorName: row.author_name, blocks };
+  return { ...toWorkItem(row), authorHandle: row.author_handle, authorName: row.author_name, blocks, loglinePosition: Math.max(0, row.logline_position ?? 0) };
 }
 
 // 작품 카드에 걸 대표 이미지·영상(작품 안 이미지·영상 요소를 위에서부터 차례로). 공개된 작품의 것만 돌려준다.

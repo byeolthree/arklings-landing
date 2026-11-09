@@ -126,6 +126,7 @@ export function validateCreatorProfile(input: ProfileInput):
 // ── 작품 ────────────────────────────────────────────────────────────────────────
 export const WORK_LIMIT = 12; // 사람당 작품 수
 export const BLOCK_LIMIT = 20; // 작품당 요소 수
+export const LOGLINE_TOKEN = "logline"; // 요소 순서 목록에서 로그라인 블록을 가리키는 글자(D35-2)
 export const TITLE_MAX = 60;
 export const LOGLINE_MAX = 200; // 띄어쓰기를 뺀 글자 수(기획안 화면의 로그라인과 같은 제한, D35)
 export const LOGLINE_STORE_MAX = 1000; // 띄어쓰기를 포함해 저장할 수 있는 한도(DB 검사)

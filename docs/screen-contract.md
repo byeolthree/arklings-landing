@@ -120,6 +120,8 @@
 | 협업 신청 버튼 3곳 | 크리에이터 목록 카드 「협업 신청」→`/collab/new?creator=<공개 주소>`, 프로필 「이 크리에이터에게 협업 신청」→`/collab/new?creator=<공개 주소>`, 작품 창 「이 작품에 협업 신청」→`/collab/new?work=<작품 번호>` | 아니요 | 없음 | 없음 | 협업 신청을 받는 중인 크리에이터에게만 보인다. 본인 프로필·비공개 미리 보기에서는 숨김 | 위 협업 신청 화면 |
 | 마이페이지·등록 화면의 요소 세부 종류 (0012) | `/mypage`, `/portfolio/new` 안 | 예 | `addTextBlock(workId, body, subKind?)`, `addVideoBlock(workId, url, subKind?)`, `finishFileUpload(workId, {path, kind, name, subKind?})`(**끝에 선택 인자만 더함**), **`setBlockSubKind(blockId, subKind\|null)`**(새 함수) | 영상 칩: 티저·예고편·선공개·파일럿·피치 영상. 글·문서 칩: 시놉시스·트리트먼트·아웃라인·시리즈 바이블·파일럿·피치 문서(시안 01의 글자 그대로, `lib/creator-rules.ts`의 `VIDEO_SUBKINDS`·`DOC_SUBKINDS`). 이미지는 없음 | 요소의 `sub`. 접은 목록 「대표」 칸: 영상은 「티저 영상」처럼, 이미지는 「컨셉 이미지」, 없으면 「로그라인」 | `supabase/migrations/0012_block_sub_kind.sql`을 실행한 뒤 저장된다. 실행 전에는 칩 없이 저장은 되고 칩을 고르면 안내가 나온다 |
 
+| 로그라인을 옮기는 작품 편집 (D35-2, 0013) | `/mypage`·`/portfolio/new` 안, 공개 작품 창 `/portfolio/<작품 번호>` | 예(편집), 아니요(작품 창) | **`reorderWorkItems(workId, items)`**(새 함수. `items`는 이 작품의 요소 번호 전부와 글자 「logline」 하나를 원하는 순서대로 담은 목록. 서버가 요소 순서(`position`)와 로그라인 위치(`logline_position` = 로그라인 앞 요소 개수)를 함께 저장, 번호가 모자라거나 남의 것이면 거절). 기존 `moveBlock`·`reorderBlocks`는 그대로 두되 화면은 이제 쓰지 않는다 | 요소 칸 + 로그라인 블록(손잡이 ⠿·(＋)·↑↓, 지울 수 없음) | `MyWork.loglinePosition`, 공개 작품 `WorkDetail.loglinePosition`. 맨 위에 놓인 것이 「대표」(접은 목록 「대표」 칸: 로그라인이면 「로그라인」, 영상이면 「티저 영상」처럼, 이미지면 「컨셉 이미지」, 글·문서면 고른 종류 또는 「문서」) | `supabase/migrations/0013_logline_position.sql` 실행 뒤 저장된다. 실행 전에는 로그라인 위치가 0(맨 위)으로 읽히고 옮기기를 저장하면 안내가 나온다 |
+
 처리 함수 결과 모양: `{ ok: true, …값 } | { ok: false, error, needLogin?, fieldErrors? }` (기획안 동작과 같은 모양).
 
 **코드 전에 보고한 것 (2026-11-07):**

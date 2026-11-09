@@ -17,6 +17,7 @@ export type MyProfile = {
 
 export type MyBlock = WorkBlock;
 export type MyWork = WorkListItem & {
+  loglinePosition: number; // 로그라인 앞에 있는 요소의 개수(0이면 맨 위, D35-2)
   updatedAt: string; // 마지막으로 고친 시각(ISO). 접은 목록의 「수정일」
   isPublic: boolean;
   planId: string | null;
@@ -31,7 +32,7 @@ export type MyCreatorData = {
 
 type WorkRow = {
   id: string; title: string; roles: string[]; genres: string[] | null; kind: string | null; form: string | null;
-  logline: string; plan_id: string | null; is_public: boolean; first_published_at: string | null; created_at: string; updated_at: string;
+  logline: string; plan_id: string | null; is_public: boolean; first_published_at: string | null; created_at: string; updated_at: string; logline_position?: number | null;
 };
 type BlockRow = {
   id: string; work_id: string; position: number; kind: "text" | "image" | "video" | "document";
@@ -40,15 +41,16 @@ type BlockRow = {
 
 export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
   const sb = await createAuthClient();
-  const readBlocks = (cols: string) => sb.from("creator_work_blocks").select(cols).eq("owner_id", userId).order("position", { ascending: true }).order("created_at", { ascending: true });
-  const [prof, chans, works, firstBlocks] = await Promise.all([
+  const workCols = "id, title, roles, genres, kind, form, logline, plan_id, is_public, first_published_at, created_at, updated_at";
+  const readWorks = (cols: string) => sb.from("creator_works").select(cols).eq("owner_id", userId).order("sort_order", { ascending: true }).order("created_at", { ascending: false });
+  const [prof, chans, firstWorks, blocks] = await Promise.all([
     sb.from("creator_profiles").select("public_handle, roles, bio, open_to_collab, is_public").eq("user_id", userId).maybeSingle(),
     sb.from("creator_channels").select("label, url, position").eq("user_id", userId).order("position", { ascending: true }),
-    sb.from("creator_works").select("id, title, roles, genres, kind, form, logline, plan_id, is_public, first_published_at, created_at, updated_at").eq("owner_id", userId).order("sort_order", { ascending: true }).order("created_at", { ascending: false }),
-    readBlocks("id, work_id, position, kind, body, file_path, file_name, file_bytes, youtube_id, sub_kind"),
+    readWorks(`${workCols}, logline_position`),
+    sb.from("creator_work_blocks").select("id, work_id, position, kind, body, file_path, file_name, file_bytes, youtube_id, sub_kind").eq("owner_id", userId).order("position", { ascending: true }).order("created_at", { ascending: true }),
   ]);
-  // 0012(요소 세부 종류) 실행 전에는 sub_kind 칸이 없다. 그때는 세부 종류만 빼고 읽는다. 0012를 실행한 뒤에 이 분기는 지운다.
-  const blocks = firstBlocks.error?.message.includes("sub_kind") ? await readBlocks("id, work_id, position, kind, body, file_path, file_name, file_bytes, youtube_id") : firstBlocks;
+  // 0013(로그라인 위치) 실행 전에는 logline_position 칸이 없다. 그때는 로그라인을 맨 위로 본다. 0013을 실행한 뒤에 이 분기는 지운다.
+  const works = firstWorks.error?.message.includes("logline_position") ? await readWorks(workCols) : firstWorks;
   for (const r of [prof, chans, works, blocks]) if (r.error) throw new Error(r.error.message);
 
   const brows = (blocks.data ?? []) as unknown as BlockRow[];
@@ -88,6 +90,7 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
       form: w.form === "long" || w.form === "short" ? w.form : null,
       publishedAt: w.first_published_at ?? w.created_at,
       updatedAt: w.updated_at,
+      loglinePosition: Math.max(0, w.logline_position ?? 0),
       isPublic: w.is_public,
       planId: w.plan_id,
       blocks: byWork.get(w.id) ?? [],

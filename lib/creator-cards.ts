@@ -1,6 +1,7 @@
 // 실제 읽기 결과(lib/creators.ts, lib/creators-mine.ts)를 화면 부품(components/creators)이 받는 모양으로 바꾼다. 주인 번호는 어디에도 싣지 않는다.
 import { WORK_KINDS, type CreatorCard, type CreatorProfileData, type WorkCard, type WorkKind } from "@/components/creators/types";
 import type { CreatorListItem, CreatorProfile, WorkListItem, WorkMediaItem } from "@/lib/creators";
+import { LOGLINE_TOKEN } from "@/lib/creator-rules";
 import type { MyBlock, MyWork } from "@/lib/creators-mine";
 
 const asKind = (k: string | null): WorkKind | null => ((WORK_KINDS as readonly string[]).includes(k ?? "") ? (k as WorkKind) : null);
@@ -20,14 +21,20 @@ export function mediaOfBlocks(blocks: MyBlock[]): WorkMediaItem[] {
   return out;
 }
 
-// 작품의 「대표」(마이페이지 접은 목록의 「대표」 칸, 시안 02): 작품 안에서 맨 위에 있는 이미지·영상이 그 작품의 대표이고, 없으면 로그라인이다.
-// 영상은 고른 세부 종류로 「티저 영상」처럼, 이미지는 「컨셉 이미지」로 보인다(세부 종류를 안 골랐으면 「영상」).
-export function representativeOf(w: Pick<MyWork, "blocks">): string {
-  const first = w.blocks.find((b) => b.kind === "image" || b.kind === "video");
-  if (!first) return "로그라인";
-  if (first.kind === "image") return "컨셉 이미지";
-  if (!first.sub) return "영상";
-  return first.sub.endsWith("영상") ? first.sub : `${first.sub} 영상`;
+// 작품 안의 로그라인 블록과 요소를 화면에 보이는 순서로 합친다(D35-2). 로그라인은 요소 앞에 loglinePosition개가 있는 자리에 놓이고, 요소 수보다 크면 맨 아래다.
+export function orderItems<B>(blocks: B[], loglinePosition: number): (B | typeof LOGLINE_TOKEN)[] {
+  const at = Math.min(Math.max(0, Math.floor(loglinePosition) || 0), blocks.length);
+  return [...blocks.slice(0, at), LOGLINE_TOKEN, ...blocks.slice(at)];
+}
+
+// 작품의 「대표」(마이페이지 접은 목록의 「대표」 칸, 시안 02): 작품 안에서 맨 위에 놓인 것이 대표다.
+// 로그라인이면 「로그라인」, 영상이면 고른 세부 종류로 「티저 영상」처럼(안 골랐으면 「영상」), 이미지면 「컨셉 이미지」, 글·문서면 고른 종류(안 골랐으면 「문서」)다.
+export function representativeOf(w: Pick<MyWork, "blocks" | "loglinePosition">): string {
+  const top = orderItems(w.blocks, w.loglinePosition)[0];
+  if (top === LOGLINE_TOKEN) return "로그라인";
+  if (top.kind === "image") return "컨셉 이미지";
+  if (top.kind === "video") return !top.sub ? "영상" : top.sub.endsWith("영상") ? top.sub : `${top.sub} 영상`;
+  return top.sub ?? "문서";
 }
 
 export function toProfileData(p: CreatorProfile): CreatorProfileData {
