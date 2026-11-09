@@ -55,7 +55,7 @@ export default async function PortfolioNewPage({ searchParams }: { searchParams:
         <div className="rg-prof">
           <div className="rg-wrap rg-prof-wrap">
             <div className="rg-prof-card mp-card">
-              <CreatorProfileForm profile={data.profile} />
+              <CreatorProfileForm profile={data.profile} workCount={data.works.length} />
             </div>
           </div>
         </div>
@@ -68,7 +68,7 @@ export default async function PortfolioNewPage({ searchParams }: { searchParams:
       <RegisterHeader current="포트폴리오 등록" />
       <div className="rg-main">
         <div className="rg-wrap">
-          <RegisterScreen works={data.works} usedBytes={data.usedBytes} nickname={nickname} openWorkId={workParam} profileRoles={data.profile.roles} />
+          <RegisterScreen works={data.works} usedBytes={data.usedBytes} nickname={nickname} openWorkId={workParam} profileRoles={data.profile.roles} handle={data.profile.handle} profilePublic={data.profile.isPublic} />
         </div>
       </div>
     </div>

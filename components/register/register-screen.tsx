@@ -40,7 +40,7 @@ function PreviewCard({ p, kind }: { p: WorkPreview; kind: "video" | "image" | "d
 }
 
 // 독립 포트폴리오 등록 화면(시안 01-C): 왼쪽은 진짜 저장되는 편집 칸, 오른쪽은 「포트폴리오 화면에 보일 카드」(편집하는 대로 바로 바뀐다).
-export function RegisterScreen({ works, usedBytes, nickname, openWorkId, profileRoles }: { works: MyWork[]; usedBytes: number; nickname: string; openWorkId: string | null; profileRoles?: Role[] }) {
+export function RegisterScreen({ works, usedBytes, nickname, openWorkId, profileRoles, handle, profilePublic }: { works: MyWork[]; usedBytes: number; nickname: string; openWorkId: string | null; profileRoles?: Role[]; handle: string; profilePublic: boolean }) {
   const router = useRouter();
   // 접힌 목록(시안 02)이 처음 화면이다. 작품이 하나도 없으면 바로 등록 화면(시안 01 C)이고, 「접기」를 누르면 목록으로 돌아온다.
   const [current, setCurrent] = useState<string | "new" | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : works.length === 0 ? "new" : null);
@@ -85,7 +85,9 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId, profile
               setFormKey((k) => k + 1);
               setCurrent(works.length > 0 ? null : "new");
             }}
-            onCreated={(id) => {
+            onCreated={(id, allSaved) => {
+              // 작품을 만들고 빠짐없이 저장됐으면 내 크리에이터 상세로 간다. 프로필이 비공개이거나 일부가 저장되지 않았으면 이 화면에 남아 이유를 보여 준다.
+              if (allSaved && profilePublic) return router.push(`/creators/${handle}`);
               setCurrent(id);
               router.refresh();
             }}

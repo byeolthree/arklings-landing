@@ -351,9 +351,11 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
 }
 
 // ── 크리에이터 등록 ─────────────────────────────────────────────────────────────────
-export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
+export function CreatorProfileForm({ profile, workCount = 0 }: { profile: MyProfile | null; workCount?: number }) {
   const router = useRouter();
   const [note, setNote] = useState("");
+  // 작품 없이 프로필만 저장했을 때 뜨는 안내 창. 창이 떠 있는 동안에는 화면을 새로 읽지 않는다(새로 읽으면 이 창이 있는 화면이 바뀐다).
+  const [savedPopup, setSavedPopup] = useState(false);
   const [busy, setBusy] = useState(false);
   // 프로필을 만들기 전에 고른 대표 파일: 프로필을 만든 직후에 올린다.
   const [pendingHero, setPendingHero] = useState<{ file: File; kind: "image" | "video" } | null>(null);
@@ -371,6 +373,10 @@ export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
       const err = await uploadHeroFile(pendingHero.file, pendingHero.kind);
       setPendingHero(null);
       setNote(err ? `프로필은 저장했어요. 대표 파일은 올리지 못했어요. ${err}` : "프로필과 대표 파일을 저장했어요.");
+    }
+    if (workCount === 0) {
+      setSavedPopup(true);
+      return { ok: true };
     }
     router.refresh();
     return { ok: true };
@@ -428,6 +434,27 @@ export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
         <p role="status" className="mp-note">
           {note}
         </p>
+      )}
+      {savedPopup && (
+        <div className="mp-modal-back" role="presentation">
+          <div className="mp-modal" role="dialog" aria-modal="true" aria-labelledby="mp-saved-title">
+            <p id="mp-saved-title" className="mp-modal-title">프로필을 저장했어요.</p>
+            <button type="button" className="btn btn-primary mp-modal-btn" onClick={() => router.push("/portfolio/new")}>
+              포트폴리오 등록하기
+            </button>
+            <p className="mp-modal-note">포트폴리오를 등록해야 크리에이터로 등록됩니다.</p>
+            <button
+              type="button"
+              className="mp-modal-close"
+              onClick={() => {
+                setSavedPopup(false);
+                router.refresh();
+              }}
+            >
+              닫기
+            </button>
+          </div>
+        </div>
       )}
     </>
   );
@@ -729,7 +756,7 @@ export function WorkEditor({
   profileRoles?: Role[]; // 작품의 역할은 프로필에서 가져온다(시안 01: 여기서 고르지 않음)
   topNote?: string; // 맨 윗줄에 보일 「내 포트폴리오 4 / 12 · 파일 12MB / 20MB」
   onClose: () => void;
-  onCreated?: (id: string) => void;
+  onCreated?: (id: string, allSaved: boolean) => void;
   onTogglePublic?: () => void;
   busyOuter?: boolean;
   onPreview?: (p: WorkPreview) => void;
@@ -801,7 +828,7 @@ export function WorkEditor({
         if (!p.ok) publishErr = p.error;
       }
       router.refresh();
-      onCreated?.(r.id);
+      onCreated?.(r.id, !publishErr && !failed && !moved);
       if (publishErr) return setMsg({ text: `작품은 저장했어요. 공개로 올리지는 못했어요. ${publishErr}`, err: true });
       if (failed) return setMsg({ text: `작품은 저장했어요. ${failed}`, err: true });
       if (moved) return setMsg({ text: `작품은 저장했어요. 로그라인 자리는 저장하지 못했어요. ${moved}`, err: true });
