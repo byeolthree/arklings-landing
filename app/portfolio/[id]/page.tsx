@@ -61,7 +61,8 @@ export default async function WorkPage({ params }: Props) {
       <WorkDetail
         work={{ title: work.title, authorName: work.authorName, publishedAt: work.publishedAt, roles: work.roles, genres: work.genres, logline: work.logline, blocks: work.blocks }}
         closeHref={`/creators/${work.authorHandle}`}
-        // 「이 작품에 협업 신청」은 협업 신청 쪽 코드가 작품을 받게 되는 0010 이후에 연다.
+        // 본인이 비공개 미리 보기로 열었을 때는 협업 신청 버튼을 숨긴다(D13·D14).
+        applyHref={preview || !profile.openToCollab ? undefined : `/collab/new?work=${work.id}`}
       />
     </>
   );

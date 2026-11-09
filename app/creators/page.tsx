@@ -38,7 +38,7 @@ export default async function CreatorsPage({ searchParams }: { searchParams: SP 
       filter={filter}
       profileHref={(h) => `/creators/${h}`}
       pageHref={href}
-      // 카드의 「협업 신청」은 협업 신청 쪽 코드가 작품·크리에이터를 받게 되는 0010 이후에 연다.
+      applyHref={(c) => `/collab/new?creator=${c.handle}`}
     />
   );
 }

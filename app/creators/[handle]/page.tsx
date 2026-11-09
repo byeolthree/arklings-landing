@@ -48,7 +48,8 @@ export default async function CreatorProfilePage({ params }: Props) {
       workHref={(id) => `/portfolio/${id}`}
       privateNote={data.preview}
       owner={data.owner ? { editHref: "/mypage#mp-creator", registerHref: "/mypage#mp-portfolio" } : undefined}
-      // 「이 크리에이터에게 협업 신청」은 협업 신청 쪽 코드가 크리에이터를 받게 되는 0010 이후에 연다.
+      // 본인 프로필·비공개 미리 보기에서는 협업 신청 버튼을 숨긴다(D13·D14).
+      applyHref={data.owner || data.preview ? undefined : `/collab/new?creator=${data.profile.handle}`}
     />
   );
 }

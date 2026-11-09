@@ -27,6 +27,8 @@ const NOT_FOUND = "찾을 수 없는 신청입니다.";
 const UNAVAILABLE = "지금은 저장할 수 없어요. 잠시 뒤에 다시 시도해 주세요.";
 // 개발 화면에서만 원인을 한 줄 덧붙인다(운영 화면에는 내부 오류 글을 내보내지 않는다).
 const devDetail = (e: unknown) => (process.env.NODE_ENV === "production" ? "" : ` [개발 화면 전용: ${e instanceof Error ? e.message : typeof e === "object" && e && "message" in e ? String((e as { message: unknown }).message) : String(e)}]`);
+const CREATOR_GONE = "이 크리에이터(작품)에게는 지금 신청할 수 없어요. 공개가 끝났거나 협업 신청을 받지 않는 중일 수 있어요.";
+const HANDLE_RE = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
 const PLAN_GONE = "이 기획안은 더 이상 공개되어 있지 않아 신청할 수 없어요. 포트폴리오에서 다른 기획안을 찾아 주세요.";
 
 // 기획안으로 들어온 신청의 받는 사람은 서버가 plan_id로 기획안을 찾아 정한다(화면에서 받는 사람 번호를 받지 않는다).
@@ -41,6 +43,41 @@ async function findPlanRecipient(planId: string): Promise<{ ownerId: string } | 
     if (ownerError || !owner.user) return "error";
     if (!owner.user.email || !owner.user.email_confirmed_at) return "gone";
     return { ownerId: data.owner_id as string };
+  } catch {
+    return "error";
+  }
+}
+
+// 크리에이터(공개 주소) 또는 작품(작품 번호)으로 들어온 신청의 받는 사람도 서버가 정한다(화면에서 받는 사람 번호를 받지 않는다).
+// 공개 프로필이고 협업 신청을 받는 중이며(작품이면 공개한 작품), 주인이 이메일 확인을 마쳤을 때만 받을 수 있다. DB(0010)도 저장 순간에 같은 규칙을 한 번 더 확인한다.
+async function findCreatorRecipient(target: { handle?: string; workId?: string }): Promise<{ ownerId: string; handle: string; workId: string | null } | "gone" | "error"> {
+  try {
+    const admin = createAdminClient();
+    let ownerId: string;
+    let workId: string | null = null;
+    if (target.workId) {
+      const w = await admin.from("creator_works").select("id, owner_id, is_public, first_published_at").eq("id", target.workId).maybeSingle();
+      if (w.error) return "error";
+      const row = w.data as { id: string; owner_id: string; is_public: boolean; first_published_at: string | null } | null;
+      if (!row || !row.is_public || !row.first_published_at) return "gone";
+      ownerId = row.owner_id;
+      workId = row.id;
+    } else if (target.handle) {
+      const p = await admin.from("creator_profiles").select("user_id").ilike("public_handle", target.handle).maybeSingle();
+      if (p.error) return "error";
+      if (!p.data) return "gone";
+      ownerId = (p.data as { user_id: string }).user_id;
+    } else {
+      return "gone";
+    }
+    const prof = await admin.from("creator_profiles").select("public_handle, is_public, open_to_collab").eq("user_id", ownerId).maybeSingle();
+    if (prof.error) return "error";
+    const pr = prof.data as { public_handle: string; is_public: boolean; open_to_collab: boolean } | null;
+    if (!pr || !pr.is_public || !pr.open_to_collab) return "gone";
+    const { data: owner, error: ownerError } = await admin.auth.admin.getUserById(ownerId);
+    if (ownerError || !owner.user) return "error";
+    if (!owner.user.email || !owner.user.email_confirmed_at) return "gone";
+    return { ownerId, handle: pr.public_handle, workId };
   } catch {
     return "error";
   }
@@ -112,6 +149,20 @@ export async function createCollab(_prev: FormState, fd: FormData): Promise<Form
     ownerId = found.ownerId;
   }
 
+  // 4-2) 크리에이터·작품으로 온 신청이면 받는 사람(그 프로필의 주인)을 서버가 찾는다. 기획안과 함께 쓸 수 없다.
+  const creatorHandle = String(fd.get("creator_handle") ?? "").trim().toLowerCase();
+  const workId = String(fd.get("work_id") ?? "").trim();
+  let creatorTarget: { handle: string; workId: string | null } | null = null;
+  if (creatorHandle || workId) {
+    if (planId || (creatorHandle && workId)) return { message: CREATOR_GONE, values };
+    if (workId ? !UUID_RE.test(workId) : creatorHandle.length < 3 || creatorHandle.length > 20 || !HANDLE_RE.test(creatorHandle)) return { message: CREATOR_GONE, values };
+    const found = await findCreatorRecipient(workId ? { workId } : { handle: creatorHandle });
+    if (found === "error") return { message: UNAVAILABLE, values };
+    if (found === "gone") return { message: CREATOR_GONE, values };
+    ownerId = found.ownerId;
+    creatorTarget = { handle: found.handle, workId: found.workId };
+  }
+
   // 5) 파일 올리기 → 저장. id는 앱에서 미리 만든다(저장 뒤에 읽어 올 권한이 필요 없게).
   let attachment_path: string | null = null;
   try {
@@ -137,7 +188,8 @@ export async function createCollab(_prev: FormState, fd: FormData): Promise<Form
         attachment_name: file ? file.name : null,
         recipient_kind: ownerId ? "user" : "arklings",
         recipient_id: ownerId,
-        plan_id: ownerId ? planId : null,
+        plan_id: planId ? planId : null,
+        ...(creatorTarget ? { creator_handle: creatorTarget.handle, work_id: creatorTarget.workId } : {}),
     };
     const admin = createAdminClient();
     const { error } = await admin.from("collab_requests").insert((me ? { ...row, applicant_id: me.id } : row) as Record<string, unknown>);
@@ -145,6 +197,7 @@ export async function createCollab(_prev: FormState, fd: FormData): Promise<Form
       await removeFile(attachment_path);
       // 확인과 저장 사이에 주인이 공개를 끈 경우(DB가 막았다)
       if (error.message.includes("plan_not_public")) return { message: PLAN_GONE, values };
+      if (error.message.includes("creator_not_available")) return { message: CREATOR_GONE, values };
       console.error("[collab] 신청을 저장하지 못했습니다.", error);
       return { message: "저장하지 못했습니다. 잠시 후 다시 시도해 주세요." + devDetail(error), values };
     }

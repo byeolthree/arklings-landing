@@ -5,6 +5,7 @@ import "@/components/register/register.css";
 import { CreatorProfile } from "@/components/creators/creator-profile";
 import { PortfolioManager } from "@/components/mypage/creator-forms";
 import { RegisterScreen } from "@/components/register/register-screen";
+import { SiteNav } from "@/components/site-nav";
 import { RegisterHeader } from "@/components/register/register-steps";
 import type { MyWork } from "@/lib/creators-mine";
 import type { WorkCard } from "@/components/creators/types";
@@ -28,7 +29,12 @@ export default async function RealPartsPreview({ searchParams }: { searchParams:
   const part = typeof sp.part === "string" ? sp.part : "list";
   return (
     <div className="mp rg">
-      <p style={{ padding: "8px 16px", fontSize: 12 }}>샘플: 진짜 부품에 가짜 값. 보기: ?part=list · ?part=register · ?part=profile</p>
+      <p style={{ padding: "8px 16px", fontSize: 12 }}>샘플: 진짜 부품에 가짜 값. 보기: ?part=list · ?part=register · ?part=profile · ?part=header</p>
+      {part === "header" && (
+        <div style={{ minHeight: 420, background: "#000" }}>
+          <SiteNav loggedIn newCount={2} notices={[{ id: "n1", text: "〈신청자 이름〉님이 「악의 꽃」에 협업을 신청했어요", when: "오늘 14:20" }, { id: "n2", text: "〈신청자 이름〉님이 「사다함의 꿈」에 협업을 신청했어요", when: "어제 18:05" }]} />
+        </div>
+      )}
       {part === "list" && (
         <section className="mp-sec s3">
           <div className="wrap">
