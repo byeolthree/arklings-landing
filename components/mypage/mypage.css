@@ -88,6 +88,7 @@
 .mp .mp-name { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .mp .mp-input { flex: 1 1 180px; min-width: 0; height: 48px; padding: 0 14px; border: 1px solid var(--line); border-radius: 6px; background: #fff; font: inherit; font-size: 14px; color: var(--title); }
 .mp .mp-foot { margin-top: 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; }
+.mp .mp-foot form { margin-left: auto; }
 .mp .mp-foot small { font-size: 12px; color: var(--body); }
 .mp .mp-foot a { color: inherit; text-decoration: underline; }
 
