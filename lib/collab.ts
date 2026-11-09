@@ -51,7 +51,7 @@ export function collabTargetOf(
   names: ReadonlyMap<string, string> = new Map(),
 ): CollabTarget {
   if (r.plan_id) return { kind: "plan", text: `기획안 「${r.plans?.title ?? "제목 없음"}」` };
-  if (r.work_title) return { kind: "work", text: `작품 「${r.work_title}」` };
+  if (r.work_title) return { kind: "work", text: `「${r.work_title}」` };
   if (r.creator_handle) return { kind: "creator", text: names.get(r.creator_handle) ?? r.creator_handle };
   return { kind: "general", text: r.source_works?.title ?? "전체 협업 제안" };
 }
