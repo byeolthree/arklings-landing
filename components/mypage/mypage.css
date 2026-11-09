@@ -252,3 +252,5 @@
 
 /* 영상 요소의 파일 첨부 안내(점선 칸) */
 .mp .we-drop { display: grid; gap: 10px; padding: 14px 16px; border: 1px dashed var(--body); border-radius: 12px; background: #fff; }
+/* 대표 이미지·영상: 칩 줄의 오른쪽 끝에 「파일 선택」 (좁으면 다음 줄로) */
+.mp .pp-roles .pp-file-end { margin-left: auto; }

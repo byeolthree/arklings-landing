@@ -89,8 +89,8 @@ function HeroField() {
             </span>
           </>
         )}
+        <input key={kind} type="file" className="pp-file-end" accept={rule.accept} onChange={onFile} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
       </div>
-      <input key={kind} type="file" accept={rule.accept} onChange={onFile} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
       {picked && <p className="len" role="status">고른 파일: {picked}</p>}
       <p id="pp-hero-hint" className="len">{rule.hint}</p>
       {msg && (

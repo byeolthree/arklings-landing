@@ -213,9 +213,9 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
             </span>
           </>
         )}
+        <input key={kind} type="file" className="pp-file-end" accept={rule.accept} onChange={onFile} disabled={busy} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
       </div>
       {showPrompt && <textarea readOnly className="we-text" rows={8} value={VIDEO_PROMPT} aria-label="영상 변환 프롬프트" onFocus={(e) => e.currentTarget.select()} />}
-      <input key={kind} type="file" accept={rule.accept} onChange={onFile} disabled={busy} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
       {picked && !pending && <p className="len" role="status">고른 파일: {picked}{busy ? " · 올리는 중…" : ""}</p>}
       {pending && !hasProfile && <p className="len">올릴 파일: {pending.name} (프로필을 저장하면 올라가요)</p>}
       <p id="pp-hero-hint" className="len">{rule.hint}</p>
