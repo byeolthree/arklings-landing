@@ -69,7 +69,7 @@ export default async function PortfolioNewPage({ searchParams }: { searchParams:
       <RegisterHeader title="포트폴리오 등록" current="포트폴리오 등록" hrefs={stepHrefs} />
       <div className="rg-main">
         <div className="rg-wrap">
-          <RegisterScreen works={data.works} usedBytes={data.usedBytes} nickname={nickname} openWorkId={workParam} />
+          <RegisterScreen works={data.works} usedBytes={data.usedBytes} nickname={nickname} openWorkId={workParam} profileRoles={data.profile.roles} />
         </div>
       </div>
     </div>

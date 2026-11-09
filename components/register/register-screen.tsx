@@ -3,7 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { WorkEditor, type WorkPreview } from "@/components/mypage/creator-forms";
-import { ROLES } from "@/lib/collab";
+import { ROLES, type Role } from "@/lib/collab";
+import { ROLE_TONE } from "@/components/creators/role-tone";
 import { QUOTA_BYTES, WORK_LIMIT } from "@/lib/creator-rules";
 import type { MyWork } from "@/lib/creators-mine";
 
@@ -19,7 +20,9 @@ function PreviewCard({ p, kind }: { p: WorkPreview; kind: "video" | "image" | "d
         {p.roles.length > 0 && (
           <ul className="rg-roles">
             {p.roles.map((r) => (
-              <li key={r}>{ROLES[r]}</li>
+              <li key={r} className={`tone-${ROLE_TONE[r]}`}>
+                {ROLES[r]}
+              </li>
             ))}
           </ul>
         )}
@@ -36,27 +39,27 @@ function PreviewCard({ p, kind }: { p: WorkPreview; kind: "video" | "image" | "d
 }
 
 // 독립 포트폴리오 등록 화면(시안 01-C): 왼쪽은 진짜 저장되는 편집 칸, 오른쪽은 「포트폴리오 화면에 보일 카드」(편집하는 대로 바로 바뀐다).
-export function RegisterScreen({ works, usedBytes, nickname, openWorkId }: { works: MyWork[]; usedBytes: number; nickname: string; openWorkId: string | null }) {
+export function RegisterScreen({ works, usedBytes, nickname, openWorkId, profileRoles }: { works: MyWork[]; usedBytes: number; nickname: string; openWorkId: string | null; profileRoles?: Role[] }) {
   const router = useRouter();
   const [current, setCurrent] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : null);
   const [formKey, setFormKey] = useState(0);
   const [preview, setPreview] = useState<WorkPreview>({ title: "", logline: "", genres: [], roles: [], top: "logline" });
   const cur = current ? (works.find((w) => w.id === current) ?? null) : null;
   const other = preview.top === "logline" ? "video" : "logline";
+  const topNote = `내 포트폴리오 ${works.length} / ${WORK_LIMIT} · 파일 ${mb(usedBytes)} / ${mb(QUOTA_BYTES)}`;
 
   return (
     <div className="rg-grid">
       <section className="rg-card" aria-label="포트폴리오 등록">
-        <p className="rg-count">
-          내 포트폴리오 {works.length} / {WORK_LIMIT} · 파일 {mb(usedBytes)} / {mb(QUOTA_BYTES)}
-        </p>
         {cur ? (
-          <WorkEditor key={cur.id} work={cur} nickname={nickname} onClose={() => setCurrent(null)} onPreview={setPreview} />
+          <WorkEditor key={cur.id} work={cur} nickname={nickname} profileRoles={profileRoles} topNote={topNote} onClose={() => setCurrent(null)} onPreview={setPreview} />
         ) : (
           <WorkEditor
             key={`new${formKey}`}
             work={null}
             nickname={nickname}
+            profileRoles={profileRoles}
+            topNote={topNote}
             onClose={() => setFormKey((k) => k + 1)}
             onCreated={(id) => {
               setCurrent(id);
@@ -77,7 +80,7 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId }: { wor
           <p className="rg-side-sub">맨 위가 {other === "video" ? "영상" : "로그라인"}일 때</p>
           <PreviewCard p={preview} kind={other} />
         </div>
-        <p className="rg-side-note">역할은 왼쪽에서 고른 것이 보입니다. 왼쪽 맨 위 요소를 끌어 바꾸면 이 카드가 바로 바뀝니다.</p>
+        <p className="rg-side-note">역할은 프로필에서 가져옵니다(여기서 고르지 않음). 왼쪽 맨 위 요소를 끌어서 바꾸면 이 카드가 바로 바뀝니다.</p>
       </aside>
     </div>
   );

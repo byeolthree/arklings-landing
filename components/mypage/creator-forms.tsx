@@ -63,7 +63,7 @@ function DocFilePick({ file, onFile, disabled }: { file?: File | null; onFile: (
       <div className="we-drop-row">
         <span className="mp-note">외부 문서 첨부 (PDF · 10MB 이하)</span>
         <label className="btn btn-ghost" style={{ cursor: "pointer" }}>
-          파일 불러오기
+          파일 고르기
           <input type="file" accept="application/pdf" hidden disabled={disabled} onChange={pick} aria-label="문서 파일" />
         </label>
       </div>
@@ -111,10 +111,7 @@ function ImageSlotBox({ file, onFile }: { file: File | null; onFile: (f: File | 
         <button type="button" className="we-fold" aria-expanded={!fold} onClick={() => setFold(!fold)}>
           {fold ? "▸ 펼치기" : "▾ 접기"}
         </button>
-        <span className="mp-note">· 이미지 (JPG·PNG·WEBP, 5MB 이하)</span>
-        <button type="button" className="btn btn-ghost" style={{ marginLeft: "auto" }} onClick={() => ref.current?.click()}>
-          파일 불러오기
-        </button>
+        <span className="mp-note">· 이미지 (JPG · PNG · WEBP, 5MB 이하)</span>
       </div>
       {!fold && (
         <button type="button" className="we-media we-imgbox" onClick={() => ref.current?.click()} aria-label="이미지 고르기">
@@ -185,7 +182,7 @@ function VideoFilePick({ file, onFile, disabled }: { file?: File | null; onFile:
           영상 변환 프롬프트 복사
         </button>
         <label className="btn btn-ghost" style={{ cursor: "pointer" }}>
-          파일 불러오기
+          파일 고르기
           <input type="file" accept={rule.accept} hidden disabled={disabled} onChange={pick} aria-label="영상 파일" />
         </label>
         {file && (
@@ -699,9 +696,13 @@ export function WorkEditor({
   onTogglePublic,
   busyOuter,
   onPreview,
+  profileRoles,
+  topNote,
 }: {
   work: MyWork | null;
   nickname: string;
+  profileRoles?: Role[]; // 작품의 역할은 프로필에서 가져온다(시안 01: 여기서 고르지 않음)
+  topNote?: string; // 맨 윗줄에 보일 「내 포트폴리오 4 / 12 · 파일 12MB / 20MB」
   onClose: () => void;
   onCreated?: (id: string) => void;
   onTogglePublic?: () => void;
@@ -710,7 +711,7 @@ export function WorkEditor({
 }) {
   const router = useRouter();
   const [title, setTitle] = useState(work?.title ?? "");
-  const [roles, setRoles] = useState<Role[]>(work?.roles ?? []);
+  const [roles, setRoles] = useState<Role[]>(work?.roles ?? profileRoles ?? []);
   const [genres, setGenres] = useState<string[]>(work?.genres ?? []);
   const [kind] = useState(work?.kind ?? "");
   const [form] = useState<string>(work?.form ?? "");
@@ -719,7 +720,7 @@ export function WorkEditor({
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   // 새 작품: 승인 샘플처럼 글·이미지·영상·문서 칸이 처음부터 있고 순서를 바꾸거나 지울 수 있다. 「저장」을 누르면 작품을 만든 뒤 채운 칸을 이 순서대로 넣는다.
-  const [slots, setSlots] = useState<Slot[]>(() => (work ? [] : (["logline", "text", "image", "video"] as SlotKind[]).map(newSlot)));
+  const [slots, setSlots] = useState<Slot[]>(() => (work ? [] : (["video", "logline", "text", "image"] as SlotKind[]).map(newSlot)));
   const dragSlot = useRef<string | null>(null);
   const moveSlotTo = (id: string, to: number) => setSlots((cur) => {
     const from = cur.findIndex((x) => x.id === id);
@@ -792,34 +793,28 @@ export function WorkEditor({
   return (
     <div className="mp-work we">
       <div className="we-top">
-        <span className="we-state">{work ? (work.isPublic ? "공개 중" : "공개하지 않음") : "새 작품"}</span>
-        {work && onTogglePublic && (
-          <button type="button" className="btn btn-ghost" onClick={onTogglePublic} disabled={disabled}>
-            {work.isPublic ? "포트폴리오에서 내리기" : "포트폴리오에 올리기"}
-          </button>
-        )}
-        {work && (
-          <button type="button" className="btn btn-ghost we-close" onClick={onClose}>
-            접기 ▴
-          </button>
-        )}
+        <span className="we-state">{work ? (work.isPublic ? "공개 중" : "공개하지 않음") : "공개하지 않음"}</span>
+        {topNote && <span className="we-note">{topNote}</span>}
+        <span className="we-top-btns">
+          {work && (
+            <button type="button" className="btn btn-ghost we-close" onClick={onClose}>
+              접기 ▴
+            </button>
+          )}
+          {work && onTogglePublic && (
+            <button type="button" className="btn btn-primary" onClick={onTogglePublic} disabled={disabled}>
+              {work.isPublic ? "포트폴리오에서 내리기" : "포트폴리오에 올리기"}
+            </button>
+          )}
+        </span>
       </div>
 
       <div className="we-head">
-        <input className="we-title" type="text" placeholder="〈작품 제목〉" aria-label="작품 제목" value={title} maxLength={TITLE_MAX} onChange={(e) => setTitle(e.target.value)} aria-invalid={errs.title ? true : undefined} />
+        <input className="we-title" type="text" placeholder="〈제목〉" aria-label="작품 제목" value={title} maxLength={TITLE_MAX} onChange={(e) => setTitle(e.target.value)} aria-invalid={errs.title ? true : undefined} />
         {errs.title && <p className="mp-msg err" role="alert">{errs.title}</p>}
         <p className="we-by">
-          {nickname || "닉네임"}
-          {work && ` · ${new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" })}`}
+          {nickname || "닉네임"} · {work && work.isPublic ? new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" }) : "게시 전"}
         </p>
-        <div className="we-tags" role="group" aria-label="역할">
-          {(Object.keys(ROLES) as Role[]).map((r) => (
-            <button key={r} type="button" className={`mp-tag tone-${ROLE_TONE[r]}`} data-on={roles.includes(r) ? "1" : "0"} aria-pressed={roles.includes(r)} onClick={() => setRoles(toggle(roles, r))}>
-              {roles.includes(r) ? "✓ " : ""}
-              {ROLES[r]}
-            </button>
-          ))}
-        </div>
         {errs.roles && <p className="mp-msg err" role="alert">{errs.roles}</p>}
         <div className="we-pick" role="group" aria-label="장르">
           {GENRES.map((g) => (
@@ -875,7 +870,7 @@ export function WorkEditor({
                 >
                   ⠿
                 </button>
-                <div className="we-main">
+                <div className={`we-main${sl.kind === "video" || sl.kind === "text" ? " we-card" : ""}`}>
                   {sl.kind === "logline" && (
                     <label className="we-logline-label">
                       <span className="we-label">로그라인 (이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)</span>
@@ -888,6 +883,8 @@ export function WorkEditor({
                   {sl.kind === "text" && <textarea className="we-text" rows={3} placeholder="〈문서〉" aria-label="문서" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
                   {sl.kind === "text" && <DocFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
                   {sl.kind === "image" && <ImageSlotBox file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
+                  {sl.kind === "video" && <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={sl.url} onChange={(e) => patchSlot(sl.id, { url: e.target.value })} />}
+                  {sl.kind === "video" && <p className="mp-note" style={{ flex: "1 1 100%" }}>유튜브 주소로 넣으면 용량 제한 없이 올릴 수 있어요.</p>}
                   {sl.kind === "video" && <VideoFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
                 </div>
                 <div className="we-tools">
@@ -1055,7 +1052,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
           >
             ⠿
           </button>
-          <div className="we-main">
+          <div className={`we-main${b && (b.kind === "video" || b.kind === "text" || b.kind === "document") ? " we-card" : ""}`}>
             {!b && (
               <label className="we-logline-label">
                 <span className="we-label">로그라인 (이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)</span>
@@ -1077,7 +1074,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
                 {folded[b.id] ? "▸ 펼치기" : "▾ 접기"}
               </button>
             )}
-            {b && b.kind === "image" && <span className="mp-note">· 이미지 (JPG·PNG·WEBP, 5MB 이하)</span>}
+            {b && b.kind === "image" && <span className="mp-note">· 이미지 (JPG · PNG · WEBP, 5MB 이하)</span>}
             {b && b.kind === "text" && (
               <>
                 <textarea className="we-text" rows={3} aria-label="문서" value={edits[b.id] ?? b.body} onChange={(e) => setEdits({ ...edits, [b.id]: e.target.value })} />
@@ -1124,10 +1121,15 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
           <div className="we-main">
             {adding === "text" ? (
               <textarea className="we-text" rows={3} aria-label="새 문서" placeholder="문서를 입력해 주세요" value={draft} onChange={(e) => setDraft(e.target.value)} />
-            ) : null}
+            ) : (
+              <>
+                <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={draft} onChange={(e) => setDraft(e.target.value)} />
+                <p className="mp-note" style={{ flex: "1 1 100%" }}>유튜브 주소로 넣으면 용량 제한 없이 올릴 수 있어요.</p>
+              </>
+            )}
             {adding === "text" && <DocFilePick file={draftDoc} onFile={setDraftDoc} disabled={busy} />}
             {adding === "video" && <VideoFilePick disabled={busy} onFile={(f) => { if (f) { setAdding(null); setDraft(""); void upload(f, "video"); } }} />}
-            {adding === "text" && <button type="button" className="btn btn-primary" disabled={busy} onClick={add}>추가</button>}
+            <button type="button" className="btn btn-primary" disabled={busy} onClick={add}>추가</button>
             <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => { setAdding(null); setDraft(""); setDraftDoc(null); }}>취소</button>
           </div>
         </div>
