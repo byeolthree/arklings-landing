@@ -8,13 +8,12 @@ import { ROLES, type Role } from "@/lib/collab";
 const LOGLINE_LABEL = "로그라인 (이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)";
 const LOGLINE_HINT = "어느 날 〈사건〉이 벌어지자, 〈주인공〉은 〈장애물〉을 극복해야 〈목표〉를 달성할 수 있다. 그렇지 않으면 〈위험〉이 닥친다.";
 
-type Kind = "text" | "image" | "video" | "doc";
-const FOLDABLE: Kind[] = ["image", "video", "doc"];
+type Kind = "text" | "image" | "video";
+const FOLDABLE: Kind[] = ["image", "video"];
 const ADD: { kind: Kind; label: string }[] = [
   { kind: "text", label: "문서" },
   { kind: "image", label: "이미지" },
   { kind: "video", label: "영상" },
-  { kind: "doc", label: "문서(PDF)" },
 ];
 
 function Tools({ first, last }: { first: boolean; last: boolean }) {
@@ -41,7 +40,6 @@ function Element({ kind, first, last, folded, onFold }: { kind: Kind; first: boo
         {kind === "text" && <textarea className="we-text" rows={3} placeholder="〈문서〉" aria-label="문서" />}
         {kind === "image" && (folded ? <span className="we-line">이미지 〈파일 이름〉</span> : <div className="we-media">〈이미지〉</div>)}
         {kind === "video" && (folded ? <span className="we-line">영상 〈제목〉 · youtube.com</span> : <div className="we-media">〈영상〉</div>)}
-        {kind === "doc" && (folded ? <span className="we-line">문서(PDF) 〈파일 이름〉 · 4.8MB</span> : <div className="we-media doc">〈문서〉</div>)}
       </div>
       <Tools first={first} last={last} />
     </div>
@@ -49,8 +47,8 @@ function Element({ kind, first, last, folded, onFold }: { kind: Kind; first: boo
 }
 
 export function WorkEditor({ isPublic, roles, onFold }: { isPublic: boolean; roles: Role[]; onFold: () => void }) {
-  const [order] = useState<Kind[]>(isPublic ? ["text", "image", "video", "doc"] : ["text", "image"]);
-  const [folded, setFolded] = useState<Partial<Record<Kind, boolean>>>({ video: true, doc: true });
+  const [order] = useState<Kind[]>(isPublic ? ["text", "image", "video"] : ["text", "image"]);
+  const [folded, setFolded] = useState<Partial<Record<Kind, boolean>>>({ video: true });
   const [pickRoles, setPickRoles] = useState(false);
   const [myRoles, setMyRoles] = useState<Role[]>(roles);
   const [genres, setGenres] = useState<number[]>([0, 1]);
@@ -116,10 +114,12 @@ export function WorkEditor({ isPublic, roles, onFold }: { isPublic: boolean; rol
       </div>
 
       <div className="we-foot">
-        <button type="button" className="btn btn-ghost">미리 보기</button>
-        <button type="button" className="btn btn-primary">저장</button>
+        <div className="we-foot-l">
+          <button type="button" className="btn btn-ghost">미리 보기</button>
+          <button type="button" className="btn btn-ghost we-del">작품 지우기</button>
+        </div>
         <button type="button" className="btn btn-ghost" onClick={onFold}>취소</button>
-        <button type="button" className="btn btn-ghost we-del">작품 지우기</button>
+        <button type="button" className="btn btn-primary">저장</button>
       </div>
     </div>
   );

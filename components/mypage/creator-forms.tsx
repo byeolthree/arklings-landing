@@ -120,6 +120,7 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
   const [kind, setKind] = useState<"image" | "video">(hero?.kind ?? "image");
   const [msg, setMsg] = useState("");
   const [picked, setPicked] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
   const [copied, setCopied] = useState("");
   const [showPrompt, setShowPrompt] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -213,7 +214,8 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
             </span>
           </>
         )}
-        <input key={kind} type="file" className="pp-file-end" accept={rule.accept} onChange={onFile} disabled={busy} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
+        <input key={kind} type="file" hidden ref={fileRef} accept={rule.accept} onChange={onFile} disabled={busy} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
+        <button type="button" className="btn btn-ghost pp-file-end" onClick={() => fileRef.current?.click()} disabled={busy}>파일 선택</button>
       </div>
       {showPrompt && <textarea readOnly className="we-text" rows={8} value={VIDEO_PROMPT} aria-label="영상 변환 프롬프트" onFocus={(e) => e.currentTarget.select()} />}
       {picked && !pending && <p className="len" role="status">고른 파일: {picked}{busy ? " · 올리는 중…" : ""}</p>}
@@ -518,7 +520,7 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
   );
 }
 
-type SlotKind = "logline" | "text" | "image" | "video" | "doc";
+type SlotKind = "logline" | "text" | "image" | "video";
 type Slot = { id: string; kind: SlotKind; text: string; url: string; file: File | null; sub: string };
 let slotSeq = 0;
 const newSlot = (kind: SlotKind): Slot => ({ id: `s${++slotSeq}`, kind, text: "", url: "", file: null, sub: "" });
@@ -526,7 +528,7 @@ const newSlot = (kind: SlotKind): Slot => ({ id: `s${++slotSeq}`, kind, text: ""
 // 요소 종류 칩(시안 01). 영상은 티저·예고편…, 글·문서는 시놉시스·트리트먼트…를 고른다. 다시 누르면 비운다. 고른 것은 요소의 sub_kind(0012)에 저장된다.
 function SubChips({ items, value, onPick, label, disabled }: { items: readonly string[]; value: string; onPick: (v: string) => void; label: string; disabled?: boolean }) {
   return (
-    <div className="we-pick" role="group" aria-label={label}>
+    <div className="we-pick we-sub" role="group" aria-label={label}>
       {items.map((x) => (
         <button key={x} type="button" className="opt" aria-pressed={value === x} disabled={disabled} onClick={() => onPick(value === x ? "" : x)}>
           {x}
@@ -553,7 +555,7 @@ async function addSlots(workId: string, slots: Slot[]): Promise<{ error: string 
       const r = await addVideoBlock(workId, sl.url, sl.sub || null);
       if (!r.ok) return { error: `영상을 넣지 못했어요. ${r.error}`, order };
       order.push(r.id);
-    } else if ((sl.kind === "image" || sl.kind === "doc" || sl.kind === "video") && sl.file) {
+    } else if ((sl.kind === "image" || sl.kind === "video") && sl.file) {
       const kind = sl.kind === "image" ? "image" : sl.kind === "video" ? "video" : "document";
       if (kindOfMime(sl.file.type) !== kind) return { error: kind === "image" ? "JPG, PNG, WEBP 이미지만 올릴 수 있어요." : kind === "video" ? "MP4 파일만 올릴 수 있어요." : "PDF 파일만 올릴 수 있어요.", order };
       const slot = await prepareFileUpload(workId, { kind, type: sl.file.type, size: sl.file.size });
@@ -600,7 +602,7 @@ export function WorkEditor({
   const [busy, setBusy] = useState(false);
   const [pickRoles, setPickRoles] = useState((work?.roles.length ?? 0) === 0);
   // 새 작품: 승인 샘플처럼 글·이미지·영상·문서 칸이 처음부터 있고 순서를 바꾸거나 지울 수 있다. 「저장」을 누르면 작품을 만든 뒤 채운 칸을 이 순서대로 넣는다.
-  const [slots, setSlots] = useState<Slot[]>(() => (work ? [] : (["logline", "text", "image", "video", "doc"] as SlotKind[]).map(newSlot)));
+  const [slots, setSlots] = useState<Slot[]>(() => (work ? [] : (["logline", "text", "image", "video"] as SlotKind[]).map(newSlot)));
   const dragSlot = useRef<string | null>(null);
   const moveSlotTo = (id: string, to: number) => setSlots((cur) => {
     const from = cur.findIndex((x) => x.id === id);
@@ -617,7 +619,7 @@ export function WorkEditor({
   // 맨 위에 놓인 것이 이 작품의 대표다(D35-2). 글·문서가 맨 위면 「문서」로 본다.
   const topItem = work ? orderItems(work.blocks, work.loglinePosition)[0] : (slots[0]?.kind ?? "logline");
   const topKind: WorkPreview["top"] = (() => {
-    if (typeof topItem === "string") return topItem === "image" || topItem === "video" ? topItem : topItem === "text" || topItem === "doc" ? "doc" : "logline";
+    if (typeof topItem === "string") return topItem === "image" || topItem === "video" ? topItem : topItem === "text" ? "doc" : "logline";
     return topItem.kind === "image" || topItem.kind === "video" ? topItem.kind : "doc";
   })();
   const genresKey = genres.join("|");
@@ -776,7 +778,7 @@ export function WorkEditor({
                     </label>
                   )}
                   {sl.kind === "video" && <SubChips items={VIDEO_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="영상 종류" />}
-                  {(sl.kind === "text" || sl.kind === "doc") && <SubChips items={DOC_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="문서 종류" />}
+                  {sl.kind === "text" && <SubChips items={DOC_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="문서 종류" />}
                   {sl.kind === "text" && <textarea className="we-text" rows={3} placeholder="〈문서〉" aria-label="문서" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
                   {sl.kind === "image" && (
                     <label className="we-line">
@@ -787,12 +789,6 @@ export function WorkEditor({
                   {sl.kind === "video" && <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={sl.url} onChange={(e) => patchSlot(sl.id, { url: e.target.value })} />}
                   {sl.kind === "video" && <p className="mp-note" style={{ flex: "1 1 100%" }}>유튜브 주소로 넣으면 용량 제한 없이 올릴 수 있어요.</p>}
                   {sl.kind === "video" && <VideoFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
-                  {sl.kind === "doc" && (
-                    <label className="we-line">
-                      문서 (PDF){" "}
-                      <input type="file" accept="application/pdf" aria-label="문서 파일" onChange={(e) => patchSlot(sl.id, { file: e.target.files?.[0] ?? null })} />
-                    </label>
-                  )}
                 </div>
                 <div className="we-tools">
                   <button type="button" className="we-mini" aria-label="위로" disabled={i === 0} onClick={() => moveSlotTo(sl.id, i - 1)}>↑</button>
@@ -804,7 +800,7 @@ export function WorkEditor({
           ))}
           <div className="we-add">
             <span>추가</span>
-            {([["text", "문서"], ["image", "이미지"], ["video", "영상"], ["doc", "문서(PDF)"]] as [SlotKind, string][]).map(([k, l]) => (
+            {([["text", "문서"], ["image", "이미지"], ["video", "영상"]] as [SlotKind, string][]).map(([k, l]) => (
               <button key={k} type="button" className="btn btn-ghost" onClick={() => setSlots((cur) => [...cur, newSlot(k)])}>
                 + {l}
               </button>
@@ -819,22 +815,24 @@ export function WorkEditor({
         </p>
       )}
       <div className="we-foot">
-        {work && (
-          <Link className="btn btn-ghost" href={`/portfolio/${work.id}`} target="_blank" rel="noopener noreferrer">
-            미리 보기
-          </Link>
-        )}
-        <button type="button" className="btn btn-primary" onClick={save} disabled={disabled}>
-          {busy ? "저장하는 중…" : "저장"}
-        </button>
+        <div className="we-foot-l">
+          {work && (
+            <Link className="btn btn-ghost" href={`/portfolio/${work.id}`} target="_blank" rel="noopener noreferrer">
+              미리 보기
+            </Link>
+          )}
+          {work && (
+            <button type="button" className="btn btn-ghost we-del" onClick={removeWork} disabled={disabled}>
+              작품 지우기
+            </button>
+          )}
+        </div>
         <button type="button" className="btn btn-ghost" onClick={onClose} disabled={disabled}>
           취소
         </button>
-        {work && (
-          <button type="button" className="btn btn-ghost we-del" onClick={removeWork} disabled={disabled}>
-            작품 지우기
-          </button>
-        )}
+        <button type="button" className="btn btn-primary" onClick={save} disabled={disabled}>
+          {busy ? "저장하는 중…" : "저장"}
+        </button>
       </div>
     </div>
   );
@@ -850,7 +848,6 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
   const [busy, setBusy] = useState(false);
   const [edits, setEdits] = useState<Record<string, string>>({});
   const imgInput = useRef<HTMLInputElement>(null);
-  const docInput = useRef<HTMLInputElement>(null);
   const full = work.blocks.length >= BLOCK_LIMIT;
   const dragId = useRef<string | null>(null);
   // 화면에 보이는 순서(로그라인 블록 포함, D35-2). 로그라인 자리는 글자 「logline」이다.
@@ -995,9 +992,9 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
                 <video src={b.src} controls playsInline preload="metadata" style={{ width: "100%", height: "100%" }} />
               </div>
             ) : <div className="we-media">영상을 불러오지 못했어요</div>)}
-            {b && b.kind === "document" && (folded[b.id] ? <span className="we-line">문서(PDF) {b.fileName ?? ""} · {b.fileBytes ? mb(b.fileBytes) : ""}</span> : (
+            {b && b.kind === "document" && (folded[b.id] ? <span className="we-line">문서 {b.fileName ?? ""} · {b.fileBytes ? mb(b.fileBytes) : ""}</span> : (
               <div className="we-line">
-                {b.src ? <a href={b.src} target="_blank" rel="noopener noreferrer">{b.fileName ?? "문서(PDF)"} 열기 ↗</a> : "문서를 불러오지 못했어요"}
+                {b.src ? <a href={b.src} target="_blank" rel="noopener noreferrer">{b.fileName ?? "문서"} 열기 ↗</a> : "문서를 불러오지 못했어요"}
                 {b.fileBytes ? ` · ${mb(b.fileBytes)}` : ""}
               </div>
             ))}
@@ -1032,9 +1029,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
         <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => { setAdding("text"); setDraft(""); }}>+ 문서</button>
         <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => imgInput.current?.click()}>+ 이미지</button>
         <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => { setAdding("video"); setDraft(""); }}>+ 영상</button>
-        <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => docInput.current?.click()}>+ 문서(PDF)</button>
         <input ref={imgInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => { void upload(e.target.files?.[0], "image"); e.target.value = ""; }} />
-        <input ref={docInput} type="file" accept="application/pdf" hidden onChange={(e) => { void upload(e.target.files?.[0], "document"); e.target.value = ""; }} />
       </div>
     </div>
   );

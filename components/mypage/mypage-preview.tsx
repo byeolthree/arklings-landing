@@ -2,7 +2,7 @@
 
 import { HERO_RULE, VIDEO_PROMPT } from "@/components/mypage/hero-guide";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SAMPLE_CREATORS } from "@/components/creators/sample-data";
 import { PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
 import { ROLES } from "@/lib/collab";
@@ -43,6 +43,7 @@ function HeroField() {
   const [msg, setMsg] = useState("");
   const [copied, setCopied] = useState("");
   const [picked, setPicked] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
   const rule = HERO_RULE[kind];
   async function copyPrompt() {
     try {
@@ -89,7 +90,8 @@ function HeroField() {
             </span>
           </>
         )}
-        <input key={kind} type="file" className="pp-file-end" accept={rule.accept} onChange={onFile} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
+        <input key={kind} type="file" hidden ref={fileRef} accept={rule.accept} onChange={onFile} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
+        <button type="button" className="btn btn-ghost pp-file-end" onClick={() => fileRef.current?.click()}>파일 선택</button>
       </div>
       {picked && <p className="len" role="status">고른 파일: {picked}</p>}
       <p id="pp-hero-hint" className="len">{rule.hint}</p>

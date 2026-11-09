@@ -208,7 +208,9 @@
 .mp .we-by { margin-top: 6px; font-size: 13px; color: var(--body); }
 .mp .we-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; }
 .mp .we-pick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.mp .we-pick.we-sub { flex-wrap: nowrap; gap: 6px; }
 .mp .we-pick .opt { padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--body); font: inherit; font-size: 13px; cursor: pointer; }
+.mp .we-pick.we-sub .opt { flex: 0 0 auto; white-space: nowrap; padding: 4px 10px; }
 .mp .we-pick .opt[aria-pressed="true"] { background: var(--body); border-color: var(--body); color: #fff; }
 .mp .we-logline { margin-top: 20px; }
 .mp .we-label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 700; color: var(--title); }
@@ -231,9 +233,9 @@
 .mp .we-media { aspect-ratio: 16 / 9; border-radius: 14px; background: var(--bg); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--body); }
 .mp .we-media.doc { aspect-ratio: 4 / 3; max-height: 260px; }
 .mp .we-add { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--body); }
-.mp .we-foot { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
-.mp .we-del { margin-left: auto; }
-@media (max-width: 767px) { .mp .we-el { flex-wrap: wrap; } .mp .we-tools { flex: 1 1 100%; padding-left: 24px; } .mp .we-del { margin-left: 0; } .mp .we-tools { opacity: 1; } .mp .we-gap .we-mini { opacity: 1; } }
+.mp .we-foot { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); }
+.mp .we-foot-l { display: flex; flex-wrap: wrap; gap: 8px; margin-right: auto; }
+@media (max-width: 767px) { .mp .we-el { flex-wrap: wrap; } .mp .we-tools { flex: 1 1 100%; padding-left: 24px; } .mp .we-tools { opacity: 1; } .mp .we-gap .we-mini { opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) { .mp *, .mp *::before, .mp *::after { transition: none !important; animation: none !important; } }
 
@@ -254,3 +256,4 @@
 .mp .we-drop { display: grid; gap: 10px; padding: 14px 16px; border: 1px dashed var(--body); border-radius: 12px; background: #fff; }
 /* 대표 이미지·영상: 칩 줄의 오른쪽 끝에 「파일 선택」 (좁으면 다음 줄로) */
 .mp .pp-roles .pp-file-end { margin-left: auto; }
+@media (max-width: 767px) { .mp .we-pick.we-sub { flex-wrap: wrap; } }
