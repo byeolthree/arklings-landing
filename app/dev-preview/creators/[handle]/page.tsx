@@ -41,7 +41,7 @@ export default async function CreatorProfilePreviewPage({ params, searchParams }
             내 프로필 미리 보기:{" "}
             <Link href={`${base}?mine=public`} className={mine === "public" ? "font-bold underline" : "underline"}>공개 중</Link> ·{" "}
             <Link href={`${base}?mine=private`} className={mine === "private" ? "font-bold underline" : "underline"}>비공개</Link> ·{" "}
-            <Link href={`/dev-preview/mypage?profile=${mine}`} className="underline">마이페이지로</Link>
+            <Link href="/mypage" className="underline">마이페이지로</Link>
           </>
         )}
       </div>
