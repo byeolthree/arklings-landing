@@ -718,7 +718,6 @@ export function WorkEditor({
   const [errs, setErrs] = useState<Record<string, string>>({});
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
-  const [pickRoles, setPickRoles] = useState((work?.roles.length ?? 0) === 0);
   // 새 작품: 승인 샘플처럼 글·이미지·영상·문서 칸이 처음부터 있고 순서를 바꾸거나 지울 수 있다. 「저장」을 누르면 작품을 만든 뒤 채운 칸을 이 순서대로 넣는다.
   const [slots, setSlots] = useState<Slot[]>(() => (work ? [] : (["logline", "text", "image", "video"] as SlotKind[]).map(newSlot)));
   const dragSlot = useRef<string | null>(null);
@@ -813,25 +812,14 @@ export function WorkEditor({
           {nickname || "닉네임"}
           {work && ` · ${new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" })}`}
         </p>
-        <div className="we-tags">
+        <div className="we-tags" role="group" aria-label="역할">
           {(Object.keys(ROLES) as Role[]).map((r) => (
-            <span key={r} className={`mp-tag tone-${ROLE_TONE[r]}`} data-on={roles.includes(r) ? "1" : "0"}>
+            <button key={r} type="button" className={`mp-tag tone-${ROLE_TONE[r]}`} data-on={roles.includes(r) ? "1" : "0"} aria-pressed={roles.includes(r)} onClick={() => setRoles(toggle(roles, r))}>
+              {roles.includes(r) ? "✓ " : ""}
               {ROLES[r]}
-            </span>
+            </button>
           ))}
-          <button type="button" className="we-mini" aria-expanded={pickRoles} aria-label="역할 고르기" onClick={() => setPickRoles(!pickRoles)}>
-            +
-          </button>
         </div>
-        {pickRoles && (
-          <div className="we-pick" role="group" aria-label="역할">
-            {(Object.keys(ROLES) as Role[]).map((r) => (
-              <button key={r} type="button" className="opt" aria-pressed={roles.includes(r)} onClick={() => setRoles(toggle(roles, r))}>
-                {ROLES[r]}
-              </button>
-            ))}
-          </div>
-        )}
         {errs.roles && <p className="mp-msg err" role="alert">{errs.roles}</p>}
         <div className="we-pick" role="group" aria-label="장르">
           {GENRES.map((g) => (
