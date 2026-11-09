@@ -131,7 +131,7 @@ export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; ne
                 <p className="lk-drop-cap">등록할 곳</p>
                 {MENU.map((m) =>
                   m.href ? (
-                    <Link key={m.label} role="menuitem" href="/mypage#mp-portfolio" onClick={shut} aria-current={onCreators ? "page" : undefined}>
+                    <Link key={m.label} role="menuitem" href="/portfolio/new" onClick={shut} aria-current={onCreators ? "page" : undefined}>
                       {m.label}
                     </Link>
                   ) : (
@@ -159,7 +159,7 @@ export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; ne
                     <Link role="menuitem" href="/mypage#mp-creator" onClick={shut}>
                       프로필 등록
                     </Link>
-                    <Link role="menuitem" href="/mypage#mp-portfolio" onClick={shut}>
+                    <Link role="menuitem" href="/portfolio/new" onClick={shut}>
                       포트폴리오 등록
                     </Link>
                     <hr />

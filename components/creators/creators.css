@@ -286,7 +286,6 @@
 /* 누르는 동안 살짝 작아지고 진해진다(잠긴 버튼 제외) */
 .cr .btn:not([disabled]):active { transform: scale(.97); filter: brightness(.92); }
 
-++ b/components/creators/creators.css
 
 /* 프로필: 작품마다 한 섹션(시안 03·08). 섹션 배경은 번갈아 바뀐다 */
 .cr .cr-prof-top { padding-bottom: 0; }

@@ -1,0 +1,88 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { WorkEditor, type WorkPreview } from "@/components/mypage/creator-forms";
+import { ROLES } from "@/lib/collab";
+import { QUOTA_BYTES, WORK_LIMIT } from "@/lib/creator-rules";
+import type { MyWork } from "@/lib/creators-mine";
+
+const FRAME = "어느 날 〈사건〉이 벌어지자, 〈주인공〉은 〈장애물〉을 극복해야 〈목표〉를 달성할 수 있다. 그렇지 않으면 〈위험〉이 닥친다.";
+const mb = (n: number) => `${(n / 1024 / 1024).toFixed(1)}MB`;
+
+function PreviewCard({ p, kind }: { p: WorkPreview; kind: "video" | "image" | "logline" }) {
+  return (
+    <div className="rg-pcard">
+      <p className="rg-pcard-title">{p.title || "〈제목〉"}</p>
+      {kind === "logline" ? <p className="rg-pcard-log">{p.logline || FRAME}</p> : <div className="rg-pcard-media">{kind === "video" ? "영상" : "이미지"}</div>}
+      <div className="rg-pcard-tags">
+        {p.roles.length > 0 && (
+          <ul className="rg-roles">
+            {p.roles.map((r) => (
+              <li key={r}>{ROLES[r]}</li>
+            ))}
+          </ul>
+        )}
+        {p.genres.length > 0 && (
+          <ul>
+            {p.genres.map((g) => (
+              <li key={g}>{g}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// 독립 포트폴리오 등록 화면(시안 01-C): 왼쪽은 진짜 저장되는 편집 칸, 오른쪽은 「포트폴리오 화면에 보일 카드」(편집하는 대로 바로 바뀐다).
+export function RegisterScreen({ works, usedBytes, nickname, openWorkId }: { works: MyWork[]; usedBytes: number; nickname: string; openWorkId: string | null }) {
+  const router = useRouter();
+  const [current, setCurrent] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : null);
+  const [formKey, setFormKey] = useState(0);
+  const [preview, setPreview] = useState<WorkPreview>({ title: "", logline: "", genres: [], roles: [], top: "logline" });
+  const cur = current ? (works.find((w) => w.id === current) ?? null) : null;
+  const other = preview.top === "logline" ? "video" : "logline";
+
+  return (
+    <div className="rg-grid">
+      <section className="rg-card" aria-label="포트폴리오 등록">
+        <p className="rg-count">
+          내 포트폴리오 {works.length} / {WORK_LIMIT} · 파일 {mb(usedBytes)} / {mb(QUOTA_BYTES)}
+        </p>
+        <p className="rg-rep-note">
+          <span className="rg-rep-tag">대표</span>
+          맨 위에 놓은 이미지·영상이 대표입니다. 없으면 로그라인이 보입니다. 포트폴리오 카드에 이것이 보입니다.
+        </p>
+        {cur ? (
+          <WorkEditor key={cur.id} work={cur} nickname={nickname} onClose={() => setCurrent(null)} onPreview={setPreview} />
+        ) : (
+          <WorkEditor
+            key={`new${formKey}`}
+            work={null}
+            nickname={nickname}
+            onClose={() => setFormKey((k) => k + 1)}
+            onCreated={(id) => {
+              setCurrent(id);
+              router.refresh();
+            }}
+            onPreview={setPreview}
+          />
+        )}
+      </section>
+
+      <aside className="rg-side" aria-label="포트폴리오 화면에 보일 카드">
+        <h2 className="rg-side-h">포트폴리오 화면에 보일 카드</h2>
+        <div>
+          <p className="rg-side-sub">맨 위가 {preview.top === "video" ? "영상" : preview.top === "image" ? "이미지" : "로그라인"}일 때 (지금 왼쪽 모습)</p>
+          <PreviewCard p={preview} kind={preview.top} />
+        </div>
+        <div>
+          <p className="rg-side-sub">맨 위가 {other === "video" ? "영상" : "로그라인"}일 때</p>
+          <PreviewCard p={preview} kind={other} />
+        </div>
+        <p className="rg-side-note">역할과 장르는 왼쪽에서 고른 것이 보입니다. 맨 위 요소를 바꾸면 이 카드가 바로 바뀝니다.</p>
+      </aside>
+    </div>
+  );
+}

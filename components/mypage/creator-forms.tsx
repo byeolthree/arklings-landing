@@ -4,7 +4,7 @@
 // 모든 저장은 app/actions/creators.ts의 Server Action이 하고(서버가 로그인·이메일 확인·글자 수를 다시 검사한다), 끝나면 서버에서 다시 읽는다(router.refresh).
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   addTextBlock,
   addVideoBlock,
@@ -16,6 +16,7 @@ import {
   moveBlock,
   prepareFileUpload,
   reorderBlocks,
+  reorderWorks,
   saveCreatorProfile,
   setProfilePublic,
   setWorkPublic,
@@ -26,6 +27,7 @@ import { GENRES } from "@/components/creators/genres";
 import { PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
 import { ROLES, type Role } from "@/lib/collab";
 import { BLOCK_LIMIT, QUOTA_BYTES, TITLE_MAX, WORK_LIMIT, type ProfileErrors, type ProfileValues } from "@/lib/creator-rules";
+import { representativeOf } from "@/lib/creator-cards";
 import { kindOfMime, uploadToSlot } from "@/lib/creator-upload-client";
 import type { MyBlock, MyProfile, MyWork } from "@/lib/creators-mine";
 
@@ -91,15 +93,24 @@ export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
 }
 
 // ── 포트폴리오 등록 ─────────────────────────────────────────────────────────────────
+// 접은 목록(시안 02·07): 맨 윗줄 「＋ 새 포트폴리오 등록」이 접힌 등록 화면이고, 아래에 내 작품이 한 줄씩 있다.
+// 줄마다 손잡이(순서 저장)·제목·대표·역할·장르·수정일·공개 스위치·수정·삭제. 「수정」과 새 등록 줄을 펼치면 그 아래에 편집 칸(WorkEditor)이 열린다.
+const kstDate = (iso: string) => {
+  const p = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date(iso));
+  const g = (t: string) => p.find((x) => x.type === t)?.value ?? "";
+  return `${g("year")}.${g("month")}.${g("day")}`;
+};
+
 export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null, nickname = "" }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null; nickname?: string }) {
-  // 등록 화면에는 편집 칸 하나만 보인다. 이미 등록한 작품을 카드로 늘어놓지 않는다(그건 남들이 보는 포트폴리오 화면의 모양이다).
-  // 기획안 화면의 「포트폴리오 작성하기」로 넘어오면(?work=) 그 작품의 편집 칸이, 아니면 새 작품 칸이 보인다.
-  const [current, setCurrent] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : null);
-  const [formKey, setFormKey] = useState(0);
-  const cur = current ? (works.find((w) => w.id === current) ?? null) : null;
+  const router = useRouter();
+  // 기획안 화면의 「포트폴리오 작성하기」로 넘어오면(?work=) 그 작품의 편집 칸이 열려 있다.
+  const [editing, setEditing] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : null);
+  const [newOpen, setNewOpen] = useState(false);
+  const [newKey, setNewKey] = useState(0);
+  const [del, setDel] = useState<MyWork | null>(null);
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
-  const router = useRouter();
+  const drag = useRef<string | null>(null);
 
   async function togglePublic(w: MyWork) {
     setBusy(true);
@@ -110,29 +121,43 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
     setMsg({ text: r.isPublic ? "작품을 포트폴리오에 올렸어요." : "작품을 포트폴리오에서 내렸어요." });
     router.refresh();
   }
+  async function confirmDelete() {
+    if (!del) return;
+    setBusy(true);
+    const r = await deleteWork(del.id);
+    setBusy(false);
+    if (!r.ok) {
+      setDel(null);
+      return setMsg({ text: r.error, err: true });
+    }
+    if (editing === del.id) setEditing(null);
+    setDel(null);
+    setMsg({ text: "작품을 지웠어요." });
+    router.refresh();
+  }
+  async function moveTo(id: string, to: number) {
+    const ids = works.map((w) => w.id);
+    const from = ids.indexOf(id);
+    if (from < 0 || to < 0 || to >= ids.length || from === to) return;
+    ids.splice(from, 1);
+    ids.splice(to, 0, id);
+    setBusy(true);
+    setMsg(null);
+    const r = await reorderWorks(ids);
+    setBusy(false);
+    if (!r.ok) return setMsg({ text: r.error, err: true });
+    router.refresh();
+  }
 
   return (
-    <>
-      <div className="mp-top-row">
-        <div className="mp-count">
-          <span>
-            작품 {works.length} / {WORK_LIMIT}
-          </span>
-          <span>
-            파일 {mb(usedBytes)} / {mb(QUOTA_BYTES)}
-          </span>
-        </div>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={() => {
-            setCurrent(null);
-            setFormKey((k) => k + 1);
-          }}
-          disabled={works.length >= WORK_LIMIT || !cur}
-        >
-          작품 추가
-        </button>
+    <div className="pf" aria-busy={busy || undefined}>
+      <div className="pf-count">
+        <span>
+          작품 {works.length} / {WORK_LIMIT}
+        </span>
+        <span>
+          파일 {mb(usedBytes)} / {mb(QUOTA_BYTES)}
+        </span>
       </div>
       {!hasProfile && <p className="mp-note">작품을 포트폴리오에 올리려면 먼저 위의 「크리에이터 등록」에서 프로필을 만들어 주세요.</p>}
       {msg && (
@@ -141,14 +166,121 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
         </p>
       )}
 
-      <div className="mp-works">
-        {cur ? (
-          <WorkEditor key={cur.id} work={cur} nickname={nickname} onClose={() => setCurrent(null)} onTogglePublic={() => togglePublic(cur)} busyOuter={busy} />
-        ) : (
-          <WorkEditor key={`new${formKey}`} work={null} nickname={nickname} onClose={() => setFormKey((k) => k + 1)} onCreated={(id) => setCurrent(id)} />
-        )}
+      <div className="pf-head" aria-hidden="true">
+        <span />
+        <span>제목</span>
+        <span>대표</span>
+        <span>역할</span>
+        <span>장르</span>
+        <span>수정일</span>
+        <span className="pf-head-end">관리</span>
       </div>
-    </>
+
+      {/* 맨 윗줄이 접힌 등록 화면이다. 누르면 이 줄 아래로 등록 화면이 펼쳐진다. */}
+      <button type="button" className="pf-new" aria-expanded={newOpen} onClick={() => setNewOpen((v) => !v)} disabled={!newOpen && works.length >= WORK_LIMIT} title={works.length >= WORK_LIMIT ? `작품은 ${WORK_LIMIT}개까지 만들 수 있어요.` : undefined}>
+        <span className="pf-new-main">
+          <span className="pf-plus" aria-hidden="true">＋</span> 새 포트폴리오 등록
+        </span>
+        <span className="pf-new-fold">
+          <span className="pf-long">등록 화면 {newOpen ? "접기 ▴" : "펼치기 ▾"}</span>
+          <span className="pf-short">{newOpen ? "접기 ▴" : "펼치기 ▾"}</span>
+        </span>
+      </button>
+      {newOpen && (
+        <WorkEditor
+          key={`new${newKey}`}
+          work={null}
+          nickname={nickname}
+          onClose={() => {
+            setNewOpen(false);
+            setNewKey((k) => k + 1);
+          }}
+          onCreated={(id) => {
+            setNewOpen(false);
+            setNewKey((k) => k + 1);
+            setEditing(id);
+          }}
+        />
+      )}
+
+      {works.map((w, i) => (
+        <div
+          key={w.id}
+          className="pf-item"
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            if (drag.current) void moveTo(drag.current, i);
+            drag.current = null;
+          }}
+        >
+          <div className={`pf-row${w.isPublic ? "" : " off"}`}>
+            <button
+              type="button"
+              className="pf-grip"
+              draggable
+              aria-label={`${w.title} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`}
+              onDragStart={(e) => {
+                drag.current = w.id;
+                e.dataTransfer.effectAllowed = "move";
+                e.dataTransfer.setData("text/plain", w.id);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                  e.preventDefault();
+                  void moveTo(w.id, e.key === "ArrowUp" ? i - 1 : i + 1);
+                }
+              }}
+            >
+              ⠿
+            </button>
+            <span className="pf-title">{w.title}</span>
+            <span className="pf-meta">
+              <span className="pf-rep">{representativeOf(w)}</span>
+              <span className="pf-roles">{w.roles.map((x) => ROLES[x]).join(" · ")}</span>
+              <span className="pf-genres">
+                {w.genres.map((g) => (
+                  <span key={g}>{g}</span>
+                ))}
+              </span>
+            </span>
+            <span className="pf-date">{kstDate(w.updatedAt)}</span>
+            <span className="pf-sw-wrap">
+              <button type="button" role="switch" aria-checked={w.isPublic} aria-label={`${w.title} 공개`} className="pf-sw" disabled={busy} onClick={() => void togglePublic(w)}>
+                <i aria-hidden="true" />
+                <span>{w.isPublic ? "공개" : "비공개"}</span>
+              </button>
+            </span>
+            <span className="pf-actions">
+              <button type="button" className="btn btn-ghost" aria-expanded={editing === w.id} onClick={() => setEditing(editing === w.id ? null : w.id)}>
+                수정
+              </button>
+              <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => setDel(w)}>
+                삭제
+              </button>
+            </span>
+          </div>
+          {editing === w.id && <WorkEditor key={w.id} work={w} nickname={nickname} onClose={() => setEditing(null)} onTogglePublic={() => void togglePublic(w)} busyOuter={busy} />}
+        </div>
+      ))}
+
+      {del && (
+        <div className="pf-back" onMouseDown={(e) => e.target === e.currentTarget && !busy && setDel(null)}>
+          <div className="pf-dialog" role="alertdialog" aria-modal="true" aria-labelledby="pf-del-h" aria-describedby="pf-del-p" onKeyDown={(e) => e.key === "Escape" && !busy && setDel(null)}>
+            <h3 id="pf-del-h">「{del.title}」을 삭제할까요?</h3>
+            <p id="pf-del-p">삭제하면 되돌릴 수 없습니다.</p>
+            <div className="pf-dialog-btns">
+              <button type="button" className="btn btn-ghost pf-cancel" autoFocus disabled={busy} onClick={() => setDel(null)}>
+                취소
+              </button>
+              <button type="button" className="btn pf-danger" disabled={busy} onClick={() => void confirmDelete()}>
+                {busy ? "지우는 중…" : "삭제"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -180,13 +312,17 @@ async function addSlots(workId: string, slots: Slot[]): Promise<string | null> {
   return null;
 }
 
-function WorkEditor({
+// 편집 칸이 바뀔 때마다 「포트폴리오 화면에 보일 카드」(독립 등록 화면 오른쪽)에 알려 주는 값. 대표는 작품 안 맨 위의 이미지·영상이고, 없으면 로그라인이다.
+export type WorkPreview = { title: string; logline: string; genres: string[]; roles: Role[]; top: "video" | "image" | "logline" };
+
+export function WorkEditor({
   work,
   nickname,
   onClose,
   onCreated,
   onTogglePublic,
   busyOuter,
+  onPreview,
 }: {
   work: MyWork | null;
   nickname: string;
@@ -194,6 +330,7 @@ function WorkEditor({
   onCreated?: (id: string) => void;
   onTogglePublic?: () => void;
   busyOuter?: boolean;
+  onPreview?: (p: WorkPreview) => void;
 }) {
   const router = useRouter();
   const [title, setTitle] = useState(work?.title ?? "");
@@ -218,6 +355,17 @@ function WorkEditor({
   const patchSlot = (id: string, patch: Partial<Slot>) => setSlots((cur) => cur.map((x) => (x.id === id ? { ...x, ...patch } : x)));
 
   const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
+
+  const topKind: WorkPreview["top"] = work
+    ? ((work.blocks.find((b) => b.kind === "image" || b.kind === "video")?.kind as "image" | "video" | undefined) ?? "logline")
+    : ((slots.find((x) => x.kind === "image" || x.kind === "video")?.kind as "image" | "video" | undefined) ?? "logline");
+  const genresKey = genres.join("|");
+  const rolesKey = roles.join("|");
+  useEffect(() => {
+    onPreview?.({ title, logline, genres: genresKey ? genresKey.split("|") : [], roles: (rolesKey ? rolesKey.split("|") : []) as Role[], top: topKind });
+    // onPreview는 부르는 쪽이 매번 새로 만들어도 다시 부르지 않게 뺀다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [title, logline, genresKey, rolesKey, topKind]);
 
   async function save() {
     setBusy(true);

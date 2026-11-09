@@ -127,6 +127,7 @@ function Section({
   extra,
   open,
   onToggle,
+  noToggle,
   children,
 }: {
   id: string;
@@ -135,6 +136,7 @@ function Section({
   extra?: React.ReactNode;
   open: boolean;
   onToggle: () => void;
+  noToggle?: boolean; // 접기 버튼이 없는 구역(포트폴리오 등록: 맨 윗줄이 접힌 등록 화면)
   children: React.ReactNode;
 }) {
   return (
@@ -143,10 +145,12 @@ function Section({
         <div className="mp-sh">
           <h2 id={`${id}-h`}>{title}</h2>
           {extra && <div className="mp-extra">{extra}</div>}
-          <button type="button" className="btn btn-ghost mp-toggle" aria-expanded={open} aria-controls={`${id}-body`} onClick={onToggle}>
-            {open ? "접기" : "펼치기"}
-            <span className="mp-chev" aria-hidden="true" />
-          </button>
+          {!noToggle && (
+            <button type="button" className="btn btn-ghost mp-toggle" aria-expanded={open} aria-controls={`${id}-body`} onClick={onToggle}>
+              {open ? "접기" : "펼치기"}
+              <span className="mp-chev" aria-hidden="true" />
+            </button>
+          )}
         </div>
         <div id={`${id}-body`} className="mp-card" hidden={!open}>
           {children}
@@ -366,7 +370,7 @@ export function MypagePreview({
           </Section>
           )}
 
-          <Section id="mp-portfolio" tone="s3" title={!showCreator ? "내 기획안" : "포트폴리오 등록"} open={open["mp-portfolio"]} onToggle={() => toggle("mp-portfolio")}>
+          <Section id="mp-portfolio" tone="s3" title={!showCreator ? "내 기획안" : "포트폴리오 등록"} open={open["mp-portfolio"]} onToggle={() => toggle("mp-portfolio")} noToggle={showCreator && portfolio !== undefined}>
             {showCreator && portfolio === undefined && (
             <div className="mp-top-row">
               <div className="mp-count">

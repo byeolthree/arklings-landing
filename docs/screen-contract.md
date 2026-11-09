@@ -15,7 +15,7 @@
 
 | 부품 | 파일 | 하는 일 | 계약 |
 |---|---|---|---|
-| 상단 메뉴 | `components/site-nav.tsx` | 로고, 메뉴, 「로그인」/「마이페이지」/「받은 협업 신청」/「로그아웃」, 「기획안 만들기」(→`/planner`) | 상단 메뉴는 페이지(`components/site-header.tsx`가 `getCurrentUser()`로 확인)가 넘겨 주는 `loggedIn` 값으로 로그인 여부를 안다. `/api/session`은 랜딩(`public/landing.html`)만 부른다. 메뉴 디자인을 새로 만들어도 이 확인 방식은 그대로 둔다. 「로그인」 링크는 `/login?next=<지금 주소>`(로그인·가입·`/auth/*` 화면에서는 `/login`). 「로그아웃」은 `signOut()` |
+| 상단 메뉴 | `components/site-nav.tsx`(서버에서 `components/site-header.tsx`가 값을 읽어 넘김) | 로고(햄버거는 로고 왼쪽), 메뉴, 오른쪽 아이콘만 ＋·사람·종. 로그인: ＋=「등록할 곳」 드롭다운(크리에이터→`/portfolio/new`), 사람=기본 정보 `/mypage#mp-basic`·프로필 등록 `/mypage#mp-creator`·포트폴리오 등록 `/portfolio/new`·로그아웃 `signOut()`, 종=새 협업 신청(「접수」 상태) 개수(`countNewCollab`)와 최근 5건(`listNewCollab`, 한 줄을 누르면 `/collab/<id>`)·「받은 협업 신청 모두 보기」 `/collab`. 로그아웃: ＋와 사람만, ＋는 `/login`으로, 사람=로그인 `/login`·회원가입 `/signup`. 「기획안 만들기」 버튼은 상단 메뉴에서 뺐다(랜딩 전용, 랜딩은 `public/landing.html` 별도) | `loggedIn`(`getCurrentUser()`), `newCount`, `notices[]`(`id`,`text`,`when`) |
 | 하단 | `components/site-footer.tsx` | 「개인정보처리방침」→`/privacy` | 없음 |
 | 입력칸 틀 | `components/form-field.tsx` | `FormField`(id, label, hint, error), `authInputCls` | 없음 |
 | 카드 틀 | `components/paper-card.tsx` | `PaperPage`, `PaperCard`, `CardHeading`, `primaryBtn`, `outlineBtn` | 없음 |
@@ -111,6 +111,10 @@
 | 마이페이지 · 포트폴리오 등록 구역 | `/mypage` 안 | 예 | `createWork`, `updateWork`, `deleteWork`, `setWorkPublic`, `addTextBlock`, `updateTextBlock`, `addVideoBlock`, `prepareFileUpload`→(브라우저가 보관함에 직접 올림)→`finishFileUpload`, `moveBlock`, `reorderBlocks`, `deleteBlock` | 작품: `title`(60자), `roles`, `genres`, `kind`, `form`, `logline`(띄어쓰기 뺀 200자), `planId`. 요소: 글 5000자, 유튜브 주소, 이미지 JPG·PNG·WEBP 5MB, PDF 10MB, 사람당 합계 20MB, 작품 12개, 작품당 요소 20개 | 내 작품·요소(본인 연결로 읽음), 용량·개수 | 작품 창은 위와 같음 |
 | 기획안 화면 · 포트폴리오 작성하기 | `/planner?plan=<id>&step=2` | 예 | `startWorkFromPlan(planId, draft)`(2026-11-07 별뜨리님 지시: 기획안 화면에서 바로 올리지 않는다. 그 기획안이 붙은 작품을 비공개로 만들고(제목·로그라인은 기획안에서, 역할은 「대본」을 먼저 골라 둠) 마이페이지 포트폴리오 등록으로 넘어가 마저 쓴 뒤 거기서 올린다. 이미 있으면 그 작품 번호만 돌려줌. 프로필이 없으면 `needProfile`) | 없음(입력은 마이페이지에서) | `PlannerEditor` props `workId`, `workPublic`(이전의 `creatorProfile`은 없앰) | 「포트폴리오 작성하기」→`/mypage?work=<작품 번호>#mp-portfolio`(그 작품 편집 칸이 열림), 프로필이 없으면 `/mypage?msg=need_profile#mp-creator`, 올라가 있으면 「포트폴리오에서 보기」 `/portfolio/<작품 번호>`. 이전의 `publishPlanAsWork`·`unpublishPlanWork`는 없앰(내리기는 마이페이지 작품에서) |
 | 옛 포트폴리오 목록 | `/portfolio` | 아니요 | 없음 | 없음 | 없음 | `/creators`로 이동(D29로 작품 단위가 됨) |
+
+| 독립 포트폴리오 등록(시안 01) | `/portfolio/new?work=<작품 번호>` | 예 (이메일 확인까지) | `saveCreatorProfile`·`checkHandle`(프로필이 없을 때만 「프로필 등록」 단계), `createWork`·`updateWork`·`deleteWork`·`setWorkPublic`, 요소 동작은 마이페이지와 같음 | 마이페이지 「포트폴리오 등록」과 같은 칸 | 내 프로필·작품·용량(`loadMyCreator`), 닉네임. 오른쪽 「포트폴리오 화면에 보일 카드」는 편집 칸 값(제목·로그라인·장르·역할·맨 위 이미지/영상)으로 바로 바뀐다 | 단계 칩 「프로필 등록」→`/mypage#mp-creator` |
+| 마이페이지 · 포트폴리오 등록 구역(접은 목록, 시안 02·07) | `/mypage` 안 | 예 | `setWorkPublic`(스위치), `deleteWork`(삭제 확인 창), **`reorderWorks(orderedIds)`**(손잡이, 2026-11-09 추가: 내 작품 번호 전체를 원하는 순서로 받아 `sort_order` 저장, 번호가 모자라거나 남의 것이면 거절), 맨 윗줄 「새 포트폴리오 등록」과 「수정」은 편집 칸(`createWork`·`updateWork`…)을 펼침 | 없음 | 내 작품(`MyWork`에 `updatedAt` 추가), 「대표」 칸은 작품 안 맨 위 이미지·영상(없으면 로그라인, `representativeOf`). 「내 기획안」 목록은 이 구역 화면에서 뺐다(코드는 남김) | 작품 편집 `?work=` |
+| 크리에이터 프로필(작품별 섹션, 시안 03·08) | `/creators/<handle>` | 아니요 | 본인에게만: `setWorkPublic`(스위치), `reorderWorks`(손잡이) | 없음 | 작품 카드에 `media`(작품 안 이미지·영상, 공개 작품은 `loadWorkMedia`, 본인은 내 요소)와 `isPublic`. 본인이 열면 비공개 작품도 흐리게 보이고 「프로필 편집」 `/mypage#mp-creator`·「포트폴리오 등록」 `/portfolio/new` 버튼이 붙는다 | 작품 `/portfolio/<작품 번호>` |
 
 처리 함수 결과 모양: `{ ok: true, …값 } | { ok: false, error, needLogin?, fieldErrors? }` (기획안 동작과 같은 모양).
 

@@ -1,0 +1,74 @@
+/* 포트폴리오 등록 화면(시안 01). 값(색·글자·버튼)은 마이페이지·랜딩과 같고, 이 화면 안(.rg)에서만 쓴다. */
+.rg {
+  --jaju: #a61e5c; --teal: #1f5a66; --gold: #d89a24;
+  --bg: #faf7f8; --line: #e8dfe3; --body: #574a50; --title: #2a2025; --paper: #ffffff;
+  --hero-bg: color-mix(in srgb, var(--bg) 55%, var(--line));
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  flex: 1; color: var(--body); font-size: 14px; line-height: 1.6; word-break: keep-all; overflow-wrap: break-word;
+}
+.rg h1, .rg h2, .rg h3 { color: var(--title); margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+.rg p { margin: 0; text-wrap: pretty; }
+.rg .rg-wrap { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 768px) { .rg .rg-wrap { padding: 0 40px; } }
+.rg .btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 0 16px; border-radius: 999px; font: inherit; font-weight: 700; font-size: 13px; cursor: pointer; border: 1.5px solid var(--jaju); text-decoration: none; white-space: nowrap; transition: transform .35s var(--ease), box-shadow .35s; }
+.rg .btn-primary { background: var(--jaju); color: #fff; box-shadow: 0 8px 24px -10px rgba(166,30,92,.55); }
+.rg .btn-ghost { background: transparent; color: var(--body); border-color: var(--body); }
+.rg .btn-primary:hover, .rg .btn-ghost:hover { transform: translateY(-2px); }
+.rg a:focus-visible, .rg button:focus-visible, .rg input:focus-visible, .rg textarea:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.rg .btn:not([disabled]):active, .rg .rg-chip:active { transform: scale(.97); filter: brightness(.92); }
+
+/* 맨 위: 가운데 제목 + 설명 + 단계 칩 */
+.rg .rg-top { background: var(--hero-bg); padding: 48px 0 28px; text-align: center; }
+@media (min-width: 768px) { .rg .rg-top { padding: 80px 0 36px; } }
+.rg .rg-title { font-size: 22px; line-height: 1.3; font-weight: 700; }
+@media (min-width: 768px) { .rg .rg-title { font-size: 32px; } }
+.rg .rg-desc { margin: 12px auto 0; max-width: 900px; font-size: 15px; }
+@media (min-width: 768px) { .rg .rg-desc { font-size: 18px; } }
+.rg .rg-steps { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 24px 0 0; padding: 0; list-style: none; }
+.rg .rg-steps li { padding: 5px 16px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-size: 13px; color: var(--body); }
+.rg .rg-steps li a { color: inherit; text-decoration: none; }
+.rg .rg-steps li[aria-current="step"] { background: var(--body); border-color: var(--body); color: #fff; font-weight: 700; }
+
+/* 프로필 등록 단계: 격자 바탕 위 흰 카드 */
+.rg .rg-prof { padding: 40px 0 84px; background-color: var(--bg); background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 28px 28px; }
+@media (min-width: 768px) { .rg .rg-prof { padding: 64px 0 120px; } }
+.rg .rg-prof-wrap { max-width: 960px; }
+.rg .rg-prof-card.mp-card { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 30px 60px -36px rgba(42,32,37,.35); padding: 20px 18px; }
+@media (min-width: 768px) { .rg .rg-prof-card.mp-card { padding: 40px 48px; } }
+
+/* 포트폴리오 등록 단계 */
+.rg .rg-main { background: var(--paper); padding: 40px 0 84px; }
+@media (min-width: 768px) { .rg .rg-main { padding: 64px 0 120px; } }
+.rg .rg-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; }
+@media (min-width: 1024px) { .rg .rg-grid { grid-template-columns: minmax(0, 1fr) 380px; gap: 48px; align-items: start; } }
+.rg .rg-card { padding: 20px 18px 24px; border-radius: 28px; background: var(--bg); border: 1px solid var(--line); box-shadow: 0 30px 60px -36px rgba(42,32,37,.35); }
+@media (min-width: 768px) { .rg .rg-card { padding: 28px 32px 32px; } }
+.rg .rg-count { font-size: 14px; color: var(--title); font-weight: 500; }
+.rg .rg-rep-note { display: flex; align-items: center; gap: 10px; margin: 14px 0 6px; padding: 12px 16px; border-radius: 12px; background: #fff; border-left: 3px solid var(--jaju); font-size: 14px; color: var(--title); }
+.rg .rg-rep-tag { flex: none; padding: 2px 12px; border-radius: 999px; background: var(--jaju); color: #fff; font-size: 12px; font-weight: 700; }
+.rg .rg-card .mp-work.we { margin-top: 12px; border: 0; box-shadow: none; background: transparent; padding: 0; }
+
+/* 오른쪽: 포트폴리오 화면에 보일 카드 */
+.rg .rg-side { display: grid; gap: 14px; align-content: start; }
+@media (min-width: 1024px) { .rg .rg-side { position: sticky; top: 88px; } }
+.rg .rg-side-h { font-size: 15px; font-weight: 700; }
+.rg .rg-side-sub { margin-bottom: 8px; font-size: 13px; font-weight: 700; color: var(--title); }
+.rg .rg-side-note { font-size: 13px; color: var(--body); }
+.rg .rg-pcard { display: grid; gap: 12px; padding: 18px 18px 20px; border-radius: 22px; background: #fff; border: 1px solid var(--line); box-shadow: 0 24px 48px -34px rgba(42,32,37,.4); }
+.rg .rg-pcard-title { font-size: 17px; color: var(--body); }
+.rg .rg-pcard-media { aspect-ratio: 16 / 9; border-radius: 12px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--body); }
+.rg .rg-pcard-log { font-size: 14px; line-height: 1.7; color: var(--body); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.rg .rg-pcard-tags { display: grid; gap: 8px; }
+.rg .rg-pcard-tags ul { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.rg .rg-pcard-tags .rg-roles li { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 700; }
+.rg .rg-pcard-tags li { padding: 2px 12px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-size: 13px; color: var(--body); }
+.rg .rg-role { justify-self: start; padding: 3px 14px; border-radius: 999px; background: var(--jaju); color: #fff; font-size: 13px; font-weight: 700; }
+
+@media (max-width: 767px) {
+  .rg .rg-tools { flex-direction: row; opacity: 1; position: absolute; right: 12px; top: -2px; }
+  .rg .rg-el { padding-top: 30px; }
+  .rg .rg-bar-btns { margin-left: 0; width: 100%; }
+  .rg .rg-bar-btns .btn { flex: 1; }
+  .rg .rg-gap .rg-plus { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .rg *, .rg *::before, .rg *::after { transition: none !important; animation: none !important; } }
