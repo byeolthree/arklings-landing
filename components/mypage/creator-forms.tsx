@@ -4,6 +4,7 @@
 // 모든 저장은 app/actions/creators.ts의 Server Action이 하고(서버가 로그인·이메일 확인·글자 수를 다시 검사한다), 끝나면 서버에서 다시 읽는다(router.refresh).
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ROLE_TONE } from "@/components/creators/role-tone";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   addTextBlock,
@@ -62,7 +63,7 @@ function DocFilePick({ file, onFile, disabled }: { file?: File | null; onFile: (
       <div className="we-drop-row">
         <span className="mp-note">외부 문서 첨부 (PDF · 10MB 이하)</span>
         <label className="btn btn-ghost" style={{ cursor: "pointer" }}>
-          파일 고르기
+          파일 불러오기
           <input type="file" accept="application/pdf" hidden disabled={disabled} onChange={pick} aria-label="문서 파일" />
         </label>
       </div>
@@ -111,6 +112,9 @@ function ImageSlotBox({ file, onFile }: { file: File | null; onFile: (f: File | 
           {fold ? "▸ 펼치기" : "▾ 접기"}
         </button>
         <span className="mp-note">· 이미지 (JPG·PNG·WEBP, 5MB 이하)</span>
+        <button type="button" className="btn btn-ghost" style={{ marginLeft: "auto" }} onClick={() => ref.current?.click()}>
+          파일 불러오기
+        </button>
       </div>
       {!fold && (
         <button type="button" className="we-media we-imgbox" onClick={() => ref.current?.click()} aria-label="이미지 고르기">
@@ -181,7 +185,7 @@ function VideoFilePick({ file, onFile, disabled }: { file?: File | null; onFile:
           영상 변환 프롬프트 복사
         </button>
         <label className="btn btn-ghost" style={{ cursor: "pointer" }}>
-          파일 고르기
+          파일 불러오기
           <input type="file" accept={rule.accept} hidden disabled={disabled} onChange={pick} aria-label="영상 파일" />
         </label>
         {file && (
@@ -317,7 +321,7 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
           </>
         )}
         <input key={kind} type="file" hidden ref={fileRef} accept={rule.accept} onChange={onFile} disabled={busy} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
-        <button type="button" className="btn btn-ghost pp-file-end" onClick={() => fileRef.current?.click()} disabled={busy}>파일 선택</button>
+        <button type="button" className="btn btn-ghost pp-file-end" onClick={() => fileRef.current?.click()} disabled={busy}>파일 불러오기</button>
       </div>
       {showPrompt && <textarea readOnly className="we-text" rows={8} value={VIDEO_PROMPT} aria-label="영상 변환 프롬프트" onFocus={(e) => e.currentTarget.select()} />}
       {picked && !pending && <p className="len" role="status">고른 파일: {picked}{busy ? " · 올리는 중…" : ""}</p>}
@@ -810,8 +814,8 @@ export function WorkEditor({
           {work && ` · ${new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" })}`}
         </p>
         <div className="we-tags">
-          {roles.map((r) => (
-            <span key={r} className="mp-tag">
+          {(Object.keys(ROLES) as Role[]).map((r) => (
+            <span key={r} className={`mp-tag tone-${ROLE_TONE[r]}`} data-on={roles.includes(r) ? "1" : "0"}>
               {ROLES[r]}
             </span>
           ))}
@@ -896,8 +900,6 @@ export function WorkEditor({
                   {sl.kind === "text" && <textarea className="we-text" rows={3} placeholder="〈문서〉" aria-label="문서" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
                   {sl.kind === "text" && <DocFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
                   {sl.kind === "image" && <ImageSlotBox file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
-                  {sl.kind === "video" && <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={sl.url} onChange={(e) => patchSlot(sl.id, { url: e.target.value })} />}
-                  {sl.kind === "video" && <p className="mp-note" style={{ flex: "1 1 100%" }}>유튜브 주소로 넣으면 용량 제한 없이 올릴 수 있어요.</p>}
                   {sl.kind === "video" && <VideoFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
                 </div>
                 <div className="we-tools">
@@ -1103,7 +1105,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
               // eslint-disable-next-line @next/next/no-img-element
               <img src={b.src} alt={b.fileName ?? "이미지"} style={{ maxWidth: "100%", borderRadius: 14 }} />
             ) : <div className="we-media">이미지를 불러오지 못했어요</div>)}
-            {b && b.kind === "video" && (folded[b.id] ? <span className="we-line">{b.youtubeId ? "영상 · youtube.com" : `영상 파일 ${b.fileName ?? ""} · ${b.fileBytes ? mb(b.fileBytes) : ""}`}</span> : b.youtubeId ? (
+            {b && b.kind === "video" && (folded[b.id] ? <span className="we-line">{b.youtubeId ? "영상" : `영상 파일 ${b.fileName ?? ""} · ${b.fileBytes ? mb(b.fileBytes) : ""}`}</span> : b.youtubeId ? (
               <div className="we-media" style={{ overflow: "hidden" }}>
                 <iframe src={`https://www.youtube-nocookie.com/embed/${b.youtubeId}`} title="영상" loading="lazy" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" style={{ width: "100%", height: "100%", border: 0 }} />
               </div>
@@ -1134,12 +1136,10 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
           <div className="we-main">
             {adding === "text" ? (
               <textarea className="we-text" rows={3} aria-label="새 문서" placeholder="문서를 입력해 주세요" value={draft} onChange={(e) => setDraft(e.target.value)} />
-            ) : (
-              <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="https://youtu.be/…" value={draft} onChange={(e) => setDraft(e.target.value)} style={{ flex: "1 1 100%" }} />
-            )}
+            ) : null}
             {adding === "text" && <DocFilePick file={draftDoc} onFile={setDraftDoc} disabled={busy} />}
             {adding === "video" && <VideoFilePick disabled={busy} onFile={(f) => { if (f) { setAdding(null); setDraft(""); void upload(f, "video"); } }} />}
-            <button type="button" className="btn btn-primary" disabled={busy} onClick={add}>추가</button>
+            {adding === "text" && <button type="button" className="btn btn-primary" disabled={busy} onClick={add}>추가</button>}
             <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => { setAdding(null); setDraft(""); setDraftDoc(null); }}>취소</button>
           </div>
         </div>

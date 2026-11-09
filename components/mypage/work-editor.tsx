@@ -39,7 +39,7 @@ function Element({ kind, first, last, folded, onFold }: { kind: Kind; first: boo
         )}
         {kind === "text" && <textarea className="we-text" rows={3} placeholder="〈문서〉" aria-label="문서" />}
         {kind === "image" && (folded ? <span className="we-line">이미지 〈파일 이름〉</span> : <div className="we-media">〈이미지〉</div>)}
-        {kind === "video" && (folded ? <span className="we-line">영상 〈제목〉 · youtube.com</span> : <div className="we-media">〈영상〉</div>)}
+        {kind === "video" && (folded ? <span className="we-line">영상 〈파일 이름〉</span> : <div className="we-media">〈영상〉</div>)}
       </div>
       <Tools first={first} last={last} />
     </div>

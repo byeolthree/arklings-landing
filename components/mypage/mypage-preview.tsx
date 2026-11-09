@@ -91,7 +91,7 @@ function HeroField() {
           </>
         )}
         <input key={kind} type="file" hidden ref={fileRef} accept={rule.accept} onChange={onFile} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
-        <button type="button" className="btn btn-ghost pp-file-end" onClick={() => fileRef.current?.click()}>파일 선택</button>
+        <button type="button" className="btn btn-ghost pp-file-end" onClick={() => fileRef.current?.click()}>파일 불러오기</button>
       </div>
       {picked && <p className="len" role="status">고른 파일: {picked}</p>}
       <p id="pp-hero-hint" className="len">{rule.hint}</p>

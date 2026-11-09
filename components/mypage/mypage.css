@@ -260,3 +260,11 @@
 .mp .we-drop-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .mp .we-imgbox { width: 100%; margin-top: 8px; min-height: 240px; cursor: pointer; font: inherit; overflow: hidden; padding: 0; }
 .mp .we-imgbox img { width: 100%; max-height: 360px; object-fit: contain; }
+/* 작품 머리의 역할 태그: 실제 포트폴리오 화면과 같은 색(역할마다 다른 색). 지금은 여섯 개를 모두 보여 준다 */
+.mp .mp-tag[class*="tone-"] { border: 0; color: #fff; font-weight: 500; padding: 4px 12px; }
+.mp .mp-tag.tone-teal { background: var(--teal); }
+.mp .mp-tag.tone-dusty { background: #5f7c99; }
+.mp .mp-tag.tone-gold { background: var(--gold); }
+.mp .mp-tag.tone-sage { background: #6f8a7a; }
+.mp .mp-tag.tone-jaju { background: var(--jaju); }
+.mp .mp-tag.tone-body { background: var(--body); }
