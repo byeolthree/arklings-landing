@@ -110,6 +110,9 @@ function Band({ work, href, owner, tone, onGrip }: { work: WorkCard; href: strin
                     <i aria-hidden="true" />
                     <span>{pub ? "공개" : "비공개"}</span>
                   </button>
+                  <Link href={`/portfolio/new?work=${work.id}`} className="cr-edit" aria-label={`${work.title} 수정`}>
+                    수정
+                  </Link>
                   <button
                     type="button"
                     className="cr-grip"
