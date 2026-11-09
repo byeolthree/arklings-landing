@@ -44,14 +44,12 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
   const sb = await createAuthClient();
   const workCols = "id, title, roles, genres, kind, form, logline, plan_id, is_public, first_published_at, created_at, updated_at";
   const readWorks = (cols: string) => sb.from("creator_works").select(cols).eq("owner_id", userId).order("sort_order", { ascending: true }).order("created_at", { ascending: false });
-  const [prof, chans, firstWorks, blocks] = await Promise.all([
+  const [prof, chans, works, blocks] = await Promise.all([
     sb.from("creator_profiles").select("public_handle, roles, bio, open_to_collab, is_public, hero_kind, hero_path, hero_bytes").eq("user_id", userId).maybeSingle(),
     sb.from("creator_channels").select("label, url, position").eq("user_id", userId).order("position", { ascending: true }),
     readWorks(`${workCols}, logline_position`),
     sb.from("creator_work_blocks").select("id, work_id, position, kind, body, file_path, file_name, file_bytes, youtube_id, sub_kind").eq("owner_id", userId).order("position", { ascending: true }).order("created_at", { ascending: true }),
   ]);
-  // 0013(로그라인 위치) 실행 전에는 logline_position 칸이 없다. 그때는 로그라인을 맨 위로 본다. 0013을 실행한 뒤에 이 분기는 지운다.
-  const works = firstWorks.error?.message.includes("logline_position") ? await readWorks(workCols) : firstWorks;
   for (const r of [prof, chans, works, blocks]) if (r.error) throw new Error(r.error.message);
 
   const brows = (blocks.data ?? []) as unknown as BlockRow[];

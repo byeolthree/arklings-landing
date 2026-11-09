@@ -278,10 +278,7 @@ export async function listCreatorWorks(handle: string): Promise<WorkListItem[]> 
 export async function getWork(id: string): Promise<WorkDetail | null> {
   if (!UUID_QUERY.test(String(id ?? ""))) return null;
   const sb = getSupabase();
-  let res = await sb.from("creator_works_public").select(`${WORK_COLUMNS}, logline_position`).eq("id", id).maybeSingle();
-  // 0013(로그라인 위치) 실행 전에는 logline_position 칸이 없다. 그때는 로그라인을 맨 위로 본다. 0013을 실행한 뒤에 이 분기는 지운다.
-  if (res.error?.message.includes("logline_position")) res = await sb.from("creator_works_public").select(WORK_COLUMNS).eq("id", id).maybeSingle();
-  const { data, error } = res;
+  const { data, error } = await sb.from("creator_works_public").select(`${WORK_COLUMNS}, logline_position`).eq("id", id).maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) return null;
   const row = data as unknown as WorkRow & { logline_position?: number | null };
