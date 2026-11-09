@@ -5,11 +5,8 @@ import { startLinkIdentity, unlinkProvider } from "@/app/actions/social";
 import { DisplayNameForm } from "@/components/mypage-forms";
 import "@/components/planner/planner.css";
 import "@/components/mypage/mypage.css";
-import { MypagePreview } from "@/components/mypage/mypage-preview";
-import { CreatorProfileForm, PortfolioManager } from "@/components/mypage/creator-forms";
-import { loadMyCreator, type MyCreatorData } from "@/lib/creators-mine";
+import { AccountScreen } from "@/components/mypage/account-screen";
 import { requireUser } from "@/lib/auth";
-import { countNewCollab } from "@/lib/collab-count";
 import { collabTargetOf, PAGE_SIZE, ROLES, STATUSES, type CollabRequest } from "@/lib/collab";
 import { creatorNames } from "@/lib/creators";
 import { formatKstDate } from "@/lib/time";
@@ -37,7 +34,6 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
   const user = await requireUser("/mypage");
   const sp = await searchParams;
   const msgKey = sp.msg;
-  const workParam = typeof sp.work === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(sp.work) ? sp.work : null;
   const banner = typeof msgKey === "string" ? MESSAGES[msgKey] : undefined;
 
   let displayName = "";
@@ -50,16 +46,6 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
   } catch {
     profileLoadFailed = true;
   }
-
-  // 내 크리에이터 프로필·작품(비공개 포함, 본인 권한으로 읽는다). 못 읽으면 그 구역만 안내하고 나머지는 그대로 보여 준다.
-  let creatorData: MyCreatorData | null = null;
-  try {
-    creatorData = await loadMyCreator(user.id);
-  } catch {
-    creatorData = null;
-  }
-
-  const newCollab = await countNewCollab();
 
   // 받은 협업 신청 목록(최근 것부터). 로그인한 본인의 권한으로 읽어 DB 규칙(RLS)이 내게 온 신청만 돌려준다.
   let collabRows: CollabRequest[] = [];
@@ -246,20 +232,5 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
     </>
   );
 
-  const failed = (
-    <p role="alert" className="mp-msg err">
-      불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
-    </p>
-  );
-  return (
-    <MypagePreview
-      profile="none"
-      pending={false}
-      basic={basic}
-      collab={{ newCount: newCollab, content: collabList }}
-      newScreens={{ creator: "/portfolio/new?step=profile", portfolio: "/portfolio/new" }}
-      creator={creatorData ? <CreatorProfileForm profile={creatorData.profile} /> : failed}
-      portfolio={creatorData ? <PortfolioManager works={creatorData.works} usedBytes={creatorData.usedBytes} hasProfile={Boolean(creatorData.profile)} openWorkId={workParam} nickname={displayName} /> : failed}
-    />
-  );
+  return <AccountScreen basic={basic} collab={collabList} />;
 }
