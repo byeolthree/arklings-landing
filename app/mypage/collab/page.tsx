@@ -70,7 +70,7 @@ export default async function MyCollabPage() {
                     <div className="cl-main">
                       <p className="cl-name">{r.applicant_name}</p>
                       <p className="cl-meta">
-                        {collabTargetOf(r, names).text} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)}
+                        {collabTargetOf(r, names).text} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at).replace(/ KST$/, "")}
                       </p>
                     </div>
                     <div className="cl-side">
@@ -102,17 +102,18 @@ export default async function MyCollabPage() {
                       <div className="cl-main">
                         <p className="cl-name">{collabTargetOf(r, names).text}</p>
                         <p className="cl-meta">
-                          {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)}
+                          {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at).replace(/ KST$/, "")}
                         </p>
                         {replies.map((p, i) => (
                           <p key={i} className="cl-meta" style={{ whiteSpace: "pre-wrap" }}>
-                            답장 ({formatKstDate(p.created_at)}){p.decision === "accepted" ? " · 수락" : p.decision === "rejected" ? " · 거절" : ""}
+                            답장 ({formatKstDate(p.created_at).replace(/ KST$/, "")}){p.decision === "accepted" ? " · 수락" : p.decision === "rejected" ? " · 거절" : ""}
                             {p.message ? `: ${p.message}` : ""}
                           </p>
                         ))}
                       </div>
                       <div className="cl-side">
                         <StatusBadge status={r.status} />
+                        <Link href={`/mypage/collab/${r.id}`} className="cl-open">열기</Link>
                       </div>
                     </li>
                   );
