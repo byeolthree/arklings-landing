@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import "@/components/planner/planner.css";
 import "@/components/mypage/mypage.css";
 import "@/components/register/register.css";
@@ -47,6 +48,9 @@ export default async function PortfolioNewPage({ searchParams }: { searchParams:
       </div>
     );
   }
+
+  // 프로필이 없으면 처음부터 프로필 단계 주소(?step=profile)에 둔다. 저장하면 서버가 화면을 다시 읽는데, 주소가 그대로여야 「저장했어요」 안내 창이 있는 이 화면이 사라지지 않는다.
+  if (!data.profile && sp.step !== "profile") redirect("/portfolio/new?step=profile");
 
   if (!data.profile || sp.step === "profile") {
     return (

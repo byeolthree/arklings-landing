@@ -58,7 +58,7 @@ export function PublishProfile({
   // 마이페이지판은 채널 줄(흐린 예시 포함)을 처음부터 한 줄 보여 준다. 빈 줄은 저장할 때 빠진다(validateCreatorProfile).
   const [channels, setChannels] = useState<Channel[]>(initial?.channels?.length ? initial.channels : full ? [{ label: "", url: "" }] : []);
   const [openToCollab, setOpenToCollab] = useState(initial?.openToCollab ?? true);
-  const [isPublic, setIsPublic] = useState(initial?.isPublic ?? false);
+  const [isPublic, setIsPublic] = useState(initial?.isPublic ?? true);
   const [errors, setErrors] = useState<ProfileErrors>({});
   const [formError, setFormError] = useState("");
   const [pending, setPending] = useState(false);
