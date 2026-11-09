@@ -257,6 +257,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
       pending={false}
       basic={basic}
       collab={{ newCount: newCollab, content: collabList }}
+      newScreens={{ creator: "/portfolio/new?step=profile", portfolio: "/portfolio/new" }}
       creator={creatorData ? <CreatorProfileForm profile={creatorData.profile} /> : failed}
       portfolio={creatorData ? <PortfolioManager works={creatorData.works} usedBytes={creatorData.usedBytes} hasProfile={Boolean(creatorData.profile)} openWorkId={workParam} nickname={displayName} /> : failed}
     />

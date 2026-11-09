@@ -156,6 +156,7 @@ export function MypagePreview({
   hideSamples = false,
   creator,
   portfolio,
+  newScreens,
 }: {
   profile: ProfileState;
   msg?: string;
@@ -168,6 +169,8 @@ export function MypagePreview({
   // 실제 「크리에이터 등록」·「포트폴리오 등록」 구역(저장되는 진짜 화면). 주면 샘플 대신 이것을 그린다.
   creator?: React.ReactNode;
   portfolio?: React.ReactNode;
+  // 크리에이터·포트폴리오는 새 화면(시안 01)으로 옮겼다. 주면 이 두 구역은 여기서 그리지 않고, 이동 줄의 탭이 그 새 화면으로 간다.
+  newScreens?: { creator: string; portfolio: string };
 }) {
   const showCreator = !hideSamples || creator !== undefined;
   const baseSections: readonly { id: SectionId; label: string }[] = !showCreator ? [{ id: "mp-basic", label: "기본 정보" }, { id: "mp-portfolio", label: "내 기획안" }] : BASE_SECTIONS;
@@ -238,7 +241,11 @@ export function MypagePreview({
       <nav className="mp-nav" aria-label="구역 이동">
         <div className="wrap">
           <div className="mp-tabs">
-            {SECTIONS.map((s) => (
+            {SECTIONS.map((s) => newScreens && (s.id === "mp-creator" || s.id === "mp-portfolio") ? (
+              <Link key={s.id} className="mp-tab" href={s.id === "mp-creator" ? newScreens.creator : newScreens.portfolio}>
+                {s.label}
+              </Link>
+            ) : (
               <button key={s.id} type="button" className="mp-tab" aria-current={active === s.id ? "true" : undefined} onClick={() => go(s.id)}>
                 {s.label}
               </button>
@@ -311,7 +318,7 @@ export function MypagePreview({
             )}
           </Section>
 
-          {showCreator && (
+          {showCreator && !newScreens && (
           <Section
             id="mp-creator"
             tone="s2"
@@ -354,6 +361,7 @@ export function MypagePreview({
           </Section>
           )}
 
+          {!newScreens && (
           <Section id="mp-portfolio" tone="s3" title={!showCreator ? "내 기획안" : "포트폴리오 등록"} open={open["mp-portfolio"]} onToggle={() => toggle("mp-portfolio")} noToggle={showCreator && portfolio !== undefined}>
             {showCreator && portfolio === undefined && (
             <div className="mp-top-row">
@@ -447,6 +455,7 @@ export function MypagePreview({
             </div>
             )}
           </Section>
+          )}
 
           {collab && (
             <Section id="mp-collab" tone="s4" title="협업 신청" open={open["mp-collab"]} onToggle={() => toggle("mp-collab")}>

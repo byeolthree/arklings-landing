@@ -269,3 +269,4 @@
 .mp .mp-tag.tone-jaju { background: var(--jaju); }
 .mp .mp-tag.tone-body { background: var(--body); }
 .mp button.mp-tag[class*="tone-"] { font: inherit; font-size: 12px; font-weight: 500; cursor: pointer; }
+.mp a.mp-tab { text-decoration: none; display: inline-block; }
