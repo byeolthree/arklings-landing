@@ -27,6 +27,7 @@ export type CreatorListItem = {
   latest: { title: string; logline: string; genres: string[] } | null; // 가장 최근에 올린 작품(작품이 없으면 null)
   hero?: HeroKind;
   heroSrc?: string; // 대표 이미지·영상의 임시 주소
+  coverKind?: "image" | "video"; // cover가 그림 주소인지 영상 파일 주소인지(올린 MP4는 영상 그대로 건다)
   cover?: string; // 가장 최근 공개 작품의 대표(작품 안 맨 위에 놓인 것, D35-2)가 이미지·영상일 때 그 그림 주소. 영상 제작·아트디렉터 역할이 있는 사람만 채워진다
 };
 
@@ -176,13 +177,13 @@ export async function listCreators(filter: CreatorFilterInput, page: number): Pr
   const heroUrls = await signPublicFiles(rows.map((r) => r.hero_path));
   // 대표 이미지·영상을 카드 맨 위에 거는 것은 역할에 영상 제작이나 아트디렉터가 있는 사람만이다(별뜨리님 규칙).
   const covers = await loadCovers(rows.filter((r) => asRoles(r.roles).some((x) => x === "video" || x === "art_director")).map((r) => r.public_handle));
-  return { items: rows.map((r) => ({ ...toListItem(r, heroUrls), cover: covers.get(r.public_handle) })), total: count ?? 0 };
+  return { items: rows.map((r) => ({ ...toListItem(r, heroUrls), cover: covers.get(r.public_handle)?.src, coverKind: covers.get(r.public_handle)?.kind })), total: count ?? 0 };
 }
 
 // 그 크리에이터들의 가장 최근 공개 작품에서 「대표」(D35-2: 작품 안에서 맨 위에 놓인 것)가 이미지·영상이면 그 그림 주소를 돌려준다.
 // 맨 위가 로그라인이거나 글·문서면 그 사람은 빠진다(카드는 로그라인 모양으로 나온다). 영상은 유튜브라서 유튜브가 주는 대표 그림을 쓴다.
-async function loadCovers(handles: string[]): Promise<Map<string, string>> {
-  const out = new Map<string, string>();
+async function loadCovers(handles: string[]): Promise<Map<string, { src: string; kind: "image" | "video" }>> {
+  const out = new Map<string, { src: string; kind: "image" | "video" }>();
   if (handles.length === 0) return out;
   const sb = getSupabase();
   const works = await sb.from("creator_works_public").select("id, author_handle, logline_position").in("author_handle", handles).order("published_at", { ascending: false }).order("id", { ascending: false });
@@ -213,8 +214,12 @@ async function loadCovers(handles: string[]): Promise<Map<string, string>> {
   for (const [handle, w] of latest) {
     const b = topByWork.get(w.id);
     if (!b) continue;
-    const src = b.kind === "video" ? (b.youtube_id ? `https://i.ytimg.com/vi/${b.youtube_id}/hqdefault.jpg` : null) : b.file_path ? (urls.get(b.file_path) ?? null) : null;
-    if (src) out.set(handle, src);
+    // 유튜브 영상은 유튜브가 주는 대표 그림, 올린 MP4는 그 영상 파일 그대로(카드가 소리 없이 재생), 이미지는 그 이미지.
+    if (b.kind === "video" && b.youtube_id) out.set(handle, { src: `https://i.ytimg.com/vi/${b.youtube_id}/hqdefault.jpg`, kind: "image" });
+    else {
+      const src = b.file_path ? (urls.get(b.file_path) ?? null) : null;
+      if (src) out.set(handle, { src, kind: b.kind === "video" ? "video" : "image" });
+    }
   }
   return out;
 }

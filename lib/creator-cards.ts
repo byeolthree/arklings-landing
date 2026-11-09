@@ -57,7 +57,7 @@ export function toCreatorCard(c: CreatorListItem): CreatorCard {
     genres: c.genres,
     forms: c.forms,
     latest: c.latest ?? { title: "", logline: "" },
-    hero: media ? "image" : c.hero,
+    hero: media ? (c.coverKind ?? "image") : c.hero,
     heroSrc: media ? c.cover : c.heroSrc,
     main: media ? "media" : "logline",
   };
