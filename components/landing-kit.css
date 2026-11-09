@@ -100,21 +100,22 @@
 .lk-ico { position: relative; display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--jaju); background: #fff; color: var(--jaju); cursor: pointer; text-decoration: none; padding: 0; }
 .lk-ico.lk-ico-fill { background: var(--jaju); color: #fff; }
 .lk-badge { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #c83a3a; color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
-.lk-drop { position: absolute; z-index: 60; right: 0; top: calc(100% + 10px); min-width: 188px; padding: 10px 8px; background: #fff; border-radius: 16px;
-  box-shadow: 0 24px 48px -20px rgba(42,32,37,.45), 0 2px 8px rgba(42,32,37,.08); }
-.lk-drop > a, .lk-drop > span, .lk-drop form > button { display: block; width: 100%; padding: 11px 14px; border: 0; background: none; font: inherit; font-size: 15px; color: var(--title); text-align: left; text-decoration: none; cursor: pointer; border-radius: 10px; }
+/* 상단 메뉴 드롭다운(시안 04·05·09·10·11을 2배 그림에서 재서 맞춘 값). 상자: 가로 190, 테두리 1px, 모서리 12, 안쪽 여백 8. 한 줄 높이 41, 글자 14. */
+.lk-drop { position: absolute; z-index: 60; right: 0; top: calc(100% + 9px); width: 190px; box-sizing: border-box; padding: 8px; background: #fff; border: 1px solid var(--line); border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+.lk-drop > a, .lk-drop > span, .lk-drop form > button { display: flex; align-items: center; box-sizing: border-box; width: 100%; height: 41px; padding: 0 14px; border: 0; background: none; font: inherit; font-size: 14px; color: var(--title); text-align: left; text-decoration: none; cursor: pointer; border-radius: 8px; }
 .lk-drop > span { cursor: default; }
 .lk-drop > a[aria-current="page"] { color: var(--jaju); font-weight: 700; }
-.lk-drop-cap { padding: 6px 14px 4px; font-size: 12px; color: var(--body); }
-.lk-drop hr { margin: 6px 12px; border: 0; border-top: 1px solid var(--line); }
-.lk-drop-bell { width: 320px; padding: 14px 12px 8px; }
-.lk-drop-title { padding: 0 8px 10px; font-size: 14px; font-weight: 700; color: var(--title); }
-.lk-drop-bell ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.lk-drop-bell li a { display: block; padding: 12px 14px; border-radius: 12px; background: var(--bg); color: var(--title); text-decoration: none; font-size: 14px; line-height: 1.55; }
-.lk-drop-bell li small { display: block; margin-top: 4px; font-size: 12px; color: var(--body); }
-.lk-drop-bell .lk-drop-all { display: block; margin-top: 10px; padding: 12px 8px 8px; border-top: 1px solid var(--line); text-align: center; color: var(--jaju); font-weight: 700; font-size: 14px; text-decoration: none; }
+.lk-drop-cap { height: 25px; box-sizing: border-box; margin: 0; padding: 5px 14px 0; font-size: 11px; line-height: 20px; color: var(--body); }
+.lk-drop hr { margin: 6px 4px; border: 0; border-top: 1px solid var(--line); }
+.lk-drop-bell { width: 320px; }
+.lk-drop-title { display: flex; align-items: center; height: 41px; margin: 0; padding: 0 14px; font-size: 14px; font-weight: 700; color: var(--title); }
+.lk-drop-bell ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.lk-drop-bell li a { display: block; padding: 10px 14px; border-radius: 12px; background: var(--bg); color: var(--title); text-decoration: none; font-size: 14px; line-height: 21px; }
+.lk-drop-bell li small { display: block; margin-top: 2px; font-size: 12px; line-height: 18px; color: var(--body); }
+.lk-drop-bell .lk-drop-all { display: block; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); text-align: center; color: var(--jaju); font-weight: 700; font-size: 14px; line-height: 41px; text-decoration: none; }
 @media (max-width: 899px) {
   .lk-nav { gap: 12px; }
-  .lk-drop-bell { position: fixed; right: 16px; top: 72px; width: min(320px, calc(100vw - 32px)); }
+  .lk-drop-bell { position: fixed; right: 16px; top: 62px; width: min(320px, calc(100vw - 32px)); }
 }
 .lk-drop-empty { padding: 8px 8px 12px; font-size: 14px; color: var(--body); }
