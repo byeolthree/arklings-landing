@@ -76,13 +76,20 @@ function Band({ work, href, owner, tone, onGrip }: { work: WorkCard; href: strin
   const [err, setErr] = useState<string | null>(null);
   const off = owner && !pub;
 
+  // 공개 스위치: 누르는 즉시 바뀌어 보이고, 저장 중에는 잠그며, 서버가 실패하면 원래대로 되돌리고 줄 아래에 오류를 보여 준다.
   async function toggle() {
-    setBusy(true);
+    if (busy) return;
+    const before = pub;
+    const next = !before;
     setErr(null);
-    const r = await setWorkPublic(work.id, !pub);
+    setPub(next);
+    setBusy(true);
+    const r = await setWorkPublic(work.id, next);
     setBusy(false);
-    if (!r.ok) return setErr(r.error);
-    setPub(r.isPublic);
+    if (!r.ok) {
+      setPub(before);
+      return setErr(r.error);
+    }
     router.refresh();
   }
 
