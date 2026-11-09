@@ -239,7 +239,7 @@
   .rg .rg-card.rg-card-list { padding: 34px 44px 34px; }
   .rg .rg-card-list .pf-count { padding: 0; gap: 4px 20px; font-size: 14px; line-height: 20px; }
   .rg .rg-card-list .pf { gap: 0; }
-  .rg .rg-card-list .pf-head { margin: 22px 0 7px; padding: 0 16px 0 12px; height: 20px; column-gap: 6px; font-size: 13px; line-height: 20px; grid-template-columns: 20px 177px 91px 92px 112px 140px 118px minmax(0, 1fr); }
+  .rg .rg-card-list .pf-head { margin: 16.5px 0 7px; padding: 0 16px 0 12px; height: 20px; column-gap: 6px; font-size: 13px; line-height: 20px; grid-template-columns: 20px 177px 91px 92px 112px 140px 118px minmax(0, 1fr); }
   .rg .rg-card-list .pf-head-end { grid-column: 8; }
   .rg .rg-card-list .pf-row { box-sizing: border-box; height: 56px; padding: 0 16px 0 12px; column-gap: 6px; border-radius: 16px; box-shadow: none; grid-template-columns: 20px 177px 91px 92px 112px 140px 118px minmax(0, 1fr); }
   .rg .rg-card-list .pf-new { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; border-radius: 16px; box-shadow: none; margin-bottom: 9px; }
