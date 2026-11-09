@@ -2,8 +2,9 @@
 // DB의 공개용 보기(view) 4개(creators_public, creator_channels_public, creator_works_public, creator_blocks_public)에서만 읽고,
 // 로그인 없는 연결(lib/supabase.ts)을 쓴다. 보기에는 공개 프로필의 공개 작품만 있고 주인 번호(UUID)·이메일은 한 칸도 없다.
 // 화면으로 넘기는 값에도 싣지 않는다. 파일은 비공개 보관함에 있어서, 공개용 보기에 올라와 있는 것만 짧은 임시 주소로 바꿔 준다(lib/creator-files.ts).
+import { orderItems } from "@/lib/creator-cards";
 import type { Role } from "@/lib/collab";
-import { isRole } from "@/lib/creator-rules";
+import { isRole, LOGLINE_TOKEN } from "@/lib/creator-rules";
 import { signPublicFiles } from "@/lib/creator-files";
 import { getSupabase } from "@/lib/supabase";
 
@@ -26,7 +27,7 @@ export type CreatorListItem = {
   latest: { title: string; logline: string; genres: string[] } | null; // 가장 최근에 올린 작품(작품이 없으면 null)
   hero?: HeroKind;
   heroSrc?: string; // 대표 이미지·영상의 임시 주소
-  cover?: string; // 가장 최근 공개 작품의 대표(작품 안 맨 위 이미지·영상)의 그림 주소. 영상 제작·아트디렉터 역할이 있는 사람만 채워진다
+  cover?: string; // 가장 최근 공개 작품의 대표(작품 안 맨 위에 놓인 것, D35-2)가 이미지·영상일 때 그 그림 주소. 영상 제작·아트디렉터 역할이 있는 사람만 채워진다
 };
 
 export type CreatorProfile = {
@@ -178,31 +179,39 @@ export async function listCreators(filter: CreatorFilterInput, page: number): Pr
   return { items: rows.map((r) => ({ ...toListItem(r, heroUrls), cover: covers.get(r.public_handle) })), total: count ?? 0 };
 }
 
-// 그 크리에이터들의 가장 최근 공개 작품에서 맨 위에 있는 이미지·영상을 찾아 그림 주소로 돌려준다(없으면 그 사람은 빠진다).
-// 영상은 유튜브라서 유튜브가 주는 대표 그림을 쓴다.
+// 그 크리에이터들의 가장 최근 공개 작품에서 「대표」(D35-2: 작품 안에서 맨 위에 놓인 것)가 이미지·영상이면 그 그림 주소를 돌려준다.
+// 맨 위가 로그라인이거나 글·문서면 그 사람은 빠진다(카드는 로그라인 모양으로 나온다). 영상은 유튜브라서 유튜브가 주는 대표 그림을 쓴다.
 async function loadCovers(handles: string[]): Promise<Map<string, string>> {
   const out = new Map<string, string>();
   if (handles.length === 0) return out;
   const sb = getSupabase();
-  const works = await sb.from("creator_works_public").select("id, author_handle").in("author_handle", handles).order("published_at", { ascending: false }).order("id", { ascending: false });
+  const works = await sb.from("creator_works_public").select("id, author_handle, logline_position").in("author_handle", handles).order("published_at", { ascending: false }).order("id", { ascending: false });
   if (works.error) return out;
-  const latest = new Map<string, string>(); // handle → 가장 최근 작품 번호
-  for (const w of (works.data ?? []) as { id: string; author_handle: string }[]) if (!latest.has(w.author_handle)) latest.set(w.author_handle, w.id);
-  const ids = Array.from(latest.values());
+  const latest = new Map<string, { id: string; loglinePosition: number }>(); // handle → 가장 최근 작품
+  for (const w of (works.data ?? []) as { id: string; author_handle: string; logline_position: number | null }[]) {
+    if (!latest.has(w.author_handle)) latest.set(w.author_handle, { id: w.id, loglinePosition: w.logline_position ?? 0 });
+  }
+  const ids = Array.from(latest.values()).map((w) => w.id);
   if (ids.length === 0) return out;
   const blocks = await sb
     .from("creator_blocks_public")
     .select("work_id, kind, file_path, youtube_id, position")
     .in("work_id", ids)
-    .in("kind", ["image", "video"])
     .order("position", { ascending: true })
     .order("id", { ascending: true });
   if (blocks.error) return out;
-  const firstByWork = new Map<string, { kind: string; file_path: string | null; youtube_id: string | null }>();
-  for (const b of (blocks.data ?? []) as { work_id: string; kind: string; file_path: string | null; youtube_id: string | null }[]) if (!firstByWork.has(b.work_id)) firstByWork.set(b.work_id, b);
-  const urls = await signPublicFiles(Array.from(firstByWork.values()).map((b) => b.file_path));
-  for (const [handle, workId] of latest) {
-    const b = firstByWork.get(workId);
+  type Row = { work_id: string; kind: string; file_path: string | null; youtube_id: string | null };
+  const byWork = new Map<string, Row[]>();
+  for (const b of (blocks.data ?? []) as Row[]) byWork.set(b.work_id, [...(byWork.get(b.work_id) ?? []), b]);
+  // 작품마다 로그라인을 그 자리에 끼운 순서에서 맨 위가 이미지·영상일 때만 대표 그림이 된다.
+  const topByWork = new Map<string, Row>();
+  for (const w of latest.values()) {
+    const top = orderItems(byWork.get(w.id) ?? [], w.loglinePosition)[0];
+    if (top !== LOGLINE_TOKEN && (top.kind === "image" || top.kind === "video")) topByWork.set(w.id, top);
+  }
+  const urls = await signPublicFiles(Array.from(topByWork.values()).map((b) => b.file_path));
+  for (const [handle, w] of latest) {
+    const b = topByWork.get(w.id);
     if (!b) continue;
     const src = b.kind === "video" ? (b.youtube_id ? `https://i.ytimg.com/vi/${b.youtube_id}/hqdefault.jpg` : null) : b.file_path ? (urls.get(b.file_path) ?? null) : null;
     if (src) out.set(handle, src);
