@@ -48,14 +48,15 @@ export default async function PortfolioNewPage({ searchParams }: { searchParams:
     );
   }
 
-  if (!data.profile) {
+  const stepHrefs = { "로그인·가입": "/mypage#mp-basic", "이메일 확인": "/mypage#mp-basic", "프로필 등록": "/portfolio/new?step=profile", "포트폴리오 등록": "/portfolio/new" } as const;
+  if (!data.profile || sp.step === "profile") {
     return (
       <div className="mp rg">
-        <RegisterHeader title="크리에이터 프로필 등록" current="프로필 등록" />
+        <RegisterHeader title="크리에이터 프로필 등록" current="프로필 등록" hrefs={data.profile ? stepHrefs : { "로그인·가입": stepHrefs["로그인·가입"], "이메일 확인": stepHrefs["이메일 확인"] }} />
         <div className="rg-prof">
           <div className="rg-wrap rg-prof-wrap">
             <div className="rg-prof-card mp-card">
-              <CreatorProfileForm profile={null} />
+              <CreatorProfileForm profile={data.profile} />
             </div>
           </div>
         </div>
@@ -65,7 +66,7 @@ export default async function PortfolioNewPage({ searchParams }: { searchParams:
 
   return (
     <div className="mp rg">
-      <RegisterHeader title="포트폴리오 등록" current="포트폴리오 등록" hrefs={{ "프로필 등록": "/mypage#mp-creator" }} />
+      <RegisterHeader title="포트폴리오 등록" current="포트폴리오 등록" hrefs={stepHrefs} />
       <div className="rg-main">
         <div className="rg-wrap">
           <RegisterScreen works={data.works} usedBytes={data.usedBytes} nickname={nickname} openWorkId={workParam} />

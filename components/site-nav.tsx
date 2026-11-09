@@ -156,7 +156,7 @@ export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; ne
                     <Link role="menuitem" href="/mypage#mp-basic" onClick={shut}>
                       기본 정보
                     </Link>
-                    <Link role="menuitem" href="/mypage#mp-creator" onClick={shut}>
+                    <Link role="menuitem" href="/portfolio/new?step=profile" onClick={shut}>
                       프로필 등록
                     </Link>
                     <Link role="menuitem" href="/portfolio/new" onClick={shut}>

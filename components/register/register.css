@@ -26,7 +26,8 @@
 @media (min-width: 768px) { .rg .rg-desc { font-size: 18px; } }
 .rg .rg-steps { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 24px 0 0; padding: 0; list-style: none; }
 .rg .rg-steps li { padding: 5px 16px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-size: 13px; color: var(--body); }
-.rg .rg-steps li a { color: inherit; text-decoration: none; }
+.rg .rg-steps li a { display: block; margin: -5px -16px; padding: 5px 16px; border-radius: 999px; color: inherit; text-decoration: none; }
+.rg .rg-steps li a:hover { background: var(--tint, #f5ecf0); }
 .rg .rg-steps li[aria-current="step"] { background: var(--body); border-color: var(--body); color: #fff; font-weight: 700; }
 
 /* 프로필 등록 단계: 격자 바탕 위 흰 카드 */
