@@ -61,7 +61,7 @@ const VIDEO_PROMPT = `첨부한 영상을 웹사이트 프로필 맨 위에 거�
 - 최종 해상도, 길이, 용량(MB), 영상·소리 비트레이트, 초당 장면 수
 - 원본에서 자른 구간(시작~끝 시간)`;
 
-function HeroField() {
+export function HeroField() {
   const [kind, setKind] = useState<"image" | "video">("image");
   const [msg, setMsg] = useState("");
   const [copied, setCopied] = useState("");

@@ -67,6 +67,8 @@
 | 포트폴리오 목록 | `/portfolio?page=` | 아니요 | **안 됨**(0007, 서버 오류) | 없음(읽기만: `listPortfolio(page)`) | 없음 | `cards[]`(`PortfolioCard`: `id`, `title`, `logline`, `authorName`, `publishedAt`), `total`, 쪽 수(`PORTFOLIO_PAGE_SIZE`=10으로 계산). 시각은 `formatKstDate`(「게시일」). 세 가지 상태: 하나도 없음(`total=0`), 쪽 번호가 너무 큼(`cards`가 비고 `total>0`: 「이 쪽에는 기획안이 없어요」), 목록 | 카드 `/portfolio/<id>`, 비었을 때 「기획안 만들기」 `/planner`, 너무 큰 쪽 「첫 쪽으로」 `/portfolio`, 이전·다음 `/portfolio?page=<n>`(1쪽은 `/portfolio`) |
 | 포트폴리오 상세 | `/portfolio/<id>` | 아니요 | **안 됨**(0007) | 없음(읽기만: `getPortfolio(id)`) | 없음 | `PortfolioDetail`(위 카드 값 + `content`: `sections[{id,label,text}]`, `answers[{label,text}]`). 없는 번호·비공개·UUID가 아닌 값은 404(`app/portfolio/not-found.tsx`) | 「← 포트폴리오」`/portfolio`, 「이 기획안에 협업 신청」 `/collab/new?plan=<id>`, 링크 복사(`CopyLinkButton`) |
 
+| 포트폴리오 등록(독립 화면, 샘플) | `/dev-preview/portfolio-register`(실제 주소는 아직 없음. 상단 메뉴 ＋·사람 메뉴가 지금은 `/mypage#mp-…`로 간다) | 예 | **서버 저장 없음**(샘플만) | 없음(화면 안에서만 움직임) | 제목, 장르(여러 개), 요소 순서·종류(티저/예고편/선공개/파일럿/피치 영상, 시놉시스/트리트먼트/아웃라인/시리즈 바이블/파일럿/피치 문서), 영상 주소, 파일, 로그라인 | 닉네임·역할(프로필에서), 내 포트폴리오 개수·파일 용량(샘플) | 프로필이 없으면 「프로필 등록」 단계가 먼저(`step=profile`), 저장 뒤 포트폴리오 등록 단계 |
+
 작성자 주인 번호는 화면·주소·화면 소스 어디에도 내지 않는다.
 
 ## 협업 신청
