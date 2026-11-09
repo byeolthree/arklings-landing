@@ -10,7 +10,8 @@ import { BUCKET } from "@/lib/supabase";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createAuthClient } from "@/lib/supabase/server";
 import { formatKst } from "@/lib/time";
-import { ROLES, UUID_RE, type CollabRequest } from "@/lib/collab";
+import { collabTargetOf, ROLES, UUID_RE, type CollabRequest } from "@/lib/collab";
+import { creatorNames } from "@/lib/creators";
 
 export const metadata: Metadata = { title: "협업 신청 상세", robots: { index: false, follow: false } };
 
@@ -43,6 +44,7 @@ export default async function CollabDetailPage({ params, searchParams }: Props) 
   if (error) throw new Error(error.message);
   if (!data) notFound();
   const r = data as CollabRequest;
+  const target = collabTargetOf(r, await creatorNames([r.creator_handle]));
 
   let fileUrl: string | null = null;
   let fileFailed = false;
@@ -86,8 +88,12 @@ export default async function CollabDetailPage({ params, searchParams }: Props) 
         <dl className="mt-4 divide-y divide-[#e8dfe3] border-y border-[#e8dfe3]">
           <Row k="연락처">{r.contact}</Row>
           <Row k="SNS 아이디">{r.sns_handle}</Row>
-          {r.plan_id ? (
+          {target.kind === "plan" ? (
             <Row k="신청 기획안">{r.plans?.title ?? "제목을 불러오지 못했어요"}</Row>
+          ) : target.kind === "work" ? (
+            <Row k="신청 작품">{r.work_title}</Row>
+          ) : target.kind === "creator" ? (
+            <Row k="신청 크리에이터">{target.text}</Row>
           ) : (
             <Row k="신청 대상">{r.source_works?.title ?? "특정 이야기 아님 (전체적인 협업 제안)"}</Row>
           )}

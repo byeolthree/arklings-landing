@@ -324,3 +324,17 @@ export async function loadWorkMedia(workIds: string[]): Promise<Map<string, Work
   }
   return out;
 }
+
+// 공개 주소 → 닉네임(받은·보낸 협업 신청 목록에서 크리에이터 이름을 보여 줄 때). 공개 프로필만 읽히므로 못 찾은 주소는 빠진다.
+export async function creatorNames(handles: (string | null | undefined)[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  const list = Array.from(new Set(handles.filter((h): h is string => typeof h === "string" && HANDLE_QUERY.test(h) && h.length <= 20))).slice(0, 30);
+  if (list.length === 0) return out;
+  try {
+    const { data } = await getSupabase().from("creators_public").select("public_handle, display_name").in("public_handle", list);
+    for (const r of (data ?? []) as { public_handle: string; display_name: string }[]) out.set(r.public_handle, r.display_name);
+  } catch {
+    // 이름을 못 읽으면 공개 주소를 보여 준다
+  }
+  return out;
+}

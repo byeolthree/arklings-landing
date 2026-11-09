@@ -36,9 +36,25 @@ export type CollabRequest = {
   applicant_id?: string | null; // 로그인하고 보낸 신청이면 그 계정(0008 SQL 전에는 없다)
   collab_replies?: { message: string; decision: "accepted" | "rejected" | null; created_at: string }[];
   plan_id: string | null; // 기획안으로 들어온 신청이면 그 기획안(지워지면 비워진다)
+  work_id?: string | null; // 작품으로 들어온 신청이면 그 작품(0010. 작품이 지워지면 비워진다)
+  work_title?: string | null; // 작품으로 들어온 신청의 접수 때 작품 제목(작품이 지워져도 남는다)
+  creator_handle?: string | null; // 크리에이터(작품)로 들어온 신청이면 그 크리에이터의 공개 주소
   source_works?: { title: string } | null;
   plans?: { title: string } | null;
 };
+
+// 받은·보낸 신청의 「신청 대상」 표시(목록·상세·마이페이지가 같이 쓴다). 기획안 → 작품 → 크리에이터 → 아클링스 앞 일반 신청 순서로 본다.
+// 크리에이터 이름은 호출하는 쪽이 공개 주소로 읽어 names에 넣어 준다(못 읽으면 공개 주소를 그대로 보여 준다).
+export type CollabTarget = { kind: "plan" | "work" | "creator" | "general"; text: string };
+export function collabTargetOf(
+  r: Pick<CollabRequest, "plan_id" | "work_title" | "creator_handle" | "source_works" | "plans">,
+  names: ReadonlyMap<string, string> = new Map(),
+): CollabTarget {
+  if (r.plan_id) return { kind: "plan", text: `기획안 「${r.plans?.title ?? "제목 없음"}」` };
+  if (r.work_title) return { kind: "work", text: `작품 「${r.work_title}」` };
+  if (r.creator_handle) return { kind: "creator", text: names.get(r.creator_handle) ?? r.creator_handle };
+  return { kind: "general", text: r.source_works?.title ?? "전체 협업 제안" };
+}
 
 export const NO_TARGET_LABEL = "특정 이야기 아님 (전체적인 협업 제안)";
 export const PAGE_SIZE = 10;

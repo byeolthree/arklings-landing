@@ -10,7 +10,8 @@ import { CreatorProfileForm, PortfolioManager } from "@/components/mypage/creato
 import { loadMyCreator, type MyCreatorData } from "@/lib/creators-mine";
 import { requireUser } from "@/lib/auth";
 import { countNewCollab } from "@/lib/collab-count";
-import { PAGE_SIZE, ROLES, STATUSES, type CollabRequest } from "@/lib/collab";
+import { collabTargetOf, PAGE_SIZE, ROLES, STATUSES, type CollabRequest } from "@/lib/collab";
+import { creatorNames } from "@/lib/creators";
 import { formatKstDate } from "@/lib/time";
 import { StatusBadge } from "@/components/status-badge";
 import { SubmitButton } from "@/components/submit-button";
@@ -78,6 +79,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
   } catch {
     collabLoadFailed = true;
   }
+  const receivedNames = await creatorNames(collabRows.map((r) => r.creator_handle));
   const receivedBlock = collabLoadFailed ? (
     <div className="mp-plans">
       <h3>받은 협업 신청</h3>
@@ -98,7 +100,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
           <li key={r.id}>
             <span>{r.applicant_name}</span>
             <span>
-              {r.plan_id ? `기획안 「${r.plans?.title ?? "제목 없음"}」` : (r.source_works?.title ?? "전체 협업 제안")} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)} · {STATUSES[r.status]} · <Link href={`/collab/${r.id}`}>열기</Link>
+              {collabTargetOf(r, receivedNames).text} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)} · {STATUSES[r.status]} · <Link href={`/collab/${r.id}`}>열기</Link>
             </span>
           </li>
         ))}
@@ -122,7 +124,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
   try {
     const { data, error } = await (await createAuthClient())
       .from("collab_requests")
-      .select("id, status, roles, created_at, plan_id, source_works(title), plans(title), collab_replies(message, decision, created_at)")
+      .select("id, status, roles, created_at, plan_id, work_title, creator_handle, source_works(title), plans(title), collab_replies(message, decision, created_at)")
       .eq("applicant_id", user.id)
       .order("created_at", { ascending: false })
       .limit(20);
@@ -131,6 +133,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
   } catch {
     sentUnavailable = true;
   }
+  const sentNames = await creatorNames(sentRows.map((r) => r.creator_handle));
   const sentBlock = (
     <div className="mp-plans">
       <h3>보낸 협업 신청</h3>
@@ -145,7 +148,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
             return (
               <li key={r.id}>
                 <span>
-                  {r.plan_id ? `기획안 「${r.plans?.title ?? "제목 없음"}」` : (r.source_works?.title ?? "전체 협업 제안")} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)}
+                  {collabTargetOf(r, sentNames).text} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)}
                 </span>
                 <StatusBadge status={r.status} />
                 {replies.length > 0 && (
