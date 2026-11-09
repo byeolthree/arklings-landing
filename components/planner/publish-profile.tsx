@@ -293,7 +293,7 @@ export function PublishProfile({
 
       {/* P6 협업 신청 받기 */}
       {full && (
-        <div className="pp-field">
+        <div className="pp-field pp-half">
           <span className="pp-label" id="pp-collab-label">
             협업 신청 받기
           </span>
@@ -310,7 +310,7 @@ export function PublishProfile({
 
       {/* 공개 설정: 마이페이지에서만(기본 비공개). 기획안을 올리다가 만들면 프로필도 함께 공개된다 */}
       {full && (
-        <div className="pp-field">
+        <div className="pp-field pp-half">
           <span className="pp-label" id="pp-vis-label">
             공개 설정
           </span>

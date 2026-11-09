@@ -224,22 +224,10 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
   const [msg, setMsg] = useState("");
   const [picked, setPicked] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
-  const [copied, setCopied] = useState("");
-  const [showPrompt, setShowPrompt] = useState(false);
   const [busy, setBusy] = useState(false);
   const rule = HERO_RULE[kind];
   const router = useRouter();
 
-  async function copyPrompt() {
-    try {
-      await navigator.clipboard.writeText(VIDEO_PROMPT);
-      setCopied("복사했어요. 영상 변환 도구에 붙여 넣으세요.");
-      setShowPrompt(false);
-    } catch {
-      setCopied("복사하지 못했어요. 아래 글을 직접 복사해 주세요.");
-      setShowPrompt(true);
-    }
-  }
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const input = e.target;
     const f = input.files?.[0];
@@ -283,52 +271,49 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
       <span className="pp-label" id="pp-hero-label">
         대표 이미지·영상 <span className="pp-hint-inline">(선택)</span>
       </span>
-      {hero?.src && (
-        <div style={{ marginBottom: 8 }}>
-          {hero.kind === "video" ? (
-            <video src={hero.src} controls muted playsInline preload="metadata" style={{ maxWidth: "100%", maxHeight: 220, borderRadius: 12, background: "#000" }} />
+      <div className="pp-hero">
+        <div className="pp-roles" role="group" aria-labelledby="pp-hero-label">
+          <button type="button" className="opt" aria-pressed={kind === "image"} onClick={() => { setKind("image"); setMsg(""); }}>
+            이미지
+          </button>
+          <button type="button" className="opt" aria-pressed={kind === "video"} onClick={() => { setKind("video"); setMsg(""); }}>
+            영상
+          </button>
+        </div>
+        <input key={kind} type="file" hidden ref={fileRef} accept={rule.accept} onChange={onFile} disabled={busy} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
+        <button type="button" className="pp-drop" onClick={() => fileRef.current?.click()} disabled={busy} aria-label="대표 파일 고르기">
+          {hero?.src ? (
+            hero.kind === "video" ? (
+              <video src={hero.src} muted playsInline preload="metadata" />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={hero.src} alt="대표 이미지" />
+            )
+          ) : pending && !hasProfile ? (
+            `올릴 파일: ${pending.name}`
+          ) : picked ? (
+            `고른 파일: ${picked}${busy ? " · 올리는 중…" : ""}`
           ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={hero.src} alt="대표 이미지" style={{ maxWidth: "100%", maxHeight: 220, borderRadius: 12 }} />
+            "눌러서 올리기"
           )}
+        </button>
+        <p id="pp-hero-hint" className="len">
+          이미지 JPG · PNG · WEBP, 5MB 이하 · 영상 MP4(H.264), 10MB 이하, 1280×720, 15~30초
+        </p>
+        {hero && (
           <p className="len">
             지금 걸린 {hero.kind === "video" ? "영상" : "이미지"} · {mb(hero.bytes)}{" "}
             <button type="button" className="btn btn-ghost" onClick={remove} disabled={busy}>
               지우기
             </button>
           </p>
-        </div>
-      )}
-      {!hero?.src && hero && <p className="len">대표 파일은 걸려 있지만 지금은 불러오지 못했어요.</p>}
-      <div className="pp-roles" role="group" aria-labelledby="pp-hero-label">
-        <button type="button" className="opt" aria-pressed={kind === "image"} onClick={() => { setKind("image"); setMsg(""); setCopied(""); setShowPrompt(false); }}>
-          이미지
-        </button>
-        <button type="button" className="opt" aria-pressed={kind === "video"} onClick={() => { setKind("video"); setMsg(""); setCopied(""); }}>
-          영상
-        </button>
-        {kind === "video" && (
-          <>
-            <button type="button" className="btn btn-ghost" onClick={copyPrompt}>
-              영상 변환 프롬프트 복사
-            </button>
-            <span role="status" aria-live="polite" className="len" style={{ alignSelf: "center" }}>
-              {copied}
-            </span>
-          </>
         )}
-        <input key={kind} type="file" hidden ref={fileRef} accept={rule.accept} onChange={onFile} disabled={busy} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
-        <button type="button" className="btn btn-ghost pp-file-end" onClick={() => fileRef.current?.click()} disabled={busy}>파일 불러오기</button>
+        {msg && (
+          <p className="pp-err" role="alert">
+            {msg}
+          </p>
+        )}
       </div>
-      {showPrompt && <textarea readOnly className="we-text" rows={8} value={VIDEO_PROMPT} aria-label="영상 변환 프롬프트" onFocus={(e) => e.currentTarget.select()} />}
-      {picked && !pending && <p className="len" role="status">고른 파일: {picked}{busy ? " · 올리는 중…" : ""}</p>}
-      {pending && !hasProfile && <p className="len">올릴 파일: {pending.name} (프로필을 저장하면 올라가요)</p>}
-      <p id="pp-hero-hint" className="len">{rule.hint}</p>
-      {msg && (
-        <p className="pp-err" role="alert">
-          {msg}
-        </p>
-      )}
     </div>
   );
 }
@@ -385,6 +370,7 @@ export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
           key={profile ? `${profile.handle}-${profile.roles.join()}-${profile.bio}-${profile.channels.length}-${profile.openToCollab}-${profile.isPublic}` : "new"}
           mode={profile ? "edit" : "create"}
           context="mypage"
+          submitLabel={profile ? undefined : "저장하고 포트폴리오 등록으로"}
           initial={profile ? { ...profile, about: profile.bio } : undefined}
           onSubmit={onSubmit}
           checkHandle={check}
