@@ -403,7 +403,7 @@ const kstDate = (iso: string) => {
   return `${g("year")}.${g("month")}.${g("day")}`;
 };
 
-export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null, nickname = "" }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null; nickname?: string }) {
+export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null, nickname = "", onOpenNew, onOpenEdit }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null; nickname?: string; onOpenNew?: () => void; onOpenEdit?: (id: string) => void }) {
   const router = useRouter();
   // 기획안 화면의 「포트폴리오 작성하기」로 넘어오면(?work=) 그 작품의 편집 칸이 열려 있다.
   const [editing, setEditing] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : null);
@@ -497,7 +497,7 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
       </div>
 
       {/* 맨 윗줄이 접힌 등록 화면이다. 누르면 이 줄 아래로 등록 화면이 펼쳐진다. */}
-      <button type="button" className="pf-new" aria-expanded={newOpen} onClick={() => setNewOpen((v) => !v)} disabled={!newOpen && works.length >= WORK_LIMIT} title={works.length >= WORK_LIMIT ? `작품은 ${WORK_LIMIT}개까지 만들 수 있어요.` : undefined}>
+      <button type="button" className="pf-new" aria-expanded={newOpen} onClick={() => (onOpenNew ? onOpenNew() : setNewOpen((v) => !v))} disabled={!newOpen && works.length >= WORK_LIMIT} title={works.length >= WORK_LIMIT ? `작품은 ${WORK_LIMIT}개까지 만들 수 있어요.` : undefined}>
         <span className="pf-new-main">
           <span className="pf-plus" aria-hidden="true">＋</span> 새 포트폴리오 등록
         </span>
@@ -572,7 +572,7 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
               </button>
             </span>
             <span className="pf-actions">
-              <button type="button" className="btn btn-ghost" aria-expanded={editing === w.id} onClick={() => setEditing(editing === w.id ? null : w.id)}>
+              <button type="button" className="btn btn-ghost" aria-expanded={editing === w.id} onClick={() => (onOpenEdit ? onOpenEdit(w.id) : setEditing(editing === w.id ? null : w.id))}>
                 수정
               </button>
               <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => setDel(w)}>
