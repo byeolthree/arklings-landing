@@ -253,12 +253,30 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
   const [busy, setBusy] = useState(false);
   const drag = useRef<string | null>(null);
 
+  // 공개 스위치: 누르는 즉시 바뀌어 보이고(서버 응답을 기다리지 않는다), 저장 중에는 그 스위치만 잠근다. 서버가 실패하면 원래대로 되돌리고 그 작품 줄 아래에 오류를 보여 준다.
+  const [pubOverride, setPubOverride] = useState<Record<string, boolean>>({});
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [rowErr, setRowErr] = useState<Record<string, string>>({});
+  const isPub = (w: MyWork) => pubOverride[w.id] ?? w.isPublic;
+
   async function togglePublic(w: MyWork) {
-    setBusy(true);
+    if (savingId === w.id) return;
+    const before = isPub(w);
+    const next = !before;
+    setRowErr((cur) => {
+      const copy = { ...cur };
+      delete copy[w.id];
+      return copy;
+    });
+    setPubOverride((cur) => ({ ...cur, [w.id]: next }));
+    setSavingId(w.id);
     setMsg(null);
-    const r = await setWorkPublic(w.id, !w.isPublic);
-    setBusy(false);
-    if (!r.ok) return setMsg({ text: r.error, err: true });
+    const r = await setWorkPublic(w.id, next);
+    setSavingId(null);
+    if (!r.ok) {
+      setPubOverride((cur) => ({ ...cur, [w.id]: before }));
+      return setRowErr((cur) => ({ ...cur, [w.id]: r.error }));
+    }
     setMsg({ text: r.isPublic ? "작품을 포트폴리오에 올렸어요." : "작품을 포트폴리오에서 내렸어요." });
     router.refresh();
   }
@@ -355,7 +373,7 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
             drag.current = null;
           }}
         >
-          <div className={`pf-row${w.isPublic ? "" : " off"}`}>
+          <div className={`pf-row${isPub(w) ? "" : " off"}`}>
             <button
               type="button"
               className="pf-grip"
@@ -387,9 +405,9 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
             </span>
             <span className="pf-date">{kstDate(w.updatedAt)}</span>
             <span className="pf-sw-wrap">
-              <button type="button" role="switch" aria-checked={w.isPublic} aria-label={`${w.title} 공개`} className="pf-sw" disabled={busy} onClick={() => void togglePublic(w)}>
+              <button type="button" role="switch" aria-checked={isPub(w)} aria-label={`${w.title} 공개`} className="pf-sw" disabled={busy || savingId === w.id} onClick={() => void togglePublic(w)}>
                 <i aria-hidden="true" />
-                <span>{w.isPublic ? "공개" : "비공개"}</span>
+                <span>{isPub(w) ? "공개" : "비공개"}</span>
               </button>
             </span>
             <span className="pf-actions">
@@ -401,7 +419,12 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
               </button>
             </span>
           </div>
-          {editing === w.id && <WorkEditor key={w.id} work={w} nickname={nickname} onClose={() => setEditing(null)} onTogglePublic={() => void togglePublic(w)} busyOuter={busy} />}
+          {rowErr[w.id] && (
+            <p role="alert" className="mp-msg err">
+              {rowErr[w.id]}
+            </p>
+          )}
+          {editing === w.id && <WorkEditor key={w.id} work={{ ...w, isPublic: isPub(w) }} nickname={nickname} onClose={() => setEditing(null)} onTogglePublic={() => void togglePublic(w)} busyOuter={busy} />}
         </div>
       ))}
 
