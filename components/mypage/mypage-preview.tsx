@@ -42,6 +42,7 @@ function HeroField() {
   const [kind, setKind] = useState<"image" | "video">("image");
   const [msg, setMsg] = useState("");
   const [copied, setCopied] = useState("");
+  const [picked, setPicked] = useState("");
   const rule = HERO_RULE[kind];
   async function copyPrompt() {
     try {
@@ -53,6 +54,7 @@ function HeroField() {
   }
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
+    setPicked("");
     if (!f) return setMsg("");
     if (!(rule.types as readonly string[]).includes(f.type)) {
       e.target.value = "";
@@ -63,6 +65,7 @@ function HeroField() {
       return setMsg(`선택한 파일이 ${(f.size / 1024 / 1024).toFixed(1)}MB예요. ${rule.max / 1024 / 1024}MB 이하만 올릴 수 있어요.`);
     }
     setMsg("");
+    setPicked(`${f.name} · ${(f.size / 1024 / 1024).toFixed(1)}MB`);
   }
   return (
     <div className="pp-field">
@@ -88,6 +91,7 @@ function HeroField() {
         )}
       </div>
       <input key={kind} type="file" accept={rule.accept} onChange={onFile} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
+      {picked && <p className="len" role="status">고른 파일: {picked}</p>}
       <p id="pp-hero-hint" className="len">{rule.hint}</p>
       {msg && (
         <p className="pp-err" role="alert">

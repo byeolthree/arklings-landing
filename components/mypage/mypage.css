@@ -25,6 +25,13 @@
 .mp .btn-ghost { background: transparent; color: var(--body); border-color: var(--body); }
 .mp .btn-ghost:hover { transform: translateY(-2px); }
 .mp .btn[aria-disabled="true"] { opacity: .45; pointer-events: none; box-shadow: none; }
+/* 파일 고르기: 브라우저 기본 버튼은 배경·테두리가 없어 글씨처럼 보이므로 보조 버튼 모양으로 맞춘다 */
+.mp input[type="file"] { font: inherit; font-size: 13px; color: var(--body); max-width: 100%; }
+.mp input[type="file"]::file-selector-button {
+  margin-right: 12px; padding: 8px 20px; background: transparent; color: var(--jaju);
+  border: 1.5px solid var(--jaju); border-radius: 8px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.mp input[type="file"]:disabled::file-selector-button { opacity: .45; cursor: default; }
 .mp a:focus-visible, .mp button:focus-visible, .mp input:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 
 /* 맨 위: 가운데 제목 + 설명 (포트폴리오 화면의 제목 크기, 제목 위 작은 글 없음) */

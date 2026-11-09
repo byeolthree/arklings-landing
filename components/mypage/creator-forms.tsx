@@ -119,6 +119,7 @@ async function uploadHeroFile(file: File, kind: "image" | "video"): Promise<stri
 function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: NonNullable<MyProfile["hero"]>; hasProfile: boolean; pending: File | null; onPending: (f: File | null) => void; onDone: (text: string, err?: boolean) => void }) {
   const [kind, setKind] = useState<"image" | "video">(hero?.kind ?? "image");
   const [msg, setMsg] = useState("");
+  const [picked, setPicked] = useState("");
   const [copied, setCopied] = useState("");
   const [showPrompt, setShowPrompt] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -138,6 +139,7 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const input = e.target;
     const f = input.files?.[0];
+    setPicked("");
     if (!f) return setMsg("");
     if (!(rule.types as readonly string[]).includes(f.type)) {
       input.value = "";
@@ -148,6 +150,7 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
       return setMsg(`선택한 파일이 ${(f.size / 1024 / 1024).toFixed(1)}MB예요. ${rule.max / 1024 / 1024}MB 이하만 올릴 수 있어요.`);
     }
     setMsg("");
+    setPicked(`${f.name} · ${mb(f.size)}`);
     if (!hasProfile) {
       onPending(f);
       return onDone("프로필을 저장하면 이 파일도 함께 올라가요.");
@@ -156,6 +159,7 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
     const err = await uploadHeroFile(f, kind);
     setBusy(false);
     input.value = "";
+    setPicked("");
     if (err) return setMsg(err);
     onDone(hero ? "대표 파일을 바꿨어요." : "대표 파일을 올렸어요.");
     router.refresh();
@@ -212,7 +216,7 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
       </div>
       {showPrompt && <textarea readOnly className="we-text" rows={8} value={VIDEO_PROMPT} aria-label="영상 변환 프롬프트" onFocus={(e) => e.currentTarget.select()} />}
       <input key={kind} type="file" accept={rule.accept} onChange={onFile} disabled={busy} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
-      {busy && <p className="len" role="status">올리는 중…</p>}
+      {picked && !pending && <p className="len" role="status">고른 파일: {picked}{busy ? " · 올리는 중…" : ""}</p>}
       {pending && !hasProfile && <p className="len">올릴 파일: {pending.name} (프로필을 저장하면 올라가요)</p>}
       <p id="pp-hero-hint" className="len">{rule.hint}</p>
       {msg && (
