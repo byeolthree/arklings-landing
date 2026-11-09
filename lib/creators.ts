@@ -292,3 +292,29 @@ export async function getWork(id: string): Promise<WorkDetail | null> {
   }
   return { ...toWorkItem(row), authorHandle: row.author_handle, authorName: row.author_name, blocks };
 }
+
+// 작품 카드에 걸 대표 이미지·영상(작품 안 이미지·영상 요소를 위에서부터 차례로). 공개된 작품의 것만 돌려준다.
+export type WorkMediaItem = { kind: "image"; src: string } | { kind: "video"; youtubeId: string };
+
+export async function loadWorkMedia(workIds: string[]): Promise<Map<string, WorkMediaItem[]>> {
+  const out = new Map<string, WorkMediaItem[]>();
+  const ids = workIds.filter((id) => UUID_QUERY.test(id)).slice(0, 12);
+  if (ids.length === 0) return out;
+  const { data, error } = await getSupabase()
+    .from("creator_blocks_public")
+    .select("work_id, kind, file_path, youtube_id, position")
+    .in("work_id", ids)
+    .in("kind", ["image", "video"])
+    .order("position", { ascending: true })
+    .order("id", { ascending: true });
+  if (error) return out; // 그림을 못 읽어도 프로필은 보여 준다(자리 표시로)
+  const rows = (data ?? []) as { work_id: string; kind: string; file_path: string | null; youtube_id: string | null }[];
+  const urls = await signPublicFiles(rows.map((b) => b.file_path));
+  for (const b of rows) {
+    const list = out.get(b.work_id) ?? [];
+    if (b.kind === "video" && b.youtube_id) list.push({ kind: "video", youtubeId: b.youtube_id });
+    else if (b.kind === "image" && b.file_path && urls.get(b.file_path)) list.push({ kind: "image", src: urls.get(b.file_path) as string });
+    out.set(b.work_id, list);
+  }
+  return out;
+}

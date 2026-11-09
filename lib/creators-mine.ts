@@ -17,6 +17,7 @@ export type MyProfile = {
 
 export type MyBlock = WorkBlock;
 export type MyWork = WorkListItem & {
+  updatedAt: string; // 마지막으로 고친 시각(ISO). 접은 목록의 「수정일」
   isPublic: boolean;
   planId: string | null;
   blocks: MyBlock[];
@@ -30,7 +31,7 @@ export type MyCreatorData = {
 
 type WorkRow = {
   id: string; title: string; roles: string[]; genres: string[] | null; kind: string | null; form: string | null;
-  logline: string; plan_id: string | null; is_public: boolean; first_published_at: string | null; created_at: string;
+  logline: string; plan_id: string | null; is_public: boolean; first_published_at: string | null; created_at: string; updated_at: string;
 };
 type BlockRow = {
   id: string; work_id: string; position: number; kind: "text" | "image" | "video" | "document";
@@ -42,7 +43,7 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
   const [prof, chans, works, blocks] = await Promise.all([
     sb.from("creator_profiles").select("public_handle, roles, bio, open_to_collab, is_public").eq("user_id", userId).maybeSingle(),
     sb.from("creator_channels").select("label, url, position").eq("user_id", userId).order("position", { ascending: true }),
-    sb.from("creator_works").select("id, title, roles, genres, kind, form, logline, plan_id, is_public, first_published_at, created_at").eq("owner_id", userId).order("sort_order", { ascending: true }).order("created_at", { ascending: true }),
+    sb.from("creator_works").select("id, title, roles, genres, kind, form, logline, plan_id, is_public, first_published_at, created_at, updated_at").eq("owner_id", userId).order("sort_order", { ascending: true }).order("created_at", { ascending: false }),
     sb.from("creator_work_blocks").select("id, work_id, position, kind, body, file_path, file_name, file_bytes, youtube_id").eq("owner_id", userId).order("position", { ascending: true }).order("created_at", { ascending: true }),
   ]);
   for (const r of [prof, chans, works, blocks]) if (r.error) throw new Error(r.error.message);
@@ -82,6 +83,7 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
       kind: w.kind,
       form: w.form === "long" || w.form === "short" ? w.form : null,
       publishedAt: w.first_published_at ?? w.created_at,
+      updatedAt: w.updated_at,
       isPublic: w.is_public,
       planId: w.plan_id,
       blocks: byWork.get(w.id) ?? [],

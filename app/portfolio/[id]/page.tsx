@@ -57,7 +57,7 @@ export default async function WorkPage({ params }: Props) {
   const { work, profile, works, preview } = data;
   return (
     <>
-      <CreatorProfile creator={toProfileData(profile)} works={works.map(toWorkCard)} backHref="/creators" workHref={(id) => `/portfolio/${id}`} privateNote={preview && !works.some((w) => w.id === work.id)} />
+      <CreatorProfile creator={toProfileData(profile)} works={works.map((w) => toWorkCard(w))} backHref="/creators" workHref={(id) => `/portfolio/${id}`} privateNote={preview && !works.some((w) => w.id === work.id)} />
       <WorkDetail
         work={{ title: work.title, authorName: work.authorName, publishedAt: work.publishedAt, roles: work.roles, genres: work.genres, logline: work.logline, blocks: work.blocks }}
         closeHref={`/creators/${work.authorHandle}`}

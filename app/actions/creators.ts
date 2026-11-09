@@ -243,6 +243,30 @@ export async function setWorkPublic(workId: string, isPublic: boolean): Promise<
   return { ok: true, isPublic: Boolean(isPublic) };
 }
 
+// 작품 카드의 순서를 저장한다(마이페이지 목록·프로필의 손잡이). 내 작품 전체의 번호를 원하는 순서대로 받아 sort_order를 0부터 매긴다.
+// 번호가 하나라도 빠지거나 남의 것이 섞여 있으면 저장하지 않는다. 바뀐 작품만 고쳐서 수정일이 괜히 바뀌지 않게 한다.
+export async function reorderWorks(orderedIds: string[]): Promise<Ok | Fail> {
+  const auth = await needUser();
+  if (!("user" in auth)) return auth;
+  if (!Array.isArray(orderedIds) || orderedIds.length === 0 || orderedIds.length > 12 || !orderedIds.every((id) => UUID.test(String(id))) || new Set(orderedIds).size !== orderedIds.length) {
+    return { ok: false, error: "작품 순서를 저장하지 못했어요. 새로고침한 뒤 다시 시도해 주세요." };
+  }
+  const own = await auth.sb.from("creator_works").select("id, sort_order").eq("owner_id", auth.user.id);
+  if (own.error) return { ok: false, error: UNAVAILABLE };
+  const rows = (own.data ?? []) as { id: string; sort_order: number }[];
+  if (rows.length !== orderedIds.length || !rows.every((r) => orderedIds.includes(r.id))) {
+    return { ok: false, error: "작품 목록이 바뀌었어요. 새로고침한 뒤 다시 시도해 주세요." };
+  }
+  const before = new Map(rows.map((r) => [r.id, r.sort_order]));
+  for (let i = 0; i < orderedIds.length; i += 1) {
+    if (before.get(orderedIds[i]) === i) continue;
+    const { error } = await auth.sb.from("creator_works").update({ sort_order: i }).eq("id", orderedIds[i]).eq("owner_id", auth.user.id);
+    if (error) return { ok: false, error: dbMessage(error) };
+  }
+  refresh();
+  return { ok: true };
+}
+
 // ── 작품 안 요소 ─────────────────────────────────────────────────────────────────
 
 async function ownWork(sb: Sb, userId: string, workId: string): Promise<boolean> {
