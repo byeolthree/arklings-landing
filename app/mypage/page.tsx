@@ -222,12 +222,12 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
         </div>
       </dl>
       <div className="mp-foot">
-        <form action={signOut}>
-          <SubmitButton className="btn btn-ghost">로그아웃</SubmitButton>
-        </form>
         <small>
           더 이상 쓰지 않으신다면 <Link href="/mypage/withdraw">회원 탈퇴</Link>를 할 수 있어요.
         </small>
+        <form action={signOut}>
+          <SubmitButton className="btn btn-ghost">로그아웃</SubmitButton>
+        </form>
       </div>
     </>
   );
