@@ -780,8 +780,8 @@ export function WorkEditor({
                   {sl.kind === "text" && <textarea className="we-text" rows={3} placeholder="〈글〉" aria-label="글" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
                   {sl.kind === "image" && (
                     <label className="we-line">
-                      이미지 (JPG·PNG·WEBP){" "}
-                      <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="이미지 파일" onChange={(e) => patchSlot(sl.id, { file: e.target.files?.[0] ?? null })} />
+                      <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="이미지 파일" onChange={(e) => patchSlot(sl.id, { file: e.target.files?.[0] ?? null })} />{" "}
+                      이미지 (JPG·PNG·WEBP)
                     </label>
                   )}
                   {sl.kind === "video" && <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={sl.url} onChange={(e) => patchSlot(sl.id, { url: e.target.value })} />}
