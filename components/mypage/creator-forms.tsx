@@ -225,8 +225,28 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
   const [picked, setPicked] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [copyNote, setCopyNote] = useState("");
   const rule = HERO_RULE[kind];
   const router = useRouter();
+
+  // 「이미지」·「영상」 태그를 누르면 그 종류로 바꾸고 바로 파일 고르는 창을 연다(아래 큰 칸을 눌러도 같다).
+  function pickKind(k: "image" | "video") {
+    setKind(k);
+    setMsg("");
+    const el = fileRef.current;
+    if (!el) return;
+    el.value = "";
+    el.accept = HERO_RULE[k].accept;
+    el.click();
+  }
+  async function copyVideoPrompt() {
+    try {
+      await navigator.clipboard.writeText(VIDEO_PROMPT);
+      setCopyNote("영상 변환 프롬프트를 복사했어요.");
+    } catch {
+      setCopyNote("복사하지 못했어요. 브라우저의 복사 권한을 확인해 주세요.");
+    }
+  }
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const input = e.target;
@@ -273,14 +293,26 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
       </span>
       <div className="pp-hero">
         <div className="pp-roles" role="group" aria-labelledby="pp-hero-label">
-          <button type="button" className="opt" aria-pressed={kind === "image"} onClick={() => { setKind("image"); setMsg(""); }}>
+          <button type="button" className="opt" aria-pressed={kind === "image"} onClick={() => pickKind("image")} disabled={busy}>
             이미지
           </button>
-          <button type="button" className="opt" aria-pressed={kind === "video"} onClick={() => { setKind("video"); setMsg(""); }}>
+          <button type="button" className="opt" aria-pressed={kind === "video"} onClick={() => pickKind("video")} disabled={busy}>
             영상
           </button>
+          <button type="button" className="opt" onClick={copyVideoPrompt} aria-label="영상 변환 프롬프트 복사" style={{ position: "relative", paddingRight: 30 }}>
+            변환 프롬프트
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: "absolute", top: 5, right: 8 }}>
+              <rect x="9" y="9" width="11" height="11" rx="2" />
+              <path d="M5 15V6a2 2 0 0 1 2-2h9" />
+            </svg>
+          </button>
         </div>
-        <input key={kind} type="file" hidden ref={fileRef} accept={rule.accept} onChange={onFile} disabled={busy} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
+        {copyNote && (
+          <p className="len" role="status" aria-live="polite">
+            {copyNote}
+          </p>
+        )}
+        <input type="file" hidden ref={fileRef} accept={rule.accept} onChange={onFile} disabled={busy} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
         <button type="button" className="pp-drop" onClick={() => fileRef.current?.click()} disabled={busy} aria-label="대표 파일 고르기">
           {hero?.src ? (
             hero.kind === "video" ? (
@@ -355,14 +387,21 @@ export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
   return (
     <>
       {profile && (
-        <div className="mp-top-row" style={{ marginBottom: 12 }}>
-          <Link className="mp-addr" href={`/creators/${profile.handle}`}>
+        <div className="mp-top-row" style={{ marginBottom: 12, display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center" }}>
+          <Link className="mp-addr" href={`/creators/${profile.handle}`} style={{ justifySelf: "start" }}>
             /creators/{profile.handle} ↗
           </Link>
-          <span className={`mp-state ${profile.isPublic ? "on" : ""}`}>{profile.isPublic ? "공개 중" : "비공개"}</span>
-          <button type="button" className="btn btn-ghost" onClick={togglePublic} disabled={busy}>
-            {profile.isPublic ? "비공개로 바꾸기" : "공개하기"}
+          <button
+            type="button"
+            className={`mp-state ${profile.isPublic ? "on" : ""}`}
+            onClick={togglePublic}
+            disabled={busy}
+            aria-label={profile.isPublic ? "공개 중. 누르면 비공개로 바뀝니다" : "비공개. 누르면 공개로 바뀝니다"}
+            style={{ cursor: busy ? "default" : "pointer", font: "inherit", fontWeight: 700 }}
+          >
+            {profile.isPublic ? "공개 중" : "비공개"}
           </button>
+          <span />
         </div>
       )}
       <div className="pl mp-pl">

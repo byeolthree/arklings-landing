@@ -1,10 +1,10 @@
 "use client";
 
+import { channelLabelFromUrl } from "@/lib/channel-label";
 import { useEffect, useRef, useState } from "react";
 import { ROLES, type Role } from "@/lib/collab";
 import {
   ABOUT_MAX,
-  CHANNEL_LABEL_MAX,
   CHANNEL_MAX,
   HANDLE_MAX,
   normalizeHandle,
@@ -106,7 +106,7 @@ export function PublishProfile({
       bio: "", // 한 줄 소개 칸은 없앴다(D23 8차). 서버 규칙에는 아직 있으므로 빈 값을 보낸다
       // 기획안을 올리다가 열리는 칸에서는 필수 칸만 받는다. 나머지는 마이페이지에서 나중에 채운다.
       about: full ? about : "",
-      channels: full ? channels : [],
+      channels: full ? channels.map((c) => ({ ...c, label: channelLabelFromUrl(c.url) ?? c.label })) : [],
       openToCollab: full ? openToCollab : true,
       isPublic: full ? isPublic : true,
     });
@@ -254,22 +254,17 @@ export function PublishProfile({
               <div key={i} className="pp-channel">
                 <input
                   className="answer title-in"
-                  aria-label={`채널 ${i + 1} 이름`}
-                  value={c.label}
-                  onChange={(e) => setChannel(i, { label: e.target.value })}
-                  maxLength={CHANNEL_LABEL_MAX}
-                  placeholder="이름 (예: 인스타그램)"
-                />
-                <input
-                  className="answer title-in"
                   aria-label={`채널 ${i + 1} 주소`}
                   value={c.url}
-                  onChange={(e) => setChannel(i, { url: e.target.value })}
+                  onChange={(e) => setChannel(i, { url: e.target.value, label: channelLabelFromUrl(e.target.value) ?? "" })}
                   inputMode="url"
                   autoCapitalize="none"
                   spellCheck={false}
-                  placeholder="https://"
+                  placeholder="인스타그램·유튜브 등 주소를 붙여 넣으세요 (https://)"
                 />
+                <span className="pp-hint-inline pp-channel-name" aria-live="polite">
+                  {c.url.trim() && c.label ? c.label : ""}
+                </span>
                 <button type="button" className="btn btn-ghost sm danger" onClick={() => setChannels((cur) => cur.filter((_, k) => k !== i))}>
                   빼기
                 </button>

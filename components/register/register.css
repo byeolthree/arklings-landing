@@ -207,7 +207,7 @@
 .rg .rg-prof-card .pl.mp-pl .answer::placeholder { color: #b6abb0; }
 .rg .rg-prof-card .len { margin-top: 8px; font-size: 12px; line-height: 18px; color: var(--body); }
 .rg .rg-prof-card .pp-channels { gap: 8px; margin-top: 0; }
-@media (min-width: 768px) { .rg .rg-prof-card .pp-channel { grid-template-columns: 199px minmax(0, 1fr) 61px; gap: 9px; } }
+@media (min-width: 768px) { .rg .rg-prof-card .pp-channel { grid-template-columns: minmax(0, 1fr) 96px 61px; gap: 9px; } }
 .rg .rg-prof-card .btn.sm, .rg .rg-prof-card .btn-ghost { box-sizing: border-box; height: 36px; min-height: 36px; padding: 0 16px; border-width: 1px; border-radius: 8px; font-size: 13px; }
 .rg .rg-prof-card .pp-channel .btn { height: 48px; }
 .rg .rg-prof-card .pp-handle .btn { height: 48px; padding: 0 20px; }
