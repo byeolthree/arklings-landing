@@ -14,7 +14,7 @@
 
 | 부품 | 파일 | 하는 일 | 계약 |
 |---|---|---|---|
-| 상단 메뉴 | `components/site-nav.tsx` | 로고, 메뉴, 「로그인」/「마이페이지」/「받은 협업 신청」/「로그아웃」, 「기획안 만들기」(→`/planner`) | 상단 메뉴는 페이지(`components/site-header.tsx`가 `getCurrentUser()`로 확인)가 넘겨 주는 `loggedIn` 값으로 로그인 여부를 안다. `/api/session`은 랜딩(`public/landing.html`)만 부른다. 메뉴 디자인을 새로 만들어도 이 확인 방식은 그대로 둔다. 「로그인」 링크는 `/login?next=<지금 주소>`(로그인·가입·`/auth/*` 화면에서는 `/login`). 「로그아웃」은 `signOut()` |
+| 상단 메뉴 | `components/site-nav.tsx` | 로고(햄버거는 로고 왼쪽), 메뉴, 오른쪽 아이콘만 ＋·사람·종. 로그인: ＋=「등록할 곳」 드롭다운, 사람=기본 정보·프로필 등록·포트폴리오 등록(`/mypage#mp-…`)·로그아웃(`signOut()`), 종=알림 목록(**샘플 값**, 서버에 아직 없음)과 「받은 협업 신청 모두 보기」(`/collab`). 로그아웃: ＋와 사람만, ＋는 `/login`으로, 사람=로그인(`/login`)·회원가입(`/signup`). 「기획안 만들기」 버튼은 상단 메뉴에서 뺐다(랜딩 전용, 랜딩은 `public/landing.html` 별도) | 상단 메뉴는 페이지(`components/site-header.tsx`가 `getCurrentUser()`로 확인)가 넘겨 주는 `loggedIn` 값으로 로그인 여부를 안다. `/api/session`은 랜딩(`public/landing.html`)만 부른다. 메뉴 디자인을 새로 만들어도 이 확인 방식은 그대로 둔다. 「로그인」 링크는 `/login?next=<지금 주소>`(로그인·가입·`/auth/*` 화면에서는 `/login`). 「로그아웃」은 `signOut()` |
 | 하단 | `components/site-footer.tsx` | 「개인정보처리방침」→`/privacy` | 없음 |
 | 입력칸 틀 | `components/form-field.tsx` | `FormField`(id, label, hint, error), `authInputCls` | 없음 |
 | 카드 틀 | `components/paper-card.tsx` | `PaperPage`, `PaperCard`, `CardHeading`, `primaryBtn`, `outlineBtn` | 없음 |
@@ -48,7 +48,7 @@
 
 | 화면 | 주소 | 로그인 필요 | 지금 DB | 부르는 처리 함수 | 입력 칸 이름 | 화면에 받는 데이터 | 이동 |
 |---|---|---|---|---|---|---|---|
-| 마이페이지 | `/mypage?msg=` | 예 | 위쪽 열림(0002), **내 기획안 목록은 안 됨**(0004) | `updateDisplayName`, `signOut`, `startLinkIdentity`, `unlinkProvider` | 공개 이름: `displayName` / 연결·해제: `provider`(숨김 값) / 로그아웃: 칸 없음 | `user`(`email`,`providers`), 로그인 방법 이름 `PROVIDER_LABEL`, 더할 수 있는 방법 `OAUTH_PROVIDERS`(없는 것만), `profiles.display_name`(`profileLoadFailed`면 오류 안내), `plans`(`id`,`title`,`is_public`,`updated_at` 최근 30건, `formatKst`. 못 읽으면 `plansLoadFailed` 안내, 없으면 「아직 저장한 기획안이 없어요」), `msg` 안내 키(`linked`,`unlinked`,`password_set`,`link_failed`,`link_disabled`,`link_none`,`unlink_failed`,`unlink_last`, 문구는 `app/mypage/page.tsx`의 `MESSAGES`). `updateDisplayName` 결과는 `errors.displayName`,`message`,`values.displayName`,`saved` | 기획안 `/planner?plan=<id>`, 새 기획안 `/planner`, 이메일 로그인 추가 `/forgot-password?email=`(이메일 방법이 없을 때), 탈퇴 `/mypage/withdraw`. 연결/해제는 안 됨(수동 연결 꺼짐) |
+| 마이페이지 | `/mypage?msg=` (포트폴리오 구역은 접은 목록으로 바뀜: 샘플 값, 서버에 순서 저장·공개 켜기·끄기·삭제 없음) | 예 | 위쪽 열림(0002), **내 기획안 목록은 안 됨**(0004) | `updateDisplayName`, `signOut`, `startLinkIdentity`, `unlinkProvider` | 공개 이름: `displayName` / 연결·해제: `provider`(숨김 값) / 로그아웃: 칸 없음 | `user`(`email`,`providers`), 로그인 방법 이름 `PROVIDER_LABEL`, 더할 수 있는 방법 `OAUTH_PROVIDERS`(없는 것만), `profiles.display_name`(`profileLoadFailed`면 오류 안내), `plans`(`id`,`title`,`is_public`,`updated_at` 최근 30건, `formatKst`. 못 읽으면 `plansLoadFailed` 안내, 없으면 「아직 저장한 기획안이 없어요」), `msg` 안내 키(`linked`,`unlinked`,`password_set`,`link_failed`,`link_disabled`,`link_none`,`unlink_failed`,`unlink_last`, 문구는 `app/mypage/page.tsx`의 `MESSAGES`). `updateDisplayName` 결과는 `errors.displayName`,`message`,`values.displayName`,`saved` | 기획안 `/planner?plan=<id>`, 새 기획안 `/planner`, 이메일 로그인 추가 `/forgot-password?email=`(이메일 방법이 없을 때), 탈퇴 `/mypage/withdraw`. 연결/해제는 안 됨(수동 연결 꺼짐) |
 | 회원 탈퇴 | `/mypage/withdraw` | 예 | 화면 열림, **탈퇴 실행은 안 됨**(0003) | `withdrawAccount` | `agree`(체크), `phrase`(「탈퇴합니다」 입력) | `WithdrawState.error` | 그만두기 `/mypage`, 성공하면 `/withdrawn` |
 | 탈퇴 완료 | `/withdrawn` | 아니요 | 열림 | 없음 | 없음 | 없음 | 「홈으로」`/` |
 
