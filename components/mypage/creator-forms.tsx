@@ -38,6 +38,72 @@ import type { MyProfile, MyWork } from "@/lib/creators-mine";
 const LOGLINE_FRAME = "어느 날 〈사건〉이 벌어지자, 〈주인공〉은 〈장애물〉을 극복해야 〈목표〉를 달성할 수 있다. 그렇지 않으면 〈위험〉이 닥친다.";
 const mb = (n: number) => `${(n / 1024 / 1024).toFixed(1)}MB`;
 
+// 영상 요소의 「영상 파일 첨부」(2026-11-09 D18 개정, 시안 01): 규칙 안내, 「영상 변환 프롬프트 복사」, 「파일 고르기」. 형식(MP4)·크기(10MB)를 고르는 순간 검사한다.
+// 규칙 글과 프롬프트는 대표 영상 칸과 같은 글(hero-guide.ts)이다. 파일을 고르면 onFile로 넘기고, 올리는 일은 부르는 쪽이 한다.
+function VideoFilePick({ file, onFile, disabled }: { file?: File | null; onFile: (f: File | null) => void; disabled?: boolean }) {
+  const [msg, setMsg] = useState("");
+  const [copied, setCopied] = useState("");
+  const [showPrompt, setShowPrompt] = useState(false);
+  const rule = HERO_RULE.video;
+  async function copyPrompt() {
+    try {
+      await navigator.clipboard.writeText(VIDEO_PROMPT);
+      setCopied("복사했어요. 영상 변환 도구에 붙여 넣으세요.");
+      setShowPrompt(false);
+    } catch {
+      setCopied("복사하지 못했어요. 아래 글을 직접 복사해 주세요.");
+      setShowPrompt(true);
+    }
+  }
+  function pick(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
+    const f = input.files?.[0];
+    if (!f) return;
+    if (!(rule.types as readonly string[]).includes(f.type)) {
+      input.value = "";
+      return setMsg("MP4 파일만 올릴 수 있어요.");
+    }
+    if (f.size > rule.max) {
+      input.value = "";
+      return setMsg(`선택한 파일이 ${(f.size / 1024 / 1024).toFixed(1)}MB예요. ${rule.max / 1024 / 1024}MB 이하만 올릴 수 있어요.`);
+    }
+    setMsg("");
+    onFile(f);
+    input.value = "";
+  }
+  return (
+    <div className="we-drop" style={{ flex: "1 1 100%" }}>
+      <p className="mp-note">영상 파일 첨부 · {rule.hint}</p>
+      <div className="we-pick">
+        <button type="button" className="btn btn-ghost" onClick={copyPrompt} disabled={disabled}>
+          영상 변환 프롬프트 복사
+        </button>
+        <label className="btn btn-ghost" style={{ cursor: "pointer" }}>
+          파일 고르기
+          <input type="file" accept={rule.accept} hidden disabled={disabled} onChange={pick} aria-label="영상 파일" />
+        </label>
+        {file && (
+          <span className="len">
+            {file.name} ({mb(file.size)}){" "}
+            <button type="button" className="we-mini" onClick={() => onFile(null)} disabled={disabled}>
+              선택 취소
+            </button>
+          </span>
+        )}
+        <span role="status" aria-live="polite" className="len">
+          {copied}
+        </span>
+      </div>
+      {showPrompt && <textarea readOnly className="we-text" rows={6} value={VIDEO_PROMPT} aria-label="영상 변환 프롬프트" onFocus={(e) => e.currentTarget.select()} />}
+      {msg && (
+        <p className="pp-err" role="alert">
+          {msg}
+        </p>
+      )}
+    </div>
+  );
+}
+
 // 대표 이미지·영상 파일 하나를 올린다: 서버가 규칙을 먼저 보고 올리기 자리를 주고 → 브라우저가 보관함에 직접 올리고 → 서버가 올라온 파일을 다시 검사해 프로필에 건다.
 // 실패하면 이유 한 줄을, 성공하면 null을 돌려준다.
 async function uploadHeroFile(file: File, kind: "image" | "video"): Promise<string | null> {
@@ -477,18 +543,20 @@ async function addSlots(workId: string, slots: Slot[]): Promise<{ error: string 
       const r = await addTextBlock(workId, sl.text, sl.sub || null);
       if (!r.ok) return { error: `글을 넣지 못했어요. ${r.error}`, order };
       order.push(r.id);
+    } else if (sl.kind === "video" && sl.url.trim() && sl.file) {
+      return { error: "영상은 유튜브 주소와 파일 중 하나만 넣어 주세요.", order };
     } else if (sl.kind === "video" && sl.url.trim()) {
       const r = await addVideoBlock(workId, sl.url, sl.sub || null);
       if (!r.ok) return { error: `영상을 넣지 못했어요. ${r.error}`, order };
       order.push(r.id);
-    } else if ((sl.kind === "image" || sl.kind === "doc") && sl.file) {
-      const kind = sl.kind === "image" ? "image" : "document";
-      if (kindOfMime(sl.file.type) !== kind) return { error: kind === "image" ? "JPG, PNG, WEBP 이미지만 올릴 수 있어요." : "PDF 파일만 올릴 수 있어요.", order };
+    } else if ((sl.kind === "image" || sl.kind === "doc" || sl.kind === "video") && sl.file) {
+      const kind = sl.kind === "image" ? "image" : sl.kind === "video" ? "video" : "document";
+      if (kindOfMime(sl.file.type) !== kind) return { error: kind === "image" ? "JPG, PNG, WEBP 이미지만 올릴 수 있어요." : kind === "video" ? "MP4 파일만 올릴 수 있어요." : "PDF 파일만 올릴 수 있어요.", order };
       const slot = await prepareFileUpload(workId, { kind, type: sl.file.type, size: sl.file.size });
       if (!slot.ok) return { error: slot.error, order };
       const up = await uploadToSlot(slot.path, slot.token, sl.file);
       if (!up.ok) return { error: up.error, order };
-      const fin = await finishFileUpload(workId, { path: slot.path, kind, name: sl.file.name, subKind: kind === "document" ? sl.sub || null : null });
+      const fin = await finishFileUpload(workId, { path: slot.path, kind, name: sl.file.name, subKind: kind === "document" || kind === "video" ? sl.sub || null : null });
       if (!fin.ok) return { error: fin.error, order };
       order.push(fin.id);
     }
@@ -714,6 +782,7 @@ export function WorkEditor({
                   )}
                   {sl.kind === "video" && <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={sl.url} onChange={(e) => patchSlot(sl.id, { url: e.target.value })} />}
                   {sl.kind === "video" && <p className="mp-note" style={{ flex: "1 1 100%" }}>유튜브 주소로 넣으면 용량 제한 없이 올릴 수 있어요.</p>}
+                  {sl.kind === "video" && <VideoFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
                   {sl.kind === "doc" && (
                     <label className="we-line">
                       문서 (PDF){" "}
@@ -821,10 +890,10 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
     }
   }
 
-  async function upload(file: File | undefined, kind: "image" | "document") {
+  async function upload(file: File | undefined, kind: "image" | "document" | "video") {
     if (!file) return;
     const k = kindOfMime(file.type);
-    if (k !== kind) return onMessage({ text: kind === "image" ? "JPG, PNG, WEBP 이미지만 올릴 수 있어요." : "PDF 파일만 올릴 수 있어요.", err: true });
+    if (k !== kind) return onMessage({ text: kind === "image" ? "JPG, PNG, WEBP 이미지만 올릴 수 있어요." : kind === "video" ? "MP4 파일만 올릴 수 있어요." : "PDF 파일만 올릴 수 있어요.", err: true });
     await run(async () => {
       const slot = await prepareFileUpload(work.id, { kind, type: file.type, size: file.size });
       if (!slot.ok) return slot;
@@ -913,11 +982,15 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
               // eslint-disable-next-line @next/next/no-img-element
               <img src={b.src} alt={b.fileName ?? "이미지"} style={{ maxWidth: "100%", borderRadius: 14 }} />
             ) : <div className="we-media">이미지를 불러오지 못했어요</div>)}
-            {b && b.kind === "video" && (folded[b.id] ? <span className="we-line">영상 · youtube.com</span> : (
+            {b && b.kind === "video" && (folded[b.id] ? <span className="we-line">{b.youtubeId ? "영상 · youtube.com" : `영상 파일 ${b.fileName ?? ""} · ${b.fileBytes ? mb(b.fileBytes) : ""}`}</span> : b.youtubeId ? (
               <div className="we-media" style={{ overflow: "hidden" }}>
                 <iframe src={`https://www.youtube-nocookie.com/embed/${b.youtubeId}`} title="영상" loading="lazy" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" style={{ width: "100%", height: "100%", border: 0 }} />
               </div>
-            ))}
+            ) : b.src ? (
+              <div className="we-media" style={{ overflow: "hidden", background: "#000" }}>
+                <video src={b.src} controls playsInline preload="metadata" style={{ width: "100%", height: "100%" }} />
+              </div>
+            ) : <div className="we-media">영상을 불러오지 못했어요</div>)}
             {b && b.kind === "document" && (folded[b.id] ? <span className="we-line">문서(PDF) {b.fileName ?? ""} · {b.fileBytes ? mb(b.fileBytes) : ""}</span> : (
               <div className="we-line">
                 {b.src ? <a href={b.src} target="_blank" rel="noopener noreferrer">{b.fileName ?? "문서(PDF)"} 열기 ↗</a> : "문서를 불러오지 못했어요"}
@@ -943,6 +1016,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
             ) : (
               <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="https://youtu.be/…" value={draft} onChange={(e) => setDraft(e.target.value)} style={{ flex: "1 1 100%" }} />
             )}
+            {adding === "video" && <VideoFilePick disabled={busy} onFile={(f) => { if (f) { setAdding(null); setDraft(""); void upload(f, "video"); } }} />}
             <button type="button" className="btn btn-primary" disabled={busy} onClick={add}>추가</button>
             <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => { setAdding(null); setDraft(""); }}>취소</button>
           </div>

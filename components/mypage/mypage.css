@@ -242,3 +242,6 @@
 .mp button.we-grip:disabled { cursor: default; opacity: .5; }
 .mp .we-logline-label { display: block; flex: 1 1 100%; }
 .mp .we-logline-label .we-text { margin-top: 0; }
+
+/* 영상 요소의 파일 첨부 안내(점선 칸) */
+.mp .we-drop { display: grid; gap: 10px; padding: 14px 16px; border: 1px dashed var(--body); border-radius: 12px; background: #fff; }

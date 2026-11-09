@@ -64,6 +64,7 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
     const sub = b.sub_kind ?? undefined;
     if (b.kind === "text" && b.body) list.push({ id: b.id, kind: "text", body: b.body, sub });
     else if (b.kind === "video" && b.youtube_id) list.push({ id: b.id, kind: "video", youtubeId: b.youtube_id, sub });
+    else if (b.kind === "video" && b.file_path) list.push({ id: b.id, kind: "video", youtubeId: null, fileName: b.file_name, fileBytes: b.file_bytes, src: urls.get(b.file_path) ?? null, sub });
     else if (b.kind === "image") list.push({ id: b.id, kind: "image", fileName: b.file_name, src: b.file_path ? (urls.get(b.file_path) ?? null) : null });
     else if (b.kind === "document") list.push({ id: b.id, kind: "document", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, sub });
     byWork.set(b.work_id, list);

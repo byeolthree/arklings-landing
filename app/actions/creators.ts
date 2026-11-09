@@ -68,6 +68,7 @@ function dbMessage(e: DbError): string {
   if (m.includes("email_not_confirmed")) return CONFIRM_FIRST_MESSAGE;
   if (m.includes("work_plan_not_owned")) return "내 기획안만 붙일 수 있어요.";
   if (m.includes("logline_position")) return "로그라인 위치를 저장하려면 데이터베이스 준비(0013)가 먼저 필요해요. 로그라인을 맨 위에 두고 저장하거나 잠시 뒤에 다시 시도해 주세요.";
+  if (m.includes("creator_work_blocks_shape") || m.includes("creator_work_blocks_file_path")) return "영상 파일을 저장하려면 데이터베이스 준비(0015)가 먼저 필요해요. 유튜브 주소로 넣거나 잠시 뒤에 다시 시도해 주세요.";
   if (m.includes("creator_work_blocks_sub_kind")) return "고를 수 없는 종류예요.";
   if (m.includes("sub_kind")) return "요소 종류를 저장하려면 데이터베이스 준비(0012)가 먼저 필요해요. 종류를 비우고 저장하거나 잠시 뒤에 다시 시도해 주세요.";
   if (e?.code === "23505" && m.includes("plan_id")) return "이 기획안은 이미 다른 작품에 붙어 있어요.";
@@ -366,7 +367,8 @@ export async function addVideoBlock(workId: string, url: string, subKind?: strin
   return insertBlock(auth.sb, auth.user.id, workId, { kind: "video", youtube_id: id, ...(sub ? { sub_kind: sub } : {}) });
 }
 
-const EXT_OF: Record<string, { kind: FileKind; ext: "jpg" | "png" | "webp" | "pdf" }> = {
+const EXT_OF: Record<string, { kind: FileKind; ext: "jpg" | "png" | "webp" | "pdf" | "mp4" }> = {
+  "video/mp4": { kind: "video", ext: "mp4" },
   "image/jpeg": { kind: "image", ext: "jpg" },
   "image/png": { kind: "image", ext: "png" },
   "image/webp": { kind: "image", ext: "webp" },
@@ -408,11 +410,11 @@ export async function prepareFileUpload(
   if (!("user" in auth)) return auth;
   const spec = EXT_OF[String(file?.type)];
   if (!spec || spec.kind !== file?.kind) {
-    return { ok: false, error: file?.kind === "document" ? "PDF 파일만 올릴 수 있어요." : "JPG, PNG, WEBP 이미지만 올릴 수 있어요." };
+    return { ok: false, error: file?.kind === "document" ? "PDF 파일만 올릴 수 있어요." : file?.kind === "video" ? "MP4 파일만 올릴 수 있어요." : "JPG, PNG, WEBP 이미지만 올릴 수 있어요." };
   }
   const size = Number(file.size);
   if (!Number.isFinite(size) || size <= 0) return { ok: false, error: "비어 있는 파일은 올릴 수 없어요." };
-  if (size > maxBytesOf(spec.kind)) return { ok: false, error: spec.kind === "image" ? "이미지는 한 장에 5MB 이하여야 해요." : "PDF는 한 개에 10MB 이하여야 해요." };
+  if (size > maxBytesOf(spec.kind)) return { ok: false, error: spec.kind === "image" ? "이미지는 한 장에 5MB 이하여야 해요." : spec.kind === "video" ? "영상은 10MB 이하여야 해요." : "PDF는 한 개에 10MB 이하여야 해요." };
   if (!(await ownWork(auth.sb, auth.user.id, workId))) return { ok: false, error: WORK_NOT_FOUND };
 
   const [count, used] = await Promise.all([blockCount(auth.sb, workId), usedBytes(auth.sb, auth.user.id)]);
@@ -439,21 +441,25 @@ export async function finishFileUpload(workId: string, upload: { path: string; k
   if (!("user" in auth)) return auth;
   const { user, sb } = auth;
   const path = String(upload?.path ?? "");
-  const kind: FileKind = upload?.kind === "document" ? "document" : "image";
+  const kind: FileKind = upload?.kind === "document" ? "document" : upload?.kind === "video" ? "video" : "image";
   if (!fileBelongsTo(user.id, path)) return { ok: false, error: "올린 파일을 찾을 수 없어요. 다시 올려 주세요." };
 
   const fail = async (error: string): Promise<Fail> => {
     await removeOwnFiles(user.id, [path]);
     return { ok: false, error };
   };
-  const sub = parseSubKind(kind === "document" ? "document" : "image", upload?.subKind);
+  const sub = parseSubKind(kind === "document" ? "document" : kind === "video" ? "video" : "image", upload?.subKind);
   if (sub === undefined) return fail(SUBKIND_BAD);
 
   if (!(await ownWork(sb, user.id, workId))) return fail(WORK_NOT_FOUND);
   // 같은 파일로 요소를 두 번 만들면 하나를 지울 때 다른 하나의 파일이 사라진다. 이미 쓰고 있는 파일이면 거절한다(파일은 지우지 않는다).
-  const used = await sb.from("creator_work_blocks").select("id").eq("owner_id", user.id).eq("file_path", path).limit(1);
-  if (used.error) return fail(UNAVAILABLE);
+  const [used, asHero] = await Promise.all([
+    sb.from("creator_work_blocks").select("id").eq("owner_id", user.id).eq("file_path", path).limit(1),
+    sb.from("creator_profiles").select("user_id").eq("user_id", user.id).eq("hero_path", path).limit(1),
+  ]);
+  if (used.error || asHero.error) return fail(UNAVAILABLE);
   if (used.data?.length) return { ok: false, error: "이미 요소로 만든 파일이에요." };
+  if (asHero.data?.length) return { ok: false, error: "이미 대표 파일로 쓰고 있는 파일이에요." };
 
   const looked = await inspectUploaded(user.id, path, kind);
   if (!looked.ok) return fail(looked.error);

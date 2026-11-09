@@ -14,7 +14,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 export const CREATOR_BUCKET = "creator-works";
 export const SIGNED_URL_SECONDS = 600; // 임시 주소 유효 시간(10분)
 
-type Sniffed = { kind: FileKind; type: "image/jpeg" | "image/png" | "image/webp" | "application/pdf"; ext: "jpg" | "png" | "webp" | "pdf" };
+type Sniffed = { kind: FileKind; type: "image/jpeg" | "image/png" | "image/webp" | "application/pdf" | "video/mp4"; ext: "jpg" | "png" | "webp" | "pdf" | "mp4" };
 
 function startsWith(bytes: Uint8Array, sig: number[], offset = 0): boolean {
   return sig.every((b, i) => bytes[offset + i] === b);
@@ -23,38 +23,38 @@ function startsWith(bytes: Uint8Array, sig: number[], offset = 0): boolean {
 // 파일 맨 앞 글자(시그니처)로 실제 종류를 알아낸다. 브라우저가 알려 주는 형식은 속일 수 있으므로 믿지 않는다(lib/collab-file.ts와 같은 방식).
 export function sniffFile(head: Uint8Array): Sniffed | null {
   if (startsWith(head, [0x25, 0x50, 0x44, 0x46, 0x2d])) return { kind: "document", type: "application/pdf", ext: "pdf" }; // %PDF-
+  if (startsWith(head, [0x66, 0x74, 0x79, 0x70], 4)) return { kind: "video", type: "video/mp4", ext: "mp4" }; // ....ftyp (MP4)
   if (startsWith(head, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) return { kind: "image", type: "image/png", ext: "png" };
   if (startsWith(head, [0xff, 0xd8, 0xff])) return { kind: "image", type: "image/jpeg", ext: "jpg" };
   if (startsWith(head, [0x52, 0x49, 0x46, 0x46]) && startsWith(head, [0x57, 0x45, 0x42, 0x50], 8)) return { kind: "image", type: "image/webp", ext: "webp" }; // RIFF....WEBP
   return null;
 }
 
-export const maxBytesOf = (kind: FileKind) => (kind === "image" ? IMAGE_MAX_BYTES : DOCUMENT_MAX_BYTES);
+export const maxBytesOf = (kind: FileKind) => (kind === "image" ? IMAGE_MAX_BYTES : kind === "video" ? HERO_VIDEO_MAX_BYTES : DOCUMENT_MAX_BYTES);
 
 // 올리려는 파일을 서버가 직접 받은 앞부분과 크기로 검사한다. 통과하면 실제 종류를 돌려준다.
 export function checkFileHead(head: Uint8Array, size: number, expect: FileKind): { ok: true; sniffed: Sniffed } | { ok: false; error: string } {
   if (!Number.isFinite(size) || size <= 0) return { ok: false, error: "비어 있는 파일은 올릴 수 없어요." };
   const sniffed = sniffFile(head);
   if (!sniffed) {
-    return { ok: false, error: expect === "image" ? "JPG, PNG, WEBP 이미지만 올릴 수 있어요." : "PDF 파일만 올릴 수 있어요." };
+    return { ok: false, error: expect === "image" ? "JPG, PNG, WEBP 이미지만 올릴 수 있어요." : expect === "video" ? "MP4 파일만 올릴 수 있어요." : "PDF 파일만 올릴 수 있어요." };
   }
   if (sniffed.kind !== expect) {
-    return { ok: false, error: expect === "image" ? "이미지 요소에는 JPG, PNG, WEBP 이미지만 올릴 수 있어요." : "문서 요소에는 PDF만 올릴 수 있어요." };
+    return { ok: false, error: expect === "image" ? "이미지 요소에는 JPG, PNG, WEBP 이미지만 올릴 수 있어요." : expect === "video" ? "영상 요소에는 MP4 파일만 올릴 수 있어요." : "문서 요소에는 PDF만 올릴 수 있어요." };
   }
   if (size > maxBytesOf(expect)) {
-    return { ok: false, error: expect === "image" ? "이미지는 한 장에 5MB 이하여야 해요." : "PDF는 한 개에 10MB 이하여야 해요." };
+    return { ok: false, error: expect === "image" ? "이미지는 한 장에 5MB 이하여야 해요." : expect === "video" ? "영상은 10MB 이하여야 해요." : "PDF는 한 개에 10MB 이하여야 해요." };
   }
   return { ok: true, sniffed };
 }
 
 // ── 프로필 대표 이미지·영상(MP4) ────────────────────────────────────────────────
-// 작품 요소 파일(sniffFile)과 따로 본다: 작품 요소에는 영상 파일이 없으므로(D18) 거기서는 MP4를 계속 거절하고, 대표 파일에서만 받는다.
+// 대표 파일은 이미지·영상만 받는다(PDF는 거절). 작품 요소 영상 파일(2026-11-09 D18 개정)과 같은 MP4 검사를 쓴다.
 export type HeroSniffed = { kind: HeroFileKind; type: "image/jpeg" | "image/png" | "image/webp" | "video/mp4"; ext: "jpg" | "png" | "webp" | "mp4" };
 
 export function sniffHero(head: Uint8Array): HeroSniffed | null {
-  if (startsWith(head, [0x66, 0x74, 0x79, 0x70], 4)) return { kind: "video", type: "video/mp4", ext: "mp4" }; // ....ftyp
-  const img = sniffFile(head);
-  return img && img.kind === "image" ? { kind: "image", type: img.type as HeroSniffed["type"], ext: img.ext as HeroSniffed["ext"] } : null;
+  const f = sniffFile(head);
+  return f && (f.kind === "image" || f.kind === "video") ? ({ kind: f.kind, type: f.type, ext: f.ext } as HeroSniffed) : null;
 }
 
 export const maxHeroBytes = (kind: HeroFileKind) => (kind === "image" ? IMAGE_MAX_BYTES : HERO_VIDEO_MAX_BYTES);

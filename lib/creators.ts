@@ -55,7 +55,7 @@ export type WorkListItem = {
 export type WorkBlock =
   | { id: string; kind: "text"; body: string; sub?: string }
   | { id: string; kind: "image"; fileName: string | null; src: string | null }
-  | { id: string; kind: "video"; youtubeId: string; sub?: string }
+  | { id: string; kind: "video"; youtubeId: string | null; fileName?: string | null; fileBytes?: number | null; src?: string | null; sub?: string } // 유튜브 주소 또는 MP4 파일(2026-11-09 D18 개정)
   | { id: string; kind: "document"; fileName: string | null; fileBytes: number | null; src: string | null; sub?: string };
 
 export type WorkDetail = WorkListItem & {
@@ -302,6 +302,7 @@ export async function getWork(id: string): Promise<WorkDetail | null> {
     const sub = b.sub_kind ?? undefined;
     if (b.kind === "text" && b.body) blocks.push({ id: b.id, kind: "text", body: b.body, sub });
     else if (b.kind === "video" && b.youtube_id) blocks.push({ id: b.id, kind: "video", youtubeId: b.youtube_id, sub });
+    else if (b.kind === "video" && b.file_path) blocks.push({ id: b.id, kind: "video", youtubeId: null, fileName: b.file_name, fileBytes: b.file_bytes, src: urls.get(b.file_path) ?? null, sub });
     else if (b.kind === "image") blocks.push({ id: b.id, kind: "image", fileName: b.file_name, src: b.file_path ? (urls.get(b.file_path) ?? null) : null });
     else if (b.kind === "document") blocks.push({ id: b.id, kind: "document", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, sub });
   }
@@ -309,7 +310,7 @@ export async function getWork(id: string): Promise<WorkDetail | null> {
 }
 
 // 작품 카드에 걸 대표 이미지·영상(작품 안 이미지·영상 요소를 위에서부터 차례로). 공개된 작품의 것만 돌려준다.
-export type WorkMediaItem = { kind: "image"; src: string } | { kind: "video"; youtubeId: string };
+export type WorkMediaItem = { kind: "image"; src: string } | { kind: "video"; youtubeId: string } | { kind: "file-video"; src: string };
 
 export async function loadWorkMedia(workIds: string[]): Promise<Map<string, WorkMediaItem[]>> {
   const out = new Map<string, WorkMediaItem[]>();
@@ -328,6 +329,7 @@ export async function loadWorkMedia(workIds: string[]): Promise<Map<string, Work
   for (const b of rows) {
     const list = out.get(b.work_id) ?? [];
     if (b.kind === "video" && b.youtube_id) list.push({ kind: "video", youtubeId: b.youtube_id });
+    else if (b.kind === "video" && b.file_path && urls.get(b.file_path)) list.push({ kind: "file-video", src: urls.get(b.file_path) as string });
     else if (b.kind === "image" && b.file_path && urls.get(b.file_path)) list.push({ kind: "image", src: urls.get(b.file_path) as string });
     out.set(b.work_id, list);
   }

@@ -67,17 +67,25 @@ export function WorkDetail({ work, closeHref, applyHref }: { work: WorkDetailDat
                 <div key={b.id} className="cr-w-media">이미지를 불러오지 못했어요</div>
               )
             ) : b.kind === "video" ? (
-              <div key={b.id} className="cr-w-media" style={{ overflow: "hidden" }}>
-                <iframe
-                  src={`https://www.youtube-nocookie.com/embed/${b.youtubeId}`}
-                  title="영상"
-                  loading="lazy"
-                  allow="encrypted-media; picture-in-picture"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                  style={{ width: "100%", height: "100%", border: 0 }}
-                />
-              </div>
+              b.youtubeId ? (
+                <div key={b.id} className="cr-w-media" style={{ overflow: "hidden" }}>
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${b.youtubeId}`}
+                    title="영상"
+                    loading="lazy"
+                    allow="encrypted-media; picture-in-picture"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                    style={{ width: "100%", height: "100%", border: 0 }}
+                  />
+                </div>
+              ) : b.src ? (
+                <div key={b.id} className="cr-w-media" style={{ overflow: "hidden", background: "#000" }}>
+                  <video src={b.src} controls playsInline preload="metadata" style={{ width: "100%", height: "100%" }} />
+                </div>
+              ) : (
+                <div key={b.id} className="cr-w-media">영상을 불러오지 못했어요</div>
+              )
             ) : b.src ? (
               <div key={b.id} className="cr-w-el">
                 <a href={b.src} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">

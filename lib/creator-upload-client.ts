@@ -20,4 +20,4 @@ export async function uploadToSlot(path: string, token: string, file: File): Pro
 }
 
 export const kindOfMime = (type: string): FileKind | null =>
-  type === "application/pdf" ? "document" : type === "image/jpeg" || type === "image/png" || type === "image/webp" ? "image" : null;
+  type === "video/mp4" ? "video" : type === "application/pdf" ? "document" : type === "image/jpeg" || type === "image/png" || type === "image/webp" ? "image" : null;

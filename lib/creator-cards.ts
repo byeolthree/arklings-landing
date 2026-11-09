@@ -15,7 +15,10 @@ export function toWorkCard(w: Pick<WorkListItem, "id" | "title" | "logline" | "r
 export function mediaOfBlocks(blocks: MyBlock[]): WorkMediaItem[] {
   const out: WorkMediaItem[] = [];
   for (const b of blocks) {
-    if (b.kind === "video") out.push({ kind: "video", youtubeId: b.youtubeId });
+    if (b.kind === "video") {
+      if (b.youtubeId) out.push({ kind: "video", youtubeId: b.youtubeId });
+      else if (b.src) out.push({ kind: "file-video", src: b.src });
+    }
     else if (b.kind === "image" && b.src) out.push({ kind: "image", src: b.src });
   }
   return out;
