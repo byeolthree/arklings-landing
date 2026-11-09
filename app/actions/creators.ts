@@ -21,12 +21,13 @@ import {
   normalizeHandle,
   type Channel,
   type FileKind,
+  type HeroFileKind,
   type ProfileErrors,
   type ProfileInput,
   type WorkErrors,
   type WorkInput,
 } from "@/lib/creator-rules";
-import { createUploadSlot, fileBelongsTo, inspectUploaded, maxBytesOf, removeOwnFiles } from "@/lib/creator-files";
+import { createUploadSlot, fileBelongsTo, inspectUploaded, inspectUploadedHero, maxBytesOf, maxHeroBytes, removeOwnFiles } from "@/lib/creator-files";
 import { createAuthClient } from "@/lib/supabase/server";
 import { getSupabase } from "@/lib/supabase";
 import { loglineText, parseDraft, titleOrDefault } from "@/lib/plans";
@@ -372,10 +373,24 @@ const EXT_OF: Record<string, { kind: FileKind; ext: "jpg" | "png" | "webp" | "pd
   "application/pdf": { kind: "document", ext: "pdf" },
 };
 
-async function usedBytes(sb: Sb, userId: string): Promise<number | null> {
+// 작품 요소 파일(이미지·PDF)의 합계
+async function blocksBytes(sb: Sb, userId: string): Promise<number | null> {
   const { data, error } = await sb.from("creator_work_blocks").select("file_bytes").eq("owner_id", userId);
   if (error) return null;
   return ((data ?? []) as { file_bytes: number | null }[]).reduce((n, r) => n + (r.file_bytes ?? 0), 0);
+}
+
+// 프로필 대표 이미지·영상의 크기(없으면 0)
+async function heroBytes(sb: Sb, userId: string): Promise<number | null> {
+  const { data, error } = await sb.from("creator_profiles").select("hero_bytes").eq("user_id", userId).maybeSingle();
+  if (error) return null;
+  return (data as { hero_bytes: number | null } | null)?.hero_bytes ?? 0;
+}
+
+// 사람당 파일 합계(20MB)에 세는 양: 작품 요소 파일 + 프로필 대표 파일(별뜨리님 지시 2026-11-09).
+async function usedBytes(sb: Sb, userId: string): Promise<number | null> {
+  const [a, b] = await Promise.all([blocksBytes(sb, userId), heroBytes(sb, userId)]);
+  return a === null || b === null ? null : a + b;
 }
 
 async function blockCount(sb: Sb, workId: string): Promise<number | null> {
@@ -481,6 +496,98 @@ export async function reorderWorkItems(workId: string, items: string[]): Promise
   if (w.error) return { ok: false, error: dbMessage(w.error) };
   if (!w.data?.length) return { ok: false, error: WORK_NOT_FOUND };
   return writeOrder(auth.sb, auth.user.id, workId, blockIds);
+}
+
+// ── 프로필 대표 이미지·영상 올리기(0-4 v) ──────────────────────────────────────────
+// 작품 파일과 같은 순서다: ① prepareHeroUpload가 규칙(로그인·이메일 확인·프로필·형식·크기·합계 20MB)을 먼저 보고 1회용 올리기 자리를 준다
+// ② 브라우저가 보관함에 직접 올린다(요청 크기 한도 4.5MB를 피함) ③ finishHeroUpload가 올라온 실제 파일을 다시 검사해 프로필에 건다(안 맞으면 파일을 지운다).
+const HERO_EXT: Record<string, { kind: HeroFileKind; ext: "jpg" | "png" | "webp" | "mp4" }> = {
+  "image/jpeg": { kind: "image", ext: "jpg" },
+  "image/png": { kind: "image", ext: "png" },
+  "image/webp": { kind: "image", ext: "webp" },
+  "video/mp4": { kind: "video", ext: "mp4" },
+};
+const HERO_NEED_PROFILE = "먼저 위에서 프로필을 만든 뒤에 대표 이미지·영상을 올릴 수 있어요.";
+const HERO_QUOTA_MESSAGE = "올린 파일이 합쳐서 20MB를 넘어요. 안 쓰는 파일을 지운 뒤 다시 시도해 주세요.";
+
+export async function prepareHeroUpload(file: { kind: HeroFileKind; type: string; size: number }): Promise<Ok<{ path: string; token: string }> | Fail> {
+  const auth = await needUser();
+  if (!("user" in auth)) return auth;
+  const spec = HERO_EXT[String(file?.type)];
+  if (!spec || spec.kind !== file?.kind) {
+    return { ok: false, error: file?.kind === "video" ? "MP4 파일만 올릴 수 있어요." : "JPG, PNG, WEBP 파일만 올릴 수 있어요." };
+  }
+  const size = Number(file.size);
+  if (!Number.isFinite(size) || size <= 0) return { ok: false, error: "비어 있는 파일은 올릴 수 없어요." };
+  if (size > maxHeroBytes(spec.kind)) return { ok: false, error: spec.kind === "image" ? "이미지는 5MB 이하여야 해요." : "영상은 10MB 이하여야 해요." };
+  const prof = await auth.sb.from("creator_profiles").select("user_id").eq("user_id", auth.user.id).maybeSingle();
+  if (prof.error) return { ok: false, error: UNAVAILABLE };
+  if (!prof.data) return { ok: false, error: HERO_NEED_PROFILE };
+  // 새 대표 파일은 지금 걸린 대표 파일을 대신하므로, 합계는 작품 요소 파일만 센 값에 새 파일을 더해 본다.
+  const blocks = await blocksBytes(auth.sb, auth.user.id);
+  if (blocks === null) return { ok: false, error: UNAVAILABLE };
+  if (blocks + size > QUOTA_BYTES) return { ok: false, error: HERO_QUOTA_MESSAGE };
+  let slot: Awaited<ReturnType<typeof createUploadSlot>>;
+  try {
+    slot = await createUploadSlot(auth.user.id, spec.ext);
+  } catch {
+    return { ok: false, error: UNAVAILABLE };
+  }
+  if (!slot) return { ok: false, error: UNAVAILABLE };
+  return { ok: true, path: slot.path, token: slot.token };
+}
+
+export async function finishHeroUpload(upload: { path: string; kind: HeroFileKind; name?: string }): Promise<Ok<{ kind: HeroFileKind }> | Fail> {
+  const auth = await needUser();
+  if (!("user" in auth)) return auth;
+  const { user, sb } = auth;
+  const path = String(upload?.path ?? "");
+  const kind: HeroFileKind = upload?.kind === "video" ? "video" : "image";
+  if (!fileBelongsTo(user.id, path)) return { ok: false, error: "올린 파일을 찾을 수 없어요. 다시 올려 주세요." };
+  const fail = async (error: string): Promise<Fail> => {
+    await removeOwnFiles(user.id, [path]);
+    return { ok: false, error };
+  };
+
+  const prof = await sb.from("creator_profiles").select("public_handle, hero_path").eq("user_id", user.id).maybeSingle();
+  if (prof.error) return fail(UNAVAILABLE);
+  if (!prof.data) return fail(HERO_NEED_PROFILE);
+  const { public_handle, hero_path } = prof.data as { public_handle: string; hero_path: string | null };
+  if (hero_path === path) return { ok: false, error: "이미 대표로 걸린 파일이에요." };
+  // 같은 파일을 작품 요소로도 쓰고 있으면 하나를 지울 때 다른 하나의 파일이 사라진다. 이미 쓰는 파일이면 거절한다(파일은 지우지 않는다).
+  const used = await sb.from("creator_work_blocks").select("id").eq("owner_id", user.id).eq("file_path", path).limit(1);
+  if (used.error) return fail(UNAVAILABLE);
+  if (used.data?.length) return { ok: false, error: "이미 쓰고 있는 파일이에요." };
+
+  const looked = await inspectUploadedHero(user.id, path, kind);
+  if (!looked.ok) return fail(looked.error);
+  if (!path.endsWith(`.${looked.sniffed.ext}`)) return fail("파일 내용과 형식이 맞지 않아요.");
+
+  const blocks = await blocksBytes(sb, user.id);
+  if (blocks === null) return fail(UNAVAILABLE);
+  if (blocks + looked.size > QUOTA_BYTES) return fail(HERO_QUOTA_MESSAGE);
+
+  const upd = await sb.from("creator_profiles").update({ hero_kind: kind, hero_path: path, hero_bytes: looked.size }).eq("user_id", user.id).select("user_id");
+  if (upd.error) return fail(dbMessage(upd.error));
+  if (!upd.data?.length) return fail(UNAVAILABLE);
+  await removeOwnFiles(user.id, [hero_path]); // 바꾼 것이면 이전 대표 파일은 지운다
+  refresh(public_handle);
+  return { ok: true, kind };
+}
+
+export async function removeHero(): Promise<Ok | Fail> {
+  const auth = await needUser();
+  if (!("user" in auth)) return auth;
+  const { user, sb } = auth;
+  const prof = await sb.from("creator_profiles").select("public_handle, hero_path").eq("user_id", user.id).maybeSingle();
+  if (prof.error) return { ok: false, error: UNAVAILABLE };
+  if (!prof.data) return { ok: false, error: HERO_NEED_PROFILE };
+  const { public_handle, hero_path } = prof.data as { public_handle: string; hero_path: string | null };
+  const upd = await sb.from("creator_profiles").update({ hero_kind: null, hero_path: null, hero_bytes: null }).eq("user_id", user.id).select("user_id");
+  if (upd.error) return { ok: false, error: dbMessage(upd.error) };
+  await removeOwnFiles(user.id, [hero_path]);
+  refresh(public_handle);
+  return { ok: true };
 }
 
 // 요소를 지운다. 올린 파일이 있으면 보관함에서도 지운다.

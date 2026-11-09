@@ -3,7 +3,7 @@ import "@/components/planner/planner.css";
 import "@/components/mypage/mypage.css";
 import "@/components/register/register.css";
 import { CreatorProfile } from "@/components/creators/creator-profile";
-import { PortfolioManager } from "@/components/mypage/creator-forms";
+import { CreatorProfileForm, PortfolioManager } from "@/components/mypage/creator-forms";
 import { RegisterScreen } from "@/components/register/register-screen";
 import { SiteNav } from "@/components/site-nav";
 import { WorkDetail } from "@/components/creators/work-detail";
@@ -30,7 +30,7 @@ export default async function RealPartsPreview({ searchParams }: { searchParams:
   const part = typeof sp.part === "string" ? sp.part : "list";
   return (
     <div className="mp rg">
-      <p style={{ padding: "8px 16px", fontSize: 12 }}>샘플: 진짜 부품에 가짜 값. 보기: ?part=list · ?part=register · ?part=profile · ?part=header · ?part=edit · ?part=detail</p>
+      <p style={{ padding: "8px 16px", fontSize: 12 }}>샘플: 진짜 부품에 가짜 값. 보기: ?part=list · ?part=register · ?part=profile · ?part=header · ?part=edit · ?part=detail · ?part=hero</p>
       {part === "header" && (
         <div style={{ minHeight: 420, background: "#000" }}>
           <SiteNav loggedIn newCount={2} notices={[{ id: "n1", text: "〈신청자 이름〉님이 「악의 꽃」에 협업을 신청했어요", when: "오늘 14:20" }, { id: "n2", text: "〈신청자 이름〉님이 「사다함의 꿈」에 협업을 신청했어요", when: "어제 18:05" }]} />
@@ -42,6 +42,16 @@ export default async function RealPartsPreview({ searchParams }: { searchParams:
             <div className="mp-sh"><h2>포트폴리오 등록</h2></div>
             <div className="mp-card">
               <PortfolioManager works={works} usedBytes={12 * 1024 * 1024} hasProfile nickname="별뜨리" />
+            </div>
+          </div>
+        </section>
+      )}
+      {part === "hero" && (
+        <section className="mp-sec s2">
+          <div className="wrap">
+            <div className="mp-sh"><h2>크리에이터 등록</h2></div>
+            <div className="mp-card">
+              <CreatorProfileForm profile={{ handle: "sample", roles: ["video"], bio: "", channels: [], openToCollab: true, isPublic: false, hero: { kind: "image", bytes: 2 * 1024 * 1024, src: "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='360'%3E%3Crect width='640' height='360' fill='%23e8dfe3'/%3E%3C/svg%3E" } }} />
             </div>
           </div>
         </section>

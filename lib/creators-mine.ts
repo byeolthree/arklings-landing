@@ -7,6 +7,7 @@ import type { WorkBlock, WorkListItem } from "@/lib/creators";
 import { createAuthClient } from "@/lib/supabase/server";
 
 export type MyProfile = {
+  hero?: { kind: "image" | "video"; bytes: number; src: string | null }; // 대표 이미지·영상(src는 본인에게만 보이는 짧은 임시 주소)
   handle: string;
   roles: Role[];
   bio: string;
@@ -44,7 +45,7 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
   const workCols = "id, title, roles, genres, kind, form, logline, plan_id, is_public, first_published_at, created_at, updated_at";
   const readWorks = (cols: string) => sb.from("creator_works").select(cols).eq("owner_id", userId).order("sort_order", { ascending: true }).order("created_at", { ascending: false });
   const [prof, chans, firstWorks, blocks] = await Promise.all([
-    sb.from("creator_profiles").select("public_handle, roles, bio, open_to_collab, is_public").eq("user_id", userId).maybeSingle(),
+    sb.from("creator_profiles").select("public_handle, roles, bio, open_to_collab, is_public, hero_kind, hero_path, hero_bytes").eq("user_id", userId).maybeSingle(),
     sb.from("creator_channels").select("label, url, position").eq("user_id", userId).order("position", { ascending: true }),
     readWorks(`${workCols}, logline_position`),
     sb.from("creator_work_blocks").select("id, work_id, position, kind, body, file_path, file_name, file_bytes, youtube_id, sub_kind").eq("owner_id", userId).order("position", { ascending: true }).order("created_at", { ascending: true }),
@@ -68,10 +69,12 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
     byWork.set(b.work_id, list);
   }
 
-  const p = prof.data as unknown as { public_handle: string; roles: string[]; bio: string; open_to_collab: boolean; is_public: boolean } | null;
+  const p = prof.data as unknown as { public_handle: string; roles: string[]; bio: string; open_to_collab: boolean; is_public: boolean; hero_kind: "image" | "video" | null; hero_path: string | null; hero_bytes: number | null } | null;
+  const heroUrls = p?.hero_path ? await signOwnFiles(userId, [p.hero_path]) : new Map<string, string>();
   return {
     profile: p
       ? {
+          hero: p.hero_kind && p.hero_path && p.hero_bytes ? { kind: p.hero_kind, bytes: p.hero_bytes, src: heroUrls.get(p.hero_path) ?? null } : undefined,
           handle: p.public_handle,
           roles: (p.roles ?? []).filter(isRole),
           bio: p.bio ?? "",
@@ -95,6 +98,6 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
       planId: w.plan_id,
       blocks: byWork.get(w.id) ?? [],
     })),
-    usedBytes: used,
+    usedBytes: used + (p?.hero_bytes ?? 0), // 작품 요소 파일 + 대표 이미지·영상(합계 20MB에 센다)
   };
 }

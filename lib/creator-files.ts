@@ -7,7 +7,7 @@
 // 파일 이름은 "임의 글자 20자-표식 15자"(36자, 0009의 경로 검사와 같은 모양)다. 표식은 (서버 비밀값, 주인 번호, 임의 글자)로 만든 서명이라
 // 다른 사람의 파일 이름을 자기 요소에 적어 넣어도(DB는 이름 모양만 본다) 서버가 그 파일을 지우거나 본인 것처럼 보여 주지 않는다.
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
-import { DOCUMENT_MAX_BYTES, IMAGE_MAX_BYTES, type FileKind } from "@/lib/creator-rules";
+import { DOCUMENT_MAX_BYTES, HERO_VIDEO_MAX_BYTES, IMAGE_MAX_BYTES, type FileKind, type HeroFileKind } from "@/lib/creator-rules";
 import { getSupabase } from "@/lib/supabase";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -47,6 +47,27 @@ export function checkFileHead(head: Uint8Array, size: number, expect: FileKind):
   return { ok: true, sniffed };
 }
 
+// ── 프로필 대표 이미지·영상(MP4) ────────────────────────────────────────────────
+// 작품 요소 파일(sniffFile)과 따로 본다: 작품 요소에는 영상 파일이 없으므로(D18) 거기서는 MP4를 계속 거절하고, 대표 파일에서만 받는다.
+export type HeroSniffed = { kind: HeroFileKind; type: "image/jpeg" | "image/png" | "image/webp" | "video/mp4"; ext: "jpg" | "png" | "webp" | "mp4" };
+
+export function sniffHero(head: Uint8Array): HeroSniffed | null {
+  if (startsWith(head, [0x66, 0x74, 0x79, 0x70], 4)) return { kind: "video", type: "video/mp4", ext: "mp4" }; // ....ftyp
+  const img = sniffFile(head);
+  return img && img.kind === "image" ? { kind: "image", type: img.type as HeroSniffed["type"], ext: img.ext as HeroSniffed["ext"] } : null;
+}
+
+export const maxHeroBytes = (kind: HeroFileKind) => (kind === "image" ? IMAGE_MAX_BYTES : HERO_VIDEO_MAX_BYTES);
+
+export function checkHeroHead(head: Uint8Array, size: number, expect: HeroFileKind): { ok: true; sniffed: HeroSniffed } | { ok: false; error: string } {
+  if (!Number.isFinite(size) || size <= 0) return { ok: false, error: "비어 있는 파일은 올릴 수 없어요." };
+  const sniffed = sniffHero(head);
+  if (!sniffed) return { ok: false, error: expect === "image" ? "JPG, PNG, WEBP 파일만 올릴 수 있어요." : "MP4 파일만 올릴 수 있어요." };
+  if (sniffed.kind !== expect) return { ok: false, error: expect === "image" ? "이미지를 골라 주세요(JPG, PNG, WEBP)." : "영상을 골라 주세요(MP4)." };
+  if (size > maxHeroBytes(expect)) return { ok: false, error: expect === "image" ? "이미지는 5MB 이하여야 해요." : "영상은 10MB 이하여야 해요." };
+  return { ok: true, sniffed };
+}
+
 // ── 파일 이름과 본인 표식 ───────────────────────────────────────────────────────────
 function secret(): string {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -54,9 +75,9 @@ function secret(): string {
   return key;
 }
 const tagOf = (userId: string, rand: string) => createHmac("sha256", secret()).update(`creator-file:${userId}:${rand}`).digest("hex").slice(0, 15);
-const NAME_RE = /^([0-9a-f]{20})-([0-9a-f]{15})\.(jpg|png|webp|pdf)$/;
+const NAME_RE = /^([0-9a-f]{20})-([0-9a-f]{15})\.(jpg|png|webp|pdf|mp4)$/;
 
-export function newFileName(userId: string, ext: Sniffed["ext"]): string {
+export function newFileName(userId: string, ext: Sniffed["ext"] | "mp4"): string {
   const rand = randomBytes(10).toString("hex"); // 20자
   return `${rand}-${tagOf(userId, rand)}.${ext}`;
 }
@@ -72,7 +93,7 @@ export function fileBelongsTo(userId: string, name: string): boolean {
 
 // ── 올리기 ─────────────────────────────────────────────────────────────────────────
 // 브라우저가 보관함에 직접 올릴 1회용 자리를 만든다(요청 크기 한도 4.5MB를 피하려고). 호출하는 쪽이 권한을 먼저 확인했어야 한다.
-export async function createUploadSlot(userId: string, ext: Sniffed["ext"]): Promise<{ path: string; token: string } | null> {
+export async function createUploadSlot(userId: string, ext: Sniffed["ext"] | "mp4"): Promise<{ path: string; token: string } | null> {
   const path = newFileName(userId, ext);
   const { data, error } = await createAdminClient().storage.from(CREATOR_BUCKET).createSignedUploadUrl(path);
   if (error || !data) return null;
@@ -90,6 +111,20 @@ export async function inspectUploaded(userId: string, path: string, expect: File
   const size = data.size;
   const head = new Uint8Array(await data.slice(0, 16).arrayBuffer());
   const checked = checkFileHead(head, size, expect);
+  if (!checked.ok) return checked;
+  return { ok: true, size, sniffed: checked.sniffed };
+}
+
+// 대표 파일 버전: 올라온 파일을 읽어 검사한다(크기는 보관함이 기록한 실제 크기).
+export async function inspectUploadedHero(userId: string, path: string, expect: HeroFileKind): Promise<
+  { ok: true; size: number; sniffed: HeroSniffed } | { ok: false; error: string }
+> {
+  if (!fileBelongsTo(userId, path)) return { ok: false, error: "올린 파일을 찾을 수 없어요. 다시 올려 주세요." };
+  const { data, error } = await createAdminClient().storage.from(CREATOR_BUCKET).download(path);
+  if (error || !data) return { ok: false, error: "올린 파일을 찾을 수 없어요. 다시 올려 주세요." };
+  const size = data.size;
+  const head = new Uint8Array(await data.slice(0, 16).arrayBuffer());
+  const checked = checkHeroHead(head, size, expect);
   if (!checked.ok) return checked;
   return { ok: true, size, sniffed: checked.sniffed };
 }

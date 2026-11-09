@@ -238,6 +238,8 @@ export function parseYoutubeId(raw: string): string | null {
 export const MB = 1024 * 1024;
 export const IMAGE_MAX_BYTES = 5 * MB; // 이미지 한 장 (JPG·PNG·WEBP)
 export const DOCUMENT_MAX_BYTES = 10 * MB; // PDF 한 개
-export const QUOTA_BYTES = 20 * MB; // 사람당 합계 (작품 요소의 이미지+PDF. 프로필 대표 파일은 아직 정해지지 않았다)
+export const HERO_VIDEO_MAX_BYTES = 10 * MB; // 프로필 대표 영상 한 개 (MP4, 0-4 v). 대표 이미지는 IMAGE_MAX_BYTES(5MB)
+export const QUOTA_BYTES = 20 * MB; // 사람당 합계 (작품 요소의 이미지+PDF와 프로필 대표 이미지·영상을 합쳐서, 별뜨리님 지시 2026-11-09)
 export type FileKind = "image" | "document";
+export type HeroFileKind = "image" | "video"; // 프로필 대표 파일의 종류
 export const FILE_KIND_LABEL: Record<FileKind, string> = { image: "이미지(JPG·PNG·WEBP, 5MB 이하)", document: "PDF(10MB 이하)" };

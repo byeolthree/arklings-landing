@@ -20,7 +20,7 @@ const load = cache(async (handle: string) => {
   const mine = user?.emailConfirmed ? await loadMyCreator(user.id).catch(() => null) : null;
   const pub = await getCreator(h);
   if (mine?.profile && mine.profile.handle === h) {
-    const profile = pub ?? { handle: mine.profile.handle, name: "", roles: mine.profile.roles, bio: mine.profile.bio, channels: mine.profile.channels, openToCollab: mine.profile.openToCollab };
+    const profile = pub ?? { handle: mine.profile.handle, name: "", roles: mine.profile.roles, bio: mine.profile.bio, channels: mine.profile.channels, openToCollab: mine.profile.openToCollab, hero: mine.profile.hero?.kind, heroSrc: mine.profile.hero?.src ?? undefined };
     return { profile, works: mine.works.map((w) => toWorkCard(w, mediaOfBlocks(w.blocks), w.isPublic)), preview: !mine.profile.isPublic, owner: true };
   }
   if (!pub) return null;

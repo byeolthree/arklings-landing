@@ -122,6 +122,8 @@
 
 | 로그라인을 옮기는 작품 편집 (D35-2, 0013) | `/mypage`·`/portfolio/new` 안, 공개 작품 창 `/portfolio/<작품 번호>` | 예(편집), 아니요(작품 창) | **`reorderWorkItems(workId, items)`**(새 함수. `items`는 이 작품의 요소 번호 전부와 글자 「logline」 하나를 원하는 순서대로 담은 목록. 서버가 요소 순서(`position`)와 로그라인 위치(`logline_position` = 로그라인 앞 요소 개수)를 함께 저장, 번호가 모자라거나 남의 것이면 거절). 기존 `moveBlock`·`reorderBlocks`는 그대로 두되 화면은 이제 쓰지 않는다 | 요소 칸 + 로그라인 블록(손잡이 ⠿·(＋)·↑↓, 지울 수 없음) | `MyWork.loglinePosition`, 공개 작품 `WorkDetail.loglinePosition`. 맨 위에 놓인 것이 「대표」(접은 목록 「대표」 칸: 로그라인이면 「로그라인」, 영상이면 「티저 영상」처럼, 이미지면 「컨셉 이미지」, 글·문서면 고른 종류 또는 「문서」) | `supabase/migrations/0013_logline_position.sql` 실행 뒤 저장된다. 실행 전에는 로그라인 위치가 0(맨 위)으로 읽히고 옮기기를 저장하면 안내가 나온다 |
 
+| 마이페이지 · 크리에이터 등록 · 대표 이미지·영상 올리기 (2026-11-09) | `/mypage` 안 | 예(이메일 확인까지, 프로필이 있어야 올릴 수 있음. 프로필을 만들 때 골라 두면 저장 직후 올린다) | **`prepareHeroUpload({kind, type, size})`**(서버가 로그인·이메일 확인·프로필·형식·크기·합계 20MB를 먼저 보고 보관함에 직접 올릴 1회용 자리 `{path, token}`를 준다) → 브라우저가 `creator-works`에 직접 올림 → **`finishHeroUpload({path, kind, name})`**(서버가 올라온 실제 파일의 크기·형식을 다시 보고 프로필에 걸고, 맞지 않으면 파일을 지운다. 이전 대표 파일은 지움), **`removeHero()`**(지우기) | 파일 하나: 이미지 JPG·PNG·WEBP 5MB 이하 / 영상 MP4(H.264) 10MB 이하(가로 1280×720·15~30초·AAC는 안내만, 서버는 형식·크기만 확인). 영상을 고르면 「영상 변환 프롬프트 복사」 | `MyProfile.hero`(`kind`, `bytes`, 임시 주소 `src`). 파일 합계 20MB에 **대표 파일도 센다**(마이페이지 「파일 n / 20MB」). 공개 프로필의 대표는 공개 화면에서 `lib/creators.ts`가 임시 주소(10분)로 보여 준다 | `supabase/migrations/0014_hero_quota.sql`을 실행하면 DB도 같은 한도를 막는다(실행하지 않아도 서버 동작이 먼저 막는다) |
+
 처리 함수 결과 모양: `{ ok: true, …값 } | { ok: false, error, needLogin?, fieldErrors? }` (기획안 동작과 같은 모양).
 
 **코드 전에 보고한 것 (2026-11-07):**

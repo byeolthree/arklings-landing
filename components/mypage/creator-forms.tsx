@@ -13,7 +13,10 @@ import {
   deleteBlock,
   deleteWork,
   finishFileUpload,
+  finishHeroUpload,
   prepareFileUpload,
+  prepareHeroUpload,
+  removeHero,
   reorderWorkItems,
   reorderWorks,
   saveCreatorProfile,
@@ -24,6 +27,7 @@ import {
   updateWork,
 } from "@/app/actions/creators";
 import { GENRES } from "@/components/creators/genres";
+import { HERO_RULE, VIDEO_PROMPT } from "@/components/mypage/hero-guide";
 import { PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
 import { ROLES, type Role } from "@/lib/collab";
 import { BLOCK_LIMIT, DOC_SUBKINDS, LOGLINE_TOKEN, QUOTA_BYTES, TITLE_MAX, VIDEO_SUBKINDS, WORK_LIMIT, type ProfileErrors, type ProfileValues } from "@/lib/creator-rules";
@@ -34,11 +38,133 @@ import type { MyProfile, MyWork } from "@/lib/creators-mine";
 const LOGLINE_FRAME = "어느 날 〈사건〉이 벌어지자, 〈주인공〉은 〈장애물〉을 극복해야 〈목표〉를 달성할 수 있다. 그렇지 않으면 〈위험〉이 닥친다.";
 const mb = (n: number) => `${(n / 1024 / 1024).toFixed(1)}MB`;
 
+// 대표 이미지·영상 파일 하나를 올린다: 서버가 규칙을 먼저 보고 올리기 자리를 주고 → 브라우저가 보관함에 직접 올리고 → 서버가 올라온 파일을 다시 검사해 프로필에 건다.
+// 실패하면 이유 한 줄을, 성공하면 null을 돌려준다.
+async function uploadHeroFile(file: File, kind: "image" | "video"): Promise<string | null> {
+  const slot = await prepareHeroUpload({ kind, type: file.type, size: file.size });
+  if (!slot.ok) return slot.error;
+  const up = await uploadToSlot(slot.path, slot.token, file);
+  if (!up.ok) return up.error;
+  const fin = await finishHeroUpload({ path: slot.path, kind, name: file.name });
+  return fin.ok ? null : fin.error;
+}
+
+// 「대표 이미지·영상」 칸(실제 저장): 파일을 고르면 형식·크기를 바로 검사하고 올린다. 프로필이 아직 없으면 고른 파일을 들고 있다가 프로필을 만든 직후 올린다.
+function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: NonNullable<MyProfile["hero"]>; hasProfile: boolean; pending: File | null; onPending: (f: File | null) => void; onDone: (text: string, err?: boolean) => void }) {
+  const [kind, setKind] = useState<"image" | "video">(hero?.kind ?? "image");
+  const [msg, setMsg] = useState("");
+  const [copied, setCopied] = useState("");
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const rule = HERO_RULE[kind];
+  const router = useRouter();
+
+  async function copyPrompt() {
+    try {
+      await navigator.clipboard.writeText(VIDEO_PROMPT);
+      setCopied("복사했어요. 영상 변환 도구에 붙여 넣으세요.");
+      setShowPrompt(false);
+    } catch {
+      setCopied("복사하지 못했어요. 아래 글을 직접 복사해 주세요.");
+      setShowPrompt(true);
+    }
+  }
+  async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const input = e.target;
+    const f = input.files?.[0];
+    if (!f) return setMsg("");
+    if (!(rule.types as readonly string[]).includes(f.type)) {
+      input.value = "";
+      return setMsg(kind === "image" ? "JPG, PNG, WEBP 파일만 올릴 수 있어요." : "MP4 파일만 올릴 수 있어요.");
+    }
+    if (f.size > rule.max) {
+      input.value = "";
+      return setMsg(`선택한 파일이 ${(f.size / 1024 / 1024).toFixed(1)}MB예요. ${rule.max / 1024 / 1024}MB 이하만 올릴 수 있어요.`);
+    }
+    setMsg("");
+    if (!hasProfile) {
+      onPending(f);
+      return onDone("프로필을 저장하면 이 파일도 함께 올라가요.");
+    }
+    setBusy(true);
+    const err = await uploadHeroFile(f, kind);
+    setBusy(false);
+    input.value = "";
+    if (err) return setMsg(err);
+    onDone(hero ? "대표 파일을 바꿨어요." : "대표 파일을 올렸어요.");
+    router.refresh();
+  }
+  async function remove() {
+    if (!window.confirm("대표 이미지·영상을 지울까요? 되돌릴 수 없어요.")) return;
+    setBusy(true);
+    const r = await removeHero();
+    setBusy(false);
+    if (!r.ok) return setMsg(r.error);
+    onDone("대표 파일을 지웠어요.");
+    router.refresh();
+  }
+
+  return (
+    <div className="pp-field">
+      <span className="pp-label" id="pp-hero-label">
+        대표 이미지·영상 <span className="pp-hint-inline">(선택)</span>
+      </span>
+      {hero?.src && (
+        <div style={{ marginBottom: 8 }}>
+          {hero.kind === "video" ? (
+            <video src={hero.src} controls muted playsInline preload="metadata" style={{ maxWidth: "100%", maxHeight: 220, borderRadius: 12, background: "#000" }} />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={hero.src} alt="대표 이미지" style={{ maxWidth: "100%", maxHeight: 220, borderRadius: 12 }} />
+          )}
+          <p className="len">
+            지금 걸린 {hero.kind === "video" ? "영상" : "이미지"} · {mb(hero.bytes)}{" "}
+            <button type="button" className="btn btn-ghost" onClick={remove} disabled={busy}>
+              지우기
+            </button>
+          </p>
+        </div>
+      )}
+      {!hero?.src && hero && <p className="len">대표 파일은 걸려 있지만 지금은 불러오지 못했어요.</p>}
+      <div className="pp-roles" role="group" aria-labelledby="pp-hero-label">
+        <button type="button" className="opt" aria-pressed={kind === "image"} onClick={() => { setKind("image"); setMsg(""); setCopied(""); setShowPrompt(false); }}>
+          이미지
+        </button>
+        <button type="button" className="opt" aria-pressed={kind === "video"} onClick={() => { setKind("video"); setMsg(""); setCopied(""); }}>
+          영상
+        </button>
+        {kind === "video" && (
+          <>
+            <button type="button" className="btn btn-ghost" onClick={copyPrompt}>
+              영상 변환 프롬프트 복사
+            </button>
+            <span role="status" aria-live="polite" className="len" style={{ alignSelf: "center" }}>
+              {copied}
+            </span>
+          </>
+        )}
+      </div>
+      {showPrompt && <textarea readOnly className="we-text" rows={8} value={VIDEO_PROMPT} aria-label="영상 변환 프롬프트" onFocus={(e) => e.currentTarget.select()} />}
+      <input key={kind} type="file" accept={rule.accept} onChange={onFile} disabled={busy} aria-label={kind === "image" ? "대표 이미지 파일" : "대표 영상 파일"} aria-describedby="pp-hero-hint" />
+      {busy && <p className="len" role="status">올리는 중…</p>}
+      {pending && !hasProfile && <p className="len">올릴 파일: {pending.name} (프로필을 저장하면 올라가요)</p>}
+      <p id="pp-hero-hint" className="len">{rule.hint}</p>
+      {msg && (
+        <p className="pp-err" role="alert">
+          {msg}
+        </p>
+      )}
+    </div>
+  );
+}
+
 // ── 크리에이터 등록 ─────────────────────────────────────────────────────────────────
 export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
   const router = useRouter();
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
+  // 프로필을 만들기 전에 고른 대표 파일: 프로필을 만든 직후에 올린다.
+  const [pendingHero, setPendingHero] = useState<{ file: File; kind: "image" | "video" } | null>(null);
 
   async function check(handle: string): Promise<HandleCheck> {
     const r = await checkHandleAction(handle);
@@ -49,6 +175,11 @@ export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
     const r = await saveCreatorProfile({ handle: v.handle, roles: v.roles, about: v.about, channels: v.channels, openToCollab: v.openToCollab, isPublic: v.isPublic });
     if (!r.ok) return { ok: false, errors: r.fieldErrors as ProfileErrors | undefined, error: r.error };
     setNote(r.created ? "프로필을 만들었어요." : "프로필을 저장했어요.");
+    if (pendingHero) {
+      const err = await uploadHeroFile(pendingHero.file, pendingHero.kind);
+      setPendingHero(null);
+      setNote(err ? `프로필은 저장했어요. 대표 파일은 올리지 못했어요. ${err}` : "프로필과 대표 파일을 저장했어요.");
+    }
     router.refresh();
     return { ok: true };
   }
@@ -82,6 +213,15 @@ export function CreatorProfileForm({ profile }: { profile: MyProfile | null }) {
           initial={profile ? { ...profile, about: profile.bio } : undefined}
           onSubmit={onSubmit}
           checkHandle={check}
+          heroField={
+            <HeroUpload
+              hero={profile?.hero}
+              hasProfile={Boolean(profile)}
+              pending={pendingHero?.file ?? null}
+              onPending={(f) => setPendingHero(f ? { file: f, kind: f.type === "video/mp4" ? "video" : "image" } : null)}
+              onDone={(text, err) => setNote(err ? text : text)}
+            />
+          }
         />
       </div>
       {note && (
