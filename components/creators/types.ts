@@ -48,6 +48,7 @@ export type WorkCard = {
   kind: WorkKind; // 작품 종류
   form: WorkForm;
   publishedAt: string;
+  isPublic?: boolean; // 주인이 자기 프로필을 볼 때만 쓴다(비공개 작품은 흐리게). 남이 보는 화면에는 공개한 작품만 온다
 };
 
 export type PlanCard = {

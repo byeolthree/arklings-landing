@@ -22,7 +22,9 @@ export default async function CreatorProfilePreviewPage({ params, searchParams }
   const mine = handle === MINE.handle ? (one(sp.mine) === "private" ? "private" : "public") : undefined;
 
   const state = one(sp.state); // empty = 올린 작품 0건, many = 12건(한도)
-  const works = state === "empty" ? [] : sampleWorksOf(card, state === "many" ? 12 : card.planCount);
+  // 주인 모습(?owner=1 또는 내 프로필): 「프로필 편집」·「포트폴리오 등록」 버튼과 작품마다 공개 스위치·손잡이. 세 번째 작품은 비공개로 둔다.
+  const owner = !!mine || one(sp.owner) === "1";
+  const works = (state === "empty" ? [] : sampleWorksOf(card, state === "many" ? 12 : card.planCount)).map((w, i) => ({ ...w, isPublic: !(owner && i === 2) }));
   const base = `/dev-preview/creators/${handle}`;
 
   return (
@@ -32,6 +34,7 @@ export default async function CreatorProfilePreviewPage({ params, searchParams }
         <br />
         가짜 데이터예요. 보기:{" "}
         <Link href={base} className="underline">기본</Link> ·{" "}
+        <Link href={`${base}?owner=1`} className="underline">주인 모습</Link> ·{" "}
         <Link href={`${base}?state=many`} className="underline">작품 12건</Link> ·{" "}
         <Link href={`${base}?state=empty`} className="underline">작품 0건</Link> ·{" "}
         <Link href="/dev-preview/creators" className="underline">목록</Link>
@@ -52,6 +55,7 @@ export default async function CreatorProfilePreviewPage({ params, searchParams }
         workHref={(id) => `/dev-preview/portfolio/${id}`}
         applyHref={`/dev-preview/collab?creator=${card.handle}&roles=${card.roles.join(",")}`}
         showApply={mine !== "private"}
+        owner={owner ? { editHref: "/dev-preview/mypage#mp-creator", registerHref: "/dev-preview/mypage#mp-portfolio" } : undefined}
       />
     </>
   );
