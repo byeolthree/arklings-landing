@@ -3,12 +3,12 @@
 import { useRef, useState } from "react";
 import { authInputCls } from "@/components/form-field";
 
-// 메일로 받는 확인 번호 자리 수. 서울 Supabase의 「Email OTP Length」 설정과 같아야 한다(기본 6).
+// 메일로 받는 확인 번호 자리 수. 서울 Supabase의 「Email OTP Length」 설정과 같아야 한다(서울 프로젝트 8자리).
 export const OTP_LENGTH = 8;
 
 const digits = (v: string) => v.replace(/\D/g, "");
 
-// 확인 번호 칸: 두 칸으로 나누고 가운데에 하이픈(예: 123 - 456). 붙여넣기는 전체를 나눠 채운다.
+// 확인 번호 칸: 두 칸으로 나눈다(하이픈 없음). 붙여넣기는 전체를 나눠 채운다.
 // 폼에는 합친 값이 name 이름으로 넘어간다.
 export function CodeInput({ id, name = "code", disabled, invalid }: { id: string; name?: string; disabled?: boolean; invalid?: boolean }) {
   const half = OTP_LENGTH / 2;
@@ -51,9 +51,6 @@ export function CodeInput({ id, name = "code", disabled, invalid }: { id: string
         }}
         className={cls}
       />
-      <span aria-hidden className="text-[18px] font-bold text-[#8c8c8c]">
-        -
-      </span>
       <input
         ref={secondRef}
         type="text"
