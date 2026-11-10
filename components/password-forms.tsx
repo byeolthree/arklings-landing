@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import type { AuthFormState } from "@/app/actions/auth";
-import { requestPasswordReset, updatePassword } from "@/app/actions/password";
+import { requestPasswordReset, updatePassword, verifyResetCode, type ResetCodeState } from "@/app/actions/password";
 import { authInputCls, FormField } from "@/components/form-field";
 import { CardHeading, PaperCard, primaryBtn } from "@/components/paper-card";
 import { useStoredValue } from "@/lib/use-stored-value";
@@ -13,21 +13,7 @@ export function ForgotPasswordForm({ initialEmail, expired }: { initialEmail?: s
   // 로그인 화면에서 「이메일 기억하기」를 켜 두었으면 그 이메일을 미리 채운다.
   const remembered = useStoredValue("arklings.rememberedEmail");
   if (state.sentTo) {
-    return (
-      <PaperCard>
-        <CardHeading title="메일을 보냈어요" />
-        <div className="mt-6 flex flex-col gap-3 md:mt-8">
-          <ul className="flex flex-col gap-1.5 rounded-lg bg-[#faf7f8] px-4 py-3 text-[12px] leading-normal text-[#574a4f] md:text-[13px]">
-            <li className="text-center">
-              메일의 링크를 누르면 새 비밀번호를 정할 수 있어요.
-            </li>
-          </ul>
-          <Link href="/login" className={`${primaryBtn} w-full`}>
-            로그인 화면으로
-          </Link>
-        </div>
-      </PaperCard>
-    );
+    return <ResetCodeStep email={state.sentTo} resend={action} resending={pending} />;
   }
   return (
     <PaperCard>
@@ -86,6 +72,47 @@ export function ResetPasswordForm() {
             재설정 메일 다시 받기
           </Link>
         )}
+      </form>
+    </PaperCard>
+  );
+}
+
+// 「메일을 보냈어요」 화면: 메일의 확인 번호를 넣으면 같은 화면에서 새 비밀번호를 정한다.
+function ResetCodeStep({ email, resend, resending }: { email: string; resend: (fd: FormData) => void; resending: boolean }) {
+  const [state, action, pending] = useActionState<ResetCodeState, FormData>(verifyResetCode, {});
+  if (state.verified) return <ResetPasswordForm />;
+  return (
+    <PaperCard>
+      <CardHeading title="메일을 보냈어요" lines={["메일에 적힌 확인 번호를 입력해 주세요."]} />
+      <form action={action} noValidate className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5">
+        <input type="hidden" name="email" value={email} />
+        {state.error && (
+          <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-[12px] text-destructive md:text-[13px]">
+            {state.error}
+          </p>
+        )}
+        <FormField id="reset-code" label="확인 번호">
+          <input
+            id="reset-code"
+            name="code"
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            maxLength={10}
+            disabled={pending}
+            aria-invalid={state.error ? true : undefined}
+            className={authInputCls}
+          />
+        </FormField>
+        <button type="submit" disabled={pending} className={`${primaryBtn} w-full`}>
+          {pending ? "확인하는 중…" : "확인"}
+        </button>
+      </form>
+      <form action={resend} className="mt-4 text-center">
+        <input type="hidden" name="email" value={email} />
+        <button type="submit" disabled={resending} className="text-[12px] text-jaju underline">
+          {resending ? "보내는 중…" : "메일 다시 받기"}
+        </button>
       </form>
     </PaperCard>
   );

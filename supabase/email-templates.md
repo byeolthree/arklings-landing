@@ -85,7 +85,11 @@ Supabase 화면 → Authentication → Emails(Email Templates)에서 아래 문�
 ```html
 <h2 style="margin:0 0 12px;color:#2a2025">비밀번호를 다시 정해 주세요</h2>
 <p style="margin:0 0 16px;color:#574a50;line-height:1.6">
-  아래 버튼을 누르면 새 비밀번호를 정할 수 있어요.
+  비밀번호 찾기 화면에 아래 확인 번호를 입력해 주세요.
+</p>
+<p style="margin:0 0 20px;font-size:28px;font-weight:700;letter-spacing:6px;color:#2a2025">{{ .Token }}</p>
+<p style="margin:0 0 16px;color:#574a50;line-height:1.6">
+  또는 아래 버튼을 눌러 새 비밀번호를 정할 수도 있어요.
 </p>
 <p style="margin:0 0 20px">
   <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery"

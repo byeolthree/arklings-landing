@@ -35,6 +35,31 @@ export async function requestPasswordReset(_prev: AuthFormState, fd: FormData): 
   return { sentTo: email, values: { email } };
 }
 
+// 메일로 받은 확인 번호를 「메일을 보냈어요」 화면에서 넣어 본인 확인을 한다.
+// 맞으면 이 브라우저가 그 계정으로 로그인되고, 같은 화면에서 새 비밀번호를 정한다(메일을 다른 기기에서 열어도 된다).
+export type ResetCodeState = { verified?: boolean; error?: string };
+
+export async function verifyResetCode(_prev: ResetCodeState, fd: FormData): Promise<ResetCodeState> {
+  const email = text(fd, "email").trim().toLowerCase();
+  const code = text(fd, "code").replace(/\s/g, "");
+  if (!email || !EMAIL_RE.test(email)) return { error: "이메일을 다시 입력해 주세요." };
+  if (!/^\d{6,10}$/.test(code)) return { error: "메일에 적힌 확인 번호를 숫자로 입력해 주세요." };
+  try {
+    const supabase = await createAuthClient();
+    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: "recovery" });
+    if (error) {
+      if (error.status === 429 || error.code === "over_request_rate_limit") {
+        return { error: "짧은 시간에 너무 많이 시도했어요. 잠시(1~2분) 뒤에 다시 시도해 주세요." };
+      }
+      if ((error.status ?? 0) >= 500 || error.status === 0) return { error: UNAVAILABLE };
+      return { error: "확인 번호가 맞지 않거나 시간이 지났어요. 다시 확인하거나 메일을 새로 받아 주세요." };
+    }
+  } catch {
+    return { error: UNAVAILABLE };
+  }
+  return { verified: true };
+}
+
 // 메일 링크로 들어와 로그인된 상태에서 새 비밀번호를 정한다.
 export async function updatePassword(_prev: AuthFormState, fd: FormData): Promise<AuthFormState> {
   const user = await getCurrentUser();
