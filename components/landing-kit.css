@@ -86,7 +86,7 @@
 .lk-footer .links { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: 12px; }
 .lk-footer .links a { color: inherit; text-decoration: none; }
 .lk-footer .links a:hover { text-decoration: underline; }
-@media (max-width: 640px) { .lk-footer .links { align-items: flex-start; } }
+@media (max-width: 640px) { .lk-footer .lk-wrap { flex-direction: column; align-items: center; text-align: center; } .lk-footer .links { align-items: center; } }
 
 @media (prefers-reduced-motion: reduce) { .lk-btn, .lk-btn::after, .lk-burger i, .lk-menu { transition: none !important; } }
 

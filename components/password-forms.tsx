@@ -19,7 +19,7 @@ export function ForgotPasswordForm({ initialEmail, expired }: { initialEmail?: s
   }
   return (
     <PaperCard>
-      <CardHeading title="비밀번호 찾기" lines={["가입한 이메일을 입력하면 비밀번호를 다시 정하는 번호를 보내 드려요."]} />
+      <CardHeading title="비밀번호 찾기" lines={[<>가입한 이메일 주소를 입력하면<br className="md:hidden" /> 본인 인증 확인 번호를 보내드려요.</>]} />
       <form action={action} noValidate className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5">
         <FormField id="forgot-email" label="이메일" error={state.errors?.email}>
           <input
@@ -77,7 +77,7 @@ function ResetCodeStep({ email, resend, resending }: { email: string; resend: (f
   if (state.verified) return <ResetPasswordForm />;
   return (
     <PaperCard>
-      <CardHeading title="메일을 보냈어요" lines={["메일에 적힌 확인 번호를 입력해 주세요."]} />
+      <CardHeading title="메일을 보냈어요" lines={["메일에 적힌 본인 인증 확인 번호를 입력해주세요."]} />
       <form action={action} noValidate className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5">
         <input type="hidden" name="email" value={email} />
         <FormField id="reset-code" label="확인 번호">

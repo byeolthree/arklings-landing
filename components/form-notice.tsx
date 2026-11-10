@@ -16,7 +16,13 @@ export function FormNotice({ message }: { message?: string }) {
       role="alert"
       className="mt-5 rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-center text-[12px] leading-normal text-destructive md:text-[13px]"
     >
-      {message}
+      {message.split(/(?<=\.) /).map((part, i) => (
+        <span key={i}>
+          {i > 0 && <br className="md:hidden" />}
+          {i > 0 && " "}
+          {part}
+        </span>
+      ))}
     </p>
   );
 }

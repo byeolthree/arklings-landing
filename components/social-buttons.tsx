@@ -1,5 +1,7 @@
 "use client";
 
+import { FcGoogle } from "react-icons/fc";
+import { RiKakaoTalkFill } from "react-icons/ri";
 import { useActionState, useId, useState } from "react";
 import { startOAuth } from "@/app/actions/social";
 import type { AuthFormState } from "@/app/actions/auth";
@@ -59,8 +61,10 @@ export function SocialButtons({ returnTo, heading = "또는 다른 방법으로 
             disabled={pending}
             aria-busy={pending && clicked === p.id}
             onClick={() => setClicked(p.id)}
-            className={`${outlineBtn} w-full disabled:opacity-60`}
+            className={`${outlineBtn} w-full gap-2 disabled:opacity-60`}
           >
+            {p.id === "google" && <FcGoogle aria-hidden className="size-[18px] shrink-0" />}
+            {p.id === "kakao" && <RiKakaoTalkFill aria-hidden className="size-[18px] shrink-0 text-[#191919]" />}
             {pending && clicked === p.id ? "이동 중…" : `${p.label}로 ${actionLabel}`}
           </button>
         ))}
