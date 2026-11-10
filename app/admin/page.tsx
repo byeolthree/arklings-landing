@@ -242,7 +242,7 @@ function SortHead({ q, k, children }: { q: AdminQuery; k: SortKey; children: Rea
   const nextDir = on && q.dir === "asc" ? "desc" : "asc";
   return (
     <span role="columnheader" aria-sort={on ? (q.dir === "asc" ? "ascending" : "descending") : "none"}>
-      <Link href={adminHref(q, { sort: k, dir: on ? nextDir : "asc", page: 1 })} className={`inline-flex items-center gap-0.5 ${on ? "text-jaju" : "text-title"} hover:underline`}>
+      <Link scroll={false} href={adminHref(q, { sort: k, dir: on ? nextDir : "asc", page: 1 })} className={`inline-flex items-center gap-0.5 ${on ? "text-jaju" : "text-title"} hover:underline`}>
         {children}
         <span aria-hidden="true" className="text-[10px]">{on ? (q.dir === "asc" ? "▲" : "▼") : "↕"}</span>
       </Link>
