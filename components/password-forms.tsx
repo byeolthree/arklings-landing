@@ -12,11 +12,14 @@ export function ForgotPasswordForm({ initialEmail }: { initialEmail?: string }) 
   if (state.sentTo) {
     return (
       <PaperCard>
-        <CardHeading title="메일을 보냈어요" lines={[`${state.sentTo} 으로 비밀번호 설정 링크를 보냈어요.`, "이 이메일로 가입한 계정이 있다면 메일이 도착해요."]} />
+        <CardHeading title="메일을 보냈어요" />
         <div className="mt-6 flex flex-col gap-3 md:mt-8">
           <ul className="flex flex-col gap-1.5 rounded-lg bg-[#faf7f8] px-4 py-3 text-[12px] leading-normal text-[#574a4f] md:text-[13px]">
-            <li>메일이 안 보이면 스팸함도 확인해 주세요.</li>
-            <li>구글·카카오로 가입한 계정도 이 링크로 비밀번호를 정하면 이메일로 로그인할 수 있어요.</li>
+            <li className="text-center">
+              메일이 오지 않으면 아클링스에 등록한 이메일이 맞는지 확인해 주세요.
+              <br />
+              카카오 로그인에 쓰는 메일과 다를 수 있어요.
+            </li>
           </ul>
           <Link href="/login" className={`${primaryBtn} w-full`}>
             로그인 화면으로
@@ -27,7 +30,7 @@ export function ForgotPasswordForm({ initialEmail }: { initialEmail?: string }) 
   }
   return (
     <PaperCard>
-      <CardHeading title="비밀번호 설정·재설정" lines={["가입한 이메일을 입력하면 비밀번호를 정하는 링크를 보내 드려요.", "구글·카카오로 가입했다면 이메일 로그인용 비밀번호도 여기서 만들 수 있어요."]} />
+      <CardHeading title="비밀번호 설정·재설정" lines={["가입한 이메일을 입력하면 비밀번호를 정하는 링크를 보내 드려요."]} />
       <form action={action} noValidate className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5">
         {state.message && (
           <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-[12px] text-destructive md:text-[13px]">

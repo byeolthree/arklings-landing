@@ -54,7 +54,7 @@ Figma 시안은 초안이다. 시안과 랜딩이 다르면 랜딩을 따른다.
 | 역할 | 이름 | HEX |
 |---|---|---|
 | Primary (버튼·강조·CTA) | primary/jaju | `#A61E5C` |
-| Secondary 1 · Nav 구분선 | secondary/teal | `#1F5A66` |
+| Secondary 1 | secondary/teal | `#1F5A66` |
 | Secondary 2 | secondary/dusty-blue | `#5F7C99` |
 | Secondary 3 (가장 연함) | secondary/muted-sage | `#6F8A7A` |
 | Accent (진행 중 상태 등) | accent/gold | `#D89A24` |
@@ -69,7 +69,7 @@ Figma 시안은 초안이다. 시안과 랜딩이 다르면 랜딩을 따른다.
 
 주의:
 - `accent/gold` 배경에는 흰 텍스트를 쓰지 않는다(명도 대비 미달). `neutral/title` 같은 어두운 텍스트를 올린다.
-- Nav 하단 구분선은 `neutral/border`가 아니라 `secondary/teal`이다. 푸터 상단에는 구분선을 두지 않는다.
+- 상단 메뉴 아래와 푸터 위에는 구분선을 두지 않는다(랜딩 `public/landing.html`의 상단 메뉴 아래 선은 투명이다. 2026-11-07 별뜨리님 지적으로 고침).
 - 시안 일부 레이어는 `#292126`, `#574A4F`, `#333`을 하드코딩한다. 토큰이 있으면 `neutral/title`·`neutral/body`를 쓴다.
 
 ### 타이포그래피 (Noto Sans KR 기본)
@@ -115,7 +115,7 @@ Figma 시안은 초안이다. 시안과 랜딩이 다르면 랜딩을 따른다.
 - **입력창**: `border: 1px solid neutral/border`, `border-radius: 6px`, 높이 데스크톱 48px / 모바일 44px (원하는 것은 데스크톱 120px / 모바일 100px).
 - **배지(국가·상태, 관련 자료)**: 채움. 관련 자료는 `border-radius: 999px`. 스튜디오 유닛 배지는 시안 `12px` 모서리. gold/sage/일부 국가 배지는 어두운 글자.
 - **역할 칩 (홈 협업)**: 페이지 배경 + `1px solid neutral/border`, `border-radius: 20px`, 12px 본문색. 채워진 semantic 배지와 모양이 다르다.
-- **내비게이션 바**: 페이지와 같은 `neutral/background`. 하단 `1px solid secondary/teal`. 좌측 로고, 우측 끝에 Primary 「지금 시작하기」(→ `/planner`). 데스크톱 메뉴 간격 32px, 세로 패딩 24px. 모바일은 로고+햄버거, 세로 패딩 16px.
+- **내비게이션 바**: 페이지와 같은 `neutral/background`. 하단 구분선 없음. 좌측 로고, 우측 끝에 Primary 「지금 시작하기」(→ `/planner`). 데스크톱 메뉴 간격 32px, 세로 패딩 24px. 모바일은 로고+햄버거, 세로 패딩 16px.
 - **푸터**: 상단 구분선 없음.
 - **이미지 자리**: 실제 이미지 없을 때(스튜디오 썸네일) `neutral/background` + `1px solid #8C8C8C`, 진한 회색 박스로 채우지 않는다. 모서리 8px. 데스크톱 높이 200px / 모바일 160px.
 - **필터 칩 (스튜디오)**: 테두리 `#8C8C8C`, `border-radius: 20px`, 데스크톱 13px / 모바일 12px. 펼침 동작은 시안에 없음.
@@ -210,7 +210,7 @@ Figma 시안은 초안이다. 시안과 랜딩이 다르면 랜딩을 따른다.
 
 ### 기획안 (단계 3)
 
-- 화면 `/planner`(`?plan=<id>`로 내 기획안 열기). 로그인 없이도 쓸 수 있고 이 기기 브라우저에만 자동 보관된다. 서버 저장·PDF·메일은 로그인해야 하며, 로그인 안 한 내용은 서버에 저장하지 않는다. 옛 주소 `/planner.html`은 `next.config.ts`가 `/planner`로 보낸다(`public/planner.html` 파일은 삭제 허락을 받기 전까지 남겨 둔다).
+- 화면 `/planner`(`?plan=<id>`로 내 기획안 열기). 로그인 없이도 쓸 수 있고 이 기기 브라우저에만 자동 보관된다. 서버 저장·PDF·메일은 로그인해야 하며, 로그인 안 한 내용은 서버에 저장하지 않는다. 옛 주소 `/planner.html`은 `next.config.ts`가 `/planner`로 보낸다(`public/planner.html` 파일은 2026-11-07에 지웠다).
 - 내용의 모양과 검사 규칙은 `lib/plans.ts` 한 곳(화면·서버 공통). 「아클링스가 제안한 문장」은 `buildSuggestion()` 한 함수에서만 만든다(나중에 AI 문장도 이 자리와 `method` 값으로). 서버는 화면이 보낸 제안 문장을 믿지 않고 칸 내용에서 다시 만든다.
 - 서버 동작은 `app/actions/plans.ts`(저장·이력 불러오기·고치기·삭제·공개·PDF·메일). 모든 동작이 맨 위에서 로그인을 다시 확인하고, 로그인한 본인의 권한(RLS)으로 실행한다. PDF는 Route Handler가 아니라 Server Action이 만들어(Server Action은 출처 검사가 기본으로 붙는다) 화면이 내려받게 한다. 메일은 받는 주소를 요청에서 받지 않고 로그인 계정의 확인된 이메일만 쓴다.
 - PDF: `pdfkit` + `assets/fonts/NotoSansKR-*.otf`(SIL OFL 1.1, 라이선스 `assets/fonts/OFL.txt`). `next.config.ts`에서 `pdfkit`을 번들에서 빼고(`serverExternalPackages`) 글꼴을 `/planner` 화면에 실어 보낸다(`outputFileTracingIncludes`).
@@ -235,7 +235,7 @@ Figma 시안은 초안이다. 시안과 랜딩이 다르면 랜딩을 따른다.
 - `/portfolio`(목록, 10개씩, 처음 공개한 순서 최근 먼저)와 `/portfolio/[id]`(상세, [id]는 기획안 UUID)는 로그인 없이 열린다. 읽기는 `lib/portfolio.ts` 한 곳이며 DB의 `portfolio_items` 보기에서만 읽는다. 작성자는 공개 이름(`profiles.display_name`)을 읽을 때마다 가져오므로(기획안에 복사하지 않는다) 이름을 바꾸면 바로 반영된다. 주인 번호는 화면·주소·화면 소스 어디에도 내보내지 않는다. 공개를 껐거나 지워졌거나 없는 주소는 404 화면(`app/portfolio/not-found.tsx`)이다. 포트폴리오에는 공개한 완성본(`public_content`) 하나만 나오고 임시저장 이력은 나오지 않는다.
 - 올리기·내리기는 기획안 화면의 「포트폴리오에 올리기」·「포트폴리오에서 내리기」(`setPlanPublic`)이고, 올릴지 말지는 작성자가 고른다.
 - 상세의 「협업 신청」은 `/collab/new?plan=<기획안 UUID>`로 간다. 화면은 받는 사람 번호를 받지 않는다. `createCollab`이 `plan_id`로 기획안을 찾아 공개 중인지, 주인이 이메일 확인을 마쳤는지 확인하고 받는 사람(`recipient_kind=user`, `recipient_id`=주인)을 정하며, DB 트리거가 저장 순간에 같은 규칙을 한 번 더 적용한다(앱이 다른 값을 보내도 주인으로 바뀌고, 공개가 꺼졌으면 `plan_not_public`으로 막힌다). 신청 화면에는 작품 고르는 칸 대신 기획안 제목과 「○○님께 전달됩니다」가 보인다. 알림 메일은 받는 사람(주인)에게 간다. `plan` 없이 들어온 신청(랜딩)은 지금처럼 아클링스(운영자)가 받는다.
-- `lib/portfolio-sample.ts`는 1단계 시험용 가짜 데이터라 지금은 쓰지 않는다(삭제 허락을 받기 전까지 남겨 둔다).
+- `lib/portfolio-sample.ts`(1단계 시험용 가짜 데이터)는 2026-11-07에 지웠다.
 
 ### 이메일 확인 규칙 (카카오 등 이메일 없이 들어온 계정)
 

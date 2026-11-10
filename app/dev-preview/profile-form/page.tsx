@@ -19,7 +19,7 @@ export default async function ProfileFormPreviewPage({ searchParams }: { searchP
           <strong>미리보기 도우미</strong> (사이트에 없는 상자, 눌러서 펼침)
         </summary>
         <div className="mt-1">
-          <Link href="/dev-preview/mypage" className="underline">← 마이페이지 샘플로</Link>
+          <Link href="/mypage" className="underline">← 마이페이지로</Link>
           <br />
           가운데 흰 판은 기획안 화면 아래쪽 「포트폴리오」 칸을 흉내 낸 샘플이에요. 중복 확인 시험: <b>taken-name</b>(이미 쓰는 주소), <b>check-fail</b>(확인 실패), 샘플 크리에이터 주소(예: jian-lee).
           <br />

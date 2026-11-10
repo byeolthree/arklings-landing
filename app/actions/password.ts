@@ -59,5 +59,6 @@ export async function updatePassword(_prev: AuthFormState, fd: FormData): Promis
   } catch {
     return { message: UNAVAILABLE, nextStep: "retry" };
   }
-  redirect("/mypage?msg=password_set");
+  // 이메일 로그인이 이미 있던 계정은 「바꿨어요」, 소셜 전용 계정이 처음 정한 것이면 「이제 이메일로도 로그인」 안내를 보인다.
+  redirect(user.providers.includes("email") ? "/mypage?msg=password_changed" : "/mypage?msg=password_set");
 }

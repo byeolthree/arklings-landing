@@ -272,8 +272,8 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
 
       <p className="mt-5 text-center text-[12px] text-[#6f6469]">
         비밀번호가 기억나지 않나요?{" "}
-        <Link href="/forgot-password" className="text-jaju underline">
-          비밀번호 설정·재설정
+        <Link href={`/forgot-password${remembered ? `?email=${encodeURIComponent(remembered)}` : ""}`} className="text-jaju underline">
+          비밀번호 찾기
         </Link>
       </p>
       <p className="mt-2 text-center text-[12px] text-[#6f6469]">

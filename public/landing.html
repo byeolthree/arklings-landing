@@ -896,12 +896,16 @@
   .studio-card .h2 { font-size: 22px; line-height: 1.3; }
   @media (min-width: 768px) { .studio-card .h2 { font-size: 32px; } }
   /* r5: 태블릿·모바일(899px 이하)에서는 상단 CTA 대신 햄버거 메뉴 */
-  .nav-burger { display: none; position: relative; width: 40px; height: 40px; margin-right: -8px; border: 0; background: none; cursor: pointer; border-radius: 10px; }
+  .nav-burger { display: none; position: relative; width: 40px; height: 40px; margin-left: -8px; border: 0; background: none; cursor: pointer; border-radius: 10px; }
   .nav-burger i { position: absolute; left: 10px; right: 10px; height: 2px; border-radius: 2px; background: var(--title); transition: transform .3s var(--ease), opacity .2s; }
   .nav-burger i:nth-child(1) { top: 13px; } .nav-burger i:nth-child(2) { top: 19px; } .nav-burger i:nth-child(3) { top: 25px; }
   .nav-burger[aria-expanded="true"] i:nth-child(1) { transform: translateY(6px) rotate(45deg); }
   .nav-burger[aria-expanded="true"] i:nth-child(2) { opacity: 0; }
   .nav-burger[aria-expanded="true"] i:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+  .nav-icons { display: flex; align-items: center; gap: 8px; }
+  .nav-ico { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--jaju); background: #fff; color: var(--jaju); text-decoration: none; }
+  .nav-ico.fill { background: var(--jaju); color: #fff; }
+  .nav-ico[hidden] { display: none; }
   .nav-menu { display: none; }
   @media (max-width: 899px) {
     .nav-cta { display: none !important; }
@@ -1069,18 +1073,22 @@
 
 <header class="site" id="top">
   <div class="wrap nav">
+    <button class="nav-burger" id="navBurger" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="navMenu"><i></i><i></i><i></i></button>
     <a class="logo" href="#top">Arklings</a>
     <nav class="nav-links" aria-label="주요 메뉴">
       <span>킹덤</span><span>스튜디오</span><a class="nav-creators" href="/creators">크리에이터</a><span>라이브러리</span><span>커뮤니티</span>
     </nav>
     <div class="nav-right">
-      <a class="mypage auth-slot" id="navAuth" href="/login">로그인</a>
       <a class="btn btn-primary nav-cta" href="/planner">기획안 만들기</a>
-      <button class="nav-burger" id="navBurger" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="navMenu"><i></i><i></i><i></i></button>
+      <span class="nav-icons">
+        <a class="nav-ico fill" id="navPlus" href="/login" aria-label="등록하기(로그인이 필요해요)"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></a>
+        <a class="nav-ico" id="navAuth" href="/login" aria-label="로그인·회원가입"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg></a>
+        <a class="nav-ico" id="navBell" href="/collab" aria-label="알림" hidden><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg></a>
+      </span>
     </div>
   </div>
   <nav class="nav-menu" id="navMenu" aria-label="모바일 메뉴">
-    <span>킹덤</span><span>스튜디오</span><a class="nav-creators" href="/creators">크리에이터</a><span>라이브러리</span><span>커뮤니티</span><a class="auth-slot" id="navAuthM" href="/login">로그인</a>
+    <span>킹덤</span><span>스튜디오</span><a class="nav-creators" href="/creators">크리에이터</a><span>라이브러리</span><span>커뮤니티</span>
   </nav>
 </header>
 
@@ -1637,16 +1645,13 @@
 })();
 </script>
 <script>
-/* 로그인 여부에 따라 메뉴의 「로그인」/「마이페이지」를 바꾼다. 확인이 끝나기 전에는 글자를 숨겨 깜빡임을 막는다. */
+/* 로그인 여부에 따라 아이콘 이동 주소를 바꾼다(＋ → 등록 화면, 사람 → 마이페이지, 종은 로그인했을 때만 보인다). 확인은 /api/session만 부른다. */
 (function () {
-  var a = document.getElementById("navAuth"), m = document.getElementById("navAuthM");
+  var plus = document.getElementById("navPlus"), a = document.getElementById("navAuth"), bell = document.getElementById("navBell");
   function show(loggedIn) {
-    [a, m].forEach(function (el) {
-      if (!el) return;
-      el.textContent = loggedIn ? "마이페이지" : "로그인";
-      el.setAttribute("href", loggedIn ? "/mypage" : "/login");
-      el.classList.add("ready");
-    });
+    if (plus) { plus.setAttribute("href", loggedIn ? "/portfolio/new" : "/login"); plus.setAttribute("aria-label", loggedIn ? "등록하기" : "등록하기(로그인이 필요해요)"); }
+    if (a) { a.setAttribute("href", loggedIn ? "/mypage" : "/login"); a.setAttribute("aria-label", loggedIn ? "마이페이지" : "로그인·회원가입"); }
+    if (bell) bell.hidden = !loggedIn;
   }
   fetch("/api/session", { credentials: "same-origin", cache: "no-store" })
     .then(function (r) { return r.ok ? r.json() : { loggedIn: false }; })

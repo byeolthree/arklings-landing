@@ -5,7 +5,8 @@ import { StatusBadge } from "@/components/status-badge";
 import { requireUser } from "@/lib/auth";
 import { createAuthClient } from "@/lib/supabase/server";
 import { formatKstDate } from "@/lib/time";
-import { PAGE_SIZE, ROLES, STATUSES, type CollabRequest, type Status } from "@/lib/collab";
+import { collabTargetOf, PAGE_SIZE, ROLES, STATUSES, type CollabRequest, type Status } from "@/lib/collab";
+import { creatorNames } from "@/lib/creators";
 
 export const metadata: Metadata = { title: "받은 협업 신청", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic"; // 로그인 확인과 최신 목록을 요청 때마다 확인한다
@@ -32,6 +33,7 @@ export default async function CollabListPage({ searchParams }: { searchParams: S
   if (error) throw new Error(error.message);
 
   const rows = (data ?? []) as CollabRequest[];
+  const names = await creatorNames(rows.map((r) => r.creator_handle));
   const total = count ?? 0;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const href = (p: number, s = status) => {
@@ -79,10 +81,13 @@ export default async function CollabListPage({ searchParams }: { searchParams: S
                   <div>
                     <p className="text-[15px] font-medium text-[#292126]">{r.applicant_name}</p>
                     <p className="text-[12px] text-[#574a4f]">
-                      {r.plan_id ? `기획안 「${r.plans?.title ?? "제목 없음"}」` : (r.source_works?.title ?? "전체 협업 제안")} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)}
+                      {collabTargetOf(r, names).text} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)}
                     </p>
                   </div>
-                  <StatusBadge status={r.status} />
+                  <span className="flex items-center gap-3">
+                    <StatusBadge status={r.status} />
+                    <span className="inline-flex h-9 items-center rounded-lg border border-[#574a50] px-4 text-[13px] font-bold text-[#574a50]">열기</span>
+                  </span>
                 </Link>
               </li>
             ))}

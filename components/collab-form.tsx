@@ -24,6 +24,8 @@ type Props = {
   cancelHref: string;
   // 포트폴리오의 기획안으로 들어온 신청이면 값이 있다. 받는 사람은 화면이 아니라 서버가 기획안 번호로 정한다.
   plan?: { id: string; title: string; recipientName: string };
+  // 작품 창에서 들어온 신청이면 값이 있다. 받는 사람은 화면이 아니라 서버가 작품 번호로 정한다.
+  work?: { id: string; title: string; recipientName: string };
   // 크리에이터(목록·프로필)에서 들어온 신청이면 값이 있다(기획안 없이). 받는 사람 이름만 보여 주고 칸 모양은 기획안 칸과 같다.
   creator?: { handle: string; name: string };
   // 처음 열 때 미리 체크해 둘 역할(신청자가 바꿀 수 있다)
@@ -65,7 +67,7 @@ function Field({
   );
 }
 
-export function CollabForm({ action, works, initial, cancelHref, plan, creator, prefillRoles }: Props) {
+export function CollabForm({ action, works, initial, cancelHref, plan, work, creator, prefillRoles }: Props) {
   const [state, formAction, pending] = useActionState<FormState, FormData>(action, {});
   const e = state.errors ?? {};
   const v = (k: string, fallback = "") => state.values?.[k] ?? fallback;
@@ -140,6 +142,15 @@ export function CollabForm({ action, works, initial, cancelHref, plan, creator, 
             <div className="rounded-lg border border-[#e8dfe3] bg-[#f5ecf0] px-[11px] py-3">
               <p className="text-[13px] font-bold text-[#292126] md:text-[14px]">{plan.title}</p>
               <p className="mt-1 text-[12px] text-[#574a4f] md:text-[13px]">{plan.recipientName}님께 전달됩니다</p>
+            </div>
+          </div>
+        ) : work ? (
+          <div className="flex flex-col gap-1.5 md:gap-2">
+            <input type="hidden" name="work_id" value={work.id} />
+            <p className="text-[12px] font-medium text-[#292126] md:text-[13px]">신청 대상 작품</p>
+            <div className="rounded-lg border border-[#e8dfe3] bg-[#f5ecf0] px-[11px] py-3">
+              <p className="text-[13px] font-bold text-[#292126] md:text-[14px]">{work.title}</p>
+              <p className="mt-1 text-[12px] text-[#574a4f] md:text-[13px]">{work.recipientName}님께 전달됩니다</p>
             </div>
           </div>
         ) : creator ? (

@@ -19,6 +19,8 @@ export function describeAuthError(error: ErrorLike, context: "signup" | "login" 
       return { message: "아직 이메일 확인이 끝나지 않았어요. 받은 편지함(스팸함도)에서 확인 메일의 링크를 눌러 주세요.", next: "resend" };
     case "weak_password":
       return { message: "비밀번호가 너무 쉬워요. 8자 이상으로 영문과 숫자를 섞어 주세요.", next: "retry", field: "password" };
+    case "same_password":
+      return { message: "지금 쓰는 비밀번호와 같아요. 이전과 다른 새 비밀번호를 입력해 주세요.", next: "retry", field: "password" };
     case "email_address_invalid":
     case "validation_failed":
       return { message: "이메일 주소를 다시 확인해 주세요.", next: "retry", field: "email" };
@@ -41,6 +43,22 @@ export function describeAuthError(error: ErrorLike, context: "signup" | "login" 
       return { message: "로그인 방법 추가는 지금 준비 중이에요. 잠시 뒤에 다시 시도해 주세요.", next: "later" };
     case "single_identity_not_deletable":
       return { message: "로그인 방법이 하나뿐이라 해제할 수 없어요. 다른 방법을 먼저 추가해 주세요.", next: "retry" };
+    case "provider_disabled":
+    case "oauth_provider_not_supported":
+      return { message: "지금은 이 로그인 방법을 쓸 수 없어요. 다른 방법으로 로그인하거나 잠시 뒤에 다시 시도해 주세요.", next: "later" };
+    case "session_not_found":
+    case "session_expired":
+    case "bad_jwt":
+    case "no_authorization":
+    case "refresh_token_not_found":
+    case "refresh_token_already_used":
+    case "user_not_found":
+      return { message: "로그인 시간이 지났어요. 다시 로그인하거나 메일을 새로 받아 주세요.", next: "resend" };
+    case "reauthentication_needed":
+    case "reauthentication_not_valid":
+      return { message: "보안을 위해 다시 확인이 필요해요. 메일을 새로 받아 다시 시도해 주세요.", next: "resend" };
+    case "conflict":
+      return { message: "같은 요청이 겹쳤어요. 잠시 뒤에 다시 시도해 주세요.", next: "retry" };
     case "user_banned":
       return { message: "이 계정은 지금 사용할 수 없어요.", next: "later" };
     default:

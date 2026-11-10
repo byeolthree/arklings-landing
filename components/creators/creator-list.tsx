@@ -34,7 +34,7 @@ export function CreatorList({
   // 쪽·검색어·필터를 주소로 바꿔 주는 함수(1쪽이면 page를 생략한다)
   pageHref: (opts: Partial<CreatorFilter> & { page?: number }) => string;
   // 카드의 「협업 신청」이 가는 주소(받는 크리에이터와 역할을 미리 채워 준다)
-  applyHref: (c: CreatorCard) => string;
+  applyHref?: (c: CreatorCard) => string; // 안 주면 카드의 협업 신청 버튼을 숨긴다
   // 검색 폼이 함께 보내야 하는 다른 주소 값(예: 샘플 미리보기의 state)
   hiddenFields?: Record<string, string>;
 }) {
@@ -45,7 +45,7 @@ export function CreatorList({
       <section className="cr-top">
         <div className="wrap">
           <h1 className="cr-title">크리에이터 — 포트폴리오 탐색</h1>
-          <p className="cr-desc">크리에이터를 눌러 프로필과 공개한 기획안을 둘러보세요.</p>
+          <p className="cr-desc">크리에이터를 눌러 프로필과 공개한 작품을 둘러보세요.</p>
         </div>
       </section>
 
@@ -139,9 +139,12 @@ export function CreatorList({
           ) : total === 0 ? (
             <div className="panel cr-state">
               <h2>아직 크리에이터가 없어요</h2>
-              <p>기획안을 완성해 포트폴리오에 올리면 크리에이터로 여기에 보여요.</p>
+              <p>작품을 포트폴리오에 올리면 크리에이터로 여기에 보여요.</p>
               <Link href="/planner" className="btn btn-primary">
                 기획안 만들기 <span className="arrow">→</span>
+              </Link>
+              <Link href="/mypage" className="btn btn-ghost">
+                크리에이터 프로필 만들기
               </Link>
             </div>
           ) : cards.length === 0 ? (
@@ -211,9 +214,11 @@ export function CreatorList({
                       {c.openToCollab && (
                         <div className="cr-card-foot">
                           <span className="cr-open">협업 받는 중</span>
-                          <Link href={applyHref(c)} className="btn btn-ghost">
-                            협업 신청
-                          </Link>
+                          {applyHref && (
+                            <Link href={applyHref(c)} className="btn btn-ghost">
+                              협업 신청
+                            </Link>
+                          )}
                         </div>
                       )}
                     </div>

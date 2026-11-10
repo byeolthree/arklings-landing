@@ -1,0 +1,30 @@
+import Link from "next/link";
+
+// 마이페이지 네 화면의 맨 위 띠(시안 01·12·13, D39·D42): 제목은 늘 「마이페이지」, 칩 이름은 「기본 정보 · 프로필 등록 · 포트폴리오 등록 · 협업 신청」이다.
+// 지금 화면의 칩만 진하게 칠하고, 나머지는 누르면 그 화면으로 간다.
+const STEPS = ["기본 정보", "프로필 등록", "포트폴리오 등록", "협업 신청"] as const;
+export type Step = (typeof STEPS)[number];
+
+const HREFS: Record<Step, string> = {
+  "기본 정보": "/mypage",
+  "프로필 등록": "/portfolio/new?step=profile",
+  "포트폴리오 등록": "/portfolio/new",
+  "협업 신청": "/mypage/collab",
+};
+
+export function RegisterHeader({ current }: { title?: string; current: Step }) {
+  return (
+    <div className="rg-top">
+      <div className="rg-wrap">
+        <h1 className="rg-title">마이페이지</h1>
+        <ol className="rg-steps" aria-label="마이페이지 이동">
+          {STEPS.map((s) => (
+            <li key={s} aria-current={s === current ? "step" : undefined}>
+              {s === current ? s : <Link href={HREFS[s]}>{s}</Link>}
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  );
+}
