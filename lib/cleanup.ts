@@ -61,6 +61,14 @@ export async function runCleanup(now: Date = new Date()): Promise<CleanupResult>
     if (data.length < BATCH) break;
   }
 
+  // 1-2) 운영자 화면 기록(collab_log, 0016)도 같은 3개월 기준으로 지운다. 표가 아직 없으면(0016 실행 전) 건너뛴다.
+  try {
+    const { error: logErr } = await sb.from("collab_log").delete().lt("created_at", cutoff);
+    if (logErr && logErr.code !== "42P01" && logErr.code !== "PGRST205") throw logErr;
+  } catch (e) {
+    fail("운영자 기록 정리", e);
+  }
+
   // 2) 짝 없는 파일(고아 파일)
   try {
     const root = await sb.storage.from(BUCKET).list("", { limit: 1000 });

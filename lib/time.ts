@@ -30,3 +30,11 @@ export function formatKstDate(iso: string): string {
   if (Number.isNaN(d.getTime())) return "-";
   return `${dateOnly.format(d)} KST`;
 }
+
+// 표에 쓰는 짧은 시각: 「11-10 09:12」(한국 시간).
+export function formatKstShort(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "-";
+  const k = new Date(d.getTime() + 9 * 3600 * 1000).toISOString();
+  return `${k.slice(5, 10)} ${k.slice(11, 16)}`;
+}
