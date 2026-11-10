@@ -38,7 +38,7 @@ export async function requestPasswordReset(_prev: AuthFormState, fd: FormData): 
 // 메일 링크로 들어와 로그인된 상태에서 새 비밀번호를 정한다.
 export async function updatePassword(_prev: AuthFormState, fd: FormData): Promise<AuthFormState> {
   const user = await getCurrentUser();
-  if (!user) return { message: "링크가 만료되었어요. 비밀번호 설정 메일을 다시 받아 주세요.", nextStep: "resend" };
+  if (!user) return { message: "링크가 만료되었어요. 재설정 메일을 다시 받아 주세요.", nextStep: "resend" };
   if (!isConfirmed(user)) return { message: CONFIRM_FIRST_MESSAGE };
   const password = text(fd, "password");
   const confirm = text(fd, "passwordConfirm");

@@ -78,20 +78,19 @@ Supabase 화면 → Authentication → Emails(Email Templates)에서 아래 문�
 </p>
 ```
 
-## 4. Reset password (비밀번호 설정·재설정) — 단계 4
+## 4. Reset password (비밀번호 찾기) — 단계 4
 
-제목: `[아클링스] 비밀번호를 정해 주세요`
+제목: `[아클링스] 비밀번호 재설정 안내`
 
 ```html
-<h2 style="margin:0 0 12px;color:#2a2025">비밀번호를 정해 주세요</h2>
+<h2 style="margin:0 0 12px;color:#2a2025">비밀번호를 다시 정해 주세요</h2>
 <p style="margin:0 0 16px;color:#574a50;line-height:1.6">
-  아래 버튼을 누르면 새 비밀번호를 정할 수 있어요. 구글·카카오로 가입한 계정도 이 링크로 비밀번호를 정하면
-  이메일로 로그인할 수 있어요.
+  아래 버튼을 누르면 새 비밀번호를 정할 수 있어요.
 </p>
 <p style="margin:0 0 20px">
   <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery"
      style="display:inline-block;background:#a61e5c;color:#ffffff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700">
-    비밀번호 정하기
+    새 비밀번호 정하기
   </a>
 </p>
 <p style="margin:0;color:#8c8c8c;font-size:12px;line-height:1.6">

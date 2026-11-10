@@ -263,7 +263,7 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
             <li>아래 「구글로 로그인」「카카오로 로그인」 버튼</li>
             <li>
               <Link href={`/forgot-password${v.email ? `?email=${encodeURIComponent(v.email)}` : ""}`} className="text-jaju underline">
-                비밀번호 설정 메일 받기
+                비밀번호 찾기
               </Link>
             </li>
           </ul>

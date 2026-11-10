@@ -29,5 +29,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (ok) redirect(next);
+  // 비밀번호 재설정 링크가 만료되면 가입 확인 메일 화면이 아니라 비밀번호 찾기 화면으로 보낸다.
+  if (type === "recovery" || next === "/reset-password") redirect("/forgot-password?expired=1");
   redirect(`/auth/link-expired?next=${encodeURIComponent(next)}`);
 }

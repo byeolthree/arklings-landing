@@ -7,7 +7,7 @@ import { requestPasswordReset, updatePassword } from "@/app/actions/password";
 import { authInputCls, FormField } from "@/components/form-field";
 import { CardHeading, PaperCard, primaryBtn } from "@/components/paper-card";
 
-export function ForgotPasswordForm({ initialEmail }: { initialEmail?: string }) {
+export function ForgotPasswordForm({ initialEmail, expired }: { initialEmail?: string; expired?: boolean }) {
   const [state, action, pending] = useActionState<AuthFormState, FormData>(requestPasswordReset, {});
   if (state.sentTo) {
     return (
@@ -16,9 +16,7 @@ export function ForgotPasswordForm({ initialEmail }: { initialEmail?: string }) 
         <div className="mt-6 flex flex-col gap-3 md:mt-8">
           <ul className="flex flex-col gap-1.5 rounded-lg bg-[#faf7f8] px-4 py-3 text-[12px] leading-normal text-[#574a4f] md:text-[13px]">
             <li className="text-center">
-              메일이 오지 않으면 아클링스에 등록한 이메일이 맞는지 확인해 주세요.
-              <br />
-              카카오 로그인에 쓰는 메일과 다를 수 있어요.
+              메일의 링크를 누르면 새 비밀번호를 정할 수 있어요.
             </li>
           </ul>
           <Link href="/login" className={`${primaryBtn} w-full`}>
@@ -30,11 +28,11 @@ export function ForgotPasswordForm({ initialEmail }: { initialEmail?: string }) 
   }
   return (
     <PaperCard>
-      <CardHeading title="비밀번호 설정·재설정" lines={["가입한 이메일을 입력하면 비밀번호를 정하는 링크를 보내 드려요."]} />
+      <CardHeading title="비밀번호 찾기" lines={["가입한 이메일을 입력하면 비밀번호를 다시 정하는 링크를 보내 드려요."]} />
       <form action={action} noValidate className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5">
-        {state.message && (
+        {(state.message || expired) && (
           <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-[12px] text-destructive md:text-[13px]">
-            {state.message}
+            {state.message ?? "링크가 만료됐거나 이미 사용됐어요. 재설정 메일을 다시 받아 주세요."}
           </p>
         )}
         <FormField id="forgot-email" label="이메일" error={state.errors?.email}>
@@ -51,7 +49,7 @@ export function ForgotPasswordForm({ initialEmail }: { initialEmail?: string }) 
           />
         </FormField>
         <button type="submit" disabled={pending} className={`${primaryBtn} w-full`}>
-          {pending ? "보내는 중…" : "설정 메일 받기"}
+          {pending ? "보내는 중…" : "재설정 메일 받기"}
         </button>
       </form>
     </PaperCard>
@@ -81,7 +79,7 @@ export function ResetPasswordForm() {
         </button>
         {state.nextStep === "resend" && (
           <Link href="/forgot-password" className="text-center text-[12px] text-jaju underline">
-            비밀번호 설정 메일 다시 받기
+            재설정 메일 다시 받기
           </Link>
         )}
       </form>
