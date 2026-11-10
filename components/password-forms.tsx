@@ -16,6 +16,11 @@ export function ForgotPasswordForm({ initialEmail }: { initialEmail?: string }) 
         <div className="mt-6 flex flex-col gap-3 md:mt-8">
           <ul className="flex flex-col gap-1.5 rounded-lg bg-[#faf7f8] px-4 py-3 text-[12px] leading-normal text-[#574a4f] md:text-[13px]">
             <li>메일이 안 보이면 스팸함도 확인해 주세요.</li>
+            <li className="text-center">
+              메일이 오지 않으면 아클링스에 등록한 이메일이 맞는지 확인해 주세요.
+              <br />
+              카카오 로그인에 쓰는 메일과 다를 수 있어요.
+            </li>
           </ul>
           <Link href="/login" className={`${primaryBtn} w-full`}>
             로그인 화면으로
