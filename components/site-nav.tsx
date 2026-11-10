@@ -130,33 +130,29 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { logg
         </nav>
 
         <div className="lk-nav-right lk-icons">
-          {/* ＋ : 로그인하면 등록할 곳 드롭다운, 로그아웃이면 로그인 화면으로 */}
-          <div className="lk-ico-wrap" {...hv("plus")}>
-            {isIn ? (
+          {/* ＋ : 로그인했을 때만. 등록할 곳 드롭다운 */}
+          {isIn && (
+            <div className="lk-ico-wrap" {...hv("plus")}>
               <button type="button" className="lk-ico lk-ico-fill" aria-label="등록하기" aria-haspopup="menu" aria-expanded={drop === "plus"} onClick={() => toggleDrop("plus")}>
                 <PlusIcon />
               </button>
-            ) : (
-              <Link href="/login" className="lk-ico lk-ico-fill" aria-label="등록하기(로그인이 필요해요)">
-                <PlusIcon />
-              </Link>
-            )}
-            {drop === "plus" && (
-              <div className="lk-drop" role="menu" aria-label="등록할 곳">
-                {MENU.map((m) =>
-                  m.href ? (
-                    <Link key={m.label} role="menuitem" href="/portfolio/new" onClick={shut} aria-current={onCreators ? "page" : undefined}>
-                      {m.label}
-                    </Link>
-                  ) : (
-                    <span key={m.label} role="presentation">
-                      {m.label}
-                    </span>
-                  ),
-                )}
-              </div>
-            )}
-          </div>
+              {drop === "plus" && (
+                <div className="lk-drop" role="menu" aria-label="등록할 곳">
+                  {MENU.map((m) =>
+                    m.href ? (
+                      <Link key={m.label} role="menuitem" href="/portfolio/new" onClick={shut} aria-current={onCreators ? "page" : undefined}>
+                        {m.label}
+                      </Link>
+                    ) : (
+                      <span key={m.label} role="presentation">
+                        {m.label}
+                      </span>
+                    ),
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 사람 : 마이페이지 메뉴(로그인) 또는 로그인·회원가입(로그아웃) */}
           <div className="lk-ico-wrap" {...hv("person")}>
