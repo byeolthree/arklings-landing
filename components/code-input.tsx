@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { authInputCls } from "@/components/form-field";
 
 // 메일로 받는 확인 번호 자리 수. 서울 Supabase의 「Email OTP Length」 설정과 같아야 한다(기본 6).
-export const OTP_LENGTH = 6;
+export const OTP_LENGTH = 8;
 
 const digits = (v: string) => v.replace(/\D/g, "");
 
