@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DeleteButton } from "@/components/delete-button";
 import "@/components/planner/planner.css";
 import "@/components/mypage/mypage.css";
 import "@/components/register/register.css";
@@ -76,6 +77,7 @@ export default async function MyCollabPage() {
                     <div className="cl-side">
                       <StatusBadge status={r.status} />
                       <Link href={`/collab/${r.id}`} className="cl-open">열기</Link>
+                      <DeleteButton id={r.id} />
                     </div>
                   </li>
                 ))}

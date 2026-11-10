@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DeleteButton } from "@/components/delete-button";
 import { PaperCard, PaperPage } from "@/components/paper-card";
 import { StatusBadge } from "@/components/status-badge";
 import { requireUser } from "@/lib/auth";
@@ -76,19 +77,18 @@ export default async function CollabListPage({ searchParams }: { searchParams: S
         ) : (
           <ul className="mt-6 divide-y divide-[#e8dfe3] rounded-xl border border-[#e8dfe3]">
             {rows.map((r) => (
-              <li key={r.id}>
-                <Link href={`/collab/${r.id}`} className="flex flex-col gap-1.5 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-[15px] font-medium text-[#292126]">{r.applicant_name}</p>
-                    <p className="text-[12px] text-[#574a4f]">
-                      {collabTargetOf(r, names).text} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)}
-                    </p>
-                  </div>
-                  <span className="flex items-center gap-3">
-                    <StatusBadge status={r.status} />
-                    <span className="inline-flex h-9 items-center rounded-lg border border-[#574a50] px-4 text-[13px] font-bold text-[#574a50]">열기</span>
-                  </span>
+              <li key={r.id} className="flex flex-col gap-1.5 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <Link href={`/collab/${r.id}`} className="min-w-0 flex-1">
+                  <p className="text-[15px] font-medium text-[#292126]">{r.applicant_name}</p>
+                  <p className="text-[12px] text-[#574a50]">
+                    {collabTargetOf(r, names).text} · {r.roles.map((x) => ROLES[x]).join(", ")} · {formatKstDate(r.created_at)}
+                  </p>
                 </Link>
+                <span className="flex items-start gap-3">
+                  <span className="flex h-9 items-center"><StatusBadge status={r.status} /></span>
+                  <Link href={`/collab/${r.id}`} className="inline-flex h-9 items-center rounded-lg border border-[#574a50] px-4 text-[13px] font-bold text-[#574a50]">열기</Link>
+                  <DeleteButton id={r.id} />
+                </span>
               </li>
             ))}
           </ul>
