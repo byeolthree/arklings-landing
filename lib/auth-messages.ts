@@ -19,6 +19,8 @@ export function describeAuthError(error: ErrorLike, context: "signup" | "login" 
       return { message: "아직 이메일 확인이 끝나지 않았어요. 받은 편지함(스팸함도)에서 확인 메일의 링크를 눌러 주세요.", next: "resend" };
     case "weak_password":
       return { message: "비밀번호가 너무 쉬워요. 8자 이상으로 영문과 숫자를 섞어 주세요.", next: "retry", field: "password" };
+    case "same_password":
+      return { message: "지금 쓰는 비밀번호와 같아요. 이전과 다른 새 비밀번호를 입력해 주세요.", next: "retry", field: "password" };
     case "email_address_invalid":
     case "validation_failed":
       return { message: "이메일 주소를 다시 확인해 주세요.", next: "retry", field: "email" };
