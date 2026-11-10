@@ -906,6 +906,11 @@
   .nav-ico { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--jaju); background: #fff; color: var(--jaju); text-decoration: none; }
   .nav-ico.fill { background: var(--jaju); color: #fff; }
   .nav-ico[hidden] { display: none; }
+  .nav-wrap { position: relative; display: inline-flex; }
+  .nav-drop { position: absolute; z-index: 60; right: 0; top: calc(100% + 9px); width: 190px; box-sizing: border-box; padding: 8px; background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+  .nav-drop[hidden] { display: none; }
+  .nav-drop a { display: flex; align-items: center; box-sizing: border-box; height: 41px; padding: 0 14px; font-size: 14px; color: var(--title); text-decoration: none; border-radius: 8px; }
+  .nav-drop a:hover { background: var(--tint); }
   .nav-menu { display: none; }
   @media (max-width: 899px) {
     .nav-cta { display: none !important; }
@@ -1082,7 +1087,7 @@
       <a class="btn btn-primary nav-cta" href="/planner">기획안 만들기</a>
       <span class="nav-icons">
         <a class="nav-ico fill" id="navPlus" href="/login" aria-label="등록하기(로그인이 필요해요)"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></a>
-        <a class="nav-ico" id="navAuth" href="/login" aria-label="로그인·회원가입"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg></a>
+        <span class="nav-wrap">        <a class="nav-ico" id="navAuth" href="/login" aria-haspopup="menu" aria-expanded="false" aria-label="로그인·회원가입"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg></a><div class="nav-drop" id="navDrop" role="menu" hidden><a role="menuitem" href="/mypage">기본 정보</a><a role="menuitem" href="/portfolio/new?step=profile">프로필 등록</a><a role="menuitem" href="/portfolio/new">포트폴리오 등록</a><a role="menuitem" href="/mypage/collab">협업 신청</a><a role="menuitem" href="/admin" id="navAdmin" hidden>운영자</a></div></span>
         <a class="nav-ico" id="navBell" href="/collab" aria-label="알림" hidden><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg></a>
       </span>
     </div>
@@ -1650,12 +1655,17 @@
   var plus = document.getElementById("navPlus"), a = document.getElementById("navAuth"), bell = document.getElementById("navBell");
   function show(loggedIn) {
     if (plus) { plus.setAttribute("href", loggedIn ? "/portfolio/new" : "/login"); plus.setAttribute("aria-label", loggedIn ? "등록하기" : "등록하기(로그인이 필요해요)"); }
-    if (a) { a.setAttribute("href", loggedIn ? "/mypage" : "/login"); a.setAttribute("aria-label", loggedIn ? "마이페이지" : "로그인·회원가입"); }
+    if (a) { a.setAttribute("href", loggedIn ? "/mypage" : "/login"); a.setAttribute("aria-label", loggedIn ? "마이페이지" : "로그인·회원가입"); a.dataset.menu = loggedIn ? "1" : ""; }
     if (bell) bell.hidden = !loggedIn;
   }
+  var drop = document.getElementById("navDrop"), adm = document.getElementById("navAdmin");
+  function setDrop(open) { if (!drop || !a) return; drop.hidden = !open; a.setAttribute("aria-expanded", open ? "true" : "false"); }
+  if (a) a.addEventListener("click", function (e) { if (!a.dataset.menu) return; e.preventDefault(); setDrop(drop.hidden); });
+  document.addEventListener("click", function (e) { if (drop && !drop.hidden && !drop.contains(e.target) && !a.contains(e.target)) setDrop(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") setDrop(false); });
   fetch("/api/session", { credentials: "same-origin", cache: "no-store" })
     .then(function (r) { return r.ok ? r.json() : { loggedIn: false }; })
-    .then(function (d) { show(!!(d && d.loggedIn)); })
+    .then(function (d) { show(!!(d && d.loggedIn)); if (adm) adm.hidden = !(d && d.isAdmin); })
     .catch(function () { show(false); });
 })();
 </script>
