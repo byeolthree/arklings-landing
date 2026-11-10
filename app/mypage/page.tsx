@@ -108,6 +108,18 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
             <span className="mp-note">이 주소는 나에게만 보여요.</span>
           </dd>
         </div>
+        {linked.includes("email") && (
+          <div className="mp-row">
+            <dt>비밀번호</dt>
+            <dd>
+              <div className="mp-btns">
+                <Link href={`/forgot-password${user.email ? `?email=${encodeURIComponent(user.email)}` : ""}`} className="btn btn-ghost">
+                  비밀번호 변경
+                </Link>
+              </div>
+            </dd>
+          </div>
+        )}
       </dl>
       <div className="mp-foot">
         <small>
