@@ -82,7 +82,7 @@ export async function signUp(_prev: AuthFormState, fd: FormData): Promise<AuthFo
     if (error) {
       // 이미 가입된 이메일이면 그대로 알려 준다.
       if (error.code === "user_already_exists" || error.code === "email_exists") {
-        return { errors: { email: "이미 가입된 이메일이에요. 로그인하거나, 비밀번호를 잊었다면 「비밀번호 찾기」를 이용해 주세요." }, values, returnTo };
+        return { errors: { email: "이미 가입된 이메일이에요." }, values, returnTo };
       }
       const issue = describeAuthError(error, "signup");
       if (issue.field) return { errors: { [issue.field]: issue.message }, nextStep: issue.next, values, returnTo };
@@ -90,7 +90,7 @@ export async function signUp(_prev: AuthFormState, fd: FormData): Promise<AuthFo
     }
     // 이미 확인이 끝난 계정의 이메일이면(가입 정보가 비어 돌아옴) 가입 메일을 보내지 않고 알려 준다.
     if (signed?.user && Array.isArray(signed.user.identities) && signed.user.identities.length === 0) {
-      return { errors: { email: "이미 가입된 이메일이에요. 로그인하거나, 비밀번호를 잊었다면 「비밀번호 찾기」를 이용해 주세요." }, values, returnTo };
+      return { errors: { email: "이미 가입된 이메일이에요." }, values, returnTo };
     }
   } catch {
     return { message: UNAVAILABLE, nextStep: "retry", values, returnTo };
