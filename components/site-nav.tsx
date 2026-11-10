@@ -128,7 +128,6 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { logg
             )}
             {drop === "plus" && (
               <div className="lk-drop" role="menu" aria-label="등록할 곳">
-                <p className="lk-drop-cap">등록할 곳</p>
                 {MENU.map((m) =>
                   m.href ? (
                     <Link key={m.label} role="menuitem" href="/portfolio/new" onClick={shut} aria-current={onCreators ? "page" : undefined}>
