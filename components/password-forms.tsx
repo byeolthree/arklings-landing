@@ -6,9 +6,12 @@ import type { AuthFormState } from "@/app/actions/auth";
 import { requestPasswordReset, updatePassword } from "@/app/actions/password";
 import { authInputCls, FormField } from "@/components/form-field";
 import { CardHeading, PaperCard, primaryBtn } from "@/components/paper-card";
+import { useStoredValue } from "@/lib/use-stored-value";
 
 export function ForgotPasswordForm({ initialEmail, expired }: { initialEmail?: string; expired?: boolean }) {
   const [state, action, pending] = useActionState<AuthFormState, FormData>(requestPasswordReset, {});
+  // 로그인 화면에서 「이메일 기억하기」를 켜 두었으면 그 이메일을 미리 채운다.
+  const remembered = useStoredValue("arklings.rememberedEmail");
   if (state.sentTo) {
     return (
       <PaperCard>
@@ -41,7 +44,8 @@ export function ForgotPasswordForm({ initialEmail, expired }: { initialEmail?: s
             name="email"
             type="email"
             autoComplete="email"
-            defaultValue={state.values?.email ?? initialEmail}
+            key={remembered}
+            defaultValue={state.values?.email ?? initialEmail ?? (remembered || undefined)}
             disabled={pending}
             aria-invalid={state.errors?.email ? true : undefined}
             aria-describedby={state.errors?.email ? "forgot-email-error" : undefined}
