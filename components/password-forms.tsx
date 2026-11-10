@@ -12,10 +12,9 @@ export function ForgotPasswordForm({ initialEmail }: { initialEmail?: string }) 
   if (state.sentTo) {
     return (
       <PaperCard>
-        <CardHeading title="메일을 보냈어요" lines={[`${state.sentTo} 으로 비밀번호 설정 링크를 보냈어요.`, "이 이메일로 가입한 계정이 있다면 메일이 도착해요."]} />
+        <CardHeading title="메일을 보냈어요" />
         <div className="mt-6 flex flex-col gap-3 md:mt-8">
           <ul className="flex flex-col gap-1.5 rounded-lg bg-[#faf7f8] px-4 py-3 text-[12px] leading-normal text-[#574a4f] md:text-[13px]">
-            <li>메일이 안 보이면 스팸함도 확인해 주세요.</li>
             <li className="text-center">
               메일이 오지 않으면 아클링스에 등록한 이메일이 맞는지 확인해 주세요.
               <br />
