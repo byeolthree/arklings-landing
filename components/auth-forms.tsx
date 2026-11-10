@@ -73,7 +73,6 @@ export function CheckEmailCard({ email, returnTo }: { email: string; returnTo: s
       <div className="mt-6 flex flex-col gap-4 md:mt-8">
         <ul className="flex flex-col gap-1.5 rounded-lg bg-[#faf7f8] px-4 py-3 text-[12px] leading-normal text-[#574a4f] md:text-[13px]">
           <li>메일이 안 보이면 스팸함도 확인해 주세요. 발신 주소가 임시라 스팸함으로 갈 수 있어요.</li>
-          <li>이미 가입한 이메일이라면 가입 확인 메일 대신 비밀번호 설정 메일이 가요. 그 링크로 비밀번호를 정하면 로그인할 수 있어요.</li>
         </ul>
         <ResendBox email={email} returnTo={returnTo} />
         <Link href={withNext("/login", returnTo)} className={`${primaryBtn} w-full`}>
