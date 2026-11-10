@@ -16,7 +16,6 @@ export function ForgotPasswordForm({ initialEmail }: { initialEmail?: string }) 
         <div className="mt-6 flex flex-col gap-3 md:mt-8">
           <ul className="flex flex-col gap-1.5 rounded-lg bg-[#faf7f8] px-4 py-3 text-[12px] leading-normal text-[#574a4f] md:text-[13px]">
             <li>메일이 안 보이면 스팸함도 확인해 주세요.</li>
-            <li>구글·카카오로 가입한 계정도 이 링크로 비밀번호를 정하면 이메일로 로그인할 수 있어요.</li>
           </ul>
           <Link href="/login" className={`${primaryBtn} w-full`}>
             로그인 화면으로

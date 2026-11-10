@@ -18,6 +18,7 @@ export const dynamic = "force-dynamic";
 const MESSAGES: Record<string, { text: string; ok?: boolean }> = {
   linked: { text: "로그인 방법을 추가했어요.", ok: true },
   unlinked: { text: "로그인 방법을 해제했어요.", ok: true },
+  password_changed: { text: "비밀번호를 바꿨어요.", ok: true },
   password_set: { text: "비밀번호를 저장했어요. 이제 이메일로도 로그인할 수 있어요.", ok: true },
   link_failed: { text: "로그인 방법을 바꾸지 못했어요. 잠시 뒤에 다시 시도해 주세요." },
   link_disabled: { text: "로그인 방법 추가·해제는 지금 준비 중이에요. 잠시 뒤에 다시 시도해 주세요." },
