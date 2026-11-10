@@ -17,7 +17,7 @@ export function PaperCard({ children, className = "" }: { children: React.ReactN
   );
 }
 
-export function CardHeading({ title, lines }: { title: string; lines?: string[] }) {
+export function CardHeading({ title, lines }: { title: string; lines?: React.ReactNode[] }) {
   return (
     <div className="flex flex-col items-center gap-2 text-center md:gap-2.5">
       {/* eslint-disable-next-line @next/next/no-img-element */}

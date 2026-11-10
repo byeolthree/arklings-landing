@@ -1,17 +1,6 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { ResetPasswordForm } from "@/components/password-forms";
-import { PaperPage } from "@/components/paper-card";
-import { getCurrentUser } from "@/lib/auth";
 
-export const metadata: Metadata = { title: "새 비밀번호", robots: { index: false, follow: false } };
-
-export default async function ResetPasswordPage() {
-  // 메일 링크를 눌러 로그인된 상태에서만 열린다. 아니면 설정 메일을 다시 받도록 보낸다.
-  if (!(await getCurrentUser())) redirect("/auth/link-expired?next=%2Freset-password");
-  return (
-    <PaperPage>
-      <ResetPasswordForm />
-    </PaperPage>
-  );
+// 새 비밀번호는 비밀번호 찾기 화면에서 확인 번호를 맞춘 같은 화면에서만 정한다. 이 주소로 직접 들어오면 비밀번호 찾기 화면으로 보낸다.
+export default function ResetPasswordPage() {
+  redirect("/forgot-password");
 }

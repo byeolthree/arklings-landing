@@ -7,7 +7,11 @@ export function SiteFooter() {
       <div className="lk-wrap">
         <div>
           <b>Arklings</b>
-          <p>한국 신화·고대사 기반 IP 스튜디오. 다양한 창작자가 함께 고유 세계관을 만들어갑니다.</p>
+          <p>
+            한국 신화·고대사 기반 IP 스튜디오.
+            <br />
+            다양한 창작자가 함께 고유 세계관을 만들어갑니다.
+          </p>
           <p>© 2026 Arklings. All rights reserved.</p>
         </div>
         <div className="links">

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { resendConfirmation, signIn, signUp, type AuthFormState } from "@/app/actions/auth";
 import { ConsentDetails } from "@/components/consent-details";
+import { FormNotice } from "@/components/form-notice";
 import { authInputCls, FormField } from "@/components/form-field";
 import { CardHeading, PaperCard, primaryBtn, outlineBtn } from "@/components/paper-card";
 import { CONSENT_LABEL } from "@/lib/consent";
@@ -11,15 +12,6 @@ import { SocialButtons } from "@/components/social-buttons";
 import { useStoredValue } from "@/lib/use-stored-value";
 
 const withNext = (path: string, next: string) => `${path}?next=${encodeURIComponent(next)}`;
-
-function ErrorBox({ message }: { message?: string }) {
-  if (!message) return null;
-  return (
-    <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-[12px] leading-normal text-destructive md:text-[13px]">
-      {message}
-    </p>
-  );
-}
 
 // 확인 메일을 (다시) 받는 칸. 로그인 화면(확인 전 계정)과 만료된 링크 화면, 가입 직후 안내에서 쓴다.
 export function ResendBox({ email, returnTo, askEmail }: { email?: string; returnTo: string; askEmail?: boolean }) {
@@ -106,7 +98,6 @@ export function SignupForm({ returnTo }: { returnTo: string }) {
       <CardHeading title="가입하기" lines={["이메일로 가입하면 기획안을 저장하고 공개할 수 있어요.", "가입 후 확인 메일의 링크를 눌러 주세요."]} />
       <form action={action} noValidate className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5">
         <input type="hidden" name="next" value={returnTo} />
-        <ErrorBox message={state.message} />
         <FormField id="displayName" label="공개 이름" hint="포트폴리오에서 다른 사람에게 보이는 이름이에요. 30자 이내." error={e.displayName}>
           <input
             id="displayName"
@@ -183,6 +174,7 @@ export function SignupForm({ returnTo }: { returnTo: string }) {
         </p>
       </form>
       <SocialButtons returnTo={returnTo} heading="또는 구글·카카오로 바로 가입하기" />
+      <FormNotice message={state.message} />
     </PaperCard>
   );
 }
@@ -198,7 +190,7 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
 
   return (
     <PaperCard>
-      <CardHeading title="로그인" lines={["가입할 때 쓴 이메일과 비밀번호를 입력해 주세요."]} />
+      <CardHeading title="로그인" />
       <form
         action={action}
         noValidate
@@ -214,7 +206,6 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
         }}
       >
         <input type="hidden" name="next" value={returnTo} />
-        <ErrorBox message={state.message} />
         <FormField id="login-email" label="이메일" error={e.email}>
           <input
             id="login-email"
@@ -263,7 +254,7 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
             <li>아래 「구글로 로그인」「카카오로 로그인」 버튼</li>
             <li>
               <Link href={`/forgot-password${v.email ? `?email=${encodeURIComponent(v.email)}` : ""}`} className="text-jaju underline">
-                비밀번호 설정 메일 받기
+                비밀번호 찾기
               </Link>
             </li>
           </ul>
@@ -283,6 +274,7 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
         </Link>
       </p>
       <SocialButtons returnTo={returnTo} actionLabel="로그인" />
+      <FormNotice message={state.message} />
     </PaperCard>
   );
 }

@@ -1,9 +1,12 @@
 "use client";
 
+import { FcGoogle } from "react-icons/fc";
+import { RiKakaoTalkFill } from "react-icons/ri";
 import { useActionState, useId, useState } from "react";
 import { startOAuth } from "@/app/actions/social";
 import type { AuthFormState } from "@/app/actions/auth";
 import { ConsentDetails } from "@/components/consent-details";
+import { FormNotice } from "@/components/form-notice";
 import { CONSENT_LABEL, CONSENT_VERSION } from "@/lib/consent";
 import { outlineBtn } from "@/components/paper-card";
 import { OAUTH_PROVIDERS } from "@/lib/providers";
@@ -36,11 +39,6 @@ export function SocialButtons({ returnTo, heading = "또는 다른 방법으로 
     >
       <input type="hidden" name="next" value={returnTo} />
       <p className="text-center text-[12px] text-[#6f6469]">{heading}</p>
-      {state.message && (
-        <p role="alert" className="text-[12px] text-destructive md:text-[13px]">
-          {state.message}
-        </p>
-      )}
       <div className="flex flex-col gap-2">
         <label htmlFor={consentId} className="flex items-start gap-2 text-[12px] font-medium text-[#6f6469] md:text-[13px]">
           <input id={consentId} type="checkbox" name="consent" checked={agreed} onChange={(ev) => setPicked(ev.target.checked)} disabled={pending} className="mt-0.5 size-4 shrink-0 accent-[#a61e5c]" />
@@ -63,12 +61,15 @@ export function SocialButtons({ returnTo, heading = "또는 다른 방법으로 
             disabled={pending}
             aria-busy={pending && clicked === p.id}
             onClick={() => setClicked(p.id)}
-            className={`${outlineBtn} w-full disabled:opacity-60`}
+            className={`${outlineBtn} w-full gap-2 disabled:opacity-60`}
           >
+            {p.id === "google" && <FcGoogle aria-hidden className="size-[18px] shrink-0" />}
+            {p.id === "kakao" && <RiKakaoTalkFill aria-hidden className="size-[18px] shrink-0 text-[#191919]" />}
             {pending && clicked === p.id ? "이동 중…" : `${p.label}로 ${actionLabel}`}
           </button>
         ))}
       </div>
+      <FormNotice message={state.message} />
     </form>
   );
 }

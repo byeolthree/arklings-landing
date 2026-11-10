@@ -78,26 +78,20 @@ Supabase 화면 → Authentication → Emails(Email Templates)에서 아래 문�
 </p>
 ```
 
-## 4. Reset password (비밀번호 설정·재설정) — 단계 4
+## 4. Reset password (비밀번호 찾기) — 단계 4
 
-제목: `[아클링스] 비밀번호를 정해 주세요`
+제목: `[아클링스] 비밀번호 재설정 안내`
 
 ```html
-<h2 style="margin:0 0 12px;color:#2a2025">비밀번호를 정해 주세요</h2>
+<h2 style="margin:0 0 12px;color:#2a2025">비밀번호를 다시 정해 주세요</h2>
 <p style="margin:0 0 16px;color:#574a50;line-height:1.6">
-  아래 버튼을 누르면 새 비밀번호를 정할 수 있어요. 구글·카카오로 가입한 계정도 이 링크로 비밀번호를 정하면
-  이메일로 로그인할 수 있어요.
+  비밀번호 찾기 화면에 아래 확인 번호를 입력해 주세요.
 </p>
-<p style="margin:0 0 20px">
-  <a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery"
-     style="display:inline-block;background:#a61e5c;color:#ffffff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700">
-    비밀번호 정하기
-  </a>
-</p>
+<p style="margin:0 0 20px;font-size:28px;font-weight:700;letter-spacing:6px;color:#2a2025">{{ .Token }}</p>
 <p style="margin:0;color:#8c8c8c;font-size:12px;line-height:1.6">
   요청한 적이 없다면 이 메일은 무시해 주세요. 비밀번호는 바뀌지 않아요.
 </p>
 ```
 
-> 세 템플릿(2·3·4) 모두 링크 모양이 `{{ .RedirectTo }}&token_hash=…&type=…`로 같아야 `/auth/confirm`이 처리합니다.
+> 템플릿 2·3은 링크 모양이 `{{ .RedirectTo }}&token_hash=…&type=…`로 같아야 `/auth/confirm`이 처리합니다. 템플릿 4(비밀번호 찾기)에는 링크를 넣지 않고 확인 번호만 둡니다.
 > Supabase 화면의 Authentication → Emails(Email Templates)에서 각각 붙여 넣습니다.
