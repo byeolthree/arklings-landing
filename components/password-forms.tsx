@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useActionState } from "react";
 import type { AuthFormState } from "@/app/actions/auth";
 import { requestPasswordReset, updatePassword, verifyResetCode, type ResetCodeState } from "@/app/actions/password";
+import { CodeInput } from "@/components/code-input";
 import { authInputCls, FormField } from "@/components/form-field";
+import { FormNotice } from "@/components/form-notice";
 import { CardHeading, PaperCard, primaryBtn } from "@/components/paper-card";
 import { useStoredValue } from "@/lib/use-stored-value";
 
@@ -17,13 +19,8 @@ export function ForgotPasswordForm({ initialEmail, expired }: { initialEmail?: s
   }
   return (
     <PaperCard>
-      <CardHeading title="비밀번호 찾기" lines={["가입한 이메일을 입력하면 비밀번호를 다시 정하는 링크를 보내 드려요."]} />
+      <CardHeading title="비밀번호 찾기" lines={["가입한 이메일을 입력하면 비밀번호를 다시 정하는 번호를 보내 드려요."]} />
       <form action={action} noValidate className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5">
-        {(state.message || expired) && (
-          <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-[12px] text-destructive md:text-[13px]">
-            {state.message ?? "링크가 만료됐거나 이미 사용됐어요. 재설정 메일을 다시 받아 주세요."}
-          </p>
-        )}
         <FormField id="forgot-email" label="이메일" error={state.errors?.email}>
           <input
             id="forgot-email"
@@ -42,6 +39,7 @@ export function ForgotPasswordForm({ initialEmail, expired }: { initialEmail?: s
           {pending ? "보내는 중…" : "재설정 메일 받기"}
         </button>
       </form>
+      <FormNotice message={state.message ?? (expired ? "링크가 만료됐거나 이미 사용됐어요. 재설정 메일을 다시 받아 주세요." : undefined)} />
     </PaperCard>
   );
 }
@@ -53,11 +51,6 @@ export function ResetPasswordForm() {
     <PaperCard>
       <CardHeading title="새 비밀번호 정하기" lines={["8자 이상, 영문과 숫자를 섞어 주세요."]} />
       <form action={action} noValidate className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5">
-        {state.message && (
-          <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-[12px] text-destructive md:text-[13px]">
-            {state.message}
-          </p>
-        )}
         <FormField id="reset-password" label="새 비밀번호" error={e.password}>
           <input id="reset-password" name="password" type="password" autoComplete="new-password" disabled={pending} aria-invalid={e.password ? true : undefined} aria-describedby={e.password ? "reset-password-error" : undefined} className={authInputCls} />
         </FormField>
@@ -73,6 +66,7 @@ export function ResetPasswordForm() {
           </Link>
         )}
       </form>
+      <FormNotice message={state.message} />
     </PaperCard>
   );
 }
@@ -86,23 +80,8 @@ function ResetCodeStep({ email, resend, resending }: { email: string; resend: (f
       <CardHeading title="메일을 보냈어요" lines={["메일에 적힌 확인 번호를 입력해 주세요."]} />
       <form action={action} noValidate className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5">
         <input type="hidden" name="email" value={email} />
-        {state.error && (
-          <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-[12px] text-destructive md:text-[13px]">
-            {state.error}
-          </p>
-        )}
         <FormField id="reset-code" label="확인 번호">
-          <input
-            id="reset-code"
-            name="code"
-            type="text"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            maxLength={10}
-            disabled={pending}
-            aria-invalid={state.error ? true : undefined}
-            className={authInputCls}
-          />
+          <CodeInput id="reset-code" disabled={pending} invalid={Boolean(state.error)} />
         </FormField>
         <button type="submit" disabled={pending} className={`${primaryBtn} w-full`}>
           {pending ? "확인하는 중…" : "확인"}
@@ -114,6 +93,7 @@ function ResetCodeStep({ email, resend, resending }: { email: string; resend: (f
           {resending ? "보내는 중…" : "메일 다시 받기"}
         </button>
       </form>
+      <FormNotice message={state.error} />
     </PaperCard>
   );
 }

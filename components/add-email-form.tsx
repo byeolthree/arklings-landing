@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { requestEmail } from "@/app/actions/social";
 import type { AuthFormState } from "@/app/actions/auth";
+import { FormNotice } from "@/components/form-notice";
 import { authInputCls, FormField } from "@/components/form-field";
 import { CardHeading, PaperCard, primaryBtn, outlineBtn } from "@/components/paper-card";
 
@@ -32,6 +33,7 @@ export function AddEmailForm({ returnTo, providerLabel }: { returnTo: string; pr
             다른 이메일 주소로 다시 입력하기
           </Link>
         </div>
+        <FormNotice message={state.message} />
       </PaperCard>
     );
   }
@@ -44,11 +46,6 @@ export function AddEmailForm({ returnTo, providerLabel }: { returnTo: string; pr
       />
       <form action={action} noValidate className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5">
         <input type="hidden" name="next" value={returnTo} />
-        {state.message && (
-          <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-[12px] text-destructive md:text-[13px]">
-            {state.message}
-          </p>
-        )}
         <FormField id="add-email" label="이메일" hint="확인 메일을 받을 주소예요. 이 주소는 다른 사람에게 보이지 않아요." error={state.errors?.email}>
           <input
             id="add-email"
@@ -66,6 +63,7 @@ export function AddEmailForm({ returnTo, providerLabel }: { returnTo: string; pr
           {pending ? "보내는 중…" : "확인 메일 받기"}
         </button>
       </form>
+      <FormNotice message={state.message} />
     </PaperCard>
   );
 }
