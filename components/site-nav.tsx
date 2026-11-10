@@ -38,7 +38,7 @@ const BellIcon = () => (
 );
 
 // 로그인하면 아이콘 셋(＋ · 사람 · 종), 아니면 ＋와 사람 둘. 종의 개수와 목록은 서버가 읽은 새 협업 신청(SiteHeader)이다.
-export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; newCount: number | null; notices: NavNotice[] }) {
+export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { loggedIn: boolean; newCount: number | null; notices: NavNotice[]; isAdmin?: boolean }) {
   const [open, setOpen] = useState(false);
   const [drop, setDrop] = useState<Drop>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -165,6 +165,11 @@ export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; ne
                     <Link role="menuitem" href="/mypage/collab" onClick={shut}>
                       협업 신청
                     </Link>
+                    {isAdmin && (
+                      <Link role="menuitem" href="/admin" onClick={shut}>
+                        운영자
+                      </Link>
+                    )}
                     <hr />
                     <form action={signOut}>
                       <button type="submit" role="menuitem">

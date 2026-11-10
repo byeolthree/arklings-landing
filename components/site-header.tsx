@@ -1,5 +1,6 @@
 import { SiteNav, type NavNotice } from "@/components/site-nav";
 import { getCurrentUser } from "@/lib/auth";
+import { isAdminUser } from "@/lib/admin-collab";
 import { countNewCollab, listNewCollab } from "@/lib/collab-count";
 
 // 시각 표시: 오늘·어제는 「오늘 14:20」, 그 밖은 「11.07 14:20」(한국 시간).
@@ -18,11 +19,11 @@ function whenKst(iso: string): string {
 // 로그인했으면 새 협업 신청의 개수와 최근 목록(종 아이콘)도 함께 읽는다. 못 읽으면 개수는 생략하고 목록은 빈다.
 export async function SiteHeader() {
   const user = await getCurrentUser();
-  const [count, list] = user ? await Promise.all([countNewCollab(), listNewCollab(5)]) : [null, []];
+  const [count, list, admin] = user ? await Promise.all([countNewCollab(), listNewCollab(5), isAdminUser()]) : [null, [], false];
   const notices: NavNotice[] = list.map((n) => ({
     id: n.id,
     text: n.target ? `${n.applicant}님이 「${n.target}」에 협업을 신청했어요` : `${n.applicant}님이 협업을 신청했어요`,
     when: whenKst(n.createdAt),
   }));
-  return <SiteNav loggedIn={user !== null} newCount={count} notices={notices} />;
+  return <SiteNav loggedIn={user !== null} newCount={count} notices={notices} isAdmin={admin} />;
 }
