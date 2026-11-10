@@ -75,10 +75,25 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { logg
   }, [drop]);
 
   const close = () => setOpen(false);
+  // 마우스가 있는 화면: 아이콘에 올리면 열리고 벗어나면 닫힌다(누르면 그대로 열려 있음). 터치 화면: 누르면 열고 닫는다.
+  const canHover = () => typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches;
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toggleDrop = (d: Exclude<Drop, null>) => {
     setOpen(false);
-    setDrop((cur) => (cur === d ? null : d));
+    setDrop((cur) => (cur === d && !canHover() ? null : d));
   };
+  const hv = (d: Exclude<Drop, null>) => ({
+    onMouseEnter: () => {
+      if (!canHover()) return;
+      if (leaveTimer.current) clearTimeout(leaveTimer.current);
+      setOpen(false);
+      setDrop(d);
+    },
+    onMouseLeave: () => {
+      if (!canHover()) return;
+      leaveTimer.current = setTimeout(() => setDrop((cur) => (cur === d ? null : cur)), 150);
+    },
+  });
   const shut = () => setDrop(null);
 
   return (
@@ -116,7 +131,7 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { logg
 
         <div className="lk-nav-right lk-icons">
           {/* ＋ : 로그인하면 등록할 곳 드롭다운, 로그아웃이면 로그인 화면으로 */}
-          <div className="lk-ico-wrap">
+          <div className="lk-ico-wrap" {...hv("plus")}>
             {isIn ? (
               <button type="button" className="lk-ico lk-ico-fill" aria-label="등록하기" aria-haspopup="menu" aria-expanded={drop === "plus"} onClick={() => toggleDrop("plus")}>
                 <PlusIcon />
@@ -144,7 +159,7 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { logg
           </div>
 
           {/* 사람 : 마이페이지 메뉴(로그인) 또는 로그인·회원가입(로그아웃) */}
-          <div className="lk-ico-wrap">
+          <div className="lk-ico-wrap" {...hv("person")}>
             <button type="button" className="lk-ico" aria-label={isIn ? "마이페이지" : "로그인·회원가입"} aria-haspopup="menu" aria-expanded={drop === "person"} onClick={() => toggleDrop("person")}>
               <PersonIcon />
             </button>
@@ -192,7 +207,7 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { logg
 
           {/* 종 : 로그인했을 때만. 새 협업 신청 알림 */}
           {isIn && (
-            <div className="lk-ico-wrap">
+            <div className="lk-ico-wrap" {...hv("bell")}>
               <button type="button" className="lk-ico" aria-label={newCount ? `알림 ${newCount}개` : "알림"} aria-haspopup="menu" aria-expanded={drop === "bell"} onClick={() => toggleDrop("bell")}>
                 <BellIcon />
                 {newCount ? (
