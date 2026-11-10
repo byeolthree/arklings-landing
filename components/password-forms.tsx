@@ -26,7 +26,7 @@ export function ForgotPasswordForm({ initialEmail }: { initialEmail?: string }) 
   }
   return (
     <PaperCard>
-      <CardHeading title="비밀번호 설정·재설정" lines={["가입한 이메일을 입력하면 비밀번호를 정하는 링크를 보내 드려요.", "구글·카카오로 가입했다면 이메일 로그인용 비밀번호도 여기서 만들 수 있어요."]} />
+      <CardHeading title="비밀번호 설정·재설정" lines={["가입한 이메일을 입력하면 비밀번호를 정하는 링크를 보내 드려요."]} />
       <form action={action} noValidate className="mt-6 flex flex-col gap-4 md:mt-8 md:gap-5">
         {state.message && (
           <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-[12px] text-destructive md:text-[13px]">
