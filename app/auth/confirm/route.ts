@@ -14,6 +14,10 @@ export async function GET(request: NextRequest) {
   const code = params.get("code");
   const next = safeNext(params.get("next"));
 
+  // 비밀번호 재설정은 링크로 열지 않는다. 확인 번호를 받을 이메일을 적은 그 브라우저의 비밀번호 찾기 화면에서만 정한다.
+  // 예전에 받은 재설정 링크도 확인하지 않고 비밀번호 찾기 화면으로 돌려보낸다.
+  if (type === "recovery" || next === "/reset-password") redirect("/forgot-password?expired=1");
+
   let ok = false;
   try {
     const supabase = await createAuthClient();
@@ -29,7 +33,5 @@ export async function GET(request: NextRequest) {
   }
 
   if (ok) redirect(next);
-  // 비밀번호 재설정 링크가 만료되면 가입 확인 메일 화면이 아니라 비밀번호 찾기 화면으로 보낸다.
-  if (type === "recovery" || next === "/reset-password") redirect("/forgot-password?expired=1");
   redirect(`/auth/link-expired?next=${encodeURIComponent(next)}`);
 }
