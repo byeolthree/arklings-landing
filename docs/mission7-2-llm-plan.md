@@ -99,7 +99,7 @@
 6. 호출이 실패하면 잡은 자리를 돌려준다 (`mailPlanPdf`의 reserve → release 모양). 결과를 받았으면 자리를 돌려주지 않는다.
 7. 완료 사유(`finishReason`)와 토큰 사용량을 기록한다. 키와 사용자 글 전문은 로그에 남기지 않는다.
 
-- 자리 잡기·돌려주기는 `supabase/migrations/0004_plans.sql`의 `reserve_plan_mail` / `release_plan_mail`과 같은 구조로 만든다 (새 마이그레이션 0010 이후). 사용 기록 표는 정책 없이 RLS를 켜서 앱이 직접 못 만지게 한다. 기능 이름을 기본키에 넣어 기능별로 센다.
+- 자리 잡기·돌려주기는 `supabase/migrations/0004_plans.sql`의 `reserve_plan_mail` / `release_plan_mail`과 같은 구조로 만든다 (새 마이그레이션 파일). 사용 기록 표는 정책 없이 RLS를 켜서 앱이 직접 못 만지게 한다. 기능 이름을 기본키에 넣어 기능별로 센다.
 - 서버 전용 열쇠(`SUPABASE_SERVICE_ROLE_KEY`)는 AI 기능에 쓰지 않는다 (`AGENTS.md` 규칙 4). 사용 기록은 자리 잡기 함수로만, 평가 결과는 로그인한 본인의 권한(RLS)으로 본인 것만 읽고 쓴다.
 - 재시도는 `maxRetries: 0`으로 두고, 서버 전체 시간 상한(`maxDuration`)을 정한다.
 - 시대 고정(D10): 열국시대~삼한일통기. 자료에 없는 고구려·백제·신라 궁궐·연도·숫자는 지어내지 않고 "확인 필요" 또는 "자료에 없음"으로 답한다.
@@ -174,13 +174,14 @@ README에 담는다: 선택한 기능과 선택 이유, 두 기능 설명, 사�
 1. 저장소 점검: 아직 읽지 않은 `proxy.ts`, `supabase/schema.sql`, `plan_revisions` 칸 구성, 인증 설정(이메일 인증 사용 여부)을 읽고 결과를 보고한다.
 2. `AGENTS.md`의 "미션 7 범위"에서 "만들지 않는다: OpenAI·AI 평가" 문장을 이 계획에 맞게 고치고, "미션 7 단계"에 AI 단계(8단계)를 더한다.
 3. 화면 먼저: `docs/screen-contract.md`에 평가 패널·질의응답 화면 줄(부르는 처리 함수·입력 칸 이름·이동 주소)을 먼저 더하고, 가짜 데이터로 화면을 만들어 아키텍터 확인을 받는다. 화면 작업의 자리는 O7을 따른다.
-4. 서버: 마이그레이션(사용 기록·평가 결과·위키), 자리 잡기 함수, 평가 Server Action, 질의응답 Route Handler, 프롬프트 파일. 마이그레이션은 `supabase/migrations/0010_…sql`부터 새 파일로 만든다(지금 마지막은 0009). 실행은 아키텍터가 Supabase SQL Editor에서 번호 순서대로 한다. `schema.sql`은 다시 실행하지 않는다.
+4. 서버: 마이그레이션(사용 기록·평가 결과·위키), 자리 잡기 함수, 평가 Server Action, 질의응답 Route Handler, 프롬프트 파일. 마이그레이션은 `supabase/migrations/`의 새 파일로 만든다. 번호는 작업을 시작할 때 `ls supabase/migrations`로 마지막 번호를 확인해 그다음부터 쓴다(2026-11-11 기준 마지막은 0016이다). 크리에이터·운영자 화면을 맡은 다른 세션도 번호를 쓰므로, 번호가 겹치면 코드를 고치기 전에 보고한다. 실행은 아키텍터가 Supabase SQL Editor에서 번호 순서대로 한다. `schema.sql`은 다시 실행하지 않는다.
 5. 가짜 모델로 11장 시험을 돌리고 결과를 보고한다.
 6. 아키텍터가 키를 넣은 뒤, 승인을 받고 진짜 모델로 시험한다.
 7. README, `dev` 올리기, 배포 주소 확인, 보고.
 
 ## 15. 작업 규칙 (CLAUDE.md와 같은 방향)
 
+- 크리에이터 화면(`app/creators`, 크리에이터 마이그레이션)과 운영자 화면(`app/admin`)은 다른 세션이 맡고 있다. 이 작업에서는 그 파일을 고치지 않는다. 겹치는 곳(`site-nav.tsx`, `AGENTS.md`, `docs/screen-contract.md`, `lib/plans.ts`)을 고칠 때는 `git pull`로 최신 `dev`를 받은 뒤 필요한 줄만 고친다.
 - `dev` 가지에는 올린 뒤 보고한다. `main` 합치기·푸시·Vercel 배포는 아키텍터가 명령할 때만 한다.
 - 파일을 지워야 하면 이유를 설명하고 아키텍터에게 먼저 묻는다.
 - 화면만 고치는 작업에서는 백엔드(`app/actions`, `lib`, `supabase`, `proxy.ts`, `app/api`)를 건드리지 않는다. 칸 이름이나 처리 함수 모양을 바꿔야 하면 코드를 고치기 전에 보고한다.
