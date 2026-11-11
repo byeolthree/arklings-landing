@@ -12,19 +12,20 @@ export default async function AiEvaluationPreviewPage({ searchParams }: { search
   const key = raw && raw in EVAL_STATES ? raw : "ready";
   return (
     <>
-      <div className="fixed bottom-4 right-4 z-50 max-w-[320px] rounded-lg border border-[#e8dfe3] bg-white/95 px-3 py-2 text-[11px] leading-snug text-[#2a2025] shadow-md">
-        <strong>미리보기 도우미</strong> (사이트에 없는 상자)
-        <br />
-        가짜 결과만 나와요. 보기:{" "}
-        {Object.entries(EVAL_STATES).map(([k, label], i) => (
-          <span key={k}>
-            {i > 0 && " · "}
-            <Link href={`/dev-preview/ai-evaluation?state=${k}`} className={k === key ? "font-bold underline" : "underline"}>
-              {label}
-            </Link>
-          </span>
-        ))}
-      </div>
+      <details className="mx-auto mt-6 w-full max-w-[720px] px-4 text-[11px] leading-snug text-[#2a2025]">
+        <summary className="cursor-pointer">미리보기 도우미 (사이트에 없는 상자) — 상태 고르기</summary>
+        <p className="mt-2 rounded-lg border border-[#e8dfe3] bg-white px-3 py-2">
+          가짜 결과만 나와요.{" "}
+          {Object.entries(EVAL_STATES).map(([k, label], i) => (
+            <span key={k}>
+              {i > 0 && " · "}
+              <Link href={`/dev-preview/ai-evaluation?state=${k}`} className={k === key ? "font-bold underline" : "underline"}>
+                {label}
+              </Link>
+            </span>
+          ))}
+        </p>
+      </details>
       <EvalPreview key={key} state={key} />
     </>
   );

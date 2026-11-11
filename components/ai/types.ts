@@ -1,4 +1,5 @@
 // 미션7-2 AI 화면이 다루는 값의 모양. 화면 쪽 약속이며, 서버 단계에서 같은 모양으로 맞춘다(docs/screen-contract.md 「미션7-2 AI 기능」).
+// 글자 수 상한·하루 횟수·남은 횟수의 숫자는 확정 전의 임시값이다. 화면은 값을 받아서 보여 주기만 한다.
 
 // ── AI 평가 ──
 export type EvalSlot = { label: string; status: "ok" | "needs"; reason: string; fix: string };
@@ -11,7 +12,7 @@ export type EvalView =
 
 // ── 라이브러리 질의응답 ──
 export type WikiItem = { id: string; question: string; answer: string; source: string; era: string };
-export type AskErrorKind = "login" | "input" | "limit" | "auth" | "busy" | "retry";
+export type AskErrorKind = "input" | "limit" | "auth" | "busy" | "retry";
 export type AskMessage = {
   id: string;
   role: "user" | "assistant";
@@ -27,8 +28,7 @@ export type AskController = {
   error: AskErrorKind | null;
   draft: string; // 입력칸에 남아 있는 질문(끊기거나 실패해도 지우지 않는다)
   setDraft: (v: string) => void;
-  onAsk: () => void;
-  onStop: () => void;
-  onReset: () => void;
+  onAsk: () => void; // 새 질문과 「다시 묻기」가 같은 동작이다(입력칸의 글을 다시 보낸다)
+  remaining: number | null; // 오늘 남은 질문 수(화면이 받는 값. 읽는 길은 서버 단계에서 정한다)
 };
-export const MAX_QUESTION_CHARS = 300; // 제안값
+export const MAX_QUESTION_CHARS = 300; // 임시값

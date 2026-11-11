@@ -7,8 +7,8 @@ export const EVAL_STATES: Record<string, string> = {
   login: "로그인 안 함",
   input: "입력 너무 김",
   limit: "횟수 소진",
-  auth: "AI 연결 문제(401)",
-  busy: "요청 몰림(429)",
+  auth: "AI 연결 문제",
+  busy: "요청 몰림",
   retry: "일시 오류·시간 초과",
   schema: "결과 읽기 실패",
 };

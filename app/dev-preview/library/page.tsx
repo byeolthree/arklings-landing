@@ -32,13 +32,15 @@ export default async function LibraryPreviewPage({ searchParams }: { searchParam
   );
   return (
     <>
-      <div className="fixed bottom-4 right-4 z-50 max-w-[340px] rounded-lg border border-[#e8dfe3] bg-white/95 px-3 py-2 text-[11px] leading-snug text-[#2a2025] shadow-md">
-        <strong>미리보기 도우미</strong> (사이트에 없는 상자)
-        {line("로그인", "login", login ? "in" : "out", { in: "한 상태", out: "안 한 상태" })}
-        {line("위키", "wiki", wiki, { filled: "채움", empty: "비었음" })}
-        {line("다음 질문의 결과", "next", next, NEXT)}
-        {line("처음 모습", "start", start, START)}
-      </div>
+      <details className="mx-auto mt-6 w-full max-w-[880px] px-4 text-[11px] leading-snug text-[#2a2025]">
+        <summary className="cursor-pointer">미리보기 도우미 (사이트에 없는 상자) — 상태 고르기</summary>
+        <p className="mt-2 rounded-lg border border-[#e8dfe3] bg-white px-3 py-2">
+          {line("로그인", "login", login ? "in" : "out", { in: "한 상태", out: "안 한 상태" })}
+          {line("위키", "wiki", wiki, { filled: "채움", empty: "비었음" })}
+          {line("다음 질문의 결과", "next", next, NEXT)}
+          {line("처음 모습", "start", start, START)}
+        </p>
+      </details>
       <LibraryPreview key={`${login}-${wiki}-${next}-${start}`} loggedIn={login} wikiEmpty={wiki === "empty"} next={next} start={start} />
     </>
   );
