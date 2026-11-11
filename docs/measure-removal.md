@@ -67,13 +67,14 @@
 ```sql
 -- 사용 기록(0021)을 없앤다. 표를 지우면 그 표의 인덱스·읽기 정책도 함께 지워진다.
 drop function if exists public.record_usage_event(text, text, text, jsonb);
+select cron.unschedule('purge-usage-events'); -- 0025의 자동 삭제 일정(pg_cron). 일정이 없으면 오류가 나므로 이미 지웠다면 이 줄은 건너뛴다.
 drop function if exists public.purge_usage_events();
 drop table if exists public.usage_events;
 ```
 
-## 4-1. 90일 지난 기록 지우기 (자동 스케줄 없음)
+## 4-1. 90일 지난 기록 지우기
 
-운영자 계정으로 로그인한 연결에서 `select public.purge_usage_events();`를 부르면 90일이 지난 `usage_events` 줄을 지우고 지운 줄 수를 돌려준다(`supabase/migrations/0023_purge_usage_events.sql`을 실행해 둔 뒤. 운영자가 아니면 오류).
+매일 한국 시간 새벽 3시에 Supabase 일정(`0025_purge_usage_events_schedule.sql`, 이름 `purge-usage-events`)이 90일 지난 줄을 지운다. 손으로 지우려면 운영자 계정으로 로그인한 연결에서 `select public.purge_usage_events();`를 부르면 90일이 지난 `usage_events` 줄을 지우고 지운 줄 수를 돌려준다(`supabase/migrations/0023_purge_usage_events.sql`을 실행해 둔 뒤. 운영자가 아니면 오류).
 
 ## 5. 개인정보처리방침에서 지울 구역
 
