@@ -139,11 +139,13 @@ export function EvaluationPanel({
           filled[i] ? (
             <li key={label} className="ai-chip">
               {CHECK}
-              {label} · 입력됨
+              {label}
+              <span className="sr">(입력됨)</span>
             </li>
           ) : (
             <li key={label} className="ai-chip empty">
-              {label} · 비어 있음
+              {label}
+              <span className="sr">(비어 있음)</span>
             </li>
           ),
         )}

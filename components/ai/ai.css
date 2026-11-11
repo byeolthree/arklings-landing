@@ -17,8 +17,9 @@
 .ai .ai-kicker { font-size: 12px; font-weight: 700; color: var(--teal); letter-spacing: .06em; }
 .ai .ai-h2 { margin-top: 6px; font-size: 20px; font-weight: 700; color: var(--title); line-height: 1.4; }
 .ai .ai-lead { margin-top: 8px; font-size: 14px; line-height: 1.7; }
-.ai .ai-chips { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.ai .ai-chips { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-wrap: nowrap; gap: 8px; }
 .ai .ai-chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--teal); color: var(--teal); background: #fff; font-size: 13px; font-weight: 500; }
+.ai .sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .ai .ai-chip.empty { border: 1px dashed var(--jaju); color: var(--jaju); }
 .ai .ai-row { margin-top: 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .ai .ai-row .side { font-size: 13px; }
@@ -109,6 +110,8 @@
 .ai .ai-src .ai-meta { margin-top: 6px; }
 
 @media (max-width: 560px) {
+  .ai .ai-chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ai .ai-chip { justify-content: center; padding: 0 8px; }
   .ai-card { padding: 20px 18px; border-radius: 16px; }
   .ai .ai-h2 { font-size: 18px; }
   .ai .ai-slots { margin-top: 14px; gap: 8px; }
