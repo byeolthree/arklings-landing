@@ -59,7 +59,7 @@
 
 /* 라이브러리 */
 /* 제목 띠: 높이는 크리에이터 페이지(.cr-top)의 규칙과 같다(위아래 여백 80/48(모바일 48/32), 제목 32/22px, 설명 18/15px). 색은 시안의 #f1ecee */
-.ai .ai-hero { background: #f1ecee; padding: 48px 24px 32px; text-align: center; }
+.ai .ai-hero { background: #f1ecee; padding: 34px 24px 22px; text-align: center; }
 .ai .ai-hero h1 { margin: 0 auto; max-width: 900px; font-size: 22px; line-height: 1.3; font-weight: 700; color: var(--title); }
 .ai .ai-hero p { margin: 12px auto 0; max-width: 900px; font-size: 15px; line-height: 1.6; }
 @media (min-width: 768px) { .ai .ai-hero { padding: 80px 24px 48px; } .ai .ai-hero h1 { font-size: 32px; } .ai .ai-hero p { font-size: 18px; } }
