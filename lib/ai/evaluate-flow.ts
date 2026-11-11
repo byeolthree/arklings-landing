@@ -9,6 +9,7 @@ import type { ModelHandle } from "@/lib/ai/model";
 import { releaseAiUse, reserveAiUse } from "@/lib/ai/usage";
 import { parseDraft, SLOT_COUNT } from "@/lib/plans";
 import type { EvalErrorKind } from "@/components/ai/types";
+import { USAGE_TEXT } from "@/components/ai/usage-text";
 
 export type EvaluateResult = { ok: true; slots: EvalSlotResult[] } | { ok: false; code: EvalErrorKind; error: string; needLogin?: boolean };
 export type EvaluateDeps = {
@@ -45,7 +46,7 @@ export async function evaluateLoglineFlow(raw: unknown, deps: EvaluateDeps): Pro
   // 4) 오늘 자리 하나 잡기 (확인과 증가를 DB 함수 한 번에)
   const sb = await deps.supabase();
   const hold = await reserveAiUse(sb, "evaluate_logline");
-  if (!hold.ok) return hold.reason === "limit" ? fail("limit", "오늘 횟수를 다 썼어요. 내일 다시 가능해요.") : fail("auth", CONNECT);
+  if (!hold.ok) return hold.reason === "limit" ? fail("limit", USAGE_TEXT.serverLimit) : fail("auth", CONNECT);
 
   // 5) 모델 호출. 실패하면 잡은 자리를 돌려준다(결과를 받았으면 돌려주지 않는다).
   const out = await runEvaluation({ handle, draft });

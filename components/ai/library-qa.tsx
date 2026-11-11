@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { ErrorCard, type ErrorAction } from "./error-card";
 import { MAX_QUESTION_CHARS, type AskController, type AskErrorKind, type AskMessage, type WikiItem } from "./types";
+import { USAGE_TEXT as U } from "./usage-text";
 import "./ai.css";
 
 // 라이브러리 화면(시안 「라이브러리 ① 목록과 질문칸 · ② 답이 나오는 과정 · ③ 로그인 전·비었음·오류」). 값만 받아 그리는 부품이다.
 const ERRORS: Record<AskErrorKind, { pill: string; title: string; desc: string; retry?: boolean }> = {
-  limit: { pill: "오늘 횟수를 모두 씀", title: "오늘 쓸 수 있는 질문을 모두 썼어요", desc: "하루에 할 수 있는 질문 횟수는 정해져 있어요. 내일 다시 물어볼 수 있어요." },
-  busy: { pill: "요청이 몰림", title: "지금 요청이 몰려 있어요", desc: "잠시 뒤에 다시 물어봐 주세요. 오늘 횟수는 줄지 않았어요.", retry: true },
-  auth: { pill: "AI 연결 문제", title: "AI와 연결하지 못했어요", desc: "지금은 질문에 답할 수 없어요. 잠시 뒤에 다시 물어보시고, 계속되면 아클링스에 알려 주세요. 오늘 횟수는 줄지 않았어요." },
-  retry: { pill: "일시 오류 · 시간 초과", title: "답을 가져오지 못했어요", desc: "질문은 입력칸에 그대로 남아 있어요. 다시 물어봐 주세요. 오늘 횟수는 줄지 않았어요.", retry: true },
+  limit: { pill: U.askLimitPill, title: U.askLimitTitle, desc: U.askLimitDesc },
+  busy: { pill: "요청이 몰림", title: "지금 요청이 몰려 있어요", desc: `잠시 뒤에 다시 물어봐 주세요. ${U.notReduced}`, retry: true },
+  auth: { pill: "AI 연결 문제", title: "AI와 연결하지 못했어요", desc: `지금은 질문에 답할 수 없어요. 잠시 뒤에 다시 물어보시고, 계속되면 아클링스에 알려 주세요. ${U.notReduced}` },
+  retry: { pill: "일시 오류 · 시간 초과", title: "답을 가져오지 못했어요", desc: `질문은 입력칸에 그대로 남아 있어요. 다시 물어봐 주세요. ${U.notReduced}`, retry: true },
   input: { pill: "질문 입력 오류", title: "질문을 확인해 주세요", desc: `질문이 비어 있거나 ${MAX_QUESTION_CHARS}자를 넘었어요. 고친 뒤에 다시 눌러 주세요.` },
 };
 
@@ -25,7 +26,7 @@ const MINUS = (
   </svg>
 );
 
-export function LibraryQa({ items, loggedIn, ctrl, loginHref = "/login?next=/library" }: { items: WikiItem[]; loggedIn: boolean; ctrl: AskController; loginHref?: string }) {
+export function LibraryQa({ items, listError = false, loggedIn, ctrl, loginHref = "/login?next=/library" }: { items: WikiItem[]; listError?: boolean; loggedIn: boolean; ctrl: AskController; loginHref?: string }) {
   const busy = ctrl.status === "submitted" || ctrl.status === "streaming";
   const last = ctrl.messages[ctrl.messages.length - 1];
   const cut = last?.role === "assistant" && last.state === "interrupted";
@@ -47,7 +48,13 @@ export function LibraryQa({ items, loggedIn, ctrl, loginHref = "/login?next=/lib
           <section>
             <div className="ai-kicker">게시된 질문과 답</div>
             <h2 className="ai-sec-h2">자주 묻는 질문</h2>
-            {items.length === 0 ? (
+            {listError ? (
+              // 시안에 없는 상태: 위키를 읽지 못한 것은 「자료가 없음」과 다르다(없다고 거짓 안내하지 않는다)
+              <div className="ai-empty">
+                <b>자료를 불러오지 못했어요</b>
+                <p>잠시 뒤에 다시 시도해 주세요.</p>
+              </div>
+            ) : items.length === 0 ? (
               <div className="ai-empty">
                 <b>아직 준비된 자료가 없어요</b>
                 <p>자료를 준비하고 있어요. 준비되면 이곳에 질문과 답이 올라와요.</p>
@@ -83,7 +90,7 @@ export function LibraryQa({ items, loggedIn, ctrl, loginHref = "/login?next=/lib
                   질문
                 </label>
                 <textarea id="ai-q-locked" className="ai-ta s" rows={2} disabled placeholder="로그인하면 질문할 수 있어요" />
-                <p>질문은 하루에 할 수 있는 횟수가 정해져 있어서 로그인한 분께만 열려 있어요. 위의 질문과 답은 로그인하지 않아도 볼 수 있어요.</p>
+                <p>{U.askLockedDesc}</p>
                 <Link href={loginHref} className="ai-btn sm">
                   로그인하고 물어보기
                 </Link>
@@ -133,7 +140,7 @@ export function LibraryQa({ items, loggedIn, ctrl, loginHref = "/login?next=/lib
                       {len} / {MAX_QUESTION_CHARS}자
                     </span>
                     <div className="right">
-                      <span>{cut ? "오늘 횟수는 줄지 않았어요" : ctrl.remaining !== null ? `오늘 남은 질문 ${ctrl.remaining}번` : ""}</span>
+                      <span>{cut ? U.notReducedShort : ctrl.remaining !== null ? U.askLeft(ctrl.remaining) : ""}</span>
                       <button type="submit" className="ai-btn" disabled={busy || len === 0}>
                         {busy ? "답하는 중…" : cut ? "다시 묻기" : "물어보기"}
                       </button>

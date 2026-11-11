@@ -20,9 +20,9 @@
 .ai .ai-chips { list-style: none; margin: 18px 0 0; padding: 0; display: flex; flex-wrap: nowrap; gap: 8px; }
 .ai .ai-chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--teal); color: var(--teal); background: #fff; font-size: 13px; font-weight: 500; }
 .ai .sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-.ai .ai-chip.empty { border: 1px dashed var(--jaju); color: var(--jaju); }
+.ai .ai-chip.is-empty { border: 1px dashed var(--jaju); color: var(--jaju); }
 .ai .ai-row { margin-top: 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-.ai .ai-row .side { font-size: 13px; }
+.ai .ai-row .ai-side { font-size: 13px; }
 .ai .ai-foot { margin-top: 18px; font-size: 12px; line-height: 1.6; }
 .ai .ai-status { margin-top: 16px; display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--title); }
 .ai .ai-dots { display: inline-flex; gap: 4px; }
@@ -126,7 +126,7 @@
   .ai .ai-badge.needs { padding: 0 10px; }
   .ai .ai-row.after { flex-direction: column; align-items: stretch; margin-top: 16px; gap: 10px; }
   .ai .ai-row.after .ai-btn { width: 100%; height: 46px; }
-  .ai .ai-row.after .side, .ai .d-only { display: none; }
+  .ai .ai-row.after .ai-side, .ai .d-only { display: none; }
   .ai .m-only { display: block; margin-top: 10px; font-size: 12px; text-align: center; }
   .ai .ai-foot.d-only { display: none; }
   .ai .ai-main { margin: 16px auto 40px; padding: 0 16px; }

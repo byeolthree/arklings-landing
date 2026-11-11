@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { PlannerEditor } from "@/components/planner/planner-editor";
 import { getCurrentUser } from "@/lib/auth";
+import { readAiRemaining } from "@/lib/ai/usage";
 import { loadPlanPanel } from "@/lib/plans-server";
 import { createAuthClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "기획안 만들기" };
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // AI 평가(Server Action)가 모델을 기다리는 시간의 서버 전체 상한(초). 평가 호출 상한(30초)보다 길게 둔다.
 
 type SearchParams = Promise<{ plan?: string | string[]; step?: string | string[] }>;
 
@@ -53,5 +55,13 @@ export default async function PlannerPage({ searchParams }: { searchParams: Sear
     }
   }
 
-  return <PlannerEditor key={planParam ?? "new"} loggedIn displayName={displayName} panel={panel} workId={workId} workPublic={workPublic} initialStep={panel && stepParam === "2" ? 2 : 1} />;
+  // 오늘 남은 AI 평가 수(읽지 못하면 null → 패널은 「남은 ○번」 줄을 보이지 않는다)
+  let evalRemaining: number | null = null;
+  try {
+    evalRemaining = await readAiRemaining(await createAuthClient(), "evaluate_logline");
+  } catch {
+    evalRemaining = null;
+  }
+
+  return <PlannerEditor key={planParam ?? "new"} loggedIn displayName={displayName} panel={panel} workId={workId} workPublic={workPublic} initialStep={panel && stepParam === "2" ? 2 : 1} evalRemaining={evalRemaining} />;
 }

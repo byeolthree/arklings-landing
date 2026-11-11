@@ -1,5 +1,5 @@
 // 미션7-2 AI 화면이 다루는 값의 모양. 화면 쪽 약속이며, 서버 단계에서 같은 모양으로 맞춘다(docs/screen-contract.md 「미션7-2 AI 기능」).
-// 글자 수 상한·하루 횟수·남은 횟수의 숫자는 확정 전의 임시값이다. 화면은 값을 받아서 보여 주기만 한다.
+// 글자 수 상한·하루 횟수·남은 횟수의 숫자는 확정 전의 임시값이다. 화면은 값을 받아서 보여 주기만 한다(횟수 문구는 usage-text.ts 한 곳).
 
 // ── AI 평가 ──
 export type EvalSlot = { label: string; status: "ok" | "needs"; reason: string; fix: string };

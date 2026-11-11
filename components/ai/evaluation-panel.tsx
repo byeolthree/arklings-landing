@@ -3,10 +3,11 @@
 import { SLOT_LABELS, MAX_SLOT_CHARS } from "@/lib/plans";
 import { ErrorCard, type ErrorAction } from "./error-card";
 import type { EvalErrorKind, EvalView } from "./types";
+import { USAGE_TEXT as U } from "./usage-text";
 import "./ai.css";
 
 // AI 평가 패널(시안 「AI 평가 ① 평가 전 · ② 호출 중·결과 · ③ 오류 안내」). 값만 받아 그리는 부품이라 서버를 부르지 않는다.
-// 누르면 무엇을 부를지는 onRun을 넘기는 쪽이 정한다. 남은 횟수(remaining)도 받는 값이며, 읽는 길은 서버 단계에서 정한다.
+// 누르면 무엇을 부를지는 onRun을 넘기는 쪽이 정한다. 남은 횟수(remaining)도 받는 값이다(읽는 길은 0020 ai_use_remaining, 문구는 usage-text.ts 한 곳).
 const CHECK = (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d="M5 12.5l4.5 4.5L19 7.5" />
@@ -27,13 +28,13 @@ function summaryOf(needs: string[]): string {
 }
 
 const ERRORS: Record<EvalErrorKind, { pill: string; title: string; desc: string; action?: "login" | "retry" }> = {
-  login: { pill: "로그인 안 함", title: "로그인하면 평가를 받을 수 있어요", desc: "평가는 하루에 받을 수 있는 횟수가 정해져 있어서 로그인한 분께만 열려 있어요.", action: "login" },
+  login: { pill: "로그인 안 함", title: "로그인하면 평가를 받을 수 있어요", desc: U.evalLoginDesc, action: "login" },
   input: { pill: "입력이 너무 김", title: "평가할 수 있는 길이를 넘었어요", desc: `칸마다 ${MAX_SLOT_CHARS}자까지 평가할 수 있어요. 글을 줄인 뒤에 다시 눌러 주세요.` },
-  limit: { pill: "오늘 횟수를 모두 씀", title: "오늘 쓸 수 있는 평가를 모두 썼어요", desc: "하루에 받을 수 있는 평가 횟수는 정해져 있어요. 내일 다시 받을 수 있어요. 쓰신 글은 그대로예요." },
-  auth: { pill: "AI 연결 문제", title: "AI와 연결하지 못했어요", desc: "지금은 평가를 받을 수 없어요. 잠시 뒤에 다시 눌러 보시고, 계속되면 아클링스에 알려 주세요. 오늘 횟수는 줄지 않았어요." },
-  busy: { pill: "요청이 몰림", title: "지금 요청이 몰려 있어요", desc: "잠시 뒤에 다시 눌러 주세요. 오늘 횟수는 줄지 않았어요.", action: "retry" },
-  retry: { pill: "일시 오류 · 시간 초과", title: "평가를 마치지 못했어요", desc: "시간이 오래 걸리거나 일시적인 오류가 났어요. 다시 눌러 주세요. 오늘 횟수는 줄지 않았어요.", action: "retry" },
-  schema: { pill: "결과를 읽지 못함", title: "결과를 화면에 보여 드리지 못했어요", desc: "평가는 했지만 결과의 모양이 맞지 않았어요. 다시 눌러 주세요. 오늘 횟수는 줄지 않았어요.", action: "retry" },
+  limit: { pill: U.evalLimitPill, title: U.evalLimitTitle, desc: U.evalLimitDesc },
+  auth: { pill: "AI 연결 문제", title: "AI와 연결하지 못했어요", desc: `지금은 평가를 받을 수 없어요. 잠시 뒤에 다시 눌러 보시고, 계속되면 아클링스에 알려 주세요. ${U.notReduced}` },
+  busy: { pill: "요청이 몰림", title: "지금 요청이 몰려 있어요", desc: `잠시 뒤에 다시 눌러 주세요. ${U.notReduced}`, action: "retry" },
+  retry: { pill: "일시 오류 · 시간 초과", title: "평가를 마치지 못했어요", desc: `시간이 오래 걸리거나 일시적인 오류가 났어요. 다시 눌러 주세요. ${U.notReduced}`, action: "retry" },
+  schema: { pill: "결과를 읽지 못함", title: "결과를 화면에 보여 드리지 못했어요", desc: `평가는 했지만 결과의 모양이 맞지 않았어요. 다시 눌러 주세요. ${U.notReduced}`, action: "retry" },
 };
 
 export function EvaluationPanel({
@@ -79,7 +80,7 @@ export function EvaluationPanel({
           <button type="button" className="ai-btn" disabled>
             평가하는 중…
           </button>
-          <span className="side">잠시만 기다려 주세요.</span>
+          <span className="ai-side">잠시만 기다려 주세요.</span>
         </div>
       </section>
     );
@@ -118,10 +119,10 @@ export function EvaluationPanel({
           <button type="button" className="ai-btn line" onClick={onRun}>
             다시 평가 받기
           </button>
-          {remaining !== null && <span className="side">오늘 남은 평가 {remaining}번</span>}
+          {remaining !== null && <span className="ai-side">{U.evalLeft(remaining)}</span>}
         </div>
         <p className="ai-foot d-only">평가는 참고용 제안이에요. 쓰신 글, 저장, 공개 상태는 바뀌지 않았어요.</p>
-        <p className="m-only">{remaining !== null ? `오늘 남은 평가 ${remaining}번 · ` : ""}쓰신 글은 바뀌지 않았어요</p>
+        <p className="m-only">{remaining !== null ? `${U.evalLeft(remaining)} · ` : ""}쓰신 글은 바뀌지 않았어요</p>
       </section>
     );
   }
@@ -143,7 +144,7 @@ export function EvaluationPanel({
               <span className="sr">(입력됨)</span>
             </li>
           ) : (
-            <li key={label} className="ai-chip empty">
+            <li key={label} className="ai-chip is-empty">
               {label}
               <span className="sr">(비어 있음)</span>
             </li>
@@ -154,7 +155,7 @@ export function EvaluationPanel({
         <button type="button" className="ai-btn" disabled={!allFilled} onClick={onRun}>
           평가 받기
         </button>
-        <span className="side">{allFilled ? (remaining !== null ? `오늘 남은 평가 ${remaining}번` : "") : `비어 있는 칸: ${missing.join(", ")}`}</span>
+        <span className="ai-side">{allFilled ? (remaining !== null ? U.evalLeft(remaining) : "") : `비어 있는 칸: ${missing.join(", ")}`}</span>
       </div>
       <p className="ai-foot">평가는 참고용 제안이에요. 쓰신 글은 바뀌지 않아요.</p>
       {err && <ErrorCard pill={err.pill} title={err.title} desc={err.desc} action={action} />}

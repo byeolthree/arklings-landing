@@ -2,7 +2,7 @@
 // Route Handler에는 Server Action이 기본으로 해 주는 출처 검사가 붙지 않으므로 여기서 직접 한다(계획 §6).
 // 순서: 출처(Origin) → 로그인·이메일 확인 → 입력 검사(system 역할 거절 포함) → 위키 읽기·항목 고르기 → 오늘 자리 잡기 → 모델 호출(스트리밍).
 //  · 관련 항목이 없으면 모델을 부르지 않고 자리도 잡지 않는다(비용이 없으므로). 위키를 못 읽은 것은 「없음」이 아니라 오류다.
-//  · 답이 끊겼으면 완성된 답처럼 보이지 않게 오류 부분을 그대로 흘려 보내고(화면의 error), 결과 글이 한 글자도 나오기 전에 실패하면 자리를 돌려준다.
+//  · 답이 끊겼으면 완성된 답처럼 보이지 않게 오류 부분을 그대로 흘려 보내고(화면의 error), 끝나지 못한 호출은 자리를 돌려준다(시안: 끊긴 답도 횟수는 줄지 않는다).
 //  · 근거 자료 이름(sources)은 모델이 쓴 글이 아니라 서버가 고른 항목에서 읽어 메시지 부가 정보(metadata)로 보낸다.
 import { createUIMessageStream, createUIMessageStreamResponse, streamText, toUIMessageStream, type ModelMessage } from "ai";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -10,6 +10,7 @@ import { z } from "zod";
 import { MAX_QUESTION_CHARS } from "@/components/ai/types";
 import type { CurrentUser } from "@/lib/auth";
 import { classifyAiError } from "@/lib/ai/errors";
+import { USAGE_TEXT } from "@/components/ai/usage-text";
 import type { ModelHandle } from "@/lib/ai/model";
 import { releaseAiUse, reserveAiUse } from "@/lib/ai/usage";
 import { LIBRARY_ASK_INSTRUCTIONS, buildLibraryPrompt } from "@/lib/prompts/library-ask";
@@ -110,7 +111,7 @@ export async function handleLibraryAsk(req: Request, deps: AskDeps): Promise<Res
   const handle = deps.model();
   if (!handle) return json("auth", "AI 연결에 문제가 있어요. 잠시 뒤 다시 시도해 주세요.");
   const hold = await reserveAiUse(sb, "library_ask");
-  if (!hold.ok) return hold.reason === "limit" ? json("limit", "오늘 횟수를 다 썼어요. 내일 다시 가능해요.") : json("auth", "AI 연결에 문제가 있어요. 잠시 뒤 다시 시도해 주세요.");
+  if (!hold.ok) return hold.reason === "limit" ? json("limit", USAGE_TEXT.serverLimit) : json("auth", "AI 연결에 문제가 있어요. 잠시 뒤 다시 시도해 주세요.");
 
   // 6) 모델 호출(스트리밍). 이전 대화는 최근 몇 개만, 이번 질문은 참고 자료로 감싸서 넘긴다.
   const history = texts.slice(0, -1).slice(-(ASK_HISTORY_FOR_MODEL - 1));
@@ -137,7 +138,8 @@ export async function handleLibraryAsk(req: Request, deps: AskDeps): Promise<Res
     onError: async ({ error }) => {
       const { code, status } = classifyAiError(error);
       console.error("[ai] 질의응답 호출 실패", { code, status, gotText }); // 키와 사용자 글은 남기지 않는다
-      if (!gotText) await giveBack(); // 답이 한 글자도 나오기 전에 실패했으면 자리를 돌려준다
+      // 답이 끝나지 못한 호출은 자리를 돌려준다(시안: 끊긴 답도 「오늘 횟수는 줄지 않았어요」). 사용자가 직접 연결을 끊은 경우(abort)는 돌려주지 않는다.
+      await giveBack();
     },
   });
 
@@ -148,7 +150,7 @@ export async function handleLibraryAsk(req: Request, deps: AskDeps): Promise<Res
       if (part.type === "finish") return { sources, noMatch: false, finishReason: String(part.finishReason) };
       return undefined;
     },
-    onError: () => "answer_failed", // 내부 오류 문구를 화면에 보내지 않는다
+    onError: (error) => `answer_failed:${classifyAiError(error).code}`, // 내부 오류 문구는 보내지 않고 종류만 보낸다(auth·busy·retry·schema)
   });
   return createUIMessageStreamResponse({ stream, headers: { "Cache-Control": "no-store" } });
 }

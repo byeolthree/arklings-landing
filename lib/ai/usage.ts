@@ -19,6 +19,17 @@ export async function reserveAiUse(sb: SupabaseClient, feature: AiFeature): Prom
   }
 }
 
+// 오늘 남은 수(0020의 ai_use_remaining). 읽지 못하거나 로그인·이메일 확인이 안 됐으면 null → 화면은 「남은 ○번」 줄을 보이지 않는다.
+export async function readAiRemaining(sb: SupabaseClient, feature: AiFeature): Promise<number | null> {
+  try {
+    const { data, error } = await sb.rpc("ai_use_remaining", { p_feature: feature });
+    if (error || typeof data !== "number" || !Number.isFinite(data)) return null;
+    return Math.max(0, Math.floor(data));
+  } catch {
+    return null;
+  }
+}
+
 // 호출이 실패해 결과를 못 받았을 때만 부른다. 돌려주지 못해도 사용자에게는 영향이 없도록 조용히 기록만 남긴다.
 export async function releaseAiUse(sb: SupabaseClient, holdId: string): Promise<void> {
   try {
