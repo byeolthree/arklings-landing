@@ -140,8 +140,8 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { logg
               {drop === "plus" && (
                 <div className="lk-drop" role="menu" aria-label="등록할 곳">
                   {MENU.map((m) =>
-                    m.href === "/creators" ? (
-                      <Link key={m.label} role="menuitem" href="/portfolio/new" onClick={shut} aria-current={onCreators ? "page" : undefined}>
+                    m.href ? (
+                      <Link key={m.label} role="menuitem" href={m.href === "/creators" ? "/portfolio/new" : m.href} onClick={shut} aria-current={(m.href === "/library" ? onLibrary : onCreators) ? "page" : undefined}>
                         {m.label}
                       </Link>
                     ) : (

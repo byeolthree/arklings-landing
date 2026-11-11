@@ -5,7 +5,10 @@ import { readAiRemaining } from "@/lib/ai/usage";
 import { createAuthClient } from "@/lib/supabase/server";
 import { readPublicWiki } from "@/lib/wiki";
 
-export const metadata: Metadata = { title: "라이브러리" };
+export const metadata: Metadata = {
+  title: "라이브러리",
+  description: "아클링스가 정리한 열국시대부터 삼한일통기까지의 질문과 답을 읽고, 자료 안에서 AI에게 물어볼 수 있어요.",
+};
 export const dynamic = "force-dynamic";
 
 // 라이브러리(미션7-2). 게시된 Q&A 목록(위키의 공개 항목)은 누구나 보고, 질문 칸은 로그인한 사람(이메일 확인까지)만 쓴다.
