@@ -19,6 +19,7 @@ import {
   type SortKey,
 } from "@/lib/admin-collab";
 import { requireUser } from "@/lib/auth";
+import { MEASURE_ENABLED } from "@/lib/measure/server";
 import { ROLES, STATUSES, type Role, type Status } from "@/lib/collab";
 import { formatKstShort } from "@/lib/time";
 
@@ -52,6 +53,9 @@ export default async function AdminPage({ searchParams }: { searchParams: SP }) 
           <h1 className="text-[18px] font-bold leading-[26px] text-title md:text-[20px] md:leading-7">운영자 · 협업 신청 현황</h1>
           <p className="text-[13px] leading-5 text-body md:text-[14px] md:leading-[22px]">누가 누구에게 보냈는지, 협업이 얼마나 원활하게 진행되는지 한눈에 봅니다.</p>
         </div>
+        {MEASURE_ENABLED && (
+          <Link href="/admin/usage" className="inline-flex items-center justify-center rounded-lg border-[1.5px] border-jaju px-5 py-2 text-[13px] font-bold text-jaju">사용 기록 보기</Link>
+        )}
       </div>
 
       <p className={`${cardCls} mt-6 border border-[#e8dfe3] px-5 py-4 text-[12px] leading-[18px] text-body shadow-none md:text-[13px] md:leading-5`}>
