@@ -1,7 +1,7 @@
 // /privacy에 보이는 「서비스 이용 기록」 구역의 글. 측정 도구를 들어낼 때 이 파일과 /privacy의 해당 구역을 함께 지운다(docs/measure-removal.md).
 // 서비스 이용 기록(행동 기록·방문 통계). 가입 동의 문구(CONSENT_ITEMS)와는 따로 /privacy 페이지에만 보여 준다.
 // 그래서 CONSENT_VERSION은 올리지 않았다(가입 때 동의하는 문구는 그대로다). 이 글을 가입 동의에 넣을지는 전문가 확인 때 정한다.
-// text가 null인 항목은 아직 정해지지 않은 것이라 /privacy 페이지에 빈칸으로 보인다(보관 기간은 아직 정하지 않았다).
+// text가 null인 항목은 아직 정해지지 않은 것이라 /privacy 페이지에 빈칸으로 보인다(보관 기간은 90일로 정했다).
 export const USAGE_LOG: { title: string; intro: string; items: { label: string; text: string | null }[]; notes: string[] } = {
   title: "서비스 이용 기록",
   intro: "아클링스는 화면이 어떻게 쓰이는지 알기 위해 아래의 이용 기록을 남깁니다.",
@@ -14,7 +14,7 @@ export const USAGE_LOG: { title: string; intro: string; items: { label: string; 
       label: "이용 목적",
       text: "운영자가 랜딩페이지와 기획안 화면이 어떻게 쓰이는지 통계로 보고 서비스를 고치는 데 씁니다.",
     },
-    { label: "보관 기간", text: null },
+    { label: "보관 기간", text: "이용 기록과 브라우저 무작위 값(쿠키)은 90일 동안 보관하고, 90일이 지나면 삭제합니다." },
   ],
   notes: [
     "방문 수·방문한 화면 같은 집계 통계는 Vercel Web Analytics로 모읍니다.",

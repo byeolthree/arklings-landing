@@ -67,8 +67,13 @@
 ```sql
 -- 사용 기록(0021)을 없앤다. 표를 지우면 그 표의 인덱스·읽기 정책도 함께 지워진다.
 drop function if exists public.record_usage_event(text, text, text, jsonb);
+drop function if exists public.purge_usage_events();
 drop table if exists public.usage_events;
 ```
+
+## 4-1. 90일 지난 기록 지우기 (자동 스케줄 없음)
+
+운영자 계정으로 로그인한 연결에서 `select public.purge_usage_events();`를 부르면 90일이 지난 `usage_events` 줄을 지우고 지운 줄 수를 돌려준다(`supabase/migrations/0023_purge_usage_events.sql`을 실행해 둔 뒤. 운영자가 아니면 오류).
 
 ## 5. 개인정보처리방침에서 지울 구역
 
