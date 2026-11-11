@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { PlannerEditor } from "@/components/planner/planner-editor";
+import { TrackOnMount } from "@/components/track-on-mount";
 import { getCurrentUser } from "@/lib/auth";
 import { readAiRemaining } from "@/lib/ai/usage";
 import { loadPlanPanel } from "@/lib/plans-server";
@@ -21,7 +22,12 @@ export default async function PlannerPage({ searchParams }: { searchParams: Sear
   // 로그인하지 않았으면 기획안은 브라우저 안에서만 쓴다(서버에 저장하지 않는다).
   if (!user) {
     if (planParam) redirect(`/login?next=${encodeURIComponent(`/planner?plan=${planParam}`)}`);
-    return <PlannerEditor loggedIn={false} displayName="" panel={null} />;
+    return (
+      <>
+        <TrackOnMount event="planner_open" />
+        <PlannerEditor loggedIn={false} displayName="" panel={null} />
+      </>
+    );
   }
 
   // 이메일 확인을 마치지 않은 계정(카카오 등)은 먼저 이메일을 확인한다.
@@ -63,5 +69,10 @@ export default async function PlannerPage({ searchParams }: { searchParams: Sear
     evalRemaining = null;
   }
 
-  return <PlannerEditor key={planParam ?? "new"} loggedIn displayName={displayName} panel={panel} workId={workId} workPublic={workPublic} initialStep={panel && stepParam === "2" ? 2 : 1} evalRemaining={evalRemaining} />;
+  return (
+    <>
+      <TrackOnMount event="planner_open" />
+      <PlannerEditor key={planParam ?? "new"} loggedIn displayName={displayName} panel={panel} workId={workId} workPublic={workPublic} initialStep={panel && stepParam === "2" ? 2 : 1} evalRemaining={evalRemaining} />
+    </>
+  );
 }

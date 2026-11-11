@@ -27,6 +27,7 @@ import {
 } from "@/lib/plans";
 import { FINAL_CHECK_OFFSET, FINAL_CHECKS, LOGLINE_MAX, LOGLINE_MIN, SHORT_CHECK_OFFSET, SHORT_CHECKS, SLOT_QUESTIONS } from "./questions";
 import { EvaluationSection } from "@/components/ai/evaluation-section";
+import { trackEvent } from "@/lib/track";
 import { useUndo } from "./use-undo";
 import "./planner.css";
 
@@ -134,6 +135,7 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, work
   const [savedLocal, setSavedLocal] = useState<PlanDraft | null>(null); // 로그인하지 않고 저장한 내용(이 브라우저에만 있다)
   const [prevEdited, setPrevEdited] = useState<string | null>(null); // 제안 문장으로 바꾸기 전의 내 글(이 화면을 닫기 전까지)
 
+
   // 02 모아 보기에 보여 줄 「저장해 둔 내용」: 로그인했으면 서버에 저장된 가장 최근 내용, 아니면 이 브라우저에 저장한 내용
   const view: PlanDraft | null = authed && panel ? panel.latest : savedLocal;
 
@@ -239,12 +241,14 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, work
         // 로그인하지 않았다: 이 브라우저에만 저장하고 02로 넘어간다.
         writeLocal(localKey(planId), draft);
         setSavedLocal(draft);
+        trackEvent("plan_save", { mode: "local" }); // 사용 기록: 로그인하지 않아 이 브라우저에만 저장
         needLogin("저장");
         goStep(2);
         return;
       }
       return setMsg({ text: r.error, err: true });
     }
+    trackEvent("plan_save", { mode: "server" }); // 사용 기록: 로그인해서 서버에 저장
     setLoginPrompt(null);
     setLastSaved(draft);
     clearLocal(localKey(planId));
@@ -315,6 +319,7 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, work
   // 「포트폴리오 작성하기」: 바로 올리지 않는다. 이 기획안이 붙은 작품(비공개)을 만들고 마이페이지의 포트폴리오 등록으로 넘어가 마저 쓴 뒤 거기서 올린다.
   async function onWrite() {
     if (!planId || !view) return;
+    trackEvent("portfolio_start_click"); // 사용 기록
     const r = await run("write", () => startWorkFromPlan(planId, view));
     if (!r) return;
     if (!r.ok) {

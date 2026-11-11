@@ -1,5 +1,6 @@
 import { Noto_Sans_KR, Noto_Serif_KR } from "next/font/google";
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
@@ -33,6 +34,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteHeader />
         <main className="flex flex-1 flex-col">{children}</main>
         <SiteFooter />
+        {/* 방문 통계(Vercel Web Analytics). 대시보드에서 켜기 전에는 아무것도 모이지 않는다. */}
+        <Analytics />
       </body>
     </html>
   );

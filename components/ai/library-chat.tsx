@@ -4,6 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useMemo, useRef, useState } from "react";
 import { getAiRemaining } from "@/app/actions/ai";
+import { trackEvent } from "@/lib/track";
 import { LibraryQa } from "./library-qa";
 import { MAX_QUESTION_CHARS, type AskController, type AskErrorKind, type AskMessage, type AskStatus, type WikiItem } from "./types";
 
@@ -89,6 +90,7 @@ export function LibraryChat({ items, listError, loggedIn, loginHref, initialRema
       return;
     }
     setLocalError(null);
+    trackEvent("library_ask"); // 사용 기록(질문한 것만 남기고 질문 글은 보내지 않는다)
     if (error) clearError();
     if (cut || failedBeforeText) setMessages((prev) => prev.slice(0, lastUserIdx)); // 실패한 질문(과 끊긴 답)을 치우고 고친 질문을 보낸다
     lastQuestion.current = q;

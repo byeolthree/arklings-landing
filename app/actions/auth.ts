@@ -8,6 +8,7 @@ import { CONSENT_VERSION } from "@/lib/consent";
 import { getOrigin } from "@/lib/origin";
 import { safeNext } from "@/lib/safe-next";
 import { createAuthClient } from "@/lib/supabase/server";
+import { trackServer } from "@/lib/usage-server";
 
 export type AuthField = "displayName" | "email" | "password" | "passwordConfirm" | "consent";
 
@@ -92,6 +93,7 @@ export async function signUp(_prev: AuthFormState, fd: FormData): Promise<AuthFo
     if (signed?.user && Array.isArray(signed.user.identities) && signed.user.identities.length === 0) {
       return { errors: { email: "이미 가입된 이메일이에요." }, values, returnTo };
     }
+    await trackServer(supabase, "signup", "/signup", { method: "email" }); // 사용 기록: 가입 요청 성공(이메일·이름은 남기지 않는다)
   } catch {
     return { message: UNAVAILABLE, nextStep: "retry", values, returnTo };
   }
@@ -148,6 +150,7 @@ export async function signIn(_prev: AuthFormState, fd: FormData): Promise<AuthFo
         needsConfirm: issue.next === "resend" ? email : undefined,
       };
     }
+    await trackServer(supabase, "login", "/login", { method: "email" }); // 사용 기록: 이메일 로그인 성공
   } catch {
     return { message: UNAVAILABLE, nextStep: "retry", values, returnTo };
   }

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { evaluateLogline, getAiRemaining } from "@/app/actions/ai";
 import type { PlanDraft } from "@/lib/plans";
+import { trackEvent } from "@/lib/track";
 import { EvaluationPanel } from "./evaluation-panel";
 import type { EvalView } from "./types";
 
@@ -16,6 +17,7 @@ export function EvaluationSection({ draft, initialRemaining, loginHref }: { draf
   const run = async () => {
     if (running.current) return; // 연달아 눌러도 한 번만
     running.current = true;
+    trackEvent("ai_evaluate_click"); // 사용 기록(누른 것만 남기고 글은 보내지 않는다)
     setView({ kind: "loading" });
     let loginNeeded = false;
     try {
