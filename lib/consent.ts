@@ -30,26 +30,3 @@ export const CONSENT_NOTES: string[] = [
 
 // 아직 문구가 정해지지 않은 항목. /privacy 페이지에 자리만 표시한다.
 export const CONSENT_PLACEHOLDERS: string[] = ["처리 위탁·해외 서버 고지", "접속 주소 해시 보관 고지", "문의 이메일"];
-
-// 서비스 이용 기록(행동 기록·방문 통계). 가입 동의 문구(CONSENT_ITEMS)와는 따로 /privacy 페이지에만 보여 준다.
-// 그래서 CONSENT_VERSION은 올리지 않았다(가입 때 동의하는 문구는 그대로다). 이 글을 가입 동의에 넣을지는 전문가 확인 때 정한다.
-// text가 null인 항목은 아직 정해지지 않은 것이라 /privacy 페이지에 빈칸으로 보인다(보관 기간은 아직 정하지 않았다).
-export const USAGE_LOG: { title: string; intro: string; items: { label: string; text: string | null }[]; notes: string[] } = {
-  title: "서비스 이용 기록",
-  intro: "아클링스는 화면이 어떻게 쓰이는지 알기 위해 아래의 이용 기록을 남깁니다.",
-  items: [
-    {
-      label: "수집 항목",
-      text: "기획안 화면 열기, 기획안 저장(로그인해서 저장했는지 여부), AI 평가·라이브러리 질문·포트폴리오 작성하기 누르기, 가입, 로그인 같은 행동의 종류와 시각, 그 행동을 한 화면의 주소, 로그인한 경우의 회원 번호, 그리고 이 브라우저를 구분하기 위해 브라우저가 만든 무작위 값(쿠키)입니다. 작성한 글의 내용, 이메일, 이름은 이 기록에 남기지 않습니다.",
-    },
-    {
-      label: "이용 목적",
-      text: "운영자가 랜딩페이지와 기획안 화면이 어떻게 쓰이는지 통계로 보고 서비스를 고치는 데 씁니다.",
-    },
-    { label: "보관 기간", text: null },
-  ],
-  notes: [
-    "방문 수·방문한 화면 같은 집계 통계는 Vercel Web Analytics로 모읍니다.",
-    "브라우저의 「추적 안 함」 설정을 켜 두시면 이 이용 기록을 남기지 않습니다.",
-  ],
-};

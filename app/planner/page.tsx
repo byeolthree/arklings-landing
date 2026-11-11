@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { PlannerEditor } from "@/components/planner/planner-editor";
-import { TrackOnMount } from "@/components/track-on-mount";
+import { TrackOnMount } from "@/lib/measure/client";
 import { getCurrentUser } from "@/lib/auth";
 import { readAiRemaining } from "@/lib/ai/usage";
 import { loadPlanPanel } from "@/lib/plans-server";

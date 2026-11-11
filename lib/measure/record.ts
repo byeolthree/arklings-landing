@@ -2,9 +2,11 @@
 // 서버 전용 열쇠는 쓰지 않는다: 호출한 사람의 연결로 함수를 부르고, user_id는 DB가 로그인 정보(auth.uid())에서 채운다.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
-import { ANON_COOKIE, ANON_ID_RE, type UsageEvent, type UsageProps, type UsageRecord } from "@/lib/usage-events";
+import { MEASURE_ENABLED } from "@/lib/measure/config";
+import { ANON_COOKIE, ANON_ID_RE, type UsageEvent, type UsageProps, type UsageRecord } from "@/lib/measure/events";
 
 export async function recordUsageEvent(sb: SupabaseClient, rec: UsageRecord): Promise<boolean> {
+  if (!MEASURE_ENABLED) return false;
   try {
     const { data, error } = await sb.rpc("record_usage_event", { p_anon_id: rec.anonId, p_event: rec.event, p_page: rec.page, p_props: rec.props });
     return !error && data === true;

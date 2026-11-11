@@ -1,7 +1,8 @@
-// 브라우저에서 사용 기록을 알리는 도구. 정해진 행동(lib/usage-events.ts)만 보낸다. 글 내용·이메일·이름은 보내지 않는다.
+// 브라우저에서 사용 기록을 알리는 도구. 정해진 행동(lib/measure/events.ts)만 보낸다. 글 내용·이메일·이름은 보내지 않는다.
 // 이 브라우저를 구분하는 무작위 값은 쿠키(arklings_anon)에 둔다. 값의 수명은 임시로 아래 상수 한 곳에서 정한다(보관 기간 확정 전).
 // 브라우저의 「추적 안 함」 설정(Do Not Track)이 켜져 있으면 아무것도 보내지 않는다.
-import { ANON_COOKIE, ANON_ID_RE, type UsageEvent, type UsageProps } from "@/lib/usage-events";
+import { MEASURE_ENABLED } from "@/lib/measure/config";
+import { ANON_COOKIE, ANON_ID_RE, type UsageEvent, type UsageProps } from "@/lib/measure/events";
 
 export const ANON_COOKIE_DAYS = 365; // 임시값
 
@@ -20,7 +21,7 @@ function ensureAnon(): string {
 }
 
 export function trackEvent(event: UsageEvent, props: UsageProps = {}): void {
-  if (typeof window === "undefined") return;
+  if (!MEASURE_ENABLED || typeof window === "undefined") return;
   try {
     if (navigator.doNotTrack === "1") return;
     const body = JSON.stringify({ event, anonId: ensureAnon(), page: location.pathname, props });

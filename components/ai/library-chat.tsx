@@ -4,7 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useMemo, useRef, useState } from "react";
 import { getAiRemaining } from "@/app/actions/ai";
-import { trackEvent } from "@/lib/track";
+import { trackEvent } from "@/lib/measure/client";
 import { LibraryQa } from "./library-qa";
 import { MAX_QUESTION_CHARS, type AskController, type AskErrorKind, type AskMessage, type AskStatus, type WikiItem } from "./types";
 

@@ -5,7 +5,7 @@ import { CONSENT_VERSION } from "@/lib/consent";
 import { safeNext } from "@/lib/safe-next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createAuthClient } from "@/lib/supabase/server";
-import { trackServer } from "@/lib/usage-server";
+import { trackServer } from "@/lib/measure/server";
 
 // 구글·카카오 로그인이 끝나고 돌아오는 곳.
 // 실패·취소는 막다른 오류가 아니라 다음에 할 일이 있는 안내 화면(/auth/social-failed)으로 보낸다.

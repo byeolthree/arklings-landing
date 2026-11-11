@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { evaluateLogline, getAiRemaining } from "@/app/actions/ai";
 import type { PlanDraft } from "@/lib/plans";
-import { trackEvent } from "@/lib/track";
+import { trackEvent } from "@/lib/measure/client";
 import { EvaluationPanel } from "./evaluation-panel";
 import type { EvalView } from "./types";
 

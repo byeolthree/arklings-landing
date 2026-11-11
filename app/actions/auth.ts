@@ -8,7 +8,7 @@ import { CONSENT_VERSION } from "@/lib/consent";
 import { getOrigin } from "@/lib/origin";
 import { safeNext } from "@/lib/safe-next";
 import { createAuthClient } from "@/lib/supabase/server";
-import { trackServer } from "@/lib/usage-server";
+import { trackServer } from "@/lib/measure/server";
 
 export type AuthField = "displayName" | "email" | "password" | "passwordConfirm" | "consent";
 

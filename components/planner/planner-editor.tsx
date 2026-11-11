@@ -27,7 +27,7 @@ import {
 } from "@/lib/plans";
 import { FINAL_CHECK_OFFSET, FINAL_CHECKS, LOGLINE_MAX, LOGLINE_MIN, SHORT_CHECK_OFFSET, SHORT_CHECKS, SLOT_QUESTIONS } from "./questions";
 import { EvaluationSection } from "@/components/ai/evaluation-section";
-import { trackEvent } from "@/lib/track";
+import { trackEvent } from "@/lib/measure/client";
 import { useUndo } from "./use-undo";
 import "./planner.css";
 
