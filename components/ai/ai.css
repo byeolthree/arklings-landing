@@ -1,0 +1,49 @@
+/* 미션7-2 AI 화면. planner.css의 .pl 안에서만 쓴다. 색이 바뀌는 hover는 넣지 않는다. */
+.pl .ai-box { padding: 22px 0 4px; }
+.pl .ai-box .k { font-size: 12px; font-weight: 700; color: var(--teal); letter-spacing: .06em; }
+.pl .ai-box h3 { margin-top: 6px; font-size: 16px; }
+.pl .ai-box .hint { margin-top: 4px; font-size: 13px; }
+.pl .ai-status { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; color: var(--title); }
+.pl .ai-dots { display: inline-flex; gap: 4px; }
+.pl .ai-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--jaju); animation: ai-blink 1.2s ease-in-out infinite; }
+.pl .ai-dots i:nth-child(2) { animation-delay: .2s; }
+.pl .ai-dots i:nth-child(3) { animation-delay: .4s; }
+@keyframes ai-blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .pl .ai-dots i { animation: none; opacity: .7; } }
+
+.pl .ai-slots { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 10px; }
+.pl .ai-slot { padding: 14px 16px; border-radius: 14px; border: 1px solid var(--line); background: #fff; }
+.pl .ai-slot-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pl .ai-slot-head b { font-size: 14px; color: var(--title); }
+.pl .ai-badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.pl .ai-badge.ok { background: var(--teal); color: #fff; }
+.pl .ai-badge.needs { background: transparent; border: 1px solid var(--jaju); color: var(--jaju); }
+.pl .ai-slot p { margin-top: 6px; font-size: 13px; color: var(--title); }
+.pl .ai-slot .fix { color: var(--body); }
+.pl .ai-slot .fix b { color: var(--jaju); font-weight: 700; }
+.pl .ai-note { margin-top: 12px; font-size: 12px; color: var(--body); }
+
+/* 라이브러리 */
+.pl .ai-list { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 0; }
+.pl .ai-list details { border-top: 1px solid var(--line); padding: 14px 0; }
+.pl .ai-list details:first-child { border-top: 0; padding-top: 0; }
+.pl .ai-list summary { cursor: pointer; font-size: 15px; font-weight: 700; color: var(--title); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+.pl .ai-list summary::-webkit-details-marker { display: none; }
+.pl .ai-list summary::after { content: "＋"; color: var(--jaju); flex: none; }
+.pl .ai-list details[open] summary::after { content: "－"; }
+.pl .ai-list .ans { margin-top: 10px; font-size: 14px; line-height: 1.8; color: var(--title); white-space: pre-wrap; }
+.pl .ai-meta { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; }
+.pl .ai-chip { display: inline-block; padding: 1px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--body); }
+.pl .ai-chat { display: grid; gap: 12px; margin-top: 16px; }
+.pl .ai-bubble { max-width: 100%; padding: 12px 16px; border-radius: 14px; font-size: 14px; line-height: 1.75; white-space: pre-wrap; }
+.pl .ai-bubble.user { justify-self: end; background: var(--tint); color: var(--title); border-bottom-right-radius: 4px; max-width: 88%; }
+.pl .ai-bubble.bot { justify-self: start; background: #fff; border: 1px solid var(--line); color: var(--title); border-bottom-left-radius: 4px; }
+.pl .ai-bubble.bot.cut { border-style: dashed; color: var(--body); }
+.pl .ai-bubble .state { display: block; margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--jaju); }
+.pl .ai-bubble .src { display: block; margin-top: 8px; font-size: 12px; color: var(--body); }
+.pl .ai-bubble .src b { color: var(--teal); }
+.pl .ai-ask { margin-top: 16px; }
+.pl .ai-ask .answer { min-height: 72px; margin-top: 0; }
+.pl .ai-ask-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; margin-top: 8px; }
+.pl .ai-empty { margin-top: 16px; padding: 22px 16px; border-radius: 14px; border: 1px dashed var(--line); text-align: center; font-size: 14px; color: var(--body); }
+.pl .ai-demo { margin-top: 12px; padding: 10px 14px; border-radius: 12px; background: color-mix(in srgb, var(--gold) 16%, #fff); font-size: 12px; color: var(--title); }
