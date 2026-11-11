@@ -15,7 +15,7 @@
 
 | 부품 | 파일 | 하는 일 | 계약 |
 |---|---|---|---|
-| 상단 메뉴 | `components/site-nav.tsx`(서버에서 `components/site-header.tsx`가 값을 읽어 넘김) | 로고(햄버거는 로고 왼쪽), 메뉴, 오른쪽 아이콘만 ＋·사람·종. 로그인: ＋=「등록할 곳」 드롭다운(크리에이터→`/portfolio/new`), 사람=기본 정보 `/mypage#mp-basic`·프로필 등록 `/mypage#mp-creator`·포트폴리오 등록 `/portfolio/new`·로그아웃 `signOut()`, 종=새 협업 신청(「접수」 상태) 개수(`countNewCollab`)와 최근 5건(`listNewCollab`, 한 줄을 누르면 `/collab/<id>`)·「받은 협업 신청 모두 보기」 `/collab`. 로그아웃: ＋와 사람만, ＋는 `/login`으로, 사람=로그인 `/login`·회원가입 `/signup`. 「기획안 만들기」 버튼은 상단 메뉴에서 뺐다(랜딩 전용, 랜딩은 `public/landing.html` 별도) | `loggedIn`(`getCurrentUser()`), `newCount`, `notices[]`(`id`,`text`,`when`) |
+| 상단 메뉴 (2026-11-11 별뜨리님 지시로 고침) | `components/site-nav.tsx`(서버에서 `components/site-header.tsx`가 값을 읽어 넘김) | 로고(햄버거는 로고 왼쪽), 메뉴, 오른쪽 아이콘 ＋·사람·종. **마우스를 올리면 드롭다운이 열리고 벗어나면 닫힌다**(터치 화면은 누르면 열고 닫음). 로그인: ＋=크리에이터→`/portfolio/new`(「등록할 곳」 문구 없음), 사람=기본 정보 `/mypage`·프로필 등록 `/portfolio/new?step=profile`·포트폴리오 등록 `/portfolio/new`·협업 신청 `/mypage/collab`·**운영자 `/admin`(운영자 표시 계정에만)**·로그아웃 `signOut()`, 종=새 협업 신청(「접수」 상태) 개수(`countNewCollab`)와 최근 5건(`listNewCollab`, 한 줄을 누르면 `/collab/<id>`)·「받은 협업 신청 모두 보기」 `/collab`. **로그아웃: ＋는 보이지 않고** 사람만(로그인 `/login`·회원가입 `/signup`) | `loggedIn`(`getCurrentUser()`), `newCount`, `notices[]`(`id`,`text`,`when`), `isAdmin`(`isAdminUser()`) |
 | 하단 | `components/site-footer.tsx` | 「개인정보처리방침」→`/privacy` | 없음 |
 | 입력칸 틀 | `components/form-field.tsx` | `FormField`(id, label, hint, error), `authInputCls` | 없음 |
 | 카드 틀 | `components/paper-card.tsx` | `PaperPage`, `PaperCard`, `CardHeading`, `primaryBtn`, `outlineBtn` | 없음 |
@@ -94,7 +94,8 @@
 |---|---|---|---|---|
 | 개인정보처리방침 | `/privacy` | 아니요 | 없음 | `CONSENT_ITEMS`, `CONSENT_NOTES`, `CONSENT_PLACEHOLDERS`(`lib/consent.ts`). 가입·협업 신청의 동의 문구와 같은 글 |
 | 옛 주소 | `/planner.html`, `/apply`, `/collab/gate` | - | 없음 | `next.config.ts`·`app/collab/gate`가 이동시킴 |
-| 로그인 상태 확인 | `/api/session` | - | 없음 | 랜딩(`public/landing.html`)만 부른다(상단 메뉴 컴포넌트는 안 부른다). 만지지 않는다 |
+| 로그인 상태 확인 | `/api/session` | - | 없음(읽기만) | 랜딩(`public/landing.html`)만 부른다. 로그인한 본인에게만 `loggedIn`, `isAdmin`, `newCount`, `notices[]`(`id`,`text`,`when`; 글은 `lib/nav-notices.ts` 한 곳)를 주고, 로그아웃이면 `{loggedIn:false}`만 준다 |
+| 홈 상단 아이콘 (2026-11-11 별뜨리님 지시) | `public/landing.html` | 로그인: ＋·사람·종 모두 마우스를 올리면 드롭다운(＋=크리에이터, 사람=상단 메뉴와 같은 항목+로그아웃, 종=알림 목록). 상단 「기획안 만들기」 버튼은 숨김. 로그아웃: ＋·종·알림 없음, 사람=로그인·회원가입, 「기획안 만들기」 보임 | 없음 | 로그아웃은 `POST /auth/signout`(`app/auth/signout/route.ts`, 같은 사이트에서 온 요청만 처리하고 이 기기만 로그아웃한 뒤 `/`로) | 위 상태 확인 값 | `/api/session` |
 | 정리 작업 | `/api/cron/cleanup` | 비밀값 | 없음 | 화면 없음 |
 | 인증 돌아오는 길 | `/auth/callback`, `/auth/confirm` | - | 없음 | 화면 없음. 만지지 않는다 |
 
