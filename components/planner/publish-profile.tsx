@@ -208,7 +208,7 @@ export function PublishProfile({
         </span>
         <div className="pp-roles" role="group" aria-labelledby="pp-roles-label">
           {(Object.keys(ROLES) as Role[]).map((r) => (
-            <button key={r} type="button" className={`opt role-opt ${ROLE_TONE[r]}`} aria-pressed={roles.includes(r)} onClick={() => toggle(r)} onDoubleClick={() => makeRep(r)}>
+            <button key={r} type="button" className={`opt role-opt ${ROLE_TONE[r]}`} aria-pressed={roles.includes(r)} onClick={(e) => (e.detail >= 2 ? makeRep(r) : toggle(r))}>
               {roles.length >= 2 && roles[0] === r && <span className="rep-badge">대표</span>}
               {ROLES[r]}
             </button>
