@@ -133,8 +133,7 @@ export async function signIn(_prev: AuthFormState, fd: FormData): Promise<AuthFo
   const values = { email };
 
   const errors: AuthFormState["errors"] = {};
-  if (!email) errors.email = "이메일을 입력해 주세요.";
-  else if (!EMAIL_RE.test(email)) errors.email = "이메일 주소 형식이 맞지 않아요.";
+  if (!email || !EMAIL_RE.test(email)) errors.email = "이메일 주소를 입력해 주세요.";
   if (!password) errors.password = "비밀번호를 입력해 주세요.";
   if (Object.keys(errors).length) return { errors, values, returnTo };
 
