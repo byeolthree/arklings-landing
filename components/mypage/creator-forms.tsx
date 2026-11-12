@@ -915,7 +915,7 @@ export function WorkEditor({
           )}
         <input ref={titleRef} className="we-title" type="text" placeholder="〈제목〉" aria-label="작품 제목" value={title} maxLength={TITLE_MAX} onChange={(e) => setTitle(e.target.value)} aria-invalid={errs.title ? true : undefined} />
         <p className="we-by">
-          {nickname || "닉네임"} · {work && work.isPublic ? new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" }) : work || !newPublic ? "비공개" : "저장하면 공개"}
+          {nickname || "닉네임"}{work && work.isPublic ? ` · ${new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" })}` : ""}
         </p>
         {errs.roles && <AlertPopup key={errs.roles}>{errs.roles}</AlertPopup>}
         <div className="we-pick" role="group" aria-label="장르">
