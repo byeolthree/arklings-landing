@@ -47,10 +47,10 @@
 /* ---------- 상단 메뉴 (랜딩 header.site) ---------- */
 .lk-header {
   position: sticky; top: 0; z-index: 50;
-  background: rgba(250,247,248,.82); backdrop-filter: saturate(1.4) blur(10px);
-  transition: background .3s;
+  /* 모든 페이지 공통 상단 헤더: 흰색이 아닌 브랜드 색(배경색 #FAF7F8과 테두리색 #E8DFE3을 섞은 제목 띠 색)을 단색으로 깐다 */
+  background: var(--hero-bg);
 }
-.lk-header.scrolled { background: rgba(250,247,248,.94); }
+.lk-header.scrolled { background: var(--hero-bg); }
 .lk-nav { display: flex; align-items: center; gap: 28px; height: 68px; }
 .lk-logo { font-weight: 700; font-size: 22px; color: var(--jaju); text-decoration: none; letter-spacing: -0.02em; }
 .lk-nav-links { display: none; gap: 6px; font-size: 15px; }
