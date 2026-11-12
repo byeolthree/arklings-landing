@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { AlertPopup } from "@/components/ui/alert-popup";
 import { resendConfirmation, signIn, signUp, type AuthFormState } from "@/app/actions/auth";
 import { ConsentDetails } from "@/components/consent-details";
 import { FormNotice } from "@/components/form-notice";
@@ -186,6 +187,7 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
   const e = state.errors ?? {};
   const v = state.values ?? {};
   const remembered = useStoredValue(REMEMBER_EMAIL_KEY);
+  const [closed, setClosed] = useState<AuthFormState | null>(null);
 
   return (
     <PaperCard>
@@ -246,19 +248,6 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
         </div>
       )}
 
-      {state.message && (
-        <div className="mt-4 rounded-lg bg-[#faf7f8] px-4 py-3 text-[12px] leading-normal text-[#574a4f] md:text-[13px]">
-          <p>구글·카카오로 가입했거나 비밀번호를 정한 적이 없다면 아래 방법을 써 보세요.</p>
-          <ul className="mt-1.5 list-disc pl-4">
-            <li>아래 「구글로 로그인」「카카오로 로그인」 버튼</li>
-            <li>
-              <Link href={`/forgot-password${v.email ? `?email=${encodeURIComponent(v.email)}` : ""}`} className="text-jaju underline">
-                비밀번호 찾기
-              </Link>
-            </li>
-          </ul>
-        </div>
-      )}
 
       <p className="mt-5 text-center text-[12px] text-[#6f6469]">
         비밀번호가 기억나지 않나요?{" "}
@@ -273,7 +262,7 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
         </Link>
       </p>
       <SocialButtons returnTo={returnTo} actionLabel="로그인" />
-      <FormNotice message={state.message} />
+      {state.message && closed !== state && <AlertPopup onClose={() => setClosed(state)}>{state.message}</AlertPopup>}
     </PaperCard>
   );
 }
