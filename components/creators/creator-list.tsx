@@ -6,6 +6,7 @@ import { BlurImage } from "./blur-image";
 import { BlurVideo } from "./blur-video";
 import { RoleTags } from "./role-tags";
 import { FORM_LABEL, type CreatorCard, type WorkForm } from "./types";
+import { ROLE_TONE } from "./role-tone";
 import "./creators.css";
 
 // 자주색(주 색)을 아끼려고, 프로필 원은 보조 색 세 가지(청록·더스티 블루·뮤트 세이지)를 번갈아 쓴다.
@@ -171,7 +172,7 @@ export function CreatorList({
               </p>
               <ul className="cr-grid">
                 {cards.map((c, i) => {
-                  const tone = toneAt(i);
+                  const tone = c.roles[0] ? ROLE_TONE[c.roles[0]] : toneAt(i);
                   return (
                   <li key={c.handle}>
                     <div className="panel cr-card">

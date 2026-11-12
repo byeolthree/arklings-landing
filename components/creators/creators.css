@@ -95,7 +95,10 @@
 .cr .cr-av { flex: none; display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; font-size: 18px; font-weight: 700; color: #fff; }
 .cr .cr-av.teal { background: var(--teal); }
 .cr .cr-av.dusty { background: var(--dusty); }
-.cr .cr-av.sage { background: var(--sage); color: var(--title); }
+.cr .cr-av.sage { background: var(--sage); }
+.cr .cr-av.jaju { background: var(--jaju); }
+.cr .cr-av.gold { background: var(--gold); }
+.cr .cr-av.body { background: var(--body); }
 .cr .cr-who-text { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
 .cr .cr-name { font-size: 16px; font-weight: 700; color: var(--title); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cr .cr-bio { font-size: 13px; line-height: 1.5; color: var(--body); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }

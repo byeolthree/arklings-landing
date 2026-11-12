@@ -3,6 +3,7 @@
 import { channelLabelFromUrl } from "@/lib/channel-label";
 import { useEffect, useRef, useState } from "react";
 import { ROLES, type Role } from "@/lib/collab";
+import { ROLE_TONE } from "@/components/creators/role-tone";
 import {
   ABOUT_MAX,
   CHANNEL_MAX,
@@ -94,6 +95,10 @@ export function PublishProfile({
 
   function toggle(r: Role) {
     setRoles((cur) => (cur.includes(r) ? cur.filter((x) => x !== r) : [...cur, r]));
+  }
+  // 역할 태그를 두 번 누르면 그 역할이 맨 앞(대표 역할)이 된다.
+  function makeRep(r: Role) {
+    setRoles((cur) => [r, ...cur.filter((x) => x !== r)]);
   }
   const setChannel = (i: number, patch: Partial<Channel>) => setChannels((cur) => cur.map((c, k) => (k === i ? { ...c, ...patch } : c)));
 
@@ -203,11 +208,13 @@ export function PublishProfile({
         </span>
         <div className="pp-roles" role="group" aria-labelledby="pp-roles-label">
           {(Object.keys(ROLES) as Role[]).map((r) => (
-            <button key={r} type="button" className="opt" aria-pressed={roles.includes(r)} onClick={() => toggle(r)}>
+            <button key={r} type="button" className={`opt role-opt ${ROLE_TONE[r]}`} aria-pressed={roles.includes(r)} onClick={() => toggle(r)} onDoubleClick={() => makeRep(r)}>
+              {roles.length >= 2 && roles[0] === r && <span className="rep-badge">대표</span>}
               {ROLES[r]}
             </button>
           ))}
         </div>
+        {roles.length >= 2 && <p className="pp-hint">태그를 두 번 클릭해서 대표 역할을 골라주세요.</p>}
         {errors.roles && (
           <p className="pp-err" role="alert">
             {errors.roles}

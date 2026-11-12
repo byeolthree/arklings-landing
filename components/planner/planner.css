@@ -156,3 +156,14 @@
 
 /* 누르는 동안 살짝 작아지고 진해진다(잠긴 버튼 제외) */
 .pl .btn:not([disabled]):active, .pl .opt:not([disabled]):active { transform: scale(.97); filter: brightness(.92); }
+
+/* 역할 태그: 역할마다 다른 색 외곽선과 글자, 누르면 그 색으로 채우고 글자는 흰색. 두 번 누른 역할에는 「대표」 딱지(본문색, 왼쪽 위) */
+.pl .opt.role-opt { position: relative; --rc: var(--body); border-color: var(--rc); color: var(--rc); }
+.pl .opt.role-opt.jaju { --rc: #a61e5c; }
+.pl .opt.role-opt.dusty { --rc: #5f7c99; }
+.pl .opt.role-opt.gold { --rc: #d89a24; }
+.pl .opt.role-opt.sage { --rc: #6f8a7a; }
+.pl .opt.role-opt.teal { --rc: #1f5a66; }
+.pl .opt.role-opt.body { --rc: #574a50; }
+.pl .opt.role-opt[aria-pressed="true"] { background: var(--rc); border-color: var(--rc); color: #fff; }
+.pl .opt.role-opt .rep-badge { position: absolute; top: -13px; left: -8px; box-sizing: content-box; height: 18px; padding: 0 7px; display: grid; place-items: center; border: 2px solid #fff; border-radius: 999px; background: var(--body); color: #fff; font-size: 11px; font-weight: 700; line-height: 1; }
