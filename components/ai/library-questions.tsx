@@ -38,12 +38,13 @@ const MINUS = (
 // 태그 예시: 질문마다 시대·나라가 정해지기 전까지 모든 질문에 같은 예시를 보여 준다. 나라 태그는 시대 태그 다음에 온다.
 const EXAMPLE_ERA = "열국시대";
 const EXAMPLE_COUNTRY = "고구려";
+const EXAMPLE_SOURCE = "출처 예시";
 
 export function LibraryQuestions() {
   return (
     <div className="ai-qs">
-      {LIBRARY_QUESTION_SECTIONS.map((s) => (
-        <details key={s.no} className="ai-qs-sec">
+      {LIBRARY_QUESTION_SECTIONS.map((s, si) => (
+        <details key={s.no} className="ai-qs-sec" open={si === 0}>
           <summary>
             <span>{s.title}</span>
             {PLUS}
@@ -51,7 +52,7 @@ export function LibraryQuestions() {
           </summary>
           <div className="ai-qs-list">
             {s.questions.map((q, i) => (
-              <details key={i} className="ai-qs-q">
+              <details key={i} className="ai-qs-q" open={si === 0 && i === 0}>
                 <summary>
                   <span>{q.question}</span>
                   {PLUS}
@@ -65,6 +66,7 @@ export function LibraryQuestions() {
                 <div className="ai-meta">
                   <span className="ai-tag">시대 · {EXAMPLE_ERA}</span>
                   <span className="ai-tag">나라 · {EXAMPLE_COUNTRY}</span>
+                  <span className="ai-tag">출처 · 「{EXAMPLE_SOURCE}」</span>
                 </div>
               </details>
             ))}
