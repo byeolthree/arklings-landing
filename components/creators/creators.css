@@ -31,7 +31,7 @@
 .cr .btn:hover .arrow { transform: translateX(4px); }
 
 /* 상단 띠 (랜딩 히어로 배경 + 옅은 점 무늬) */
-.cr .cr-top { position: relative; background: linear-gradient(180deg, var(--hero-bg), var(--bg)); padding: 48px 0 32px; }
+.cr .cr-top { position: relative; box-sizing: border-box; min-height: var(--hero-h); background: linear-gradient(180deg, var(--hero-bg), var(--bg)); padding: 48px 0 32px; }
 .cr .cr-top::before {
   content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
   background-image: radial-gradient(circle, rgba(42,32,37,.12) 1px, transparent 1.6px);

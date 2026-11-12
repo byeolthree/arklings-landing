@@ -96,6 +96,15 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { logg
     },
   });
   const shut = () => setDrop(null);
+  // 사람·종 아이콘은 링크다. 마우스 화면에서는 누르면 드롭다운 맨 위 메뉴로 이동하고, 터치 화면에서는 누르면 드롭다운을 열고 닫는다.
+  const iconClick = (e: React.MouseEvent, d: Exclude<Drop, null>) => {
+    if (canHover()) {
+      shut();
+      return;
+    }
+    e.preventDefault();
+    toggleDrop(d);
+  };
 
   return (
     <header className={`lk-header${scrolled ? " scrolled" : ""}`} id="top">
@@ -157,9 +166,9 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { logg
 
           {/* 사람 : 마이페이지 메뉴(로그인) 또는 로그인·회원가입(로그아웃) */}
           <div className="lk-ico-wrap" {...hv("person")}>
-            <button type="button" className="lk-ico" aria-label={isIn ? "마이페이지" : "로그인·회원가입"} aria-haspopup="menu" aria-expanded={drop === "person"} onClick={() => toggleDrop("person")}>
+            <Link href={isIn ? "/mypage" : "/login"} className="lk-ico" aria-label={isIn ? "마이페이지" : "로그인·회원가입"} aria-haspopup="menu" aria-expanded={drop === "person"} onClick={(e) => iconClick(e, "person")}>
               <PersonIcon />
-            </button>
+            </Link>
             {drop === "person" && (
               <div className="lk-drop" role="menu">
                 {isIn ? (
@@ -205,14 +214,14 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { logg
           {/* 종 : 로그인했을 때만. 새 협업 신청 알림 */}
           {isIn && (
             <div className="lk-ico-wrap" {...hv("bell")}>
-              <button type="button" className="lk-ico" aria-label={newCount ? `알림 ${newCount}개` : "알림"} aria-haspopup="menu" aria-expanded={drop === "bell"} onClick={() => toggleDrop("bell")}>
+              <Link href="/mypage/collab" className="lk-ico" aria-label={newCount ? `알림 ${newCount}개` : "알림"} aria-haspopup="menu" aria-expanded={drop === "bell"} onClick={(e) => iconClick(e, "bell")}>
                 <BellIcon />
                 {newCount ? (
                   <span className="lk-badge" aria-hidden="true">
                     {newCount > 9 ? "9+" : newCount}
                   </span>
                 ) : null}
-              </button>
+              </Link>
               {drop === "bell" && (
                 <div className="lk-drop lk-drop-bell" role="menu" aria-label="알림">
                   <p className="lk-drop-title">알림</p>
