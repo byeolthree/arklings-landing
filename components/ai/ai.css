@@ -154,7 +154,7 @@
 .ai .ai-qs-sec > summary { font-size: 16px; font-weight: 700; }
 .ai .ai-qs-list { margin-top: 14px; }
 .ai .ai-qs-q { border-top: 1px solid var(--line); padding: 14px 0 14px 12px; }
-.ai .ai-qs-q > summary { font-size: 16px; font-weight: 700; }
+.ai .ai-qs-q > summary { font-size: 16px; font-weight: 500; }
 .ai .ai-qs-q > summary svg { margin-top: 2px; }
 .ai .ai-qs-q .ans { margin-top: 10px; font-size: 14px; line-height: 1.85; color: var(--title); white-space: pre-wrap; }
 .ai .ai-qs-q .ans.pending { color: var(--body); }
