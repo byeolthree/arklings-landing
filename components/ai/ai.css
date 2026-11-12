@@ -151,7 +151,7 @@
 .ai .ai-qs details:not([open]) > summary .minus, .ai .ai-qs details[open] > summary .plus { display: none; }
 .ai .ai-qs-sec { border-top: 1px solid var(--line); padding: 20px 0; }
 .ai .ai-qs-sec:last-child { border-bottom: 1px solid var(--line); }
-.ai .ai-qs-sec > summary { font-size: 16px; font-weight: 700; color: var(--jaju); padding-left: 12px; }
+.ai .ai-qs details.ai-qs-sec > summary { font-size: 16px; font-weight: 700; color: var(--jaju); padding-left: 12px; }
 .ai .ai-qs-list { margin-top: 14px; }
 .ai .ai-qs-q { border-top: 1px solid var(--line); padding: 14px 0 14px 32px; }
 .ai .ai-qs-q > summary { font-size: 16px; font-weight: 400; }
