@@ -14,7 +14,7 @@ export function describeAuthError(error: ErrorLike, context: "signup" | "login" 
 
   switch (code) {
     case "invalid_credentials":
-      return { message: "이메일 또는 비밀번호가 맞지 않아요. 다시 입력하거나, 아직 가입 전이라면 가입해 주세요.", next: "signup" };
+      return { message: "이메일 또는 비밀번호가 맞지 않아요. 다시 입력해 주세요.", next: "signup" };
     case "email_not_confirmed":
       return { message: "아직 이메일 확인이 끝나지 않았어요. 받은 편지함(스팸함도)에서 확인 메일의 링크를 눌러 주세요.", next: "resend" };
     case "weak_password":
