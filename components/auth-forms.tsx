@@ -186,6 +186,7 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
   const [state, action, pending] = useActionState<AuthFormState, FormData>(signIn, {});
   const e = state.errors ?? {};
   const v = state.values ?? {};
+  const popupLines = [e.email, e.password, state.message].filter((x): x is string => Boolean(x));
   const remembered = useStoredValue(REMEMBER_EMAIL_KEY);
   const [closed, setClosed] = useState<AuthFormState | null>(null);
 
@@ -207,7 +208,7 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
         }}
       >
         <input type="hidden" name="next" value={returnTo} />
-        <FormField id="login-email" label="이메일" error={e.email}>
+        <FormField id="login-email" label="이메일">
           <input
             id="login-email"
             name="email"
@@ -221,7 +222,7 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
             className={authInputCls}
           />
         </FormField>
-        <FormField id="login-password" label="비밀번호" error={e.password}>
+        <FormField id="login-password" label="비밀번호">
           <input
             id="login-password"
             name="password"
@@ -262,7 +263,13 @@ export function LoginForm({ returnTo }: { returnTo: string }) {
         </Link>
       </p>
       <SocialButtons returnTo={returnTo} actionLabel="로그인" />
-      {state.message && closed !== state && <AlertPopup onClose={() => setClosed(state)}>{state.message}</AlertPopup>}
+      {popupLines.length > 0 && closed !== state && (
+        <AlertPopup onClose={() => setClosed(state)}>
+          {popupLines.map((l, i) => (
+            <p key={i} style={{ margin: i ? "6px 0 0" : 0 }}>{l}</p>
+          ))}
+        </AlertPopup>
+      )}
     </PaperCard>
   );
 }
