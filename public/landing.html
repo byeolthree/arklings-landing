@@ -76,11 +76,11 @@
   .nav-links { display: none; gap: 22px; font-size: 15px; }
   .nav-links span { color: var(--body); }
   .nav-links a.nav-creators, .nav-links a.nav-library { color: var(--body); text-decoration: none; transition: color .2s; }
-  /* 상단 메뉴: 올리면 주색, 누르는 동안 안쪽으로 눌리는 그림자(다른 페이지 메뉴와 같은 효과). 글자 위치는 그대로 두려고 여백만큼 왼쪽으로 당긴다 */
+  /* 상단 메뉴: 올리면 주색, 누르면 주색에 굵은 글씨(다른 페이지에서 선택한 메뉴와 같은 모양, 네모 틀 없음). 글자 위치는 그대로 두려고 여백만큼 왼쪽으로 당긴다 */
   .nav-links { gap: 6px; margin-left: -8px; }
   .nav-links span, .nav-links a { padding: 7px 8px; border-radius: 10px; transition: color .2s, background .2s, box-shadow .2s, transform .12s; }
   .nav-links span:hover, .nav-links a:hover { color: var(--jaju); }
-  .nav-links a:active { color: var(--jaju); background: var(--tint); box-shadow: inset 0 2px 6px rgba(166,30,92,.3); transform: translateY(1px) scale(.95); }
+  .nav-links a:active { color: var(--jaju); font-weight: 700; }
   .nav-right { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: 15px; }
   .nav-right .mypage { display: none; color: var(--body); text-decoration: none; }
   .auth-slot { visibility: hidden; }
