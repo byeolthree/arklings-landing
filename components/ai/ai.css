@@ -1,5 +1,5 @@
 /* 미션7-2 AI 화면(시안 일곱 장). 모두 .ai 안에서만 쓴다. 색이 바뀌는 hover는 넣지 않는다. */
-.ai { --jaju: #a61e5c; --teal: #1f5a66; --line: #e8dfe3; --body: #574a50; --title: #2a2025; --bg: #faf7f8; color: var(--body); font-size: 14px; line-height: 1.6; word-break: keep-all; overflow-wrap: break-word; }
+.ai { background: var(--bg); --jaju: #a61e5c; --teal: #1f5a66; --line: #e8dfe3; --body: #574a50; --title: #2a2025; --bg: #faf7f8; color: var(--body); font-size: 14px; line-height: 1.6; word-break: keep-all; overflow-wrap: break-word; }
 .ai h1, .ai h2, .ai p { margin: 0; text-wrap: pretty; }
 .ai button, .ai textarea { font-family: inherit; }
 .ai :is(button, a, textarea):focus-visible { outline: 3px solid #d89a24; outline-offset: 3px; }
