@@ -1699,6 +1699,9 @@
     x.t.addEventListener("click", function (e) {
       if (!enabled()) return;
       e.preventDefault();
+      /* 마우스 화면: 사람 아이콘은 마이페이지, 종 아이콘은 협업 신청으로 바로 간다(다른 페이지 아이콘과 같게). 터치 화면은 드롭다운을 연다 */
+      if (canHover && x.t === a) { location.href = "/mypage"; return; }
+      if (canHover && x.t === bell) { location.href = "/mypage/collab"; return; }
       closeAll(w);
       setOpen(w, canHover ? true : x.p.hidden);
     });
