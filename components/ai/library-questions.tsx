@@ -35,6 +35,10 @@ const MINUS = (
   </svg>
 );
 
+// 태그 예시: 질문마다 시대·나라가 정해지기 전까지 모든 질문에 같은 예시를 보여 준다. 나라 태그는 시대 태그 다음에 온다.
+const EXAMPLE_ERA = "열국시대";
+const EXAMPLE_COUNTRY = "고구려";
+
 export function LibraryQuestions() {
   return (
     <div className="ai-qs">
@@ -58,6 +62,10 @@ export function LibraryQuestions() {
                 ) : (
                   <p className="ans pending">답변을 준비하고 있어요</p>
                 )}
+                <div className="ai-meta">
+                  <span className="ai-tag">시대 · {EXAMPLE_ERA}</span>
+                  <span className="ai-tag">나라 · {EXAMPLE_COUNTRY}</span>
+                </div>
               </details>
             ))}
           </div>
