@@ -26,6 +26,8 @@ import {
   type RevisionItem,
 } from "@/lib/plans";
 import { FINAL_CHECK_OFFSET, FINAL_CHECKS, LOGLINE_MAX, LOGLINE_MIN, SHORT_CHECK_OFFSET, SHORT_CHECKS, SLOT_QUESTIONS } from "./questions";
+import { EvaluationSection } from "@/components/ai/evaluation-section";
+import { trackEvent } from "@/lib/measure/client";
 import { useUndo } from "./use-undo";
 import "./planner.css";
 
@@ -36,6 +38,7 @@ type Props = {
   workId?: string | null; // 이 기획안이 붙은 작품(없으면 null)
   workPublic?: boolean; // 그 작품이 포트폴리오에 올라가 있는지
   initialStep?: 1 | 2; // 열 때의 단계(02 모아 보기는 내 기획안이 있을 때만)
+  evalRemaining?: number | null; // 오늘 남은 AI 평가 수(로그인·이메일 확인을 마친 사람에게만 값이 있다)
 };
 
 type Msg = { text: string; err?: boolean } | null;
@@ -110,7 +113,7 @@ function YesNo({ idx, label, value, onPick }: { idx: number; label: string; valu
 }
 
 
-export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, workId = null, workPublic = false, initialStep = 1 }: Props) {
+export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, workId = null, workPublic = false, initialStep = 1, evalRemaining = null }: Props) {
   const router = useRouter();
   const [panel, setPanel] = useState<PlanPanel | null>(initialPanel);
   // 화면을 연 뒤에 다른 창에서 로그인했을 수 있다. 열 때의 값(loggedIn)만 믿지 않고, 서버가 로그인했다고 답하면 이 값을 맞춘다.
@@ -131,6 +134,7 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, work
   const [step, setStep] = useState<1 | 2>(initialStep === 2 && initialPanel ? 2 : 1);
   const [savedLocal, setSavedLocal] = useState<PlanDraft | null>(null); // 로그인하지 않고 저장한 내용(이 브라우저에만 있다)
   const [prevEdited, setPrevEdited] = useState<string | null>(null); // 제안 문장으로 바꾸기 전의 내 글(이 화면을 닫기 전까지)
+
 
   // 02 모아 보기에 보여 줄 「저장해 둔 내용」: 로그인했으면 서버에 저장된 가장 최근 내용, 아니면 이 브라우저에 저장한 내용
   const view: PlanDraft | null = authed && panel ? panel.latest : savedLocal;
@@ -237,12 +241,14 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, work
         // 로그인하지 않았다: 이 브라우저에만 저장하고 02로 넘어간다.
         writeLocal(localKey(planId), draft);
         setSavedLocal(draft);
+        trackEvent("plan_save", { mode: "local" }); // 사용 기록: 로그인하지 않아 이 브라우저에만 저장
         needLogin("저장");
         goStep(2);
         return;
       }
       return setMsg({ text: r.error, err: true });
     }
+    trackEvent("plan_save", { mode: "server" }); // 사용 기록: 로그인해서 서버에 저장
     setLoginPrompt(null);
     setLastSaved(draft);
     clearLocal(localKey(planId));
@@ -313,6 +319,7 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, work
   // 「포트폴리오 작성하기」: 바로 올리지 않는다. 이 기획안이 붙은 작품(비공개)을 만들고 마이페이지의 포트폴리오 등록으로 넘어가 마저 쓴 뒤 거기서 올린다.
   async function onWrite() {
     if (!planId || !view) return;
+    trackEvent("portfolio_start_click"); // 사용 기록
     const r = await run("write", () => startWorkFromPlan(planId, view));
     if (!r) return;
     if (!r.ok) {
@@ -560,7 +567,10 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, work
                         ? "직접 고친 글이에요. 위의 다섯 칸을 바꿔도 이 글은 그대로 두고, 아클링스가 제안한 문장은 따로 보관돼요."
                         : "아직 아클링스가 제안한 문장이에요. 고치면 고친 글이 따로 저장되고 제안 문장은 그대로 남아요."}
                     </p>
-                    {/* 자리: 직접 고친 글을 먼저 평가하는 칸(LLM 호출)이 여기에 들어온다. 호출이 연결되기 전까지는 화면에 두지 않는다. */}
+                    {/* AI 평가 패널(시안): 직접 고친 글 아래. 평가는 제안이라 글·저장·공개를 바꾸지 않는다. */}
+                    <div style={{ marginTop: 20 }}>
+                      <EvaluationSection draft={draft} initialRemaining={evalRemaining} />
+                    </div>
                     {showSuggestionCard && (
                       <div className="suggest-card" aria-label="아클링스 제안 문장">
                         <span className="k">아클링스 제안 문장</span>

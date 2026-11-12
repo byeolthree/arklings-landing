@@ -5,6 +5,7 @@ import { CONSENT_VERSION } from "@/lib/consent";
 import { safeNext } from "@/lib/safe-next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createAuthClient } from "@/lib/supabase/server";
+import { trackServer } from "@/lib/measure/server";
 
 // 구글·카카오 로그인이 끝나고 돌아오는 곳.
 // 실패·취소는 막다른 오류가 아니라 다음에 할 일이 있는 안내 화면(/auth/social-failed)으로 보낸다.
@@ -42,6 +43,9 @@ export async function GET(request: NextRequest) {
             .from("profile_consents")
             .upsert({ user_id: user.id, consent_version: consent }, { onConflict: "user_id", ignoreDuplicates: true });
         }
+        // 사용 기록: 구글·카카오 로그인 성공(처음 가입한 것과 다시 로그인한 것은 구분하지 않는다)
+        const method = user.app_metadata?.provider;
+        if (method === "google" || method === "kakao") await trackServer(supabase, "login", "/auth/callback", { method });
         // 카카오처럼 이메일 없이 들어왔으면 이메일을 입력받아 확인하는 화면으로 먼저 보낸다.
         if (!user.email || !user.email_confirmed_at) destination = `/auth/add-email?next=${encodeURIComponent(next)}`;
       }

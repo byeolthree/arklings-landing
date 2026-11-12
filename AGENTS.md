@@ -28,10 +28,10 @@ Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Supabase(DB·Storage·�
 - 마이페이지, 기획안 서버 저장·임시저장 이력·PDF 내려받기·메일 받기, 포트폴리오 공개 화면
 - 협업 신청: 로그인 없이 접수, 받는 사람(아클링스 또는 기획안 주인)만 목록·상세·수정·삭제
 - 개인정보 동의 문구와 `/privacy`, 알림·확인 메일, 탈퇴와 3개월 자동 삭제
+- 미션7-2(OpenAI 기능): AI 평가(로그라인 다섯 칸 점검)와 라이브러리 질의응답. 두 기능 모두 만든다. 기준 문서는 `docs/mission7-2-llm-plan.md`
 
 만들지 않는다:
 
-- OpenAI·AI 평가 (나중에 붙일 수 있게 구조만 막지 않는다)
 - 결제, 후원
 - 별도 운영자 계정 (아키텍터의 평소 계정에 서버 내부 표시만 달아 운영자로 취급한다)
 - 첫 화면 용량 줄이기, 링크 미리보기 이미지, 방문자 분석 도구 (미션 7이 끝난 뒤)
@@ -150,7 +150,7 @@ Figma 시안은 초안이다. 시안과 랜딩이 다르면 랜딩을 따른다.
 3. **샘플 부품을 실제 페이지로 쓰지 않는다.** `/mypage`에 `MypagePreview`를 씌운 것은 임시 조치다. 저장된다고 보이는 버튼이 실제로 저장하지 않으면 그 버튼을 실제 사이트에 두지 않는다. 가짜 구역을 숨기는 깃발(`hideSamples`)은 멈춤 장치이지 완성 기능이 아니다.
 4. **권한은 화면이 아니라 서버와 DB가 막는다.** 새 Server Action은 맨 위에서 로그인·이메일 확인을 다시 한다. 서버 전용 열쇠(`SUPABASE_SERVICE_ROLE_KEY`)는 접수·첨부·탈퇴·정리처럼 이미 정한 자리에만 쓰고, 막혀서 편하려고 새 읽기·수정에 쓰지 않는다. 본인 데이터는 로그인한 본인 연결(`createAuthClient`)과 RLS로 다룬다.
 5. **실행한 SQL의 “이전 분기”는 지운다.** `0008`처럼 사용자가 이미 실행한 마이그레이션이면 “그 SQL 전이면 다시 시도” 코드를 남기지 않는다. DB 변경은 `supabase/migrations/000N_이름.sql` 새 파일로 만들고, `schema.sql`은 다시 실행하지 않으며, 실행은 사용자가 한다.
-6. **랜딩과 앱의 로그인 표시는 지금 두 갈래다.** `/`는 `public/landing.html`이고 `/api/session`만 부른다. 그 밖의 화면은 `SiteHeader`가 `getCurrentUser()`를 쓴다. 이 둘을 한쪽으로 합치려면 먼저 보고한다.
+6. **랜딩과 앱의 로그인 표시는 지금 두 갈래다.** `/`는 `public/landing.html`이고 `/api/session`(로그인·운영자 여부·종 알림 개수와 목록)과 로그아웃 `POST /auth/signout`만 부른다. 상단 아이콘 드롭다운은 마우스를 올리면 열리며 랜딩(고정 HTML)과 `site-nav.tsx` 두 곳에 따로 있다. 그 밖의 화면은 `SiteHeader`가 `getCurrentUser()`를 쓴다. 이 둘을 한쪽으로 합치려면 먼저 보고한다.
 
 새 기능 한 덩어리가 끝나면: 바꾼 파일, `dev` 커밋 번호, 직접 눈으로 본 것, 남은 위험을 보고한다. `main`(실제 공개)은 승인 없이 올리지 않는다.
 
@@ -173,6 +173,7 @@ Figma 시안은 초안이다. 시안과 랜딩이 다르면 랜딩을 따른다.
 5. 포트폴리오 페이지: `/portfolio`·`/portfolio/[id]`, 상세의 「협업 신청」(받는 사람 = 기획안 주인), 이메일 확인 안 한 계정 막기 (구현 완료, `0007_portfolio.sql`)
 6. 탈퇴·3개월 자동 삭제·정리 작업
 7. README·QA·배포 점검
+8. 미션7-2(OpenAI 기능): AI 평가 + 라이브러리 질의응답. 작업 순서와 규칙은 `docs/mission7-2-llm-plan.md`
 
 ### 테이블
 
@@ -184,6 +185,7 @@ Figma 시안은 초안이다. 시안과 랜딩이 다르면 랜딩을 따른다.
 - `profiles`(공개 이름만, 이메일은 복사하지 않음)와 `profile_consents`(동의 기록, 본인만 읽기)는 `0002_profiles.sql`이 만든다. 가입하면 트리거가 자동으로 채운다.
 - 기획안(`0004_plans.sql`): `plans`(주인·제목·공개 여부·공개용 사본 `public_content`. 공개된 것만 누구나 읽고 쓰기는 주인만, 사람당 30건), `plan_revisions`(「임시저장」 한 번 = 한 건. 고른 선택지 `selections` / 아클링스 제안 문장 `suggested`(만든 방식 `method` 포함) / 사용자가 고친 문장 `edited`를 따로 담는다. 주인만 읽고 쓰고 지우며 기획안당 100건), `mail_usage`(기획안 PDF 메일 하루 3번 제한, 앱이 직접 못 만지고 `reserve_plan_mail()`·`release_plan_mail()` 함수로만 센다). `collab_requests.plan_id`는 `plans`를 가리키고, 기획안이 지워지면 신청은 남고 연결만 비워진다.
 - 포트폴리오(`0007_portfolio.sql`): `plans.first_published_at`(처음 공개한 시각. DB 트리거가 처음 공개할 때 한 번만 찍고 앱이 못 바꾼다. 기존 `published_at`은 다시 공개할 때마다 덮어써지는 「마지막 공개 시각」으로 둔다), 보기(view) `portfolio_items`(공개된 기획안의 id·제목·처음 공개한 시각·공개 이름·공개용 사본만. 주인 번호·이메일·임시저장 이력은 없다. 호출한 사람의 권한(RLS)으로 읽는다), `is_email_confirmed()`(이메일 확인을 마친 계정인지), 기획안 신청 때 받는 사람을 기획안 주인으로 정하는 트리거. 화면에 보이는 날짜는 포트폴리오 목록·상세 모두 「게시일」(처음 공개한 날) 하나이고, 만든 시각·고친 시각은 포트폴리오에 띄우지 않는다.
+- 사용 기록(`0021_usage_events.sql`): `usage_events`(행동 종류 `event`·시각·화면 경로 `page`·작은 부가 값 `props`·로그인했으면 `user_id`·브라우저 무작위 값 `anon_id`). 기록하는 행동은 허용 목록(`lib/measure/events.ts`와 DB 함수 `record_usage_event`)에 있는 것만이다: 기획안 화면 열기, 저장, AI 평가 누르기, 라이브러리 질문, 포트폴리오 작성하기 누르기, 가입, 로그인. 글 내용·이메일·이름은 기록하지 않는다. 읽기는 운영자(`is_admin()`)만, 쓰기는 `/api/events`(브라우저)와 서버 동작(가입·로그인)이 DB 함수 하나로만 한다. **보관 기간은 90일(2026-11-11 결정)이고 브라우저 쿠키 수명도 90일이다. 90일이 지난 줄은 Supabase 일정(`pg_cron`, `0025`)이 매일 한국 시간 새벽 3시에 지우고, 운영자가 손으로 지울 때는 `purge_usage_events()`(`0023`)를 부른다.** 방문 통계는 `@vercel/analytics`(`app/layout.tsx`, 홈 `public/landing.html`)이며 Vercel 대시보드에서 Web Analytics를 켜야 모인다. 개인정보처리방침의 해당 항목은 `lib/measure/privacy-text.ts`의 `USAGE_LOG`(보관 기간 90일 문장 포함)다. 측정 코드는 전부 `lib/measure/`(출입구 `client.ts`·`server.ts`, 스위치 `config.ts`의 `MEASURE_ENABLED`)에 모여 있고, 들어내는 방법은 `docs/measure-removal.md`다. AI 모델(공급자)을 바꾸는 방법은 `docs/model-swap.md`다.
 - 새 표는 단계가 진행되면서 `supabase/migrations/`에 추가한다.
 - 동의 문구는 `lib/consent.ts` 한 곳에서만 쓴다(가입·협업 신청·`/privacy`가 같은 글). 문구를 고치면 `CONSENT_VERSION`도 올린다.
 

@@ -14,7 +14,10 @@
   --hero-bg: color-mix(in srgb, var(--bg) 55%, var(--line));
   --ease: cubic-bezier(.2, .8, .2, 1);
   --lk-max: 1440px;
+  /* 제목 띠(히어로) 높이: 크리에이터·라이브러리·마이페이지가 같은 값을 쓴다(모바일 145px, 768px 이상 211px) */
+  --hero-h: 145px;
 }
+@media (min-width: 768px) { :root { --hero-h: 211px; } }
 
 .lk-wrap { width: 100%; max-width: var(--lk-max); margin: 0 auto; padding: 0 16px; }
 @media (min-width: 768px) { .lk-wrap { padding: 0 40px; } }
@@ -44,17 +47,18 @@
 /* ---------- 상단 메뉴 (랜딩 header.site) ---------- */
 .lk-header {
   position: sticky; top: 0; z-index: 50;
-  background: rgba(250,247,248,.82); backdrop-filter: saturate(1.4) blur(10px);
-  transition: background .3s;
+  /* 모든 페이지 공통 상단 헤더: 흰색이 아닌 브랜드 색(배경색 #FAF7F8과 테두리색 #E8DFE3을 섞은 제목 띠 색)을 단색으로 깐다 */
+  background: var(--hero-bg);
 }
-.lk-header.scrolled { background: rgba(250,247,248,.94); }
+.lk-header.scrolled { background: var(--hero-bg); }
 .lk-nav { display: flex; align-items: center; gap: 28px; height: 68px; }
 .lk-logo { font-weight: 700; font-size: 22px; color: var(--jaju); text-decoration: none; letter-spacing: -0.02em; }
-.lk-nav-links { display: none; gap: 22px; font-size: 15px; }
-.lk-nav-links span { color: var(--body); }
-.lk-nav-links a { color: var(--body); text-decoration: none; transition: color .2s; }
-.lk-nav-links a[aria-current="page"] { color: var(--title); }
+.lk-nav-links { display: none; gap: 6px; font-size: 15px; }
+.lk-nav-links span, .lk-nav-links a { padding: 7px 8px; border-radius: 10px; color: var(--body); text-decoration: none; transition: color .2s, background .2s, box-shadow .2s, transform .12s; }
+/* 올리면 주색, 선택한 메뉴도 주색. 누르면 주색에 굵은 글씨가 된다(네모 틀 없음) */
+.lk-nav-links span:hover, .lk-nav-links a:hover, .lk-nav-links a[aria-current="page"] { color: var(--jaju); }
 .lk-nav-links a[aria-current="page"] { font-weight: 700; }
+.lk-nav-links a:focus { color: var(--jaju); font-weight: 700; }
 .lk-nav-right { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: 15px; }
 .lk-nav-right .lk-textlink { display: none; color: var(--body); background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-decoration: none; }
 .lk-nav .lk-btn { min-height: 36px; padding: 0 16px; font-size: 13px; }
@@ -88,7 +92,7 @@
 .lk-footer .links a:hover { text-decoration: underline; }
 @media (max-width: 640px) { .lk-footer .lk-wrap { flex-direction: column; align-items: center; text-align: center; } .lk-footer .links { align-items: center; } }
 
-@media (prefers-reduced-motion: reduce) { .lk-btn, .lk-btn::after, .lk-burger i, .lk-menu { transition: none !important; } }
+@media (prefers-reduced-motion: reduce) { .lk-btn, .lk-btn::after, .lk-burger i, .lk-menu, .lk-nav-links a, .lk-nav-links span, .lk-ico, .lk-drop > a { transition: none !important; } }
 
 /* 누르는 동안 살짝 작아지고 진해진다 */
 .lk-btn:active { transform: scale(.97); filter: brightness(.92); }
@@ -99,12 +103,23 @@
 .lk-ico-wrap { position: relative; }
 .lk-ico { position: relative; display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--jaju); background: #fff; color: var(--jaju); cursor: pointer; text-decoration: none; padding: 0; }
 .lk-ico.lk-ico-fill { background: var(--jaju); color: #fff; }
+/* 아이콘: 올리면 연한 핑크로 바뀌고 그림자가 생기며, 누르면 작아지면서 안쪽으로 눌린다 */
+.lk-ico { transition: background .2s, color .2s, box-shadow .2s, transform .12s; }
+.lk-ico:hover { background: var(--tint); box-shadow: 0 6px 14px -6px rgba(166,30,92,.55); }
+.lk-ico.lk-ico-fill:hover { background: var(--jaju-deep); border-color: var(--jaju-deep); color: #fff; }
+.lk-ico:active { transform: scale(.88); box-shadow: inset 0 3px 8px rgba(42,32,37,.3); }
+.lk-ico.lk-ico-fill:active { background: var(--jaju-deep); }
 .lk-badge { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #c83a3a; color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
 /* 상단 메뉴 드롭다운(시안 04·05·09·10·11을 2배 그림에서 재서 맞춘 값). 상자: 가로 190, 테두리 1px, 모서리 12, 안쪽 여백 8. 한 줄 높이 41, 글자 14. */
 .lk-drop { position: absolute; z-index: 60; right: 0; top: calc(100% + 9px); width: 190px; box-sizing: border-box; padding: 8px; background: #fff; border: 1px solid var(--line); border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+.lk-drop::before { content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px; }
 .lk-drop > a, .lk-drop > span, .lk-drop form > button { display: flex; align-items: center; box-sizing: border-box; width: 100%; height: 41px; padding: 0 14px; border: 0; background: none; font: inherit; font-size: 14px; color: var(--title); text-align: left; text-decoration: none; cursor: pointer; border-radius: 8px; }
 .lk-drop > span { cursor: default; }
+/* 메뉴에 올리면 연한 핑크 틀이 생긴다(랜딩 .nav-drop a:hover와 같은 값) */
+.lk-drop > a, .lk-drop form > button { transition: background .15s, transform .12s; }
+.lk-drop > a:hover, .lk-drop form > button:hover, .lk-drop > a:focus-visible, .lk-drop form > button:focus-visible { background: var(--tint); }
+.lk-drop > a:active, .lk-drop form > button:active { background: var(--tint); box-shadow: inset 0 2px 6px rgba(166,30,92,.25); transform: scale(.98); }
 .lk-drop > a[aria-current="page"] { color: var(--jaju); font-weight: 700; }
 .lk-drop-cap { height: 25px; box-sizing: border-box; margin: 0; padding: 5px 14px 0; font-size: 11px; line-height: 20px; color: var(--body); }
 .lk-drop hr { margin: 6px 4px; border: 0; border-top: 1px solid var(--line); }
@@ -112,6 +127,8 @@
 .lk-drop-title { display: flex; align-items: center; height: 41px; margin: 0; padding: 0 14px; font-size: 14px; font-weight: 700; color: var(--title); }
 .lk-drop-bell ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
 .lk-drop-bell li a { display: block; padding: 10px 14px; border-radius: 12px; background: var(--bg); color: var(--title); text-decoration: none; font-size: 14px; line-height: 21px; }
+.lk-drop-bell li a:hover, .lk-drop-bell .lk-drop-all:hover { background: var(--tint); }
+.lk-drop-bell li a:active, .lk-drop-bell .lk-drop-all:active { background: var(--tint); box-shadow: inset 0 2px 6px rgba(166,30,92,.25); }
 .lk-drop-bell li small { display: block; margin-top: 2px; font-size: 12px; line-height: 18px; color: var(--body); }
 .lk-drop-bell .lk-drop-all { display: block; margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); text-align: center; color: var(--jaju); font-weight: 700; font-size: 14px; line-height: 41px; text-decoration: none; }
 @media (max-width: 899px) {

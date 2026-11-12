@@ -15,7 +15,7 @@
 
 | 부품 | 파일 | 하는 일 | 계약 |
 |---|---|---|---|
-| 상단 메뉴 | `components/site-nav.tsx`(서버에서 `components/site-header.tsx`가 값을 읽어 넘김) | 로고(햄버거는 로고 왼쪽), 메뉴, 오른쪽 아이콘만 ＋·사람·종. 로그인: ＋=「등록할 곳」 드롭다운(크리에이터→`/portfolio/new`), 사람=기본 정보 `/mypage#mp-basic`·프로필 등록 `/mypage#mp-creator`·포트폴리오 등록 `/portfolio/new`·로그아웃 `signOut()`, 종=새 협업 신청(「접수」 상태) 개수(`countNewCollab`)와 최근 5건(`listNewCollab`, 한 줄을 누르면 `/collab/<id>`)·「받은 협업 신청 모두 보기」 `/collab`. 로그아웃: ＋와 사람만, ＋는 `/login`으로, 사람=로그인 `/login`·회원가입 `/signup`. 「기획안 만들기」 버튼은 상단 메뉴에서 뺐다(랜딩 전용, 랜딩은 `public/landing.html` 별도) | `loggedIn`(`getCurrentUser()`), `newCount`, `notices[]`(`id`,`text`,`when`) |
+| 상단 메뉴 (2026-11-11 별뜨리님 지시로 고침) | `components/site-nav.tsx`(서버에서 `components/site-header.tsx`가 값을 읽어 넘김) | 로고(햄버거는 로고 왼쪽), 메뉴, 오른쪽 아이콘 ＋·사람·종. **마우스를 올리면 드롭다운이 열리고 벗어나면 닫힌다**(터치 화면은 누르면 열고 닫음). 로그인: ＋=크리에이터→`/portfolio/new`(「등록할 곳」 문구 없음), 사람=기본 정보 `/mypage`·프로필 등록 `/portfolio/new?step=profile`·포트폴리오 등록 `/portfolio/new`·협업 신청 `/mypage/collab`·**운영자 `/admin`(운영자 표시 계정에만)**·로그아웃 `signOut()`, 종=새 협업 신청(「접수」 상태) 개수(`countNewCollab`)와 최근 5건(`listNewCollab`, 한 줄을 누르면 `/collab/<id>`)·「받은 협업 신청 모두 보기」 `/collab`. **로그아웃: ＋는 보이지 않고** 사람만(로그인 `/login`·회원가입 `/signup`) | `loggedIn`(`getCurrentUser()`), `newCount`, `notices[]`(`id`,`text`,`when`), `isAdmin`(`isAdminUser()`) |
 | 하단 | `components/site-footer.tsx` | 「개인정보처리방침」→`/privacy` | 없음 |
 | 입력칸 틀 | `components/form-field.tsx` | `FormField`(id, label, hint, error), `authInputCls` | 없음 |
 | 카드 틀 | `components/paper-card.tsx` | `PaperPage`, `PaperCard`, `CardHeading`, `primaryBtn`, `outlineBtn` | 없음 |
@@ -94,7 +94,8 @@
 |---|---|---|---|---|
 | 개인정보처리방침 | `/privacy` | 아니요 | 없음 | `CONSENT_ITEMS`, `CONSENT_NOTES`, `CONSENT_PLACEHOLDERS`(`lib/consent.ts`). 가입·협업 신청의 동의 문구와 같은 글 |
 | 옛 주소 | `/planner.html`, `/apply`, `/collab/gate` | - | 없음 | `next.config.ts`·`app/collab/gate`가 이동시킴 |
-| 로그인 상태 확인 | `/api/session` | - | 없음 | 랜딩(`public/landing.html`)만 부른다(상단 메뉴 컴포넌트는 안 부른다). 만지지 않는다 |
+| 로그인 상태 확인 | `/api/session` | - | 없음(읽기만) | 랜딩(`public/landing.html`)만 부른다. 로그인한 본인에게만 `loggedIn`, `isAdmin`, `newCount`, `notices[]`(`id`,`text`,`when`; 글은 `lib/nav-notices.ts` 한 곳)를 주고, 로그아웃이면 `{loggedIn:false}`만 준다 |
+| 홈 상단 아이콘 (2026-11-11 별뜨리님 지시) | `public/landing.html` | 로그인: ＋·사람·종 모두 마우스를 올리면 드롭다운(＋=크리에이터, 사람=상단 메뉴와 같은 항목+로그아웃, 종=알림 목록). 상단 「기획안 만들기」 버튼은 숨김. 로그아웃: ＋·종·알림 없음, 사람=로그인·회원가입, 「기획안 만들기」 보임 | 없음 | 로그아웃은 `POST /auth/signout`(`app/auth/signout/route.ts`, 같은 사이트에서 온 요청만 처리하고 이 기기만 로그아웃한 뒤 `/`로) | 위 상태 확인 값 | `/api/session` |
 | 정리 작업 | `/api/cron/cleanup` | 비밀값 | 없음 | 화면 없음 |
 | 인증 돌아오는 길 | `/auth/callback`, `/auth/confirm` | - | 없음 | 화면 없음. 만지지 않는다 |
 
@@ -145,3 +146,13 @@
 
 
 채널 링크 저장(`saveCreatorProfile`·`saveChannels`)은 DB 함수 `replace_creator_channels`(`0011_creator_channels_replace.sql`, 사용자가 실행)를 한 번 불러 한 트랜잭션으로 바꾼다. 0011을 실행하기 전에는 채널 링크 저장이 실패한다.
+| 운영자 · 협업 신청 현황 (2026-11-11 별뜨리님 지시) | `/admin` | 예 (이메일 확인 + 운영자 표시 `admins`가 있는 계정만. 아니면 404) | **`adminDeleteLog(requestId)`**(새 함수. 맨 위에서 로그인·이메일 확인·운영자 표시를 다시 확인. 아클링스 앞 신청은 실제 신청·첨부까지 지우고 목록에서도 치움, 남에게 온 신청은 운영자 목록에서만 치움). 조건·정렬은 처리 함수 없이 주소 값(GET)으로 | 필터 칸: `kind`, `recipient`, `status`, `role`, `target`, `period`, `reply`, `stale`, `q` / 숨김 `sort`, `dir` / 쪽 `page` | `collab_log`(0016)만 읽는다: 접수 시각·받는 사람·대상·역할·상태·상태 바뀐 시각·답장 수·신청자 이름. 내용·연락처·첨부는 없다. 지표(신청 수·상태 비율·수락률·첫 응답 시간·3일 넘게 접수·주별·받는 사람별 처리율)는 목록에서 치운 줄도 센다. 표 머리글(접수 시각·받는 사람·대상·상태·상태 바뀐 시각·답장·신청자)을 누르면 오름차순·내림차순 정렬 | 신청자 이름(아클링스 앞·미삭제)→`/collab/<번호>`. `supabase/migrations/0016_admin_collab_log.sql`을 실행해야 보인다(실행 전에는 안내만) |
+
+## 미션7-2 AI 기능 (2026-11-11, 계획 `docs/mission7-2-llm-plan.md`, 화면은 계획 세션의 시안 일곱 장)
+
+두 화면을 실제 서버에 연결했다. 실제 주소는 `/library`와 `/planner`(로그라인 단계 안)이고, `/dev-preview/ai-evaluation`·`/dev-preview/library`는 같은 화면 부품(`components/ai/`)을 가짜 데이터로 보는 디자인 확인용 그대로다. 모델은 `AI_FAKE_MODEL=1`이면 가짜 모델(실제 사이트에서는 무시), 키와 모델 이름이 있으면 OpenAI다(아직 진짜 호출은 하지 않았다). **글자 수 상한(칸마다 200자·질문 300자)과 하루 횟수(임시 5번)의 숫자는 확정 전이고, 횟수와 크레딧 중 무엇으로 할지도 정해지지 않았다.** 그래서 횟수에 관한 화면 문구는 `components/ai/usage-text.ts` 한 곳에만 두었다. 값의 모양은 `components/ai/types.ts` 한 곳이다.
+
+| 화면 | 주소 | 로그인 필요 | 지금 DB | 부르는 처리 함수 | 입력 칸 이름 | 화면에 받는 데이터 | 이동 |
+|---|---|---|---|---|---|---|---|
+| AI 평가 패널(기획안 로그라인 화면 안, 직접 고친 글 아래) | `/planner`(로그라인 단계). 가짜 데이터로 보는 곳은 `/dev-preview/ai-evaluation` | 평가를 누를 때 서버가 로그인·이메일 확인을 다시 한다. 로그아웃이면 「로그인 안 함」 카드가 나오고 화면 자체는 로그인 없이 열린다 | 0017·0018은 실행됨. 「오늘 남은 ○번」은 **0020**(`ai_use_remaining`)이 필요하고, 실행 전에는 그 줄이 보이지 않는다 | **`evaluateLogline(draft)`**(Server Action, `app/actions/ai.ts`). 인자는 기획안 화면이 들고 있는 `PlanDraft`(`title`, `slots[]`, `checks[]`, `edited`) 그대로. 결과 `{ok:true, slots[]} \| {ok:false, code, error, needLogin?}`. 평가 뒤 숫자는 **`getAiRemaining("evaluate_logline")`**로 새로 읽는다. 결과는 `plan_evaluations`에 본인 것으로 저장한다(`plan_id` 없이) | 폼이 아니라 `draft` 객체. 「평가 받기」 단추는 다섯 칸이 모두 채워져야 켜진다 | `PlannerEditor` props에 `evalRemaining`(서버가 읽은 오늘 남은 수, 없으면 null)이 늘었다. 연결 부품 `EvaluationSection`(props `draft`, `initialRemaining`)이 `EvaluationPanel`(props `view`(`EvalView`: `idle`·`loading`·`result`(`slots[]`: `label`, `status`(충족·보완 필요), `reason`, `fix`)·`error`(`reason`: `login`·`input`·`limit`·`auth`·`busy`·`retry`·`schema`)), `filled[]`, `answers[]`, `remaining`, `onRun`)을 그린다 | 오류 카드의 「로그인하기」→`/login?next=/planner`. 평가는 제안이며 글·저장·공개를 바꾸지 않는다. 「다시 평가 받기」는 결과 맨 아래와 일시 오류 카드에 있다 |
+| 라이브러리(질의응답) | `/library`. 가짜 데이터로 보는 곳은 `/dev-preview/library` | 목록은 아니요. 질문 칸은 예(이메일 확인까지, 로그인 전에는 잠긴 질문칸) | 0019(`library_wiki`)는 실행됨. 위키 예시 3개는 비공개라 공개로 켜기 전에는 목록이 비어 있다. 「오늘 남은 ○번」은 **0020** 필요 | 목록: 읽기만(`readPublicWiki`, `lib/wiki.ts`). 질문: **`POST /api/library/ask`**(Route Handler, `useChat`이 부른다. 몸체는 `messages`(사용자·도우미 글 조각만. `role: "system"`·다른 조각은 400)). 답이 끝나거나 실패하면 `getAiRemaining("library_ask")`로 숫자를 새로 읽는다 | 질문 글 하나(`question`, 300자 이내는 임시값) | `/library` 서버 화면이 `LibraryChat`(props `items[]`(`WikiItem`), `listError`, `loggedIn`, `loginHref`, `initialRemaining`)에 넘기고, 그것이 `LibraryQa`를 그린다. 서버가 메시지에 붙이는 부가 정보: `sources[]`(근거 자료 이름, 서버가 고른 항목에서 읽음), `noMatch`(자료 없음). 답을 쓰는 도중의 오류 글은 `answer_failed:종류`(auth·busy·retry·schema), 요청 단계 오류는 `{code, message}` 글이다. 위키를 읽지 못하면 「자료를 불러오지 못했어요」(시안에 없는 상태. 없다고 거짓 안내하지 않으려고 둠) | 「로그인하고 물어보기」→`/login?next=/library`(이메일 확인 전이면 `/auth/add-email?next=/library`). 끊기거나 실패하면 질문은 입력칸에 남고 「다시 묻기」가 같은 질문을 다시 보낸다. 「생성 중지」·「새 대화」 단추는 시안에 없어서 두지 않았다. 상단 메뉴 「라이브러리」→`/library`(앱 화면 `site-nav.tsx`의 가운데 메뉴·＋ 드롭다운·모바일 메뉴, 홈 `public/landing.html`의 같은 세 곳. 「라이브러리」 글자만 있던 곳은 모두 링크로 바꿨고 다른 메뉴 항목은 그대로) |

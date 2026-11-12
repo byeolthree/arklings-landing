@@ -67,15 +67,20 @@
   /* ---------- header ---------- */
   header.site {
     position: sticky; top: 0; z-index: 50;
-    background: rgba(250,247,248,.82); backdrop-filter: saturate(1.4) blur(10px);
+    background: var(--hero-bg);
     border-bottom: 1px solid transparent; transition: border-color .3s, background .3s;
   }
-  header.site.scrolled { background: rgba(250,247,248,.94); }
+  header.site.scrolled { background: var(--hero-bg); }
   .nav { display: flex; align-items: center; gap: 28px; height: 68px; }
   .logo { font-weight: 700; font-size: 22px; color: var(--jaju); text-decoration: none; letter-spacing: -0.02em; }
   .nav-links { display: none; gap: 22px; font-size: 15px; }
   .nav-links span { color: var(--body); }
-  .nav-links a.nav-creators { color: var(--body); text-decoration: none; transition: color .2s; }
+  .nav-links a.nav-creators, .nav-links a.nav-library { color: var(--body); text-decoration: none; transition: color .2s; }
+  /* 상단 메뉴: 올리면 주색, 누르면 주색에 굵은 글씨(다른 페이지에서 선택한 메뉴와 같은 모양, 네모 틀 없음). 글자 위치는 그대로 두려고 여백만큼 왼쪽으로 당긴다 */
+  .nav-links { gap: 6px; margin-left: -8px; }
+  .nav-links span, .nav-links a { padding: 7px 8px; border-radius: 10px; transition: color .2s, background .2s, box-shadow .2s, transform .12s; }
+  .nav-links span:hover, .nav-links a:hover { color: var(--jaju); }
+  .nav-links a:focus { color: var(--jaju); font-weight: 700; }
   .nav-right { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: 15px; }
   .nav-right .mypage { display: none; color: var(--body); text-decoration: none; }
   .auth-slot { visibility: hidden; }
@@ -143,6 +148,7 @@
   .hero .answer-line { max-width: 640px; font-size: 17px; font-weight: 600; line-height: 1.45; color: var(--dusty); letter-spacing: -0.01em; }
   @media (min-width: 768px) { .hero .answer-line { font-size: 22px; } }
   .hero .answer-line .nb { white-space: nowrap; }
+  .nav-right .nav-cta { margin-right: -6px; }
   .hero .ctas { margin-top: 12px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
   .hero .btn { min-height: 44px; font-size: 15px; }
   @media (min-width: 768px) { .hero h1 { font-size: 36px; } .hero .lead { font-size: 16px; } }
@@ -906,6 +912,38 @@
   .nav-ico { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--jaju); background: #fff; color: var(--jaju); text-decoration: none; }
   .nav-ico.fill { background: var(--jaju); color: #fff; }
   .nav-ico[hidden] { display: none; }
+  .nav-wrap { position: relative; display: inline-flex; }
+  .nav-wrap[hidden] { display: none; }
+  .nav-drop { position: absolute; z-index: 60; right: 0; top: calc(100% + 9px); width: 190px; box-sizing: border-box; padding: 8px; background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+  .nav-drop[hidden] { display: none; }
+  .nav-drop a { display: flex; align-items: center; box-sizing: border-box; height: 41px; padding: 0 14px; font-size: 14px; color: var(--title); text-decoration: none; border-radius: 8px; }
+  .nav-drop a:hover { background: var(--tint); }
+  .nav-drop::before { content: ""; position: absolute; left: 0; right: 0; top: -10px; height: 10px; }
+  .nav-drop { top: calc(100% + 9px); }
+  .nav-badge { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #c83a3a; color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; box-sizing: border-box; }
+  .nav-badge[hidden] { display: none; }
+  .nav-ico { position: relative; }
+  /* 아이콘: 올리면 연한 핑크와 그림자, 누르면 작아지면서 안쪽으로 눌린다(다른 페이지 아이콘과 같은 효과) */
+  .nav-ico { transition: background .2s, color .2s, box-shadow .2s, transform .12s; }
+  .nav-ico:hover { background: var(--tint); box-shadow: 0 6px 14px -6px rgba(166,30,92,.55); }
+  .nav-ico.fill:hover { background: var(--jaju-deep); border-color: var(--jaju-deep); color: #fff; }
+  .nav-ico:active { transform: scale(.88); box-shadow: inset 0 3px 8px rgba(42,32,37,.3); }
+  .nav-ico.fill:active { background: var(--jaju-deep); }
+  .nav-drop a, .nav-drop form button { transition: background .15s, transform .12s; }
+  .nav-drop a:active, .nav-drop form button:active { background: var(--tint); box-shadow: inset 0 2px 6px rgba(166,30,92,.25); transform: scale(.98); }
+  .nav-drop-bell { width: min(320px, calc(100vw - 32px)); }
+  .nav-drop-bell .ttl { display: flex; align-items: center; height: 41px; padding: 0 14px; font-size: 14px; font-weight: 700; color: var(--title); }
+  .nav-drop-bell .empty { margin: 0; padding: 8px 14px 12px; font-size: 14px; color: var(--body); }
+  .nav-drop-bell ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .nav-drop-bell li a { display: block; height: auto; padding: 10px 14px; border-radius: 12px; background: var(--bg); line-height: 21px; }
+  .nav-drop-bell li a span { display: block; height: auto; padding: 0; }
+  .nav-drop-bell li small { display: block; margin-top: 2px; font-size: 12px; line-height: 18px; color: var(--body); }
+  .nav-drop-bell .all { justify-content: center; margin-top: 6px; border-top: 1px solid var(--line); border-radius: 0 0 8px 8px; color: var(--jaju); font-weight: 700; }
+  .nav-drop hr { margin: 6px 4px; border: 0; border-top: 1px solid var(--line); }
+  .nav-drop form button { display: flex; align-items: center; box-sizing: border-box; width: 100%; height: 41px; padding: 0 14px; border: 0; background: none; font: inherit; font-size: 14px; color: var(--title); text-align: left; cursor: pointer; border-radius: 8px; }
+  .nav-drop form button:hover { background: var(--tint); }
+  .nav-drop span { display: flex; align-items: center; box-sizing: border-box; height: 41px; padding: 0 14px; font-size: 14px; color: var(--title); }
+  .nav-drop .cap { height: 25px; padding: 5px 14px 0; font-size: 11px; line-height: 20px; color: var(--body); }
   .nav-menu { display: none; }
   @media (max-width: 899px) {
     .nav-cta { display: none !important; }
@@ -1076,19 +1114,19 @@
     <button class="nav-burger" id="navBurger" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="navMenu"><i></i><i></i><i></i></button>
     <a class="logo" href="#top">Arklings</a>
     <nav class="nav-links" aria-label="주요 메뉴">
-      <span>킹덤</span><span>스튜디오</span><a class="nav-creators" href="/creators">크리에이터</a><span>라이브러리</span><span>커뮤니티</span>
+      <span>킹덤</span><span>스튜디오</span><a class="nav-creators" href="/creators">크리에이터</a><a class="nav-library" href="/library">라이브러리</a><span>커뮤니티</span>
     </nav>
     <div class="nav-right">
-      <a class="btn btn-primary nav-cta" href="/planner">기획안 만들기</a>
+      <a class="btn btn-primary nav-cta" id="navCta" href="/planner">기획안 <span class="arrow">→</span></a>
       <span class="nav-icons">
-        <a class="nav-ico fill" id="navPlus" href="/login" aria-label="등록하기(로그인이 필요해요)"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></a>
-        <a class="nav-ico" id="navAuth" href="/login" aria-label="로그인·회원가입"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg></a>
-        <a class="nav-ico" id="navBell" href="/collab" aria-label="알림" hidden><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg></a>
+        <span class="nav-wrap" data-dd id="plusWrap" hidden><a class="nav-ico fill" id="navPlus" href="/login" aria-haspopup="menu" aria-expanded="false" aria-label="등록하기(로그인이 필요해요)"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></a><div class="nav-drop" id="plusDrop" role="menu" aria-label="등록할 곳" hidden><span>킹덤</span><span>스튜디오</span><a role="menuitem" href="/portfolio/new">크리에이터</a><a role="menuitem" href="/library">라이브러리</a><span>커뮤니티</span></div></span>
+        <span class="nav-wrap" data-dd><a class="nav-ico" id="navAuth" href="/login" aria-haspopup="menu" aria-expanded="false" aria-label="로그인·회원가입"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg></a><div class="nav-drop" id="navDrop" role="menu" hidden><div id="dropIn"><a role="menuitem" href="/mypage">기본 정보</a><a role="menuitem" href="/portfolio/new?step=profile">프로필 등록</a><a role="menuitem" href="/portfolio/new">포트폴리오 등록</a><a role="menuitem" href="/mypage/collab">협업 신청</a><a role="menuitem" href="/admin" id="navAdmin" hidden>운영자</a><hr><form method="post" action="/auth/signout"><button type="submit" role="menuitem">로그아웃</button></form></div><div id="dropOut" hidden><a role="menuitem" href="/login">로그인</a><a role="menuitem" href="/signup">회원가입</a></div></div></span>
+        <span class="nav-wrap" data-dd id="bellWrap" hidden><a class="nav-ico" id="navBell" href="/collab" aria-haspopup="menu" aria-expanded="false" aria-label="알림"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg><span class="nav-badge" id="navBadge" hidden></span></a><div class="nav-drop nav-drop-bell" id="bellDrop" role="menu" aria-label="알림" hidden></div></span>
       </span>
     </div>
   </div>
   <nav class="nav-menu" id="navMenu" aria-label="모바일 메뉴">
-    <span>킹덤</span><span>스튜디오</span><a class="nav-creators" href="/creators">크리에이터</a><span>라이브러리</span><span>커뮤니티</span>
+    <span>킹덤</span><span>스튜디오</span><a class="nav-creators" href="/creators">크리에이터</a><a class="nav-library" href="/library">라이브러리</a><span>커뮤니티</span>
   </nav>
 </header>
 
@@ -1645,18 +1683,70 @@
 })();
 </script>
 <script>
-/* 로그인 여부에 따라 아이콘 이동 주소를 바꾼다(＋ → 등록 화면, 사람 → 마이페이지, 종은 로그인했을 때만 보인다). 확인은 /api/session만 부른다. */
+/* 상단 아이콘(＋·사람·종): 마우스를 올리면 메뉴가 열리고, 메뉴 항목을 누르면 그 화면으로 간다. 터치 화면은 아이콘을 누르면 열린다. 확인은 /api/session만 부른다. */
 (function () {
+  var wraps = Array.prototype.slice.call(document.querySelectorAll("[data-dd]"));
   var plus = document.getElementById("navPlus"), a = document.getElementById("navAuth"), bell = document.getElementById("navBell");
-  function show(loggedIn) {
-    if (plus) { plus.setAttribute("href", loggedIn ? "/portfolio/new" : "/login"); plus.setAttribute("aria-label", loggedIn ? "등록하기" : "등록하기(로그인이 필요해요)"); }
-    if (a) { a.setAttribute("href", loggedIn ? "/mypage" : "/login"); a.setAttribute("aria-label", loggedIn ? "마이페이지" : "로그인·회원가입"); }
-    if (bell) bell.hidden = !loggedIn;
+  var canHover = window.matchMedia && window.matchMedia("(hover: hover)").matches;
+  function parts(w) { return { t: w.querySelector(".nav-ico"), p: w.querySelector(".nav-drop") }; }
+  function setOpen(w, open) { var x = parts(w); if (!x.t || !x.p) return; x.p.hidden = !open; x.t.setAttribute("aria-expanded", open ? "true" : "false"); }
+  function closeAll(except) { wraps.forEach(function (w) { if (w !== except) setOpen(w, false); }); }
+  wraps.forEach(function (w) {
+    var x = parts(w), timer = null;
+    function enabled() { return !!x.t.dataset.menu; }
+    w.addEventListener("mouseenter", function () { if (!canHover || !enabled()) return; clearTimeout(timer); closeAll(w); setOpen(w, true); });
+    w.addEventListener("mouseleave", function () { if (!canHover) return; timer = setTimeout(function () { setOpen(w, false); }, 150); });
+    x.t.addEventListener("click", function (e) {
+      if (!enabled()) return;
+      e.preventDefault();
+      closeAll(w);
+      setOpen(w, canHover ? true : x.p.hidden);
+    });
+  });
+  document.addEventListener("click", function (e) { wraps.forEach(function (w) { if (!w.contains(e.target)) setOpen(w, false); }); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeAll(null); });
+
+  function renderBell(d) {
+    var box = document.getElementById("bellDrop"), badge = document.getElementById("navBadge"); if (!box) return;
+    var n = d && typeof d.newCount === "number" ? d.newCount : 0;
+    if (badge) { badge.hidden = n <= 0; badge.textContent = n > 9 ? "9+" : String(n); }
+    if (bell) bell.setAttribute("aria-label", n > 0 ? "알림 " + n + "개" : "알림");
+    box.textContent = "";
+    var ttl = document.createElement("p"); ttl.className = "ttl"; ttl.textContent = "알림"; box.appendChild(ttl);
+    var list = d && Array.isArray(d.notices) ? d.notices : [];
+    if (!list.length) { var em = document.createElement("p"); em.className = "empty"; em.textContent = "새 협업 신청이 없어요."; box.appendChild(em); }
+    else {
+      var ul = document.createElement("ul");
+      list.forEach(function (it) {
+        if (!it || typeof it.id !== "string" || !/^[0-9a-f-]{36}$/i.test(it.id)) return;
+        var li = document.createElement("li"), l = document.createElement("a");
+        l.setAttribute("role", "menuitem"); l.href = "/collab/" + it.id;
+        var sp = document.createElement("span"); sp.textContent = String(it.text || "");
+        var sm = document.createElement("small"); sm.textContent = String(it.when || "");
+        l.appendChild(sp); l.appendChild(sm); li.appendChild(l); ul.appendChild(li);
+      });
+      box.appendChild(ul);
+    }
+    var all = document.createElement("a"); all.className = "all"; all.setAttribute("role", "menuitem"); all.href = "/collab"; all.textContent = "받은 협업 신청 모두 보기"; box.appendChild(all);
   }
+  function show(d) {
+    var loggedIn = !!(d && d.loggedIn);
+    var cta = document.getElementById("navCta"); if (cta) cta.style.display = loggedIn ? "none" : "";
+    var pw = document.getElementById("plusWrap"); if (pw) pw.hidden = !loggedIn;
+    if (plus) { plus.dataset.menu = loggedIn ? "1" : ""; plus.setAttribute("aria-label", loggedIn ? "등록하기" : "등록하기(로그인이 필요해요)"); }
+    if (a) { a.dataset.menu = "1"; a.setAttribute("href", loggedIn ? "/mypage" : "/login"); a.setAttribute("aria-label", loggedIn ? "마이페이지" : "로그인·회원가입"); }
+    var din = document.getElementById("dropIn"), dout = document.getElementById("dropOut"), adm = document.getElementById("navAdmin");
+    if (din) din.hidden = !loggedIn; if (dout) dout.hidden = loggedIn; if (adm) adm.hidden = !(d && d.isAdmin);
+    var bw = document.getElementById("bellWrap");
+    if (bw) bw.hidden = !loggedIn;
+    if (bell) bell.dataset.menu = loggedIn ? "1" : "";
+    if (loggedIn) renderBell(d);
+  }
+  show({ loggedIn: false });
   fetch("/api/session", { credentials: "same-origin", cache: "no-store" })
     .then(function (r) { return r.ok ? r.json() : { loggedIn: false }; })
-    .then(function (d) { show(!!(d && d.loggedIn)); })
-    .catch(function () { show(false); });
+    .then(show)
+    .catch(function () { show({ loggedIn: false }); });
 })();
 </script>
 <script>
@@ -1672,5 +1762,8 @@
 })();
 </script>
 
+<!-- 방문 통계(Vercel Web Analytics). 대시보드에서 켜기 전에는 아무것도 모이지 않는다. -->
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

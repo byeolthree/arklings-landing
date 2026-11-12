@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { PlannerEditor } from "@/components/planner/planner-editor";
+import { TrackOnMount } from "@/lib/measure/client";
 import { getCurrentUser } from "@/lib/auth";
+import { readAiRemaining } from "@/lib/ai/usage";
 import { loadPlanPanel } from "@/lib/plans-server";
 import { createAuthClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = { title: "기획안 만들기" };
 export const dynamic = "force-dynamic";
+export const maxDuration = 60; // AI 평가(Server Action)가 모델을 기다리는 시간의 서버 전체 상한(초). 평가 호출 상한(30초)보다 길게 둔다.
 
 type SearchParams = Promise<{ plan?: string | string[]; step?: string | string[] }>;
 
@@ -19,7 +22,12 @@ export default async function PlannerPage({ searchParams }: { searchParams: Sear
   // 로그인하지 않았으면 기획안은 브라우저 안에서만 쓴다(서버에 저장하지 않는다).
   if (!user) {
     if (planParam) redirect(`/login?next=${encodeURIComponent(`/planner?plan=${planParam}`)}`);
-    return <PlannerEditor loggedIn={false} displayName="" panel={null} />;
+    return (
+      <>
+        <TrackOnMount event="planner_open" />
+        <PlannerEditor loggedIn={false} displayName="" panel={null} />
+      </>
+    );
   }
 
   // 이메일 확인을 마치지 않은 계정(카카오 등)은 먼저 이메일을 확인한다.
@@ -53,5 +61,18 @@ export default async function PlannerPage({ searchParams }: { searchParams: Sear
     }
   }
 
-  return <PlannerEditor key={planParam ?? "new"} loggedIn displayName={displayName} panel={panel} workId={workId} workPublic={workPublic} initialStep={panel && stepParam === "2" ? 2 : 1} />;
+  // 오늘 남은 AI 평가 수(읽지 못하면 null → 패널은 「남은 ○번」 줄을 보이지 않는다)
+  let evalRemaining: number | null = null;
+  try {
+    evalRemaining = await readAiRemaining(await createAuthClient(), "evaluate_logline");
+  } catch {
+    evalRemaining = null;
+  }
+
+  return (
+    <>
+      <TrackOnMount event="planner_open" />
+      <PlannerEditor key={planParam ?? "new"} loggedIn displayName={displayName} panel={panel} workId={workId} workPublic={workPublic} initialStep={panel && stepParam === "2" ? 2 : 1} evalRemaining={evalRemaining} />
+    </>
+  );
 }

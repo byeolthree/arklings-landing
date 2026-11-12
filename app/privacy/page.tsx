@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PaperCard, PaperPage } from "@/components/paper-card";
 import { CONSENT_ITEMS, CONSENT_NOTES, CONSENT_PLACEHOLDERS } from "@/lib/consent";
+import { MEASURE_ENABLED, USAGE_LOG } from "@/lib/measure/server";
 
 export const metadata: Metadata = { title: "개인정보처리방침" };
 
@@ -29,6 +30,32 @@ export default function PrivacyPage() {
               ))}
             </ul>
           </section>
+          {MEASURE_ENABLED && (
+            <section>
+              <h2 className="text-[15px] font-bold text-[#292126]">{USAGE_LOG.title}</h2>
+              <p className="mt-1.5 text-[14px] leading-relaxed text-[#574a4f]">{USAGE_LOG.intro}</p>
+              <div className="mt-3 flex flex-col gap-3">
+                {USAGE_LOG.items.map((item) => (
+                  <div key={item.label}>
+                    <h3 className="text-[14px] font-bold text-[#292126]">{item.label}</h3>
+                    {item.text ? (
+                      <p className="mt-1 text-[14px] leading-relaxed text-[#574a4f]">{item.text}</p>
+                    ) : (
+                      // 아직 정해지지 않은 항목: 빈칸으로 둔다(정해지면 lib/measure/privacy-text.ts에 적는다)
+                      <p className="mt-1 text-[14px] leading-relaxed text-[#8c8c8c]">
+                        <span aria-hidden="true">□ ____________</span> (정해지면 적습니다)
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <ul className="mt-3 list-disc pl-5 text-[14px] leading-relaxed text-[#574a4f]">
+                {USAGE_LOG.notes.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+            </section>
+          )}
           <section>
             <h2 className="text-[15px] font-bold text-[#292126]">추가 안내 (작성 예정)</h2>
             <ul className="mt-1.5 list-disc pl-5 text-[14px] leading-relaxed text-[#8c8c8c]">

@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "@/app/actions/auth";
 
-// 랜딩(public/landing.html)의 상단 메뉴와 같은 모양. 가운데 메뉴 글자 중 연결된 화면이 있는 것만 링크(지금은 「크리에이터」), 나머지는 글자로만 둔다.
+// 랜딩(public/landing.html)의 상단 메뉴와 같은 모양. 가운데 메뉴 글자 중 연결된 화면이 있는 것만 링크(「크리에이터」「라이브러리」), 나머지는 글자로만 둔다.
 const MENU: { label: string; href?: string }[] = [
   { label: "킹덤" },
   { label: "스튜디오" },
   { label: "크리에이터", href: "/creators" },
-  { label: "라이브러리" },
+  { label: "라이브러리", href: "/library" },
   { label: "커뮤니티" },
 ];
 
@@ -38,7 +38,7 @@ const BellIcon = () => (
 );
 
 // 로그인하면 아이콘 셋(＋ · 사람 · 종), 아니면 ＋와 사람 둘. 종의 개수와 목록은 서버가 읽은 새 협업 신청(SiteHeader)이다.
-export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; newCount: number | null; notices: NavNotice[] }) {
+export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { loggedIn: boolean; newCount: number | null; notices: NavNotice[]; isAdmin?: boolean }) {
   const [open, setOpen] = useState(false);
   const [drop, setDrop] = useState<Drop>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -49,6 +49,7 @@ export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; ne
 
   // 크리에이터 목록·프로필과 그 사람의 기획안 상세에 있을 때 메뉴의 「크리에이터」를 현재 위치로 보여 준다.
   const onCreators = pathname.startsWith("/creators") || pathname.startsWith("/portfolio") || pathname.startsWith("/dev-preview/creators") || pathname.startsWith("/dev-preview/portfolio/");
+  const onLibrary = pathname.startsWith("/library") || pathname.startsWith("/dev-preview/library");
   const hrefOf = (href: string) => href;
 
   // 랜딩처럼 아래로 내리면 메뉴 아래에 옅은 선이 생긴다.
@@ -75,11 +76,35 @@ export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; ne
   }, [drop]);
 
   const close = () => setOpen(false);
+  // 마우스가 있는 화면: 아이콘에 올리면 열리고 벗어나면 닫힌다(누르면 그대로 열려 있음). 터치 화면: 누르면 열고 닫는다.
+  const canHover = () => typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches;
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toggleDrop = (d: Exclude<Drop, null>) => {
     setOpen(false);
-    setDrop((cur) => (cur === d ? null : d));
+    setDrop((cur) => (cur === d && !canHover() ? null : d));
   };
+  const hv = (d: Exclude<Drop, null>) => ({
+    onMouseEnter: () => {
+      if (!canHover()) return;
+      if (leaveTimer.current) clearTimeout(leaveTimer.current);
+      setOpen(false);
+      setDrop(d);
+    },
+    onMouseLeave: () => {
+      if (!canHover()) return;
+      leaveTimer.current = setTimeout(() => setDrop((cur) => (cur === d ? null : cur)), 150);
+    },
+  });
   const shut = () => setDrop(null);
+  // 사람·종 아이콘은 링크다. 마우스 화면에서는 누르면 드롭다운 맨 위 메뉴로 이동하고, 터치 화면에서는 누르면 드롭다운을 열고 닫는다.
+  const iconClick = (e: React.MouseEvent, d: Exclude<Drop, null>) => {
+    if (canHover()) {
+      shut();
+      return;
+    }
+    e.preventDefault();
+    toggleDrop(d);
+  };
 
   return (
     <header className={`lk-header${scrolled ? " scrolled" : ""}`} id="top">
@@ -105,7 +130,7 @@ export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; ne
         <nav className="lk-nav-links" aria-label="주요 메뉴">
           {MENU.map((m) =>
             m.href ? (
-              <Link key={m.label} href={hrefOf(m.href)} aria-current={onCreators ? "page" : undefined}>
+              <Link key={m.label} href={hrefOf(m.href)} aria-current={(m.href === "/library" ? onLibrary : onCreators) ? "page" : undefined}>
                 {m.label}
               </Link>
             ) : (
@@ -115,40 +140,35 @@ export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; ne
         </nav>
 
         <div className="lk-nav-right lk-icons">
-          {/* ＋ : 로그인하면 등록할 곳 드롭다운, 로그아웃이면 로그인 화면으로 */}
-          <div className="lk-ico-wrap">
-            {isIn ? (
+          {/* ＋ : 로그인했을 때만. 등록할 곳 드롭다운 */}
+          {isIn && (
+            <div className="lk-ico-wrap" {...hv("plus")}>
               <button type="button" className="lk-ico lk-ico-fill" aria-label="등록하기" aria-haspopup="menu" aria-expanded={drop === "plus"} onClick={() => toggleDrop("plus")}>
                 <PlusIcon />
               </button>
-            ) : (
-              <Link href="/login" className="lk-ico lk-ico-fill" aria-label="등록하기(로그인이 필요해요)">
-                <PlusIcon />
-              </Link>
-            )}
-            {drop === "plus" && (
-              <div className="lk-drop" role="menu" aria-label="등록할 곳">
-                <p className="lk-drop-cap">등록할 곳</p>
-                {MENU.map((m) =>
-                  m.href ? (
-                    <Link key={m.label} role="menuitem" href="/portfolio/new" onClick={shut} aria-current={onCreators ? "page" : undefined}>
-                      {m.label}
-                    </Link>
-                  ) : (
-                    <span key={m.label} role="presentation">
-                      {m.label}
-                    </span>
-                  ),
-                )}
-              </div>
-            )}
-          </div>
+              {drop === "plus" && (
+                <div className="lk-drop" role="menu" aria-label="등록할 곳">
+                  {MENU.map((m) =>
+                    m.href ? (
+                      <Link key={m.label} role="menuitem" href={m.href === "/creators" ? "/portfolio/new" : m.href} onClick={shut} aria-current={(m.href === "/library" ? onLibrary : onCreators) ? "page" : undefined}>
+                        {m.label}
+                      </Link>
+                    ) : (
+                      <span key={m.label} role="presentation">
+                        {m.label}
+                      </span>
+                    ),
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* 사람 : 마이페이지 메뉴(로그인) 또는 로그인·회원가입(로그아웃) */}
-          <div className="lk-ico-wrap">
-            <button type="button" className="lk-ico" aria-label={isIn ? "마이페이지" : "로그인·회원가입"} aria-haspopup="menu" aria-expanded={drop === "person"} onClick={() => toggleDrop("person")}>
+          <div className="lk-ico-wrap" {...hv("person")}>
+            <Link href={isIn ? "/mypage" : "/login"} className="lk-ico" aria-label={isIn ? "마이페이지" : "로그인·회원가입"} aria-haspopup="menu" aria-expanded={drop === "person"} onClick={(e) => iconClick(e, "person")}>
               <PersonIcon />
-            </button>
+            </Link>
             {drop === "person" && (
               <div className="lk-drop" role="menu">
                 {isIn ? (
@@ -165,6 +185,11 @@ export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; ne
                     <Link role="menuitem" href="/mypage/collab" onClick={shut}>
                       협업 신청
                     </Link>
+                    {isAdmin && (
+                      <Link role="menuitem" href="/admin" onClick={shut}>
+                        운영자
+                      </Link>
+                    )}
                     <hr />
                     <form action={signOut}>
                       <button type="submit" role="menuitem">
@@ -188,15 +213,15 @@ export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; ne
 
           {/* 종 : 로그인했을 때만. 새 협업 신청 알림 */}
           {isIn && (
-            <div className="lk-ico-wrap">
-              <button type="button" className="lk-ico" aria-label={newCount ? `알림 ${newCount}개` : "알림"} aria-haspopup="menu" aria-expanded={drop === "bell"} onClick={() => toggleDrop("bell")}>
+            <div className="lk-ico-wrap" {...hv("bell")}>
+              <Link href="/mypage/collab" className="lk-ico" aria-label={newCount ? `알림 ${newCount}개` : "알림"} aria-haspopup="menu" aria-expanded={drop === "bell"} onClick={(e) => iconClick(e, "bell")}>
                 <BellIcon />
                 {newCount ? (
                   <span className="lk-badge" aria-hidden="true">
                     {newCount > 9 ? "9+" : newCount}
                   </span>
                 ) : null}
-              </button>
+              </Link>
               {drop === "bell" && (
                 <div className="lk-drop lk-drop-bell" role="menu" aria-label="알림">
                   <p className="lk-drop-title">알림</p>
@@ -223,7 +248,7 @@ export function SiteNav({ loggedIn, newCount, notices }: { loggedIn: boolean; ne
       <nav className={`lk-menu${open ? " open" : ""}`} id="lk-menu" aria-label="모바일 메뉴" aria-hidden={!open}>
         {MENU.map((m) =>
           m.href ? (
-            <Link key={m.label} href={hrefOf(m.href)} onClick={close} tabIndex={open ? 0 : -1} aria-current={onCreators ? "page" : undefined}>
+            <Link key={m.label} href={hrefOf(m.href)} onClick={close} tabIndex={open ? 0 : -1} aria-current={(m.href === "/library" ? onLibrary : onCreators) ? "page" : undefined}>
               {m.label}
             </Link>
           ) : (
