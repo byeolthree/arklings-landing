@@ -58,7 +58,7 @@
 /* 올리면 주색, 선택한 메뉴도 주색. 누르면 주색에 굵은 글씨가 된다(네모 틀 없음) */
 .lk-nav-links span:hover, .lk-nav-links a:hover, .lk-nav-links a[aria-current="page"] { color: var(--jaju); }
 .lk-nav-links a[aria-current="page"] { font-weight: 700; }
-.lk-nav-links a:active { color: var(--jaju); font-weight: 700; }
+.lk-nav-links a:focus { color: var(--jaju); font-weight: 700; }
 .lk-nav-right { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: 15px; }
 .lk-nav-right .lk-textlink { display: none; color: var(--body); background: none; border: 0; padding: 0; font: inherit; cursor: pointer; text-decoration: none; }
 .lk-nav .lk-btn { min-height: 36px; padding: 0 16px; font-size: 13px; }
