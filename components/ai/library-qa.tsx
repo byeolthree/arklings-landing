@@ -16,18 +16,7 @@ const ERRORS: Record<AskErrorKind, { pill: string; title: string; desc: string; 
   input: { pill: "질문 입력 오류", title: "질문을 확인해 주세요", desc: `질문이 비어 있거나 ${MAX_QUESTION_CHARS}자를 넘었어요. 고친 뒤에 다시 눌러 주세요.` },
 };
 
-const PLUS = (
-  <svg className="plus" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a61e5c" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-    <path d="M12 5v14M5 12h14" />
-  </svg>
-);
-const MINUS = (
-  <svg className="minus" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a61e5c" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
-    <path d="M5 12h14" />
-  </svg>
-);
-
-export function LibraryQa({ items, listError = false, loggedIn, ctrl, loginHref = "/login?next=/library" }: { items: WikiItem[]; listError?: boolean; loggedIn: boolean; ctrl: AskController; loginHref?: string }) {
+export function LibraryQa({ loggedIn, ctrl, loginHref = "/login?next=/library" }: { items?: WikiItem[]; listError?: boolean; loggedIn: boolean; ctrl: AskController; loginHref?: string }) {
   const busy = ctrl.status === "submitted" || ctrl.status === "streaming";
   const last = ctrl.messages[ctrl.messages.length - 1];
   const cut = last?.role === "assistant" && last.state === "interrupted";
@@ -49,38 +38,8 @@ export function LibraryQa({ items, listError = false, loggedIn, ctrl, loginHref 
           <section>
             <div className="ai-kicker">게시된 질문과 답</div>
             <h2 className="ai-sec-h2">자주 묻는 질문</h2>
-            {listError ? (
-              // 시안에 없는 상태: 위키를 읽지 못한 것은 「자료가 없음」과 다르다(없다고 거짓 안내하지 않는다)
-              <div className="ai-empty">
-                <b>자료를 불러오지 못했어요</b>
-                <p>잠시 뒤에 다시 시도해 주세요.</p>
-              </div>
-            ) : items.length === 0 ? (
-              <div className="ai-empty">
-                <b>아직 준비된 자료가 없어요</b>
-                <p>자료를 준비하고 있어요. 준비되면 이곳에 질문과 답이 올라와요.</p>
-              </div>
-            ) : (
-              <div className="ai-qa">
-                {items.map((it, i) => (
-                  <details key={it.id} open={i === 0}>
-                    <summary>
-                      <span>{it.question}</span>
-                      {PLUS}
-                      {MINUS}
-                    </summary>
-                    <p className="ans">{it.answer}</p>
-                    <div className="ai-meta">
-                      <span className="ai-tag">시대 · {it.era}</span>
-                      <span className="ai-tag">출처 · 「{it.source}」</span>
-                    </div>
-                  </details>
-                ))}
-              </div>
-            )}
+            <LibraryQuestions />
           </section>
-
-          <LibraryQuestions />
 
           <section className="ai-ask">
             <div className="ai-kicker">AI에게 묻기</div>
