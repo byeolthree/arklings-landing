@@ -206,6 +206,9 @@
 .rg .rg-prof-card .pp-roles { gap: 8px; margin-top: 0; }
 .rg .rg-prof-card .pp-roles .opt { box-sizing: border-box; height: 32px; padding: 0 15px; line-height: 30px; font-size: 14px; border: 1px solid var(--line); background: #fff; color: var(--body); border-radius: 999px; }
 .rg .rg-prof-card .pp-roles .opt[aria-pressed="true"], .rg .rg-prof-card .pp-roles .opt[aria-checked="true"] { background: var(--body); border-color: var(--body); color: #fff; }
+/* 역할 태그는 역할 색: 외곽선·글자는 역할 색, 누르면 그 색으로 채우고 흰 글자 */
+.rg .rg-prof-card .pp-roles .opt.role-opt { border-color: var(--rc); color: var(--rc); }
+.rg .rg-prof-card .pp-roles .opt.role-opt[aria-pressed="true"] { background: var(--rc); border-color: var(--rc); color: #fff; }
 .rg .rg-prof-card .pl.mp-pl .answer { box-sizing: border-box; height: 48px; padding: 0 14px; border: 1px solid var(--line); border-radius: 12px; background: #fff; font-size: 14px; }
 .rg .rg-prof-card .pl.mp-pl textarea.answer { height: 130px; padding: 14px 18px; border-radius: 16px; background: var(--bg); line-height: 1.6; }
 .rg .rg-prof-card .pl.mp-pl .answer::placeholder { color: #b6abb0; }
