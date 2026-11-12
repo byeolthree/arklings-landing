@@ -76,6 +76,11 @@
   .nav-links { display: none; gap: 22px; font-size: 15px; }
   .nav-links span { color: var(--body); }
   .nav-links a.nav-creators, .nav-links a.nav-library { color: var(--body); text-decoration: none; transition: color .2s; }
+  /* 상단 메뉴: 올리면 주색, 누르는 동안 안쪽으로 눌리는 그림자(다른 페이지 메뉴와 같은 효과). 글자 위치는 그대로 두려고 여백만큼 왼쪽으로 당긴다 */
+  .nav-links { gap: 6px; margin-left: -8px; }
+  .nav-links span, .nav-links a { padding: 7px 8px; border-radius: 10px; transition: color .2s, background .2s, box-shadow .2s, transform .12s; }
+  .nav-links span:hover, .nav-links a:hover { color: var(--jaju); }
+  .nav-links a:active { color: var(--jaju); background: var(--tint); box-shadow: inset 0 2px 6px rgba(166,30,92,.3); transform: translateY(1px) scale(.95); }
   .nav-right { margin-left: auto; display: flex; align-items: center; gap: 18px; font-size: 15px; }
   .nav-right .mypage { display: none; color: var(--body); text-decoration: none; }
   .auth-slot { visibility: hidden; }
@@ -918,6 +923,14 @@
   .nav-badge { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #c83a3a; color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; box-sizing: border-box; }
   .nav-badge[hidden] { display: none; }
   .nav-ico { position: relative; }
+  /* 아이콘: 올리면 연한 핑크와 그림자, 누르면 작아지면서 안쪽으로 눌린다(다른 페이지 아이콘과 같은 효과) */
+  .nav-ico { transition: background .2s, color .2s, box-shadow .2s, transform .12s; }
+  .nav-ico:hover { background: var(--tint); box-shadow: 0 6px 14px -6px rgba(166,30,92,.55); }
+  .nav-ico.fill:hover { background: var(--jaju-deep); border-color: var(--jaju-deep); color: #fff; }
+  .nav-ico:active { transform: scale(.88); box-shadow: inset 0 3px 8px rgba(42,32,37,.3); }
+  .nav-ico.fill:active { background: var(--jaju-deep); }
+  .nav-drop a, .nav-drop form button { transition: background .15s, transform .12s; }
+  .nav-drop a:active, .nav-drop form button:active { background: var(--tint); box-shadow: inset 0 2px 6px rgba(166,30,92,.25); transform: scale(.98); }
   .nav-drop-bell { width: min(320px, calc(100vw - 32px)); }
   .nav-drop-bell .ttl { display: flex; align-items: center; height: 41px; padding: 0 14px; font-size: 14px; font-weight: 700; color: var(--title); }
   .nav-drop-bell .empty { margin: 0; padding: 8px 14px 12px; font-size: 14px; color: var(--body); }
