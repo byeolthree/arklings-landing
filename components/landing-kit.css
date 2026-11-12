@@ -47,10 +47,11 @@
 /* ---------- 상단 메뉴 (랜딩 header.site) ---------- */
 .lk-header {
   position: sticky; top: 0; z-index: 50;
-  /* 모든 페이지 공통 상단 헤더: 흰색이 아닌 브랜드 색(배경색 #FAF7F8과 테두리색 #E8DFE3을 섞은 제목 띠 색)을 단색으로 깐다 */
-  background: var(--hero-bg);
+  /* 헤더 색은 바로 아래 구역과 같게 한다. 제목 띠가 있는 페이지는 제목 띠 색, 없는 페이지는 바탕색(#FAF7F8). 투명도 없는 단색이다 */
+  background: var(--bg);
 }
-.lk-header.scrolled { background: var(--hero-bg); }
+.lk-header.scrolled { background: var(--bg); }
+body:has(.cr-top, .ai-hero, .rg-top, .plan-top, .pf-top, .mp-top) .lk-header { background: var(--hero-bg); }
 .lk-nav { display: flex; align-items: center; gap: 28px; height: 68px; }
 .lk-logo { font-weight: 700; font-size: 22px; color: var(--jaju); text-decoration: none; letter-spacing: -0.02em; }
 .lk-nav-links { display: none; gap: 6px; font-size: 15px; }
