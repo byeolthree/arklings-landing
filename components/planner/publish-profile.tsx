@@ -100,6 +100,18 @@ export function PublishProfile({
   function makeRep(r: Role) {
     setRoles((cur) => [r, ...cur.filter((x) => x !== r)]);
   }
+  // 같은 태그를 1초 안에 다시 누르면 「두 번 누름」으로 본다(빠르게 두 번이든 천천히 두 번이든). 두 번째 누름은 선택을 풀지 않고 대표로만 정한다.
+  const lastPress = useRef<{ r: Role; t: number } | null>(null);
+  function pressRole(r: Role, now: number) {
+    const prev = lastPress.current;
+    if (prev && prev.r === r && now - prev.t < 1000) {
+      lastPress.current = null;
+      makeRep(r);
+      return;
+    }
+    lastPress.current = { r, t: now };
+    toggle(r);
+  }
   const setChannel = (i: number, patch: Partial<Channel>) => setChannels((cur) => cur.map((c, k) => (k === i ? { ...c, ...patch } : c)));
 
   async function submit(e: React.FormEvent) {
@@ -208,7 +220,7 @@ export function PublishProfile({
         </span>
         <div className="pp-roles" role="group" aria-labelledby="pp-roles-label">
           {(Object.keys(ROLES) as Role[]).map((r) => (
-            <button key={r} type="button" className={`opt role-opt ${ROLE_TONE[r]}`} aria-pressed={roles.includes(r)} onClick={(e) => (e.detail >= 2 ? makeRep(r) : toggle(r))}>
+            <button key={r} type="button" className={`opt role-opt ${ROLE_TONE[r]}`} aria-pressed={roles.includes(r)} onClick={(e) => pressRole(r, e.timeStamp)}>
               {roles.length >= 2 && roles[0] === r && <span className="rep-badge">대표</span>}
               {ROLES[r]}
             </button>
