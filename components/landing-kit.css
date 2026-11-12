@@ -47,10 +47,10 @@
 /* ---------- 상단 메뉴 (랜딩 header.site) ---------- */
 .lk-header {
   position: sticky; top: 0; z-index: 50;
-  background: rgba(250,247,248,.82); backdrop-filter: saturate(1.4) blur(10px);
-  transition: background .3s;
+  /* 헤더 색은 바탕색 하나로 고정한다(뒤에 깔린 내용·스크롤에 따라 달라 보이지 않게 투명도 없음) */
+  background: var(--bg);
 }
-.lk-header.scrolled { background: rgba(250,247,248,.94); }
+.lk-header.scrolled { background: var(--bg); }
 .lk-nav { display: flex; align-items: center; gap: 28px; height: 68px; }
 .lk-logo { font-weight: 700; font-size: 22px; color: var(--jaju); text-decoration: none; letter-spacing: -0.02em; }
 .lk-nav-links { display: none; gap: 6px; font-size: 15px; }
