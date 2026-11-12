@@ -17,18 +17,12 @@ const MINUS = (
 
 export function LibraryQuestions() {
   return (
-    <section className="ai-qs-wrap" aria-labelledby="ai-qs-h2">
-      <div className="ai-kicker">질문 모음</div>
-      <h2 id="ai-qs-h2" className="ai-sec-h2">궁금한 것부터 찾아보세요</h2>
-      <p className="ai-lead">큰 제목을 누르면 세부 질문이 열리고, 질문을 누르면 답변을 볼 수 있어요.</p>
+    <section className="ai-qs-wrap">
       <div className="ai-qs">
         {LIBRARY_QUESTION_SECTIONS.map((s) => (
           <details key={s.no} className="ai-qs-sec">
             <summary>
-              <span>
-                {s.title}
-                <small>질문 {s.questions.length}개</small>
-              </span>
+              <span>{s.title}</span>
               {PLUS}
               {MINUS}
             </summary>
