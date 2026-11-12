@@ -776,6 +776,7 @@ export function WorkEditor({
   const [newPublic, setNewPublic] = useState(true);
   // 제목 없이 저장하면 가운데 팝업으로 알리고, 버튼을 누르면 제목 칸에 커서를 둔다.
   const [askTitle, setAskTitle] = useState(false);
+  const [slotFold, setSlotFold] = useState<Record<string, boolean>>({});
   const titleRef = useRef<HTMLInputElement>(null);
   // 새 작품: 승인 샘플처럼 글·이미지·영상·문서 칸이 처음부터 있고 순서를 바꾸거나 지울 수 있다. 「저장」을 누르면 작품을 만든 뒤 채운 칸을 이 순서대로 넣는다.
   const [slots, setSlots] = useState<Slot[]>(() => (work ? [] : (["video", "logline", "text", "image"] as SlotKind[]).map(newSlot)));
@@ -972,21 +973,25 @@ export function WorkEditor({
                   ⠿
                 </button>
                 <div className={`we-main${sl.kind === "video" || sl.kind === "text" ? " we-card" : ""}`}>
-                  {sl.kind === "logline" && (
+                  {sl.kind !== "image" && (
+                    <button type="button" className="we-fold" aria-expanded={!slotFold[sl.id]} onClick={() => setSlotFold({ ...slotFold, [sl.id]: !slotFold[sl.id] })}>
+                      {slotFold[sl.id] ? "▸ 펼치기" : "▾ 접기"}
+                    </button>
+                  )}
+                  {sl.kind === "logline" && !slotFold[sl.id] && (
                     <label className="we-logline-label">
-                      <span className="we-label">로그라인 (이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)</span>
+                      <span className="we-label">로그라인 <span style={{ fontWeight: 400 }}>(이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)</span></span>
                       <textarea className="we-text" rows={3} value={logline} onChange={(e) => setLogline(e.target.value)} placeholder={LOGLINE_FRAME} aria-invalid={errs.logline ? true : undefined} />
                       {errs.logline && <AlertPopup key={errs.logline}>{errs.logline}</AlertPopup>}
                     </label>
                   )}
                   {sl.kind === "video" && <SubChips items={VIDEO_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="영상 종류" />}
                   {sl.kind === "text" && <SubChips items={DOC_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="문서 종류" />}
-                  {sl.kind === "text" && <textarea className="we-text" rows={3} placeholder="〈문서〉" aria-label="문서" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
-                  {sl.kind === "text" && <DocFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
+                  {sl.kind === "text" && !slotFold[sl.id] && <textarea className="we-text" rows={3} placeholder="〈문서〉" aria-label="문서" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
+                  {sl.kind === "text" && !slotFold[sl.id] && <DocFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
                   {sl.kind === "image" && <ImageSlotBox file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
-                  {sl.kind === "video" && <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={sl.url} onChange={(e) => patchSlot(sl.id, { url: e.target.value })} />}
-                  {sl.kind === "video" && <p className="mp-note" style={{ flex: "1 1 100%" }}>유튜브 주소로 넣으면 용량 제한 없이 올릴 수 있어요.</p>}
-                  {sl.kind === "video" && <VideoFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
+                  {sl.kind === "video" && !slotFold[sl.id] && <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={sl.url} onChange={(e) => patchSlot(sl.id, { url: e.target.value })} />}
+                  {sl.kind === "video" && !slotFold[sl.id] && <VideoFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
                 </div>
                 <div className="we-tools">
                   <button type="button" className="we-mini" aria-label="위로" disabled={i === 0} onClick={() => moveSlotTo(sl.id, i - 1)}>↑</button>
@@ -1155,8 +1160,13 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
           </button>
           <div className={`we-main${b && (b.kind === "video" || b.kind === "text" || b.kind === "document") ? " we-card" : ""}`}>
             {!b && (
+              <button type="button" className="we-fold" aria-expanded={!folded.logline} onClick={() => setFolded({ ...folded, logline: !folded.logline })}>
+                {folded.logline ? "▸ 펼치기" : "▾ 접기"}
+              </button>
+            )}
+            {!b && !folded.logline && (
               <label className="we-logline-label">
-                <span className="we-label">로그라인 (이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)</span>
+                <span className="we-label">로그라인 <span style={{ fontWeight: 400 }}>(이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)</span></span>
                 <textarea className="we-text" rows={3} value={logline} onChange={(e) => onLogline(e.target.value)} placeholder={LOGLINE_FRAME} aria-invalid={loglineErr ? true : undefined} />
                 {loglineErr && <AlertPopup key={loglineErr}>{loglineErr}</AlertPopup>}
               </label>
@@ -1170,13 +1180,13 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
                 onPick={(v) => void run(() => setBlockSubKind(b.id, v || null))}
               />
             )}
-            {b && b.kind !== "text" && (
+            {b && (
               <button type="button" className="we-fold" aria-expanded={!folded[b.id]} onClick={() => setFolded({ ...folded, [b.id]: !folded[b.id] })}>
                 {folded[b.id] ? "▸ 펼치기" : "▾ 접기"}
               </button>
             )}
             {b && b.kind === "image" && <span className="mp-note">· 이미지 (JPG · PNG · WEBP, 5MB 이하)</span>}
-            {b && b.kind === "text" && (
+            {b && b.kind === "text" && !folded[b.id] && (
               <>
                 <textarea className="we-text" rows={3} aria-label="문서" value={edits[b.id] ?? b.body} onChange={(e) => setEdits({ ...edits, [b.id]: e.target.value })} />
                 {edits[b.id] !== undefined && edits[b.id] !== b.body && (
@@ -1225,7 +1235,6 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
             ) : (
               <>
                 <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={draft} onChange={(e) => setDraft(e.target.value)} />
-                <p className="mp-note" style={{ flex: "1 1 100%" }}>유튜브 주소로 넣으면 용량 제한 없이 올릴 수 있어요.</p>
               </>
             )}
             {adding === "text" && <DocFilePick file={draftDoc} onFile={setDraftDoc} disabled={busy} />}
