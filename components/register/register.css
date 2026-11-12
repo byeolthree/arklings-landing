@@ -41,7 +41,7 @@
 @media (min-width: 768px) { .rg .rg-prof-card.mp-card { padding: 40px 48px; } }
 
 /* 포트폴리오 등록 단계 */
-.rg .rg-main { background: var(--paper); padding: 40px 0 84px; }
+.rg .rg-main { background-color: var(--bg); background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 28px 28px; padding: 40px 0 84px; }
 @media (min-width: 768px) { .rg .rg-main { padding: 64px 0 120px; } }
 .rg .rg-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; }
 @media (min-width: 1024px) { .rg .rg-grid { grid-template-columns: minmax(0, 1fr) 380px; gap: 48px; align-items: start; } }
@@ -250,7 +250,7 @@
 }
 
 /* 기본 정보 화면(시안 12): 띠 아래는 흰 배경, 가운데에 그림자 있는 흰 카드(가로 880, 안쪽 48) */
-.rg .bs-main { background: var(--paper); padding: 40px 0 80px; }
+.rg .bs-main { background-color: var(--bg); background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 28px 28px; padding: 40px 0 80px; }
 @media (min-width: 768px) { .rg .bs-main { padding: 56px 0 100px; } }
 .rg .bs-wrap { width: 100%; max-width: 880px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; }
 @media (min-width: 928px) { .rg .bs-wrap { padding: 0; } }
