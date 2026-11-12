@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AlertPopup } from "@/components/ui/alert-popup";
 import { redirect } from "next/navigation";
 import "@/components/planner/planner.css";
 import "@/components/mypage/mypage.css";
@@ -40,9 +41,7 @@ export default async function PortfolioNewPage({ searchParams }: { searchParams:
         <RegisterHeader current="포트폴리오 등록" />
         <div className="rg-main">
           <div className="rg-wrap">
-            <p role="alert" className="mp-msg err">
-              불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
-            </p>
+            <AlertPopup>불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.</AlertPopup>
           </div>
         </div>
       </div>

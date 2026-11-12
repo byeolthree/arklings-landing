@@ -2,10 +2,12 @@
 
 // 마이페이지의 「크리에이터 등록」과 「포트폴리오 등록」 실제 화면. 샘플(mypage-preview, work-editor)과 같은 모양이고 진짜로 저장한다.
 // 모든 저장은 app/actions/creators.ts의 Server Action이 하고(서버가 로그인·이메일 확인·글자 수를 다시 검사한다), 끝나면 서버에서 다시 읽는다(router.refresh).
+import { AlertPopup } from "@/components/ui/alert-popup";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ROLE_TONE } from "@/components/creators/role-tone";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   addTextBlock,
   addVideoBlock,
@@ -649,9 +651,7 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
             </span>
           </div>
           {rowErr[w.id] && (
-            <p role="alert" className="mp-msg err">
-              {rowErr[w.id]}
-            </p>
+            <AlertPopup key={rowErr[w.id]}>{rowErr[w.id]}</AlertPopup>
           )}
           {editing === w.id && <WorkEditor key={w.id} work={{ ...w, isPublic: isPub(w) }} nickname={nickname} onClose={() => setEditing(null)} onTogglePublic={() => void togglePublic(w)} busyOuter={busy} />}
         </div>
@@ -774,6 +774,9 @@ export function WorkEditor({
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const [newPublic, setNewPublic] = useState(true);
+  // 제목 없이 저장하면 가운데 팝업으로 알리고, 버튼을 누르면 제목 칸에 커서를 둔다.
+  const [askTitle, setAskTitle] = useState(false);
+  const titleRef = useRef<HTMLInputElement>(null);
   // 새 작품: 승인 샘플처럼 글·이미지·영상·문서 칸이 처음부터 있고 순서를 바꾸거나 지울 수 있다. 「저장」을 누르면 작품을 만든 뒤 채운 칸을 이 순서대로 넣는다.
   const [slots, setSlots] = useState<Slot[]>(() => (work ? [] : (["video", "logline", "text", "image"] as SlotKind[]).map(newSlot)));
   const dragSlot = useRef<string | null>(null);
@@ -811,7 +814,15 @@ export function WorkEditor({
     const r = work ? await updateWork(work.id, input) : await createWork(input);
     setBusy(false);
     if (!r.ok) {
-      setErrs(r.fieldErrors ?? {});
+      const fe = { ...(r.fieldErrors ?? {}) } as Record<string, string>;
+      if (fe.title) {
+        delete fe.title;
+        setErrs(fe);
+        setAskTitle(true);
+        const rest = Object.values(fe);
+        return rest.length ? setMsg({ text: rest[0], err: true }) : undefined;
+      }
+      setErrs(fe);
       return setMsg({ text: r.error, err: true });
     }
     if (!work) {
@@ -881,12 +892,31 @@ export function WorkEditor({
       </div>
 
       <div className="we-head">
-        <input className="we-title" type="text" placeholder="〈제목〉" aria-label="작품 제목" value={title} maxLength={TITLE_MAX} onChange={(e) => setTitle(e.target.value)} aria-invalid={errs.title ? true : undefined} />
-        {errs.title && <p className="mp-msg err" role="alert">{errs.title}</p>}
+        {askTitle &&
+          createPortal(
+            <div role="dialog" aria-modal="true" aria-labelledby="ask-title-text" style={{ position: "fixed", inset: 0, zIndex: 100, display: "grid", placeItems: "center", padding: 16, background: "rgba(42,32,37,.45)" }}>
+              <div style={{ width: "100%", maxWidth: 320, padding: "28px 24px 24px", borderRadius: 16, background: "#fff", textAlign: "center" }}>
+                <p id="ask-title-text" style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#2a2025" }}>작품 제목을 입력해 주세요.</p>
+                <button
+                  type="button"
+                  autoFocus
+                  onClick={() => {
+                    setAskTitle(false);
+                    titleRef.current?.focus();
+                  }}
+                  style={{ marginTop: 20, height: 40, padding: "0 28px", border: 0, borderRadius: 999, background: "#a61e5c", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}
+                >
+                  확인
+                </button>
+              </div>
+            </div>,
+            document.body,
+          )}
+        <input ref={titleRef} className="we-title" type="text" placeholder="〈제목〉" aria-label="작품 제목" value={title} maxLength={TITLE_MAX} onChange={(e) => setTitle(e.target.value)} aria-invalid={errs.title ? true : undefined} />
         <p className="we-by">
           {nickname || "닉네임"} · {work && work.isPublic ? new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" }) : work || !newPublic ? "비공개" : "저장하면 공개"}
         </p>
-        {errs.roles && <p className="mp-msg err" role="alert">{errs.roles}</p>}
+        {errs.roles && <AlertPopup key={errs.roles}>{errs.roles}</AlertPopup>}
         <div className="we-pick" role="group" aria-label="장르">
           {GENRES.map((g) => (
             <button key={g} type="button" className="opt" aria-pressed={genres.includes(g)} onClick={() => setGenres(toggle(genres, g))}>
@@ -946,7 +976,7 @@ export function WorkEditor({
                     <label className="we-logline-label">
                       <span className="we-label">로그라인 (이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)</span>
                       <textarea className="we-text" rows={3} value={logline} onChange={(e) => setLogline(e.target.value)} placeholder={LOGLINE_FRAME} aria-invalid={errs.logline ? true : undefined} />
-                      {errs.logline && <span className="mp-msg err" role="alert">{errs.logline}</span>}
+                      {errs.logline && <AlertPopup key={errs.logline}>{errs.logline}</AlertPopup>}
                     </label>
                   )}
                   {sl.kind === "video" && <SubChips items={VIDEO_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="영상 종류" />}
@@ -1128,7 +1158,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
               <label className="we-logline-label">
                 <span className="we-label">로그라인 (이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)</span>
                 <textarea className="we-text" rows={3} value={logline} onChange={(e) => onLogline(e.target.value)} placeholder={LOGLINE_FRAME} aria-invalid={loglineErr ? true : undefined} />
-                {loglineErr && <span className="mp-msg err" role="alert">{loglineErr}</span>}
+                {loglineErr && <AlertPopup key={loglineErr}>{loglineErr}</AlertPopup>}
               </label>
             )}
             {b && (b.kind === "video" || b.kind === "text" || b.kind === "document") && (

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AlertPopup } from "@/components/ui/alert-popup";
 import Link from "next/link";
 import "@/components/planner/planner.css";
 import "@/components/mypage/mypage.css";
@@ -60,7 +61,7 @@ export default async function MyCollabPage() {
           <div className="bs-card cl-card">
             <h2 className="cl-h">받은 협업 신청</h2>
             {receivedFailed ? (
-              <p role="alert" className="mp-msg err">받은 협업 신청을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.</p>
+              <AlertPopup>받은 협업 신청을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.</AlertPopup>
             ) : receivedRows.length === 0 ? (
               <p className="cl-empty">아직 받은 협업 신청이 없습니다.</p>
             ) : (
