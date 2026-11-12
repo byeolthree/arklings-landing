@@ -14,6 +14,12 @@ const MENU: { label: string; href?: string }[] = [
   { label: "커뮤니티" },
 ];
 
+// ＋가 가는 곳: 메뉴에서 맨 위에 있는 화면. 지금은 크리에이터(등록 화면 /portfolio/new)다.
+const PLUS_HREF = (() => {
+  const top = MENU.find((m) => m.href)?.href;
+  return top === "/creators" ? "/portfolio/new" : (top ?? "/");
+})();
+
 export type NavNotice = { id: string; text: string; when: string };
 
 type Drop = "plus" | "person" | "bell" | null;
@@ -140,27 +146,12 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { logg
         </nav>
 
         <div className="lk-nav-right lk-icons">
-          {/* ＋ : 로그인했을 때만. 등록할 곳 드롭다운 */}
+          {/* ＋ : 로그인했을 때만. 메뉴 맨 위 화면(지금은 크리에이터)의 등록 화면으로 바로 간다 */}
           {isIn && (
-            <div className="lk-ico-wrap" {...hv("plus")}>
-              <button type="button" className="lk-ico lk-ico-fill" aria-label="등록하기" aria-haspopup="menu" aria-expanded={drop === "plus"} onClick={() => toggleDrop("plus")}>
+            <div className="lk-ico-wrap">
+              <Link href={PLUS_HREF} className="lk-ico lk-ico-fill" aria-label="등록하기" onClick={shut}>
                 <PlusIcon />
-              </button>
-              {drop === "plus" && (
-                <div className="lk-drop" role="menu" aria-label="등록할 곳">
-                  {MENU.map((m) =>
-                    m.href ? (
-                      <Link key={m.label} role="menuitem" href={m.href === "/creators" ? "/portfolio/new" : m.href} onClick={shut} aria-current={(m.href === "/library" ? onLibrary : onCreators) ? "page" : undefined}>
-                        {m.label}
-                      </Link>
-                    ) : (
-                      <span key={m.label} role="presentation">
-                        {m.label}
-                      </span>
-                    ),
-                  )}
-                </div>
-              )}
+              </Link>
             </div>
           )}
 
