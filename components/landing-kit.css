@@ -53,7 +53,7 @@
 .lk-header.scrolled { background: rgba(250,247,248,.94); }
 .lk-nav { display: flex; align-items: center; gap: 28px; height: 68px; }
 .lk-logo { font-weight: 700; font-size: 22px; color: var(--jaju); text-decoration: none; letter-spacing: -0.02em; }
-.lk-nav-links { display: none; gap: 6px; font-size: 15px; }
+.lk-nav-links { display: none; gap: 6px; margin-left: -8px; font-size: 15px; }
 .lk-nav-links span, .lk-nav-links a { padding: 7px 8px; border-radius: 10px; color: var(--body); text-decoration: none; transition: color .2s, background .2s, box-shadow .2s, transform .12s; }
 /* 올리면 주색, 선택한 메뉴도 주색. 누르는 동안에는 안쪽으로 눌리는 그림자가 생기고 살짝 작아진다 */
 .lk-nav-links span:hover, .lk-nav-links a:hover, .lk-nav-links a[aria-current="page"] { color: var(--jaju); }
