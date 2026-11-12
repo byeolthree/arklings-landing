@@ -141,3 +141,22 @@
   .ai .ai-ask-foot .right .ai-btn { width: 100%; }
   .ai .ai-err { padding: 18px 16px; }
 }
+
+/* 라이브러리 「질문 모음」: 큰 제목(.ai-qs-sec) 안에 세부 질문(.ai-qs-q)이 한 겹 더 들어간다. 겹친 <details>라서 아이콘 전환은 자식 선택자(>)로만 건다. */
+.ai .ai-qs-wrap { margin-top: 48px; }
+.ai .ai-qs { margin-top: 22px; }
+.ai .ai-qs details > summary { display: flex; justify-content: space-between; gap: 16px; list-style: none; cursor: pointer; color: var(--title); }
+.ai .ai-qs details > summary::-webkit-details-marker { display: none; }
+.ai .ai-qs details > summary svg { flex: none; margin-top: 3px; }
+.ai .ai-qs details > summary:focus-visible { outline: 2px solid var(--jaju); outline-offset: 4px; border-radius: 4px; }
+.ai .ai-qs details:not([open]) > summary .minus, .ai .ai-qs details[open] > summary .plus { display: none; }
+.ai .ai-qs-sec { border-top: 1px solid var(--line); padding: 20px 0; }
+.ai .ai-qs-sec:last-child { border-bottom: 1px solid var(--line); }
+.ai .ai-qs-sec > summary { font-size: 16px; font-weight: 700; }
+.ai .ai-qs-sec > summary small { margin-left: 8px; font-size: 12px; font-weight: 400; color: var(--body); }
+.ai .ai-qs-list { margin-top: 14px; }
+.ai .ai-qs-q { border-top: 1px solid var(--line); padding: 14px 0 14px 12px; }
+.ai .ai-qs-q > summary { font-size: 14px; font-weight: 500; line-height: 1.6; }
+.ai .ai-qs-q > summary svg { margin-top: 2px; }
+.ai .ai-qs-q .ans { margin-top: 10px; font-size: 14px; line-height: 1.85; color: var(--title); white-space: pre-wrap; }
+.ai .ai-qs-q .ans.pending { color: var(--body); }

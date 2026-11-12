@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ErrorCard, type ErrorAction } from "./error-card";
+import { LibraryQuestions } from "./library-questions";
 import { MAX_QUESTION_CHARS, type AskController, type AskErrorKind, type AskMessage, type WikiItem } from "./types";
 import { USAGE_TEXT as U } from "./usage-text";
 import "./ai.css";
@@ -78,6 +79,8 @@ export function LibraryQa({ items, listError = false, loggedIn, ctrl, loginHref 
               </div>
             )}
           </section>
+
+          <LibraryQuestions />
 
           <section className="ai-ask">
             <div className="ai-kicker">AI에게 묻기</div>
