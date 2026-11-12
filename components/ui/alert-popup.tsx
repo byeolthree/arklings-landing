@@ -22,7 +22,7 @@ export function AlertPopup({
   };
   return createPortal(
     <div role="alertdialog" aria-modal="true" style={{ position: "fixed", inset: 0, zIndex: 100, display: "grid", placeItems: "center", padding: 16, background: "rgba(42,32,37,.45)" }}>
-      <div style={{ width: "100%", maxWidth: 340, padding: "28px 24px 24px", borderRadius: 16, background: "#fff", textAlign: "center", color: "#2a2025", fontSize: 15, fontWeight: 700, lineHeight: 1.6 }}>
+      <div style={{ width: "100%", maxWidth: 340, padding: "28px 24px 24px", borderRadius: 16, background: "#fff", textAlign: "center", color: "#2a2025", fontSize: 15, fontWeight: 400, lineHeight: 1.6, whiteSpace: "pre-line" }}>
         <div>{children}</div>
         <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
           {actions}

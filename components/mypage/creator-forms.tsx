@@ -896,7 +896,7 @@ export function WorkEditor({
           createPortal(
             <div role="dialog" aria-modal="true" aria-labelledby="ask-title-text" style={{ position: "fixed", inset: 0, zIndex: 100, display: "grid", placeItems: "center", padding: 16, background: "rgba(42,32,37,.45)" }}>
               <div style={{ width: "100%", maxWidth: 320, padding: "28px 24px 24px", borderRadius: 16, background: "#fff", textAlign: "center" }}>
-                <p id="ask-title-text" style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#2a2025" }}>작품 제목을 입력해 주세요.</p>
+                <p id="ask-title-text" style={{ margin: 0, fontSize: 15, fontWeight: 400, color: "#2a2025" }}>작품 제목을 입력해 주세요.</p>
                 <button
                   type="button"
                   autoFocus
