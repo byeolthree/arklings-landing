@@ -14,11 +14,8 @@ const MENU: { label: string; href?: string }[] = [
   { label: "커뮤니티" },
 ];
 
-// ＋가 가는 곳: 메뉴에서 맨 위에 있는 화면. 지금은 크리에이터(등록 화면 /portfolio/new)다.
-const PLUS_HREF = (() => {
-  const top = MENU.find((m) => m.href)?.href;
-  return top === "/creators" ? "/portfolio/new" : (top ?? "/");
-})();
+// ＋가 가는 곳: 메뉴에서 맨 위에 있는 화면. 지금은 크리에이터(/creators)다.
+const PLUS_HREF = MENU.find((m) => m.href)?.href ?? "/";
 
 export type NavNotice = { id: string; text: string; when: string };
 
@@ -146,7 +143,7 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { logg
         </nav>
 
         <div className="lk-nav-right lk-icons">
-          {/* ＋ : 로그인했을 때만. 메뉴 맨 위 화면(지금은 크리에이터)의 등록 화면으로 바로 간다 */}
+          {/* ＋ : 로그인했을 때만. 메뉴 맨 위 화면(지금은 크리에이터)으로 바로 간다 */}
           {isIn && (
             <div className="lk-ico-wrap">
               <Link href={PLUS_HREF} className="lk-ico lk-ico-fill" aria-label="등록하기" onClick={shut}>
