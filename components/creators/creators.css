@@ -376,3 +376,10 @@
 .cr .cr-v2-main.media .cr-v2-kind.image { color: #a9bcaf; }
 .cr .cr-v2-main.media .cr-v2-kind.video { color: #a3c8cd; }
 .cr .cr-v2-main.media .cr-v2-title { z-index: 2; }
+/* 이미지·영상 넘기기 화살표(‹ ›): 평소엔 숨기고 마우스를 올리거나 키보드로 들어왔을 때만 보인다. 마우스가 없는 화면(휴대폰)은 화살표 없이 밀어서 넘긴다(2026-11-13) */
+.cr .cr-media-nav { opacity: 0; pointer-events: none; transition: opacity .15s; }
+@media (hover: hover) {
+  .cr .cr-media:hover .cr-media-nav, .cr .cr-media:focus-within .cr-media-nav { opacity: 1; pointer-events: auto; }
+}
+@media (hover: none) { .cr .cr-media-nav { display: none; } }
+@media (prefers-reduced-motion: reduce) { .cr .cr-media-nav { transition: none; } }
