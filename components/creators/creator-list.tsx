@@ -3,7 +3,6 @@ import { ROLES } from "@/lib/collab";
 import { activeCount, hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
 import { GENRES } from "./genres";
 import { BlurVideo } from "./blur-video";
-import { MediaTitle } from "./media-title";
 import { RoleTags } from "./role-tags";
 import { FORM_LABEL, type CreatorCard, type WorkForm } from "./types";
 import "./creators.css";
@@ -180,7 +179,6 @@ export function CreatorList({
                   // 탐색 카드(2026-11-13 시안 card11): 프로필 동그라미 없음, 협업 신청은 오른쪽 위 아이콘 버튼,
                   // 대표 콘텐츠는 좌우 끝까지 채운 칸(로그라인도 같은 높이) 왼쪽 위에 종류 글자(굵은 색 글자), 장르는 #글자.
                   const kindLabel = c.main === "media" ? c.mainSub : "로그라인";
-                  const kindTone = c.main === "media" ? (c.mainKind === "video" ? "video" : "image") : "logline";
                   return (
                   <li key={c.handle}>
                     <div className="panel cr-card cr-card-v2">
@@ -214,12 +212,23 @@ export function CreatorList({
                             )
                           ) : (
                             <div className="cr-box">
-                              <h3 className="cr-box-title">{c.latest.title}</h3>
+                              {/* 제목 · 종류를 한 줄로(밝은 칸이라 바탕 없음) */}
+                              <p className="cr-v2-cap plain">
+                                <span className="cr-v2-cap-t">{c.latest.title}</span>
+                                <span className="cr-v2-cap-dot" aria-hidden="true">·</span>
+                                <span className="cr-v2-cap-k">로그라인</span>
+                              </p>
                               <p className="cr-box-logline">{c.latest.logline}</p>
                             </div>
                           )}
-                          {c.main === "media" && c.latest.title && (c.heroSrc && c.hero ? <MediaTitle src={c.heroSrc} kind={c.hero} title={c.latest.title} /> : <span className="cr-v2-title">{c.latest.title}</span>)}
-                          {kindLabel && <span className={`cr-v2-kind ${kindTone}`}>{kindLabel}</span>}
+                          {/* 그림·영상 위: 제목 · 종류를 한 줄로, 그 줄 뒤에만 반투명한 어두운 둥근 바탕(2026-11-13 아키텍터 참고 그림) */}
+                          {c.main === "media" && (c.latest.title || kindLabel) && (
+                            <p className="cr-v2-cap">
+                              {c.latest.title && <span className="cr-v2-cap-t">{c.latest.title}</span>}
+                              {c.latest.title && kindLabel && <span className="cr-v2-cap-dot" aria-hidden="true">·</span>}
+                              {kindLabel && <span className="cr-v2-cap-k">{kindLabel}</span>}
+                            </p>
+                          )}
                         </div>
                         {c.latest.genres && c.latest.genres.length > 0 && (
                           <ul className="cr-genres cr-genres-hash" aria-label="장르">

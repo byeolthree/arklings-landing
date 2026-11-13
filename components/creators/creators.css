@@ -425,3 +425,13 @@
 .cr .cr-v2-main.media .cr-v2-title.on-dark { color: #fff; text-shadow: 0 0 5px rgba(0,0,0,.8), 0 0 5px rgba(0,0,0,.8); }
 /* 작품 제목은 모두 세리프체(로그라인 카드 제목과 같은 Noto Serif, 2026-11-13) */
 .cr .cr-v2-title, .cr .cr-work-title, .cr .cr-win-title { font-family: var(--font-noto-serif), serif; font-weight: 700; }
+/* 탐색 카드 대표 콘텐츠: 「제목 · 종류」 한 줄(2026-11-13). 그림·영상 위에서는 그 줄 뒤에만 반투명한 어두운 둥근 바탕(뒤가 살짝 비치는 흐림) */
+.cr .cr-v2-cap { position: absolute; left: 16px; bottom: 14px; z-index: 2; display: inline-flex; align-items: baseline; gap: 8px; max-width: calc(100% - 32px); margin: 0; padding: 7px 16px; border-radius: 999px; background: rgba(42,32,37,.42); -webkit-backdrop-filter: blur(10px) saturate(1.2); backdrop-filter: blur(10px) saturate(1.2); color: #fff; }
+.cr .cr-v2-cap-t { font-family: var(--font-noto-serif), serif; font-size: 16px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cr .cr-v2-cap-dot { color: rgba(255,255,255,.6); font-size: 13px; }
+.cr .cr-v2-cap-k { font-size: 13px; font-weight: 700; color: #a3c8cd; white-space: nowrap; }
+.cr .cr-v2-cap.plain { position: static; padding: 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; margin-bottom: 8px; }
+.cr .cr-v2-cap.plain .cr-v2-cap-t { color: var(--title); }
+.cr .cr-v2-cap.plain .cr-v2-cap-dot { color: var(--line); }
+.cr .cr-v2-cap.plain .cr-v2-cap-k { color: var(--teal); }
+.cr .cr-v2-main .cr-box { padding-top: 18px; }
