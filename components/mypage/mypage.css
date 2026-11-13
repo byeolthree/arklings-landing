@@ -211,7 +211,7 @@
 .mp .we-by { margin-top: 6px; font-size: 13px; color: var(--body); }
 .mp .we-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 12px; }
 .mp .we-pick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.mp .we-pick.we-sub { flex-wrap: nowrap; gap: 6px; }
+.mp .we-pick.we-sub { flex-wrap: wrap; gap: 6px; }
 .mp .we-pick .opt { padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--body); font: inherit; font-size: 13px; cursor: pointer; }
 .mp .we-pick.we-sub .opt { flex: 0 0 auto; white-space: nowrap; padding: 4px 10px; }
 .mp .we-pick .opt[aria-pressed="true"] { background: var(--body); border-color: var(--body); color: #fff; }
