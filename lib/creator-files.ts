@@ -131,7 +131,9 @@ export async function inspectUploadedHero(userId: string, path: string, expect: 
 
 // 본인 표식이 붙은 파일만 지운다. 못 지운 것은 조용히 남는다(다음 정리에서 처리).
 export async function removeOwnFiles(userId: string, paths: readonly (string | null | undefined)[]): Promise<void> {
-  const own = Array.from(new Set(paths.filter((p): p is string => Boolean(p) && fileBelongsTo(userId, p as string))));
+  const given = Array.from(new Set(paths.filter((p): p is string => Boolean(p))));
+  const own = given.filter((p) => fileBelongsTo(userId, p));
+  if (own.length !== given.length) console.error("[signOwn] 본인 표식이 맞지 않은 파일:", given.filter((p) => !own.includes(p)));
   if (own.length === 0) return;
   try {
     await createAdminClient().storage.from(CREATOR_BUCKET).remove(own);
@@ -144,8 +146,12 @@ export async function removeOwnFiles(userId: string, paths: readonly (string | n
 async function sign(paths: string[]): Promise<Map<string, string>> {
   const out = new Map<string, string>();
   if (paths.length === 0) return out;
-  const { data } = await createAdminClient().storage.from(CREATOR_BUCKET).createSignedUrls(paths, SIGNED_URL_SECONDS);
-  for (const row of data ?? []) if (row.path && row.signedUrl && !row.error) out.set(row.path, row.signedUrl);
+  const { data, error } = await createAdminClient().storage.from(CREATOR_BUCKET).createSignedUrls(paths, SIGNED_URL_SECONDS);
+  if (error) console.error("[sign] 호출 실패:", error.message);
+  for (const row of data ?? []) {
+    if (row.path && row.signedUrl && !row.error) out.set(row.path, row.signedUrl);
+    else console.error("[sign] 주소 못 만듦:", row.path, row.error);
+  }
   return out;
 }
 

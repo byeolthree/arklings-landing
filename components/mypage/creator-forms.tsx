@@ -792,7 +792,7 @@ export function WorkEditor({
   const [slotFold, setSlotFold] = useState<Record<string, boolean>>({});
   const titleRef = useRef<HTMLInputElement>(null);
   // 새 작품: 승인 샘플처럼 글·이미지·영상·문서 칸이 처음부터 있고 순서를 바꾸거나 지울 수 있다. 「저장」을 누르면 작품을 만든 뒤 채운 칸을 이 순서대로 넣는다.
-  const [slots, setSlots] = useState<Slot[]>(() => (work ? [] : (["video", "logline", "text", "image"] as SlotKind[]).map(newSlot)));
+  const [slots, setSlots] = useState<Slot[]>(() => (work ? [] : (["logline", "text", "video", "image"] as SlotKind[]).map(newSlot)));
   const dragSlot = useRef<string | null>(null);
   const moveSlotTo = (id: string, to: number) => setSlots((cur) => {
     const from = cur.findIndex((x) => x.id === id);
@@ -1236,6 +1236,12 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
                 {loglineErr && <AlertPopup key={loglineErr}>{loglineErr}</AlertPopup>}
               </label>
             )}
+            {b && (
+              <button type="button" className="we-fold" aria-expanded={!folded[b.id]} onClick={() => setFolded({ ...folded, [b.id]: !folded[b.id] })}>
+                {folded[b.id] ? "▸ 펼치기" : "▾ 접기"}
+              </button>
+            )}
+            {b && <ElementName kind={b.kind === "document" ? "text" : b.kind} />}
             {b && (b.kind === "video" || b.kind === "text" || b.kind === "document") && (
               <SubChips
                 items={b.kind === "video" ? VIDEO_SUBKINDS : DOC_SUBKINDS}
@@ -1245,12 +1251,6 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
                 onPick={(v) => void run(() => setBlockSubKind(b.id, v || null))}
               />
             )}
-            {b && (
-              <button type="button" className="we-fold" aria-expanded={!folded[b.id]} onClick={() => setFolded({ ...folded, [b.id]: !folded[b.id] })}>
-                {folded[b.id] ? "▸ 펼치기" : "▾ 접기"}
-              </button>
-            )}
-            {b && <ElementName kind={b.kind === "document" ? "text" : b.kind} />}
             {b && b.kind === "text" && !folded[b.id] && (
               <>
                 <textarea className="we-text" rows={3} aria-label="문서" value={edits[b.id] ?? b.body} onChange={(e) => setEdits({ ...edits, [b.id]: e.target.value })} />
