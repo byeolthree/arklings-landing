@@ -140,7 +140,7 @@
 /* 포트폴리오 등록 구역: 접은 목록(시안 02·07). 맨 윗줄이 접힌 등록 화면이고, 줄마다 손잡이·제목·대표·역할·장르·수정일·공개 스위치·수정·삭제 */
 .mp .pf { display: grid; gap: 12px; }
 .mp .pf-count { display: flex; flex-wrap: wrap; gap: 4px 20px; padding: 0 4px 8px; font-size: 14px; color: var(--title); font-weight: 500; }
-.mp .pf-head, .mp .pf-row { display: grid; align-items: center; gap: 12px; grid-template-columns: 20px minmax(0, 3fr) minmax(0, 1fr) minmax(0, 0.8fr) 118px auto; }
+.mp .pf-head, .mp .pf-row { display: grid; align-items: center; gap: 12px; grid-template-columns: 20px minmax(0, 3fr) minmax(0, 1fr) minmax(0, 0.8fr) 118px 128px; }
 .mp .pf-head { padding: 0 20px; font-size: 13px; color: var(--title); }
 .mp .pf-head-end { grid-column: 5 / 7; text-align: right; }
 .mp .pf-new, .mp .pf-row { padding: 18px 20px; border-radius: 16px; background: #fff; border: 1px solid var(--line); box-shadow: 0 10px 24px -20px rgba(42,32,37,.35); }
