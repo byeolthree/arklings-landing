@@ -73,7 +73,7 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId, openNew
   return (
     <>
     {current === "new" && (
-      <div className="rg-grid rg-list rg-newbar">
+      <div className="rg-grid rg-list">
         <h2 className="rg-list-title">포트폴리오 등록</h2>
       </div>
     )}

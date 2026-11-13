@@ -84,7 +84,9 @@
 @media (min-width: 768px) { .rg .rg-steps { margin-top: 24px; } }
 .rg .rg-steps li { box-sizing: border-box; height: 28px; padding: 0 11px; line-height: 26px; font-size: 12px; }
 .rg .rg-steps li a { margin: 0 -11px; padding: 0 11px; }
-.rg .rg-steps li:not([aria-current="step"]), .rg .rg-steps li:not([aria-current="step"]) a { color: #9a9094; }
+/* 지금 화면이 아닌 탭도 잘 보이게 본문색 외곽선·굵은 글자(2026-11-13) */
+.rg .rg-steps li:not([aria-current="step"]) { border-color: var(--body); font-weight: 700; }
+.rg .rg-steps li:not([aria-current="step"]), .rg .rg-steps li:not([aria-current="step"]) a { color: var(--body); }
 
 /* 아래 바탕은 흰색, 왼쪽 카드는 #faf7f8·테두리 1px·모서리 28, 안쪽 여백 36(위 32) */
 @media (min-width: 1024px) { .rg .rg-main .rg-wrap { max-width: 1440px; padding: 0 80px; } }
@@ -284,7 +286,6 @@
 
 .rg .we-main.we-card .we-text.we-doc-text, .rg .we-text.we-doc-text { background: #fff; }
 
-.rg .we-imgbox { display: flex; align-items: center; justify-content: center; }
 .rg .we-imgempty .btn { height: 28px; min-height: 28px; padding: 0 14px; border-width: 1px; border-radius: 8px; font-size: 13px; }
 
 /* 화면을 줄여 카드가 아래로 내려가는 폭에서는 「포트폴리오 화면에 보일 카드」를 감춘다 */
@@ -292,7 +293,6 @@
 
 /* 고른 태그만 색이 보인다(2026-11-13). 장르는 딥 앰버 외곽선·글자, 종류 태그는 채우기·흰 글자: 영상 소프트 틸, 문서 딥 슬레이트 블루, 이미지 뮤트 세이지 */
 .rg .we-pick.we-genre .opt[aria-pressed="true"] { background: #fff; border-color: #a96e16; color: #a96e16; }
-.rg .we-main .we-pick.we-sub .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub .opt[aria-pressed="true"] { background: #fff; }
 .rg .we-main .we-pick.we-sub.tone-video .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub.tone-video .opt[aria-pressed="true"] { background: #6e9ca3; border-color: #6e9ca3; color: #fff; }
 .rg .we-main .we-pick.we-sub.tone-doc .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub.tone-doc .opt[aria-pressed="true"] { background: #40576f; border-color: #40576f; color: #fff; }
 .rg .we-main .we-pick.we-sub.tone-image .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub.tone-image .opt[aria-pressed="true"] { background: #6f8a7a; border-color: #6f8a7a; color: #fff; }
@@ -304,7 +304,7 @@
 .rg .we-add .btn.btn-ghost.we-add-video { background: #6e9ca3; border-color: #6e9ca3; color: #fff; }
 
 /* 이미지 프레임: 비어 있을 때는 문서·영상 첨부 칸과 같은 높이, 이미지를 고르면 그 이미지 크기만큼(2026-11-13) */
-.rg .we-imgbox { min-height: 0; height: auto; aspect-ratio: auto; padding: 11px 14px 12px; }
+.rg .we-imgbox { display: flex; align-items: center; justify-content: center; min-height: 0; height: auto; aspect-ratio: auto; padding: 11px 14px 12px; }
 .rg .we-imgbox:has(.we-imgchange) { padding: 0; }
 .rg .we-imgbox .we-imgempty { gap: 6px; }
 .rg .we-imgbox .we-imgchange img { display: block; width: 100%; height: auto; max-height: none; object-fit: contain; }
@@ -312,13 +312,7 @@
 .rg .we-fit > span { margin-right: 4px; }
 .rg .we-fit .opt { height: 28px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--body); font: inherit; font-size: 13px; cursor: pointer; }
 .rg .we-fit .opt[aria-pressed="true"] { background: var(--body); border-color: var(--body); color: #fff; font-weight: 700; }
-/* 마이 페이지 탭: 지금 화면이 아닌 탭도 잘 보이게 본문색 외곽선과 굵은 글자(2026-11-13 아키텍터 지시) */
-.rg .rg-steps li:not([aria-current="step"]) { border-color: var(--body); font-weight: 700; }
-.rg .rg-steps li:not([aria-current="step"]), .rg .rg-steps li:not([aria-current="step"]) a { color: var(--body); }
-/* 새 등록을 펼쳤을 때 위에 놓는 「새 포트폴리오 등록」 바(목록 화면과 같은 자리) */
-.rg .rg-newbar { margin-bottom: 0; }
-.rg .rg-newbar-in { margin-bottom: 20px; }
-/* 펼친 상태의 바는 접기 버튼일 뿐이라 외곽선, 오른쪽 「등록 화면 접기」만. 크기·자리는 목록 화면의 바와 같다 */
+/* 새 등록을 펼친 상태의 바: 접기 버튼일 뿐이라 외곽선, 오른쪽 「등록 화면 접기」만. 크기·자리는 목록 화면의 바와 같다 */
 .rg .rg-newbar-in { margin: 2px 8px 20px; }
 .rg .rg-newbar-in .pf-new.is-open { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; justify-content: flex-end; background: #fff; border: 1.5px solid var(--jaju); color: var(--jaju); box-shadow: none; }
 .rg .rg-newbar-in .pf-new.is-open .pf-new-fold { color: var(--jaju); }
