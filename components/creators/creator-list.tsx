@@ -3,7 +3,6 @@ import { ROLES } from "@/lib/collab";
 import { activeCount, FORMATS, hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
 import { GENRES } from "./genres";
 import { BlurVideo } from "./blur-video";
-import { FormatTags } from "./format-tags";
 import { RoleTags } from "./role-tags";
 import { FORM_LABEL, type CreatorCard, type WorkForm } from "./types";
 import "./creators.css";
@@ -202,7 +201,6 @@ export function CreatorList({
                         )}
                       </div>
                       <Link href={profileHref(c.handle)} className="cr-card-main">
-                        <FormatTags formats={c.formats} />
                         <RoleTags roles={c.roles} lead />
                         <div className={`cr-v2-main ${c.main}`}>
                           {c.main === "media" && c.hero ? (

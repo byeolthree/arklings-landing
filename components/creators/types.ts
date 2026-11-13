@@ -28,7 +28,6 @@ export type CreatorCard = {
   mainSub?: string; // 카드 대표 콘텐츠의 종류 태그(포스터·티저 등). 메인이 이미지·영상일 때만
   mainKind?: "image" | "video"; // 대표 콘텐츠 요소가 이미지인지 영상인지(종류 글자 색)
   docLabel?: string; // 대표가 글·문서일 때 종류 글자(시놉시스 등)
-  formats?: import("@/lib/creator-cards").Format[]; // 등록한 포맷 전부(작품 안 순서)
   docText?: string; // 대표가 글·문서일 때 카드에 보일 글 앞부분
   main: "logline" | "media"; // 카드의 메인: 작품의 대표가 이미지·영상이면 media, 아니면 logline(문서는 docLabel로)
 };
