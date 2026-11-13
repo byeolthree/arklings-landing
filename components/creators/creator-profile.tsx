@@ -138,6 +138,8 @@ export function CreatorProfile({
                 </ul>
               )}
             </div>
+            {/* 남의 프로필: 주인 버튼 자리에 협업 신청 아이콘 버튼의 자리를 둔다(버튼은 CollabFab이 이 자리에 맞춰 화면에 고정해 띄운다) */}
+            {!owner && creator.openToCollab && showApply && applyHref && <span className="cr-fab-slot" aria-hidden="true" />}
             {owner && (
               <div className="cr-owner-btns">
                 <Link href={owner.editHref} className="btn btn-ghost">
