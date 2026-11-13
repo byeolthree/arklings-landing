@@ -185,7 +185,7 @@ export function CreatorList({
                   <li key={c.handle}>
                     <div className="panel cr-card cr-card-v2">
                       <div className="cr-v2-top">
-                        <Link href={profileHref(c.handle)} className="cr-v2-who">
+                        <Link href={profileHref(c.handle)} className="cr-v2-who cr-stretch">
                           <span className="cr-name">{c.name}</span>
                           {c.bio && <span className="cr-bio">{c.bio}</span>}
                         </Link>

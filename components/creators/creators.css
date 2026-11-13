@@ -395,3 +395,7 @@
 /* 닉네임 칸이 이 줄 아래쪽을 덮어 글자 일부가 안 눌리던 문제: 줄을 닉네임 위로 올려 글자·아이콘 어디를 눌러도 신청으로 간다 */
 .cr .cr-hero-body > .cr-open-go { position: relative; z-index: 2; padding: 4px 0; }
 .cr .cr-fab-slot { flex: none; width: 44px; height: 44px; }
+/* 탐색 카드: 협업 신청 아이콘을 뺀 카드 어디를 눌러도 크리에이터 상세로 간다(이름 링크를 카드 전체로 넓힌다) */
+.cr .cr-card-v2 { position: relative; }
+.cr .cr-card-v2 .cr-stretch::after { content: ""; position: absolute; inset: 0; z-index: 3; }
+.cr .cr-card-v2 .cr-ask { position: relative; z-index: 4; }
