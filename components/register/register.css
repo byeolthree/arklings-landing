@@ -315,3 +315,5 @@
 /* 마이 페이지 탭: 지금 화면이 아닌 탭도 잘 보이게 본문색 외곽선과 굵은 글자(2026-11-13 아키텍터 지시) */
 .rg .rg-steps li:not([aria-current="step"]) { border-color: var(--body); font-weight: 700; }
 .rg .rg-steps li:not([aria-current="step"]), .rg .rg-steps li:not([aria-current="step"]) a { color: var(--body); }
+/* 새 등록을 펼쳤을 때 위에 놓는 「새 포트폴리오 등록」 바(목록 화면과 같은 자리) */
+.rg .rg-newbar { margin-bottom: 24px; }

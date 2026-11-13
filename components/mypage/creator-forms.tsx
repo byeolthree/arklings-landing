@@ -995,16 +995,10 @@ export function WorkEditor({
           {shownPublic ? "공개 중" : "비공개"}
         </button>
         <span className="we-top-btns" style={{ justifySelf: "end" }}>
-          {work ? (
+          {work && (
             <button type="button" className="btn btn-ghost we-close" onClick={onClose}>
               접기 ▴
             </button>
-          ) : (
-            onClose && (
-              <button type="button" className="btn btn-ghost we-close" onClick={onClose}>
-                등록 화면 접기 ▴
-              </button>
-            )
           )}
         </span>
       </div>
