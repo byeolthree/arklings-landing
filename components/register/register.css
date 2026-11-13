@@ -312,3 +312,6 @@
 .rg .we-fit > span { margin-right: 4px; }
 .rg .we-fit .opt { height: 28px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--body); font: inherit; font-size: 13px; cursor: pointer; }
 .rg .we-fit .opt[aria-pressed="true"] { background: var(--body); border-color: var(--body); color: #fff; font-weight: 700; }
+/* 마이 페이지 탭: 지금 화면이 아닌 탭도 잘 보이게 본문색 외곽선과 굵은 글자(2026-11-13 아키텍터 지시) */
+.rg .rg-steps li:not([aria-current="step"]) { border-color: var(--body); font-weight: 700; }
+.rg .rg-steps li:not([aria-current="step"]), .rg .rg-steps li:not([aria-current="step"]) a { color: var(--body); }
