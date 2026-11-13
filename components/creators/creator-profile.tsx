@@ -11,10 +11,20 @@ const iconProps = { width: 18, height: 18, viewBox: "0 0 24 24", "aria-hidden": 
 function ChannelLogo({ label }: { label: string }) {
   if (/인스타|instagram/i.test(label))
     return (
-      <svg {...iconProps} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      // 인스타그램 브랜드 색(노랑→주황→분홍→보라→파랑 그라데이션). 유튜브 로고처럼 브랜드 색을 그대로 쓴다.
+      <svg {...iconProps} fill="none" stroke="url(#cr-ig-grad)" strokeWidth="1.8" strokeLinecap="round">
+        <defs>
+          <linearGradient id="cr-ig-grad" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0" stopColor="#feda75" />
+            <stop offset="0.3" stopColor="#fa7e1e" />
+            <stop offset="0.55" stopColor="#d62976" />
+            <stop offset="0.8" stopColor="#962fbf" />
+            <stop offset="1" stopColor="#4f5bd5" />
+          </linearGradient>
+        </defs>
         <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
         <circle cx="12" cy="12" r="4" />
-        <circle cx="17.2" cy="6.8" r="0.8" fill="currentColor" stroke="none" />
+        <circle cx="17.2" cy="6.8" r="0.8" fill="#d62976" stroke="none" />
       </svg>
     );
   if (/유튜브|youtube/i.test(label))
