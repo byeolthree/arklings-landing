@@ -2,7 +2,7 @@
 // DB의 공개용 보기(view) 4개(creators_public, creator_channels_public, creator_works_public, creator_blocks_public)에서만 읽고,
 // 로그인 없는 연결(lib/supabase.ts)을 쓴다. 보기에는 공개 프로필의 공개 작품만 있고 주인 번호(UUID)·이메일은 한 칸도 없다.
 // 화면으로 넘기는 값에도 싣지 않는다. 파일은 비공개 보관함에 있어서, 공개용 보기에 올라와 있는 것만 짧은 임시 주소로 바꿔 준다(lib/creator-files.ts).
-import { orderItems } from "@/lib/creator-cards";
+import { orderItems, repOf, type Rep } from "@/lib/creator-cards";
 import type { Role } from "@/lib/collab";
 import { isRole, LOGLINE_TOKEN } from "@/lib/creator-rules";
 import { signPublicFiles } from "@/lib/creator-files";
@@ -57,6 +57,7 @@ export type WorkListItem = {
   kind: string | null;
   form: WorkForm | null;
   publishedAt: string; // 처음 올린 시각(ISO)
+  loglinePosition?: number; // 로그라인 앞에 있는 요소 개수(대표를 정할 때 쓴다)
 };
 
 export type WorkBlock =
@@ -101,8 +102,9 @@ type WorkRow = {
   form: string | null;
   logline: string;
   published_at: string;
+  logline_position?: number | null;
 };
-const WORK_COLUMNS = "id, author_handle, author_name, title, roles, genres, kind, form, logline, published_at";
+const WORK_COLUMNS = "id, author_handle, author_name, title, roles, genres, kind, form, logline, published_at, logline_position";
 
 type BlockRow = {
   id: string;
@@ -266,7 +268,8 @@ async function loadCovers(handles: string[], featured: Map<string, FeaturedWork>
   for (const [handle, w] of latest) {
     const top = orderItems(byWork.get(w.id) ?? [], w.loglinePosition)[0];
     if (top !== LOGLINE_TOKEN && (top.kind === "image" || top.kind === "video")) topByWork.set(w.id, top);
-    else if (top !== LOGLINE_TOKEN && (top.kind === "text" || top.kind === "document")) docs.set(handle, { label: top.sub_kind || "문서", text: (top.body ?? "").trim() || (top.file_name ?? "") });
+    const r = repOf((byWork.get(w.id) ?? []).map((b) => ({ kind: b.kind, sub: b.sub_kind, body: b.body, fileName: b.file_name })), w.loglinePosition);
+    if (r.kind === "doc") docs.set(handle, { label: r.label, text: r.text });
   }
   const urls = await signPublicFiles(Array.from(topByWork.values()).map((b) => b.file_path));
   for (const [handle, w] of latest) {
@@ -322,6 +325,7 @@ const toWorkItem = (r: WorkRow): WorkListItem => ({
   kind: r.kind,
   form: asForm(r.form),
   publishedAt: r.published_at,
+  loglinePosition: Math.max(0, r.logline_position ?? 0),
 });
 
 // 그 크리에이터가 올린 작품(최대 12개라 쪽 나눔 없음). 처음 올린 순서의 최근 것 먼저.
@@ -396,6 +400,25 @@ export async function loadWorkMedia(workIds: string[]): Promise<Map<string, Work
     else if (b.kind === "image" && b.file_path && urls.get(b.file_path)) list.push({ kind: "image", src: urls.get(b.file_path) as string });
     out.set(b.work_id, list);
   }
+  return out;
+}
+
+// 공개 작품마다 대표(맨 위)를 repOf 규칙으로 정한다(크리에이터 상세의 작품 줄).
+export async function loadWorkReps(works: { id: string; loglinePosition?: number }[]): Promise<Map<string, Rep>> {
+  const out = new Map<string, Rep>();
+  const ws = works.filter((w) => UUID_QUERY.test(w.id)).slice(0, 12);
+  if (ws.length === 0) return out;
+  const { data, error } = await getSupabase()
+    .from("creator_blocks_public")
+    .select("work_id, kind, body, file_name, sub_kind, position")
+    .in("work_id", ws.map((w) => w.id))
+    .order("position", { ascending: true })
+    .order("id", { ascending: true });
+  if (error) return out;
+  type R = { work_id: string; kind: string; body: string | null; file_name: string | null; sub_kind: string | null };
+  const by = new Map<string, R[]>();
+  for (const b of (data ?? []) as R[]) by.set(b.work_id, [...(by.get(b.work_id) ?? []), b]);
+  for (const w of ws) out.set(w.id, repOf((by.get(w.id) ?? []).map((b) => ({ kind: b.kind, sub: b.sub_kind, body: b.body, fileName: b.file_name })), w.loglinePosition ?? 0));
   return out;
 }
 

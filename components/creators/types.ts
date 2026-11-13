@@ -55,6 +55,7 @@ export type WorkCard = {
   form: WorkForm | null;
   publishedAt: string;
   slides?: string[]; // 카드에 걸 대표 이미지·영상 자리(안 주면 샘플 자리 표시, 빈 목록이면 안 보임)
+  rep?: { kind: "logline" } | { kind: "doc"; label: string; text: string } | { kind: "image" | "video"; sub?: string }; // 작품의 대표(lib/creator-cards repOf)
   media?: ({ kind: "image"; src: string } | { kind: "video"; youtubeId: string } | { kind: "file-video"; src: string })[]; // 실제 대표 이미지·영상(작품 안 이미지·영상 요소 순서대로). 없으면 자리 표시
   isPublic?: boolean; // 주인이 자기 프로필을 볼 때만 쓴다(비공개 작품은 흐리게). 남이 보는 화면에는 공개한 작품만 온다
 };

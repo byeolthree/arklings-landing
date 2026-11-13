@@ -95,7 +95,9 @@ function Band({ work, roles, href, owner, tone, onGrip }: { work: WorkCard; role
     router.refresh();
   }
 
-  const hasMedia = (work.media?.length ?? 0) > 0;
+  // 왼쪽 카드는 작품의 대표를 따른다: 이미지·영상이면 그것, 글·문서면 문서 카드, 로그라인이면 로그라인 카드.
+  const rep = work.rep;
+  const hasMedia = (work.media?.length ?? 0) > 0 && (!rep || rep.kind === "image" || rep.kind === "video");
   return (
     <section className={`cr-band ${tone}${off ? " off" : ""}`} aria-labelledby={`cr-band-${work.id}`}>
       <div className="wrap">
@@ -105,8 +107,8 @@ function Band({ work, roles, href, owner, tone, onGrip }: { work: WorkCard; role
           ) : (
             // 이미지·영상이 없는 작품: 같은 자리·같은 크기의 카드에 로그라인을 넣는다(제목·태그는 오른쪽, 2026-11-13)
             <Link href={href} className="cr-band-logcard">
-              <span className="cr-band-logcard-k">로그라인</span>
-              <span className="cr-band-logcard-t">{work.logline}</span>
+              <span className="cr-band-logcard-k">{rep?.kind === "doc" ? rep.label : "로그라인"}</span>
+              <span className="cr-band-logcard-t">{rep?.kind === "doc" ? rep.text : work.logline}</span>
             </Link>
           )}
           <div className="cr-band-body">
@@ -150,7 +152,7 @@ function Band({ work, roles, href, owner, tone, onGrip }: { work: WorkCard; role
                 {err}
               </p>
             )}
-            {hasMedia && <p className="cr-band-log">{work.logline}</p>}
+            {(hasMedia || rep?.kind === "doc") && <p className="cr-band-log">{work.logline}</p>}
             <div className="cr-band-foot">
               {work.kind && <p className="cr-kind">{work.kind}</p>}
               <div className="cr-band-tags">
