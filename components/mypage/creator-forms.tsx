@@ -87,6 +87,23 @@ function DocFilePick({ file, onFile, disabled }: { file?: File | null; onFile: (
   );
 }
 
+// 접어도 어떤 요소인지 알 수 있도록 요소 이름(굵게)과 받는 형식(보통 굵기)을 늘 보여 준다.
+const ELEMENT_NAME: Record<"logline" | "video" | "image" | "text", { name: string; note?: string }> = {
+  logline: { name: "로그라인", note: "(이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)" },
+  video: { name: "영상", note: "(MP4, 10MB 이하)" },
+  image: { name: "이미지", note: "(JPG · PNG · WEBP, 5MB 이하)" },
+  text: { name: "문서", note: "(PDF, 10MB 이하)" },
+};
+function ElementName({ kind }: { kind: "logline" | "video" | "image" | "text" }) {
+  const e = ELEMENT_NAME[kind];
+  return (
+    <span className="we-name">
+      {e.name}
+      {e.note && <span> {e.note}</span>}
+    </span>
+  );
+}
+
 // 시안 01: 이미지 요소 = 「▾ 접기 · 이미지 (JPG·PNG·WEBP, 5MB 이하)」 줄 + 이미지가 들어갈 큰 칸(눌러서 고른다).
 function ImageSlotBox({ file, onFile, defaultFold = false }: { file: File | null; onFile: (f: File | null) => void; defaultFold?: boolean }) {
   const [fold, setFold] = useState(defaultFold);
@@ -114,7 +131,7 @@ function ImageSlotBox({ file, onFile, defaultFold = false }: { file: File | null
         <button type="button" className="we-fold" aria-expanded={!fold} onClick={() => setFold(!fold)}>
           {fold ? "▸ 펼치기" : "▾ 접기"}
         </button>
-        <span className="mp-note">· 이미지 (JPG · PNG · WEBP, 5MB 이하)</span>
+        <ElementName kind="image" />
       </div>
       {!fold && (
         <button type="button" className="we-media we-imgbox" onClick={() => ref.current?.click()} aria-label="이미지 고르기">
@@ -1031,10 +1048,10 @@ export function WorkEditor({
                       {slotFold[sl.id] ? "▸ 펼치기" : "▾ 접기"}
                     </button>
                   )}
+                  {sl.kind !== "image" && <ElementName kind={sl.kind} />}
                   {sl.kind === "logline" && !slotFold[sl.id] && (
                     <label className="we-logline-label">
-                      <span className="we-label">로그라인 <span style={{ fontWeight: 400 }}>(이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)</span></span>
-                      <textarea className="we-text" rows={3} value={logline} onChange={(e) => setLogline(e.target.value)} placeholder={LOGLINE_FRAME} aria-invalid={errs.logline ? true : undefined} />
+                      <textarea className="we-text" aria-label="로그라인" rows={3} value={logline} onChange={(e) => setLogline(e.target.value)} placeholder={LOGLINE_FRAME} aria-invalid={errs.logline ? true : undefined} />
                       {errs.logline && <AlertPopup key={errs.logline}>{errs.logline}</AlertPopup>}
                     </label>
                   )}
@@ -1217,10 +1234,10 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
                 {folded.logline ? "▸ 펼치기" : "▾ 접기"}
               </button>
             )}
+            {!b && <ElementName kind="logline" />}
             {!b && !folded.logline && (
               <label className="we-logline-label">
-                <span className="we-label">로그라인 <span style={{ fontWeight: 400 }}>(이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)</span></span>
-                <textarea className="we-text" rows={3} value={logline} onChange={(e) => onLogline(e.target.value)} placeholder={LOGLINE_FRAME} aria-invalid={loglineErr ? true : undefined} />
+                <textarea className="we-text" aria-label="로그라인" rows={3} value={logline} onChange={(e) => onLogline(e.target.value)} placeholder={LOGLINE_FRAME} aria-invalid={loglineErr ? true : undefined} />
                 {loglineErr && <AlertPopup key={loglineErr}>{loglineErr}</AlertPopup>}
               </label>
             )}
@@ -1238,7 +1255,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
                 {folded[b.id] ? "▸ 펼치기" : "▾ 접기"}
               </button>
             )}
-            {b && b.kind === "image" && <span className="mp-note">· 이미지 (JPG · PNG · WEBP, 5MB 이하)</span>}
+            {b && <ElementName kind={b.kind === "document" ? "text" : b.kind} />}
             {b && b.kind === "text" && !folded[b.id] && (
               <>
                 <textarea className="we-text" rows={3} aria-label="문서" value={edits[b.id] ?? b.body} onChange={(e) => setEdits({ ...edits, [b.id]: e.target.value })} />
