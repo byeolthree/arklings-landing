@@ -99,8 +99,16 @@ function Band({ work, roles, href, owner, tone, onGrip }: { work: WorkCard; role
   return (
     <section className={`cr-band ${tone}${off ? " off" : ""}`} aria-labelledby={`cr-band-${work.id}`}>
       <div className="wrap">
-        <div className={`cr-band-in${hasMedia ? "" : " nomedia"}`}>
-          {hasMedia && <WorkMedia href={href} items={work.media} />}
+        <div className="cr-band-in">
+          {hasMedia ? (
+            <WorkMedia href={href} items={work.media} />
+          ) : (
+            // 이미지·영상이 없는 작품: 같은 자리·같은 크기의 카드에 로그라인을 넣는다(제목·태그는 오른쪽, 2026-11-13)
+            <Link href={href} className="cr-band-logcard">
+              <span className="cr-band-logcard-k">로그라인</span>
+              <span className="cr-band-logcard-t">{work.logline}</span>
+            </Link>
+          )}
           <div className="cr-band-body">
             <div className="cr-band-title">
               <h3 id={`cr-band-${work.id}`} className="cr-work-title">
@@ -142,7 +150,7 @@ function Band({ work, roles, href, owner, tone, onGrip }: { work: WorkCard; role
                 {err}
               </p>
             )}
-            <p className="cr-band-log">{work.logline}</p>
+            {hasMedia && <p className="cr-band-log">{work.logline}</p>}
             <div className="cr-band-foot">
               {work.kind && <p className="cr-kind">{work.kind}</p>}
               <div className="cr-band-tags">

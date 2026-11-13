@@ -62,6 +62,7 @@ export function toCreatorCard(c: CreatorListItem): CreatorCard {
     main: media ? "media" : "logline",
     mainSub: media ? c.coverSub : undefined,
     mainFit: media ? c.coverFit : undefined,
+    workId: c.workId,
     mainKind: media ? c.coverBlockKind : undefined,
   };
 }

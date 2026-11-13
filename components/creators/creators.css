@@ -440,3 +440,7 @@
 .cr .cr-v2-cap:not(.plain) .cr-v2-cap-k { color: var(--teal); }
 /* 그림·영상 위 줄의 종류 글자는 연한 분홍(배경색 계열, 2026-11-13) */
 .cr .cr-v2-cap:not(.plain) .cr-v2-cap-k { color: var(--tint); }
+/* 이미지·영상 없는 작품 줄: 왼쪽에 이미지·영상과 같은 크기의 로그라인 카드, 제목·태그는 오른쪽(2026-11-13) */
+.cr .cr-band-logcard { display: flex; flex-direction: column; gap: 8px; aspect-ratio: 16 / 9; box-sizing: border-box; padding: 20px 22px; border-radius: 12px; background: #fff; color: var(--title); text-decoration: none; overflow: hidden; }
+.cr .cr-band-logcard-k { font-size: 13px; font-weight: 700; color: var(--teal); }
+.cr .cr-band-logcard-t { font-size: 15px; line-height: 1.7; color: var(--title); display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }

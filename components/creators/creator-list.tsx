@@ -180,7 +180,7 @@ export function CreatorList({
                   // 대표 콘텐츠는 좌우 끝까지 채운 칸(로그라인도 같은 높이) 왼쪽 위에 종류 글자(굵은 색 글자), 장르는 #글자.
                   const kindLabel = c.main === "media" ? c.mainSub : "로그라인";
                   return (
-                  <li key={c.handle}>
+                  <li key={c.workId ?? c.handle}>
                     <div className="panel cr-card cr-card-v2">
                       <div className="cr-v2-top">
                         <Link href={profileHref(c.handle)} className="cr-v2-who cr-stretch">

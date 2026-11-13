@@ -28,6 +28,7 @@ export type CreatorListItem = {
   hero?: HeroKind;
   heroSrc?: string; // 대표 이미지·영상의 임시 주소
   coverKind?: "image" | "video"; // cover가 그림 주소인지 영상 파일 주소인지(올린 MP4는 영상 그대로 건다)
+  workId?: string; // 탐색 카드 한 장 = 공개 작품 하나(2026-11-13). 그 작품 번호
   coverFit?: "cover" | "contain"; // 대표 이미지를 카드에 꽉 채울지, 여백을 둘지(0027)
   coverSub?: string; // 카드 대표 콘텐츠의 종류 태그(포스터·티저 등). 없으면 비어 있다
   coverBlockKind?: "image" | "video"; // 대표 콘텐츠 요소가 원래 이미지인지 영상인지(유튜브 영상도 video)
@@ -180,22 +181,27 @@ export async function listCreators(filter: CreatorFilterInput, page: number): Pr
   const heroUrls = await signPublicFiles(rows.map((r) => r.hero_path));
   // 대표 이미지·영상을 카드 맨 위에 거는 것은 역할에 영상 제작이나 아트디렉터가 있는 사람만이다(별뜨리님 규칙).
   // 카드에 먼저 보이는 작품은 그 크리에이터가 포트폴리오 등록 목록에서 맨 위에 올려 둔 작품이다(손잡이로 정한 순서).
-  const featured = await loadFeatured(rows.map((r) => r.public_handle));
-  const covers = await loadCovers(rows.filter((r) => asRoles(r.roles).some((x) => x === "video" || x === "art_director")).map((r) => r.public_handle), featured);
+  // 탐색 화면에는 크리에이터가 공개한 작품을 하나씩 모두 카드로 보여 준다(2026-11-13 아키텍터 지시). 작품 순서는 그 사람의 포트폴리오 등록 목록 순서.
+  const allWorks = await loadAllWorks(rows.map((r) => r.public_handle));
+  const visual = new Set(rows.filter((r) => asRoles(r.roles).some((x) => x === "video" || x === "art_director")).map((r) => r.public_handle));
+  const covers = await loadWorkCovers(rows.flatMap((r) => (visual.has(r.public_handle) ? (allWorks.get(r.public_handle) ?? []) : [])));
   return {
-    items: rows.map((r) => {
+    items: rows.flatMap((r) => {
       const base = toListItem(r, heroUrls);
-      const f = featured.get(r.public_handle);
-      return { ...base, latest: f ? { title: f.title, logline: f.logline, genres: f.genres } : base.latest, cover: covers.get(r.public_handle)?.src, coverKind: covers.get(r.public_handle)?.kind, coverSub: covers.get(r.public_handle)?.sub, coverFit: covers.get(r.public_handle)?.fit, coverBlockKind: covers.get(r.public_handle)?.blockKind };
+      const works = allWorks.get(r.public_handle) ?? [];
+      if (works.length === 0) return [base];
+      return works.map((f) => {
+        const cv = covers.get(f.id);
+        return { ...base, workId: f.id, latest: { title: f.title, logline: f.logline, genres: f.genres }, cover: cv?.src, coverKind: cv?.kind, coverSub: cv?.sub, coverFit: cv?.fit, coverBlockKind: cv?.blockKind };
+      });
     }),
     total: count ?? 0,
   };
 }
 
-type FeaturedWork = { id: string; title: string; logline: string; genres: string[]; loglinePosition: number };
-// 크리에이터마다 공개 작품 중 등록 목록의 맨 위 작품(순서 번호가 가장 작은 것, 같으면 최근 공개)을 돌려준다.
-async function loadFeatured(handles: string[]): Promise<Map<string, FeaturedWork>> {
-  const out = new Map<string, FeaturedWork>();
+// 크리에이터마다 공개 작품 전부(등록 목록 순서: 순서 번호가 작은 것부터, 같으면 최근 공개).
+async function loadAllWorks(handles: string[]): Promise<Map<string, FeaturedWork[]>> {
+  const out = new Map<string, FeaturedWork[]>();
   if (handles.length === 0) return out;
   const works = await getSupabase()
     .from("creator_works_public")
@@ -206,11 +212,18 @@ async function loadFeatured(handles: string[]): Promise<Map<string, FeaturedWork
     .order("id", { ascending: false });
   if (works.error) return out;
   type W = { id: string; author_handle: string; title: string; logline: string | null; genres: string[] | null; logline_position: number | null };
-  for (const w of (works.data ?? []) as W[]) {
-    if (!out.has(w.author_handle)) out.set(w.author_handle, { id: w.id, title: w.title, logline: w.logline ?? "", genres: w.genres ?? [], loglinePosition: w.logline_position ?? 0 });
-  }
+  for (const w of (works.data ?? []) as W[]) out.set(w.author_handle, [...(out.get(w.author_handle) ?? []), { id: w.id, title: w.title, logline: w.logline ?? "", genres: w.genres ?? [], loglinePosition: w.logline_position ?? 0 }]);
   return out;
 }
+
+// 작품마다 그 작품의 대표(작품 안 맨 위)가 이미지·영상이면 카드에 걸 그림 주소. loadCovers와 같은 규칙을 작품 번호 기준으로 쓴다.
+async function loadWorkCovers(works: FeaturedWork[]): Promise<Map<string, Cover>> {
+  const byHandle = new Map<string, FeaturedWork>(works.map((w) => [w.id, w]));
+  const per = await loadCovers(Array.from(byHandle.keys()), byHandle);
+  return per;
+}
+
+type FeaturedWork = { id: string; title: string; logline: string; genres: string[]; loglinePosition: number };
 
 // 그 크리에이터들이 카드에 먼저 보이게 정한 작품(등록 목록 맨 위)에서 「대표」(D35-2: 작품 안에서 맨 위에 놓인 것)가 이미지·영상이면 그 그림 주소를 돌려준다.
 // 맨 위가 로그라인이거나 글·문서면 그 사람은 빠진다(카드는 로그라인 모양으로 나온다). 영상은 유튜브라서 유튜브가 주는 대표 그림을 쓴다.
