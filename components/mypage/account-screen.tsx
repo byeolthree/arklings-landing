@@ -20,7 +20,7 @@ export function AccountScreen({ basic, collab }: { basic: React.ReactNode; colla
     <div className="mp">
       <div className="mp-top">
         <div className="wrap">
-          <h1 className="mp-title">마이페이지</h1>
+          <h1 className="mp-title">마이 페이지</h1>
         </div>
       </div>
       <nav className="mp-nav" aria-label="이동">
