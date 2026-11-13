@@ -297,3 +297,4 @@
 .mp .we-main .we-pick.we-sub.tone-video .opt[aria-pressed="true"], .mp .we-main.we-card .we-pick.we-sub.tone-video .opt[aria-pressed="true"] { border-color: #6e9ca3; color: #6e9ca3; }
 .mp .we-main .we-pick.we-sub.tone-doc .opt[aria-pressed="true"], .mp .we-main.we-card .we-pick.we-sub.tone-doc .opt[aria-pressed="true"] { border-color: #40576f; color: #40576f; }
 .mp .we-main .we-pick.we-sub.tone-image .opt[aria-pressed="true"], .mp .we-main.we-card .we-pick.we-sub.tone-image .opt[aria-pressed="true"] { border-color: #4e6658; color: #4e6658; }
+.mp .we-pick.we-genre .opt[aria-pressed="true"], .mp .we-main .we-pick.we-sub .opt[aria-pressed="true"], .mp .we-main.we-card .we-pick.we-sub .opt[aria-pressed="true"] { font-weight: 700; }
