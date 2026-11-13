@@ -559,30 +559,12 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
 
   return (
     <div className="pf" aria-busy={busy || undefined}>
-      <div className="pf-count">
-        <span>
-          작품 {works.length} / {WORK_LIMIT}
-        </span>
-        <span>
-          파일 {mb(usedBytes)} / {mb(QUOTA_BYTES)}
-        </span>
-      </div>
       {!hasProfile && <p className="mp-note">작품을 포트폴리오에 올리려면 먼저 위의 「크리에이터 등록」에서 프로필을 만들어 주세요.</p>}
       {msg && (
         <p role={msg.err ? "alert" : "status"} className={`mp-msg ${msg.err ? "err" : "ok"}`}>
           {msg.text}
         </p>
       )}
-
-      <div className="pf-head" aria-hidden="true">
-        <span />
-        <span>제목</span>
-        <span>대표</span>
-        <span>역할</span>
-        <span>장르</span>
-        <span>수정일</span>
-        <span className="pf-head-end">관리</span>
-      </div>
 
       {/* 맨 윗줄이 접힌 등록 화면이다. 누르면 이 줄 아래로 등록 화면이 펼쳐진다. */}
       <button type="button" className="pf-new" aria-expanded={newOpen} onClick={() => (onOpenNew ? onOpenNew() : setNewOpen((v) => !v))} disabled={!newOpen && works.length >= WORK_LIMIT} title={works.length >= WORK_LIMIT ? `작품은 ${WORK_LIMIT}개까지 만들 수 있어요.` : undefined}>
@@ -609,6 +591,16 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
             setEditing(id);
           }}
         />
+      )}
+
+      {works.length > 0 && (
+        <div className="pf-head" aria-hidden="true">
+          <span />
+          <span>제목</span>
+          <span>대표</span>
+          <span>수정일</span>
+          <span className="pf-head-end">관리</span>
+        </div>
       )}
 
       {works.map((w, i) => (
@@ -645,14 +637,8 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
             <span className="pf-title">{w.title}</span>
             <span className="pf-meta">
               <span className="pf-rep">{representativeOf(w)}</span>
-              <span className="pf-roles">{w.roles.map((x) => ROLES[x]).join(" · ")}</span>
-              <span className="pf-genres">
-                {w.genres.map((g) => (
-                  <span key={g}>{g}</span>
-                ))}
-              </span>
             </span>
-            <span className="pf-date">{kstDate(w.updatedAt)}</span>
+            <span className="pf-date">{kstDate(w.updatedAt).slice(2)}</span>
             <span className="pf-sw-wrap">
               <button type="button" role="switch" aria-checked={isPub(w)} aria-label={`${w.title} 공개`} className="pf-sw" disabled={busy || savingId === w.id} onClick={() => void togglePublic(w)}>
                 <i aria-hidden="true" />
@@ -674,6 +660,15 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
           {editing === w.id && <WorkEditor key={w.id} work={{ ...w, isPublic: isPub(w) }} nickname={nickname} onClose={() => setEditing(null)} onTogglePublic={() => void togglePublic(w)} busyOuter={busy} />}
         </div>
       ))}
+
+      <div className="pf-count pf-count-end">
+        <span>
+          작품 {works.length} / {WORK_LIMIT}
+        </span>
+        <span>
+          파일 {mb(usedBytes)} / {mb(QUOTA_BYTES)}
+        </span>
+      </div>
 
       {del && (
         <div className="pf-back" onMouseDown={(e) => e.target === e.currentTarget && !busy && setDel(null)}>

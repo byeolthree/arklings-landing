@@ -239,19 +239,22 @@
 .rg .rg-list-title { margin: 0 0 19px; font-size: 20px; line-height: 26px; font-weight: 700; color: var(--title); }
 .rg .rg-card.rg-card-list { padding: 32px 44px; border-radius: 28px; background: var(--paper); }
 /* 카드를 흰색으로 바꿨으므로, 안의 줄은 옅은 바탕색으로 두어 카드와 구분한다 */
-.rg .rg-card-list .pf-row, .rg .rg-card-list .pf-new { background: var(--bg); }
+.rg .rg-card-list .pf-row { background: var(--bg); }
+.rg .rg-card-list .pf-new { background: var(--jaju); }
 .rg .rg-card-list .pf { margin: 0; }
 @media (min-width: 768px) {
   .rg .rg-card.rg-card-list { padding: 34px 44px 34px; }
   .rg .rg-card-list .pf-count { padding: 0; gap: 4px 20px; font-size: 14px; line-height: 20px; }
   .rg .rg-card-list .pf { gap: 0; }
-  .rg .rg-card-list .pf-head { margin: 16.5px 0 7px; padding: 0 16px 0 12px; height: 20px; column-gap: 6px; font-size: 13px; line-height: 20px; grid-template-columns: 20px minmax(0, 177px) minmax(0, 91px) minmax(0, 92px) minmax(0, 112px) minmax(0, 140px) 118px minmax(max-content, 1fr); }
-  .rg .rg-card-list .pf-head-end { grid-column: 8; }
-  .rg .rg-card-list .pf-row { box-sizing: border-box; min-height: 56px; padding: 8px 16px 8px 12px; column-gap: 6px; border-radius: 16px; box-shadow: none; grid-template-columns: 20px minmax(0, 177px) minmax(0, 91px) minmax(0, 92px) minmax(0, 112px) minmax(0, 140px) 118px minmax(max-content, 1fr); }
-  .rg .rg-card-list .pf-new { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; border-radius: 16px; box-shadow: none; margin-bottom: 9px; }
+  .rg .rg-card-list .pf-head { margin: 16.5px 0 7px; padding: 0 16px 0 12px; height: 20px; column-gap: 6px; font-size: 13px; line-height: 20px; grid-template-columns: 20px minmax(0, 1fr) minmax(0, 110px) minmax(0, 74px) 118px max-content; }
+  .rg .rg-card-list .pf-head-end { grid-column: 5 / 7; text-align: right; }
+  .rg .rg-card-list .pf-row { box-sizing: border-box; min-height: 56px; padding: 8px 16px 8px 12px; column-gap: 6px; border-radius: 16px; box-shadow: none; grid-template-columns: 20px minmax(0, 1fr) minmax(0, 110px) minmax(0, 74px) 118px max-content; }
+  .rg .rg-card-list .pf-new { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; border-radius: 16px; box-shadow: none; margin-bottom: 28px; }
   .rg .rg-card-list .pf-item { gap: 8px; }
   .rg .rg-card-list .pf-item + .pf-item { margin-top: 8px; }
-  .rg .rg-card-list .pf-sw-wrap { justify-content: flex-start; }
+  .rg .rg-card-list .pf-sw-wrap { justify-content: flex-end; }
+  .rg .rg-card-list .pf-actions { align-items: center; }
+  .rg .rg-card-list .pf-sw-wrap { align-items: center; }
 }
 
 /* 기본 정보 화면(시안 12): 띠 아래는 흰 배경, 가운데에 그림자 있는 흰 카드(가로 880, 안쪽 48) */

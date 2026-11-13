@@ -140,14 +140,16 @@
 /* 포트폴리오 등록 구역: 접은 목록(시안 02·07). 맨 윗줄이 접힌 등록 화면이고, 줄마다 손잡이·제목·대표·역할·장르·수정일·공개 스위치·수정·삭제 */
 .mp .pf { display: grid; gap: 12px; }
 .mp .pf-count { display: flex; flex-wrap: wrap; gap: 4px 20px; padding: 0 4px 8px; font-size: 14px; color: var(--title); font-weight: 500; }
-.mp .pf-head, .mp .pf-row { display: grid; align-items: center; gap: 12px; grid-template-columns: 20px minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1.3fr) minmax(0, 1fr) 118px auto; }
+.mp .pf-head, .mp .pf-row { display: grid; align-items: center; gap: 12px; grid-template-columns: 20px minmax(0, 3fr) minmax(0, 1fr) minmax(0, 0.8fr) 118px auto; }
 .mp .pf-head { padding: 0 20px; font-size: 13px; color: var(--title); }
-.mp .pf-head-end { grid-column: 7 / 9; text-align: right; }
+.mp .pf-head-end { grid-column: 5 / 7; text-align: right; }
 .mp .pf-new, .mp .pf-row { padding: 18px 20px; border-radius: 16px; background: #fff; border: 1px solid var(--line); box-shadow: 0 10px 24px -20px rgba(42,32,37,.35); }
 .mp .pf-new { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; font: inherit; color: var(--body); cursor: pointer; text-align: left; }
-.mp .pf-new-main { font-size: 16px; font-weight: 700; color: var(--jaju); }
+.mp .pf-new { background: var(--jaju); border-color: var(--jaju); color: #fff; margin-bottom: 26px; }
+.mp .pf-new-main { font-size: 16px; font-weight: 700; color: #fff; }
 .mp .pf-plus { font-weight: 400; margin-right: 6px; }
-.mp .pf-new-fold { font-size: 14px; color: var(--body); }
+.mp .pf-new-fold { font-size: 14px; color: #fff; }
+.mp .pf-count-end { padding: 18px 4px 0; }
 .mp .pf-short { display: none; }
 .mp .pf-grip { color: var(--body); cursor: grab; user-select: none; line-height: 1; }
 .mp .pf-title { font-size: 16px; font-weight: 700; color: var(--title); min-width: 0; }
