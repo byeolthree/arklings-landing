@@ -411,4 +411,4 @@
 /* 여백 두기의 남는 곳은 흰색(영상·이미지 칸의 검은 바탕보다 우선) */
 .cr .cr-v2-main .cr-main-media.has-src.cr-v2-img { background: #fff; }
 /* 그림·영상 위 글자(종류 글자·작품 제목)에 가는 흰 외곽선: 밝은 그림·어두운 영상 어디서든 글자 모양이 보이게(색은 그대로, 2026-11-13) */
-.cr .cr-v2-main.media .cr-v2-kind, .cr .cr-v2-main.media .cr-v2-title { -webkit-text-stroke: 1.5px #fff; paint-order: stroke fill; }
+.cr .cr-v2-main.media .cr-v2-kind, .cr .cr-v2-main.media .cr-v2-title { -webkit-text-stroke: 1px #fff; paint-order: stroke fill; }
