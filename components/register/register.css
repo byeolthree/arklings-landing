@@ -318,3 +318,7 @@
 /* 새 등록을 펼쳤을 때 위에 놓는 「새 포트폴리오 등록」 바(목록 화면과 같은 자리) */
 .rg .rg-newbar { margin-bottom: 0; }
 .rg .rg-newbar-in { margin-bottom: 20px; }
+/* 펼친 상태의 바는 접기 버튼일 뿐이라 외곽선, 오른쪽 「등록 화면 접기」만. 크기·자리는 목록 화면의 바와 같다 */
+.rg .rg-newbar-in { margin: 2px 8px 20px; }
+.rg .rg-newbar-in .pf-new.is-open { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; justify-content: flex-end; background: #fff; border: 1.5px solid var(--jaju); color: var(--jaju); box-shadow: none; }
+.rg .rg-newbar-in .pf-new.is-open .pf-new-fold { color: var(--jaju); }

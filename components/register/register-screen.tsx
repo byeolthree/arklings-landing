@@ -68,10 +68,7 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId, openNew
       <section className={`rg-card${current === null ? " rg-card-list" : ""}`} aria-label="포트폴리오 등록">
         {current === "new" && (
           <div className="pf rg-newbar-in">
-            <button type="button" className="pf-new" aria-expanded={true} onClick={closeNew}>
-              <span className="pf-new-main">
-                <span className="pf-plus" aria-hidden="true">＋</span> 새 포트폴리오 등록
-              </span>
+            <button type="button" className="pf-new is-open" aria-expanded={true} aria-label="등록 화면 접기" onClick={closeNew}>
               <span className="pf-new-fold">
                 <span className="pf-long">등록 화면 접기 ▴</span>
                 <span className="pf-short">접기 ▴</span>
