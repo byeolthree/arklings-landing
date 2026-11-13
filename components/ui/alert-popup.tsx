@@ -46,9 +46,9 @@ export function ConfirmPopup({
 }: {
   children: ReactNode;
   confirmLabel: string;
-  cancelLabel: string;
+  cancelLabel?: string;
   onConfirm: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
 }) {
   const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   if (!mounted) return null;
@@ -61,9 +61,11 @@ export function ConfirmPopup({
           <button type="button" autoFocus onClick={onConfirm} style={{ ...btn, border: 0, background: "#a61e5c", color: "#fff" }}>
             {confirmLabel}
           </button>
-          <button type="button" onClick={onCancel} style={{ ...btn, border: "1px solid #a61e5c", background: "#fff", color: "#a61e5c" }}>
-            {cancelLabel}
-          </button>
+          {cancelLabel && onCancel && (
+            <button type="button" onClick={onCancel} style={{ ...btn, border: "1px solid #a61e5c", background: "#fff", color: "#a61e5c" }}>
+              {cancelLabel}
+            </button>
+          )}
         </div>
       </div>
     </div>,

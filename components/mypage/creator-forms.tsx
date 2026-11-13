@@ -6,6 +6,7 @@ import { AlertPopup, ConfirmPopup } from "@/components/ui/alert-popup";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ROLE_TONE } from "@/components/creators/role-tone";
+const ROLE_HEX = { jaju: "#a61e5c", dusty: "#5f7c99", gold: "#d89a24", sage: "#6f8a7a", teal: "#1f5a66", body: "#574a50" } as const;
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -809,6 +810,18 @@ export function WorkEditor({
 
   // 저장 전에 역할과 대표 콘텐츠가 맞는지 본다. 영상 제작·아트디렉터는 맨 위 이미지·영상이 카드에 보이고, 다른 역할은 로그라인이 카드에 보인다.
   const [confirmMsg, setConfirmMsg] = useState<string | null>(null);
+  // 팝업에서 역할을 바꾼다. 태그를 1초 안에 다시 누르면 그 역할이 맨 앞(대표 역할)이 된다(프로필 등록 화면과 같은 방식).
+  const lastPress = useRef<{ r: Role; t: number } | null>(null);
+  function pressRole(r: Role, now: number) {
+    const prev = lastPress.current;
+    if (prev && prev.r === r && now - prev.t < 1000) {
+      lastPress.current = null;
+      setRoles((cur) => [r, ...cur.filter((x) => x !== r)]);
+      return;
+    }
+    lastPress.current = { r, t: now };
+    setRoles((cur) => (cur.includes(r) ? cur.filter((x) => x !== r) : [...cur, r]));
+  }
   function askSave() {
     if (!title.trim()) return void save();
     const visual = roles.some((x) => x === "video" || x === "art_director");
@@ -908,8 +921,29 @@ export function WorkEditor({
 
       <div className="we-head">
         {confirmMsg && (
-          <ConfirmPopup confirmLabel="등록" cancelLabel="다시 작성" onConfirm={() => { setConfirmMsg(null); void save(); }} onCancel={() => setConfirmMsg(null)}>
+          <ConfirmPopup confirmLabel="등록" onConfirm={() => { setConfirmMsg(null); void save(); }}>
             {confirmMsg}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 18 }}>
+              {(Object.keys(ROLES) as Role[]).map((r) => {
+                const on = roles.includes(r);
+                const rc = ROLE_HEX[ROLE_TONE[r]];
+                return (
+                  <button
+                    key={r}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={(e) => pressRole(r, e.timeStamp)}
+                    style={{ position: "relative", height: 34, padding: "0 15px", borderRadius: 999, border: `1.5px solid ${rc}`, background: on ? rc : "#fff", color: on ? "#fff" : rc, font: "inherit", fontSize: 14, fontWeight: 500, cursor: "pointer" }}
+                  >
+                    {roles.length >= 2 && roles[0] === r && (
+                      <span style={{ position: "absolute", top: -13, left: -8, height: 18, padding: "0 7px", display: "grid", placeItems: "center", border: "2px solid #fff", borderRadius: 999, background: "#574a50", color: "#fff", fontSize: 11, fontWeight: 700, lineHeight: 1, boxSizing: "content-box" }}>대표</span>
+                    )}
+                    {ROLES[r]}
+                  </button>
+                );
+              })}
+            </div>
+            <p style={{ margin: "10px 0 0", fontSize: 12, color: "#574a50" }}>태그를 &apos;빠르게 두 번&apos; 클릭해서 대표 역할을 골라주세요.</p>
           </ConfirmPopup>
         )}
         {askTitle &&
