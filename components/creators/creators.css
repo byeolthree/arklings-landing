@@ -386,3 +386,7 @@
 /* 협업 신청 아이콘 버튼: 소리 버튼과 같은 크기(44), 화면 고정(자리는 collab-fab.tsx가 소리 버튼 바로 위로 잰다) */
 .cr .cr-fab { position: fixed; z-index: 20; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: var(--jaju); color: #fff; box-shadow: 0 6px 18px rgba(166,30,92,.35); text-decoration: none; }
 .cr .cr-fab:hover { filter: brightness(1.08); }
+/* 「협업 신청 받는 중」 + 작은 반투명 종이비행기. 남의 프로필에서는 링크(누르면 협업 신청), 내 프로필에서는 보이기만 */
+.cr .cr-open-go { display: inline-flex; align-items: center; gap: 5px; text-decoration: none; }
+.cr .cr-open-go .cr-open-ico { opacity: .55; }
+.cr a.cr-open-go:hover .cr-open-ico { opacity: 1; }

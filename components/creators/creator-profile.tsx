@@ -38,6 +38,16 @@ function ChannelLogo({ label }: { label: string }) {
   return null;
 }
 
+// 「협업 신청 받는 중」 옆의 작은 반투명 종이비행기(배경 없음). 내 프로필에서도 보이고, 남의 프로필에서만 눌린다.
+function OpenSendIcon() {
+  return (
+    <svg className="cr-open-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M22 2 11 13" />
+      <path d="M22 2 15 22l-4-9-9-4 20-7z" />
+    </svg>
+  );
+}
+
 // 크리에이터 프로필 화면. 마이페이지 「크리에이터 등록」에 적은 것(닉네임·역할·소개 글·채널 링크·협업 신청 받는 중)이
 // 그 칸 순서대로 보이고, 아래 포트폴리오는 「포트폴리오 등록」의 작품 카드와 같은 카드다. 데이터를 받기만 하고 읽지 않는다.
 export function CreatorProfile({
@@ -83,7 +93,16 @@ export function CreatorProfile({
           <div className="cr-hero-body">
             {privateNote && <span className="cr-open">비공개 상태입니다</span>}
             {/* 순서: 협업 신청 받는 중 → 닉네임 → 역할 태그(역할이 많아도 닉네임 위를 덮지 않게 맨 아래, 2026-11-13) */}
-            {creator.openToCollab && <span className="cr-open">협업 신청 받는 중</span>}
+            {creator.openToCollab &&
+              (showApply && applyHref && !owner ? (
+                <Link href={applyHref} className="cr-open cr-open-go" aria-label="협업 신청 받는 중. 누르면 협업을 신청합니다">
+                  협업 신청 받는 중 <OpenSendIcon />
+                </Link>
+              ) : (
+                <span className="cr-open cr-open-go">
+                  협업 신청 받는 중 <OpenSendIcon />
+                </span>
+              ))}
             <h1 id="cr-hero-name" className="cr-hero-name">
               {creator.name}
             </h1>
