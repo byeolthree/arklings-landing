@@ -29,7 +29,7 @@ export type CreatorCard = {
   mainKind?: "image" | "video"; // 대표 콘텐츠 요소가 이미지인지 영상인지(종류 글자 색)
   docLabel?: string; // 대표가 글·문서일 때 종류 글자(시놉시스 등)
   docText?: string; // 대표가 글·문서일 때 카드에 보일 글 앞부분
-  main: "logline" | "media"; // 카드의 메인: 아트디렉터·영상 제작은 로그라인이 아니라 대표 이미지·영상을 걸 수 있다
+  main: "logline" | "media"; // 카드의 메인: 작품의 대표가 이미지·영상이면 media, 아니면 logline(문서는 docLabel로)
 };
 
 // 크리에이터 프로필 화면에 필요한 값(프로필 머리글 + 그 사람이 공개한 기획안 카드들).

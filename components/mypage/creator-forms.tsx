@@ -848,7 +848,7 @@ export function WorkEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, logline, genresKey, rolesKey, topKind, mediaKey]);
 
-  // 저장 전에 역할과 대표 콘텐츠가 맞는지 본다. 영상 제작·아트디렉터는 맨 위 이미지·영상이 카드에 보이고, 다른 역할은 로그라인이 카드에 보인다.
+  // 저장 전에 역할과 대표 콘텐츠가 어울리는지 한 번 알려 준다(영상 제작·아트디렉터인데 맨 위가 이미지·영상이 아니거나, 그 반대). 알려 줄 뿐 대표는 바꾸지 않는다.
   const [mismatch, setMismatch] = useState(false);
   // 팝업(시안 popup5)에 보여 줄 대표 콘텐츠 태그: 종류 태그가 있으면 그것(포스터·티저…), 없으면 요소 이름. 색은 요소 종류 색.
   const topTag = (() => {

@@ -259,7 +259,7 @@
 .cr .cr-hero-name { font-size: clamp(31px, 7vw, 90px); line-height: 1; font-weight: 700; letter-spacing: -0.03em; color: inherit; word-break: keep-all; overflow-wrap: anywhere; }
 .cr .cr-hero:not(.none) .cr-open { color: #fff; border-color: #fff; }
 
-/* 목록 카드 메인: 아트디렉터·영상 제작은 로그라인 대신 대표 이미지·영상 */
+/* 목록 카드 메인: 작품의 대표가 이미지·영상이면 그것 */
 .cr .cr-main-media { height: 160px; display: grid; place-items: center; border-radius: 12px; background: var(--title); color: rgba(255,255,255,.6); font-size: 13px; }
 @media (min-width: 768px) { .cr .cr-main-media { height: 200px; } }
 
