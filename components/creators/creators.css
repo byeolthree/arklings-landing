@@ -423,3 +423,5 @@
 .cr .cr-v2-main.media .cr-v2-kind, .cr .cr-v2-main.media .cr-v2-title { -webkit-text-stroke: 0; text-shadow: 0 0 5px #fff, 0 0 5px #fff; }
 /* 제목 자리가 어두운 그림·영상: 흰 글자에 어두운 5px 음영 */
 .cr .cr-v2-main.media .cr-v2-title.on-dark { color: #fff; text-shadow: 0 0 5px rgba(0,0,0,.8), 0 0 5px rgba(0,0,0,.8); }
+/* 작품 제목은 모두 세리프체(로그라인 카드 제목과 같은 Noto Serif, 2026-11-13) */
+.cr .cr-v2-title, .cr .cr-work-title, .cr .cr-win-title { font-family: var(--font-noto-serif), serif; font-weight: 700; }
