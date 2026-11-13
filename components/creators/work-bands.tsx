@@ -123,8 +123,9 @@ function Band({ work, roles, href, owner, tone, grip }: { work: WorkCard; roles:
             {(hasMedia || rep?.kind === "doc") && <p className="cr-band-log">{work.logline}</p>}
             <div className="cr-band-foot">
               {work.kind && <p className="cr-kind">{work.kind}</p>}
+              {/* 등록한 포맷: 역할·장르 태그 줄 바로 위에 따로 한 줄 */}
+              <FormatTags formats={work.formats} />
               <div className="cr-band-tags">
-                <FormatTags formats={work.formats} />
                 <RoleTags roles={roles} lead />
                 {work.genres.length > 0 && (
                   <ul className="cr-genres cr-genres-hash" aria-label="장르">

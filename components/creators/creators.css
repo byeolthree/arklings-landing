@@ -411,6 +411,6 @@
 /* 손잡이로 끄는 동안 끌고 있는 작품 줄은 흐리게 */
 .cr .cr-band-dragging { opacity: .45; }
 /* 등록한 포맷(역할 태그 위): 대표 카드의 종류 글자와 같은 세컨더리 청록 굵은 글씨, 앞에 체크 표시(2026-11-14 아키텍터 지시) */
-.cr .cr-fmts { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; margin: 0; padding: 0; list-style: none; font-size: 13px; font-weight: 700; line-height: 1.6; color: var(--teal); }
+.cr .cr-fmts { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; margin: 0; padding: 0; list-style: none; font-size: 13px; font-weight: 700; line-height: 1.6; color: var(--teal); }
 .cr .cr-fmt::before { content: "✓"; margin-right: 3px; }
 .cr .cr-fmts + .cr-tags { margin-top: 8px; }
