@@ -448,3 +448,6 @@
 /* 필터 칩 높이를 카드의 실제 태그 크기에 맞춘다(2026-11-13 아키텍터 지시) */
 .cr .cr-fchip { min-height: 0; padding: 4px 12px; font-size: 12px; line-height: 1.5; }
 @media (min-width: 768px) { .cr .cr-fchip { font-size: 12px; } }
+/* 필터 칩 색은 모두 본문색(2026-11-13 아키텍터 지시) */
+.cr .cr-fchip { border-color: var(--body); color: var(--body); }
+.cr .cr-fchip[aria-current="true"] { border-color: var(--body); background: var(--body); color: #fff; }
