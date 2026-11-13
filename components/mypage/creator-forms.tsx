@@ -559,18 +559,41 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
     setMsg({ text: "작품을 지웠어요." });
     router.refresh();
   }
-  async function moveTo(id: string, to: number) {
-    const ids = works.map((w) => w.id);
+  // 손잡이로 끄는 동안 줄이 바로 그 자리로 옮겨 보인다. 손을 놓으면 그 순서를 저장하고, 저장이 실패하면 원래 순서로 되돌린다(2026-11-13 아키텍터 지시).
+  const [order, setOrder] = useState<string[] | null>(null);
+  const live = useRef<string[] | null>(null);
+  const [dragging, setDragging] = useState<string | null>(null);
+  useEffect(() => {
+    setOrder(null);
+    live.current = null;
+  }, [works]);
+  const list: MyWork[] = order ? (order.map((id) => works.find((w) => w.id === id)).filter(Boolean) as MyWork[]) : works;
+  function place(id: string, to: number) {
+    const ids = (live.current ?? works.map((w) => w.id)).slice();
     const from = ids.indexOf(id);
     if (from < 0 || to < 0 || to >= ids.length || from === to) return;
     ids.splice(from, 1);
     ids.splice(to, 0, id);
-    setBusy(true);
+    live.current = ids;
+    setOrder(ids);
+  }
+  async function commit() {
+    const ids = live.current;
+    setDragging(null);
+    drag.current = null;
+    if (!ids || ids.join() === works.map((w) => w.id).join()) return;
     setMsg(null);
     const r = await reorderWorks(ids);
-    setBusy(false);
-    if (!r.ok) return setMsg({ text: r.error, err: true });
+    if (!r.ok) {
+      live.current = null;
+      setOrder(null);
+      return setMsg({ text: r.error, err: true });
+    }
     router.refresh();
+  }
+  function moveTo(id: string, to: number) {
+    place(id, to);
+    void commit();
   }
 
   return (
@@ -619,15 +642,22 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
         </div>
       )}
 
-      {works.map((w, i) => (
+      <div
+        className="pf-list"
+        onDragOver={(e) => {
+          if (drag.current) e.preventDefault();
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          void commit();
+        }}
+      >
+      {list.map((w, i) => (
         <div
           key={w.id}
-          className="pf-item"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            if (drag.current) void moveTo(drag.current, i);
-            drag.current = null;
+          className={`pf-item${dragging === w.id ? " dragging" : ""}`}
+          onDragEnter={() => {
+            if (drag.current && drag.current !== w.id) place(drag.current, i);
           }}
         >
           <div className={`pf-row${isPub(w) ? "" : " off"}`}>
@@ -638,13 +668,18 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
               aria-label={`${w.title} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`}
               onDragStart={(e) => {
                 drag.current = w.id;
+                live.current = list.map((x) => x.id);
+                setDragging(w.id);
                 e.dataTransfer.effectAllowed = "move";
                 e.dataTransfer.setData("text/plain", w.id);
+              }}
+              onDragEnd={() => {
+                if (drag.current) void commit();
               }}
               onKeyDown={(e) => {
                 if (e.key === "ArrowUp" || e.key === "ArrowDown") {
                   e.preventDefault();
-                  void moveTo(w.id, e.key === "ArrowUp" ? i - 1 : i + 1);
+                  moveTo(w.id, e.key === "ArrowUp" ? i - 1 : i + 1);
                 }
               }}
             >
@@ -676,6 +711,7 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
           {editing === w.id && <WorkEditor key={w.id} work={{ ...w, isPublic: isPub(w) }} nickname={nickname} onClose={() => setEditing(null)} onTogglePublic={() => void togglePublic(w)} busyOuter={busy} />}
         </div>
       ))}
+      </div>
 
       <div className="pf-count pf-count-end">
         <span>
