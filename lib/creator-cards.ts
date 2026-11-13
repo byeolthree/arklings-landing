@@ -64,5 +64,7 @@ export function toCreatorCard(c: CreatorListItem): CreatorCard {
     mainFit: media ? c.coverFit : undefined,
     workId: c.workId,
     mainKind: media ? c.coverBlockKind : undefined,
+    docLabel: media ? undefined : c.docLabel,
+    docText: media ? undefined : c.docText,
   };
 }

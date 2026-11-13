@@ -31,6 +31,8 @@ export type CreatorListItem = {
   workId?: string; // 탐색 카드 한 장 = 공개 작품 하나(2026-11-13). 그 작품 번호
   coverFit?: "cover" | "contain"; // 대표 이미지를 카드에 꽉 채울지, 여백을 둘지(0027)
   coverSub?: string; // 카드 대표 콘텐츠의 종류 태그(포스터·티저 등). 없으면 비어 있다
+  docLabel?: string; // 대표가 글·문서일 때 카드의 종류 글자
+  docText?: string; // 대표가 글·문서일 때 카드에 보일 글 앞부분(글이 없으면 파일 이름)
   coverBlockKind?: "image" | "video"; // 대표 콘텐츠 요소가 원래 이미지인지 영상인지(유튜브 영상도 video)
   cover?: string; // 가장 최근 공개 작품의 대표(작품 안 맨 위에 놓인 것, D35-2)가 이미지·영상일 때 그 그림 주소. 영상 제작·아트디렉터 역할이 있는 사람만 채워진다
 };
@@ -184,18 +186,23 @@ export async function listCreators(filter: CreatorFilterInput, page: number): Pr
   // 탐색 화면에는 크리에이터가 공개한 작품을 하나씩 모두 카드로 보여 준다(2026-11-13 아키텍터 지시). 작품 순서는 그 사람의 포트폴리오 등록 목록 순서.
   const allWorks = await loadAllWorks(rows.map((r) => r.public_handle));
   const visual = new Set(rows.filter((r) => asRoles(r.roles).some((x) => x === "video" || x === "art_director")).map((r) => r.public_handle));
-  const covers = await loadWorkCovers(rows.flatMap((r) => (visual.has(r.public_handle) ? (allWorks.get(r.public_handle) ?? []) : [])));
+  // 대표가 글·문서인 작품은 역할과 상관없이 문서 카드로 보인다. 이미지·영상 대표는 지금처럼 영상 제작·아트디렉터만.
+  const covers = await loadWorkCovers(rows.flatMap((r) => allWorks.get(r.public_handle) ?? []));
+  const docs = docTops.get(covers) ?? new Map<string, DocTop>();
+  const authorOf = new Map<string, string>(rows.flatMap((r) => (allWorks.get(r.public_handle) ?? []).map((w) => [w.id, r.public_handle] as [string, string])));
+  for (const id of Array.from(covers.keys())) if (!visual.has(authorOf.get(id) ?? "")) covers.delete(id);
   const items = rows.flatMap((r) => {
       const base = toListItem(r, heroUrls);
       const works = allWorks.get(r.public_handle) ?? [];
       if (works.length === 0) return [base];
       return works.map((f) => {
         const cv = covers.get(f.id);
-        return { ...base, workId: f.id, latest: { title: f.title, logline: f.logline, genres: f.genres }, cover: cv?.src, coverKind: cv?.kind, coverSub: cv?.sub, coverFit: cv?.fit, coverBlockKind: cv?.blockKind };
+        const dt = docs.get(f.id);
+        return { ...base, docLabel: dt?.label, docText: dt?.text, workId: f.id, latest: { title: f.title, logline: f.logline, genres: f.genres }, cover: cv?.src, coverKind: cv?.kind, coverSub: cv?.sub, coverFit: cv?.fit, coverBlockKind: cv?.blockKind };
       });
     });
   // 포맷 거르기: 카드에 보이는 종류 글자와 같은 것만 남긴다(대표가 이미지·영상이 아니면 「로그라인」).
-  const fmtOf = (it: CreatorListItem) => (it.cover ? it.coverSub : "로그라인");
+  const fmtOf = (it: CreatorListItem) => (it.cover ? it.coverSub : it.docLabel ?? "로그라인");
   return { items: filter.fmt ? items.filter((it) => fmtOf(it) === filter.fmt) : items, total: count ?? 0 };
 }
 
@@ -228,6 +235,9 @@ type FeaturedWork = { id: string; title: string; logline: string; genres: string
 // 그 크리에이터들이 카드에 먼저 보이게 정한 작품(등록 목록 맨 위)에서 「대표」(D35-2: 작품 안에서 맨 위에 놓인 것)가 이미지·영상이면 그 그림 주소를 돌려준다.
 // 맨 위가 로그라인이거나 글·문서면 그 사람은 빠진다(카드는 로그라인 모양으로 나온다). 영상은 유튜브라서 유튜브가 주는 대표 그림을 쓴다.
 type Cover = { src: string; kind: "image" | "video"; blockKind: "image" | "video"; sub?: string; fit?: "cover" | "contain" };
+// 대표(맨 위)가 글·문서인 작품: 카드에 종류 글자(시놉시스 등, 없으면 「문서」)와 그 글의 앞부분을 보인다(2026-11-13 아키텍터 지시).
+type DocTop = { label: string; text: string };
+const docTops = new WeakMap<Map<string, Cover>, Map<string, DocTop>>();
 async function loadCovers(handles: string[], featured: Map<string, FeaturedWork>): Promise<Map<string, Cover>> {
   const out = new Map<string, Cover>();
   if (handles.length === 0) return out;
@@ -241,19 +251,22 @@ async function loadCovers(handles: string[], featured: Map<string, FeaturedWork>
   if (ids.length === 0) return out;
   const blocks = await sb
     .from("creator_blocks_public")
-    .select("work_id, kind, file_path, youtube_id, position, sub_kind, fit")
+    .select("work_id, kind, body, file_path, file_name, youtube_id, position, sub_kind, fit")
     .in("work_id", ids)
     .order("position", { ascending: true })
     .order("id", { ascending: true });
   if (blocks.error) return out;
-  type Row = { work_id: string; kind: string; file_path: string | null; youtube_id: string | null; sub_kind?: string | null; fit?: string | null };
+  type Row = { work_id: string; kind: string; body?: string | null; file_path: string | null; file_name?: string | null; youtube_id: string | null; sub_kind?: string | null; fit?: string | null };
   const byWork = new Map<string, Row[]>();
   for (const b of (blocks.data ?? []) as Row[]) byWork.set(b.work_id, [...(byWork.get(b.work_id) ?? []), b]);
   // 작품마다 로그라인을 그 자리에 끼운 순서에서 맨 위가 이미지·영상일 때만 대표 그림이 된다.
   const topByWork = new Map<string, Row>();
-  for (const w of latest.values()) {
+  const docs = new Map<string, DocTop>();
+  docTops.set(out, docs);
+  for (const [handle, w] of latest) {
     const top = orderItems(byWork.get(w.id) ?? [], w.loglinePosition)[0];
     if (top !== LOGLINE_TOKEN && (top.kind === "image" || top.kind === "video")) topByWork.set(w.id, top);
+    else if (top !== LOGLINE_TOKEN && (top.kind === "text" || top.kind === "document")) docs.set(handle, { label: top.sub_kind || "문서", text: (top.body ?? "").trim() || (top.file_name ?? "") });
   }
   const urls = await signPublicFiles(Array.from(topByWork.values()).map((b) => b.file_path));
   for (const [handle, w] of latest) {

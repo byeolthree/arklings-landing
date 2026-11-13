@@ -190,7 +190,7 @@ export function CreatorList({
                 {cards.map((c) => {
                   // 탐색 카드(2026-11-13 시안 card11): 프로필 동그라미 없음, 협업 신청은 오른쪽 위 아이콘 버튼,
                   // 대표 콘텐츠는 좌우 끝까지 채운 칸(로그라인도 같은 높이) 왼쪽 위에 종류 글자(굵은 색 글자), 장르는 #글자.
-                  const kindLabel = c.main === "media" ? c.mainSub : "로그라인";
+                  const kindLabel = c.main === "media" ? c.mainSub : c.docLabel ?? "로그라인";
                   return (
                   <li key={c.workId ?? c.handle}>
                     <div className="panel cr-card cr-card-v2">
@@ -228,9 +228,9 @@ export function CreatorList({
                               <p className="cr-v2-cap plain">
                                 <span className="cr-v2-cap-t">{c.latest.title}</span>
                                 <span className="cr-v2-cap-dot" aria-hidden="true">·</span>
-                                <span className="cr-v2-cap-k">로그라인</span>
+                                <span className="cr-v2-cap-k">{c.docLabel ?? "로그라인"}</span>
                               </p>
-                              <p className="cr-box-logline">{c.latest.logline}</p>
+                              <p className="cr-box-logline">{c.docLabel ? c.docText : c.latest.logline}</p>
                             </div>
                           )}
                           {/* 그림·영상 위: 제목 · 종류를 한 줄로, 그 줄 뒤에만 반투명한 어두운 둥근 바탕(2026-11-13 아키텍터 참고 그림) */}
