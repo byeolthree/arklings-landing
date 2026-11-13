@@ -28,7 +28,7 @@ export default async function CreatorProfilePage({ params }: Props) {
       backHref="/creators"
       workHref={(id) => `/portfolio/${id}`}
       privateNote={data.preview}
-      owner={data.owner ? { editHref: "/mypage#mp-creator", registerHref: "/mypage#mp-portfolio" } : undefined}
+      owner={data.owner ? { editHref: "/portfolio/new?step=profile", registerHref: "/portfolio/new?new=1" } : undefined}
       // 본인 프로필·비공개 미리 보기에서는 협업 신청 버튼을 숨긴다(D13·D14).
       applyHref={data.owner || data.preview ? undefined : `/collab/new?creator=${data.profile.handle}`}
     />
