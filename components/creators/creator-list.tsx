@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ROLES } from "@/lib/collab";
 import { activeCount, hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
 import { GENRES } from "./genres";
-import { BlurImage } from "./blur-image";
 import { BlurVideo } from "./blur-video";
 import { RoleTags } from "./role-tags";
 import { FORM_LABEL, type CreatorCard, type WorkForm } from "./types";
@@ -202,7 +201,11 @@ export function CreatorList({
                             c.hero === "video" && c.heroSrc ? (
                               <BlurVideo src={c.heroSrc} className="cr-main-media has-src" label="대표 영상" />
                             ) : c.hero === "image" && c.heroSrc ? (
-                              <BlurImage src={c.heroSrc} className="cr-main-media has-src" label="대표 이미지" />
+                              // 대표 이미지: 등록 화면에서 고른 대로 꽉 채우거나(cover), 자르지 않고 남는 곳을 카드 배경색으로 둔다(contain)
+                              <div className={`cr-main-media has-src cr-v2-img ${c.mainFit === "cover" ? "fit-cover" : "fit-contain"}`} role="img" aria-label="대표 이미지">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={c.heroSrc} alt="" loading="lazy" />
+                              </div>
                             ) : (
                               <div className="cr-main-media" role="img" aria-label={c.hero === "video" ? "대표 영상" : "대표 이미지"}>
                                 {c.hero === "video" ? "▶ 〈대표 영상〉" : "〈대표 이미지〉"}

@@ -399,3 +399,12 @@
 .cr .cr-card-v2 { position: relative; }
 .cr .cr-card-v2 .cr-stretch::after { content: ""; position: absolute; inset: 0; z-index: 3; }
 .cr .cr-card-v2 .cr-ask { position: relative; z-index: 4; }
+/* 탐색 카드 대표 이미지: 꽉 채우기 / 여백 두기(카드 배경색) */
+.cr .cr-v2-img { background: #fff; }
+.cr .cr-v2-img img { display: block; width: 100%; height: 100%; }
+.cr .cr-v2-img.fit-cover img { object-fit: cover; }
+.cr .cr-v2-img.fit-contain img { object-fit: contain; }
+/* 대표 콘텐츠 종류 글자(로그라인·포스터·티저 등)는 모두 세컨더리 청록, 그림 위 작품 제목은 제목색(2026-11-13) */
+.cr .cr-v2-kind, .cr .cr-v2-kind.image, .cr .cr-v2-kind.video, .cr .cr-v2-kind.logline,
+.cr .cr-v2-main.media .cr-v2-kind, .cr .cr-v2-main.media .cr-v2-kind.image, .cr .cr-v2-main.media .cr-v2-kind.video { color: var(--teal); text-shadow: none; }
+.cr .cr-v2-title { color: var(--title); text-shadow: none; }

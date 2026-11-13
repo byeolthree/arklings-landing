@@ -37,7 +37,7 @@ type WorkRow = {
 };
 type BlockRow = {
   id: string; work_id: string; position: number; kind: "text" | "image" | "video" | "document";
-  body: string | null; file_path: string | null; file_name: string | null; file_bytes: number | null; youtube_id: string | null; sub_kind?: string | null;
+  body: string | null; file_path: string | null; file_name: string | null; file_bytes: number | null; youtube_id: string | null; sub_kind?: string | null; fit?: string | null;
 };
 
 export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
@@ -48,7 +48,7 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
     sb.from("creator_profiles").select("public_handle, roles, bio, open_to_collab, is_public, hero_kind, hero_path, hero_bytes").eq("user_id", userId).maybeSingle(),
     sb.from("creator_channels").select("label, url, position").eq("user_id", userId).order("position", { ascending: true }),
     readWorks(`${workCols}, logline_position`),
-    sb.from("creator_work_blocks").select("id, work_id, position, kind, body, file_path, file_name, file_bytes, youtube_id, sub_kind").eq("owner_id", userId).order("position", { ascending: true }).order("created_at", { ascending: true }),
+    sb.from("creator_work_blocks").select("id, work_id, position, kind, body, file_path, file_name, file_bytes, youtube_id, sub_kind, fit").eq("owner_id", userId).order("position", { ascending: true }).order("created_at", { ascending: true }),
   ]);
   for (const r of [prof, chans, works, blocks]) if (r.error) throw new Error(r.error.message);
 
@@ -66,7 +66,7 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
     if (b.kind === "text" && b.body) list.push({ id: b.id, kind: "text", body: b.body, sub });
     else if (b.kind === "video" && b.youtube_id) list.push({ id: b.id, kind: "video", youtubeId: b.youtube_id, sub });
     else if (b.kind === "video" && b.file_path) list.push({ id: b.id, kind: "video", youtubeId: null, fileName: b.file_name, fileBytes: b.file_bytes, src: urls.get(b.file_path) ?? null, sub });
-    else if (b.kind === "image") list.push({ id: b.id, kind: "image", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, sub });
+    else if (b.kind === "image") list.push({ id: b.id, kind: "image", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, sub, fit: b.fit === "cover" ? "cover" : "contain" });
     else if (b.kind === "document") list.push({ id: b.id, kind: "document", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, sub });
     byWork.set(b.work_id, list);
   }

@@ -309,3 +309,7 @@
 .mp .we-imgbox:has(.we-imgchange) { padding: 0; }
 .mp .we-imgbox .we-imgempty { gap: 6px; }
 .mp .we-imgbox .we-imgchange img { display: block; width: 100%; height: auto; max-height: none; object-fit: contain; }
+.mp .we-fit { margin-top: 8px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 13px; color: var(--body); }
+.mp .we-fit > span { margin-right: 4px; }
+.mp .we-fit .opt { height: 28px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--body); font: inherit; font-size: 13px; cursor: pointer; }
+.mp .we-fit .opt[aria-pressed="true"] { background: var(--body); border-color: var(--body); color: #fff; font-weight: 700; }

@@ -12,6 +12,7 @@ import { createPortal } from "react-dom";
 import {
   addTextBlock,
   setProfileRoles,
+  setBlockFit,
   addVideoBlock,
   checkHandle as checkHandleAction,
   createWork,
@@ -1389,6 +1390,15 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
             {b && b.kind === "image" && !folded[b.id] && (
               <>
                 <div className="we-line">{b.fileName ?? "첨부된 이미지"}{b.fileBytes ? ` · ${mb(b.fileBytes)}` : ""}</div>
+                {/* 카드에 보일 때: 꽉 채우기(가장자리가 조금 잘릴 수 있음) / 여백 두기(자르지 않고 남는 곳을 카드 배경색으로) */}
+                <div className="we-fit" role="group" aria-label="카드에 보일 때">
+                  <span>카드에 보일 때</span>
+                  {([["cover", "꽉 채우기"], ["contain", "여백 두기"]] as const).map(([v, l]) => (
+                    <button key={v} type="button" className="opt" aria-pressed={(b.fit ?? "contain") === v} disabled={busy} onClick={() => void run(() => setBlockFit(b.id, v))}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
                 {b.src && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={b.src} alt={b.fileName ?? "이미지"} style={{ maxWidth: "100%", borderRadius: 14 }} />

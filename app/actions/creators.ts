@@ -168,6 +168,18 @@ export async function setProfileRoles(input: string[]): Promise<Ok | Fail> {
   return { ok: true };
 }
 
+// 이미지 요소가 카드에 보일 때 꽉 채울지(cover), 자르지 않고 여백을 둘지(contain) 정한다(0027).
+export async function setBlockFit(blockId: string, fit: "cover" | "contain"): Promise<Ok | Fail> {
+  const auth = await needUser();
+  if (!("user" in auth)) return auth;
+  if (!UUID.test(String(blockId)) || (fit !== "cover" && fit !== "contain")) return { ok: false, error: BLOCK_NOT_FOUND };
+  const { data, error } = await auth.sb.from("creator_work_blocks").update({ fit }).eq("id", blockId).eq("owner_id", auth.user.id).eq("kind", "image").select("work_id");
+  if (error) return { ok: false, error: error.message.includes("fit") ? "이미지 보이기 방식을 저장하려면 데이터베이스 준비(0027)가 먼저 필요해요." : dbMessage(error) };
+  if (!data?.length) return { ok: false, error: BLOCK_NOT_FOUND };
+  refresh();
+  return { ok: true };
+}
+
 // 채널 링크만 따로 저장한다(통째로 바꾼다). 프로필이 먼저 있어야 한다.
 export async function saveChannels(channels: Channel[]): Promise<Ok<{ count: number }> | Fail> {
   const auth = await needUser();
