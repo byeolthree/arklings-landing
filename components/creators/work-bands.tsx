@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { useLiveReorder } from "@/components/ui/use-live-reorder";
 import { reorderWorks, setWorkPublic } from "@/app/actions/creators";
 import type { Role } from "@/lib/collab";
 import { RoleTags } from "./role-tags";
@@ -14,30 +15,22 @@ import { WorkMedia } from "./work-media";
 // 역할은 프로필 한 곳에서 가져온다(작품마다 복사된 역할은 쓰지 않는다, 2026-11-13).
 export function WorkBands({ works, hrefs, owner, roles }: { works: WorkCard[]; hrefs: string[]; owner: boolean; roles: Role[] }) {
   const router = useRouter();
-  const [order, setOrder] = useState(() => works.map((w) => w.id));
   const [msg, setMsg] = useState<string | null>(null);
-  const drag = useRef<string | null>(null);
   const byId = new Map(works.map((w, i) => [w.id, { w, href: hrefs[i] }]));
-
-  async function applyOrder(next: string[]) {
-    const prev = order;
-    setOrder(next);
-    setMsg(null);
-    const r = await reorderWorks(next);
-    if (!r.ok) {
-      setOrder(prev);
-      return setMsg(r.error);
-    }
-    router.refresh();
-  }
-  const moveTo = (id: string, to: number) => {
-    const from = order.indexOf(id);
-    if (from < 0 || to < 0 || to >= order.length || from === to) return;
-    const next = [...order];
-    next.splice(from, 1);
-    next.splice(to, 0, id);
-    void applyOrder(next);
-  };
+  // 손잡이 순서(공통 동작: components/ui/use-live-reorder.ts). 주인만 쓴다.
+  const reorder = useLiveReorder(
+    works.map((w) => w.id),
+    async (next) => {
+      setMsg(null);
+      const r = await reorderWorks(next);
+      if (!r.ok) {
+        setMsg(r.error);
+        return false;
+      }
+      router.refresh();
+      return true;
+    },
+  );
 
   return (
     <>
@@ -46,32 +39,22 @@ export function WorkBands({ works, hrefs, owner, roles }: { works: WorkCard[]; h
           {msg}
         </p>
       )}
-      {order.map((id, i) => {
-        const it = byId.get(id);
-        if (!it) return null;
-        return (
-          <div
-            key={id}
-            onDragOver={owner ? (e) => e.preventDefault() : undefined}
-            onDrop={
-              owner
-                ? (e) => {
-                    e.preventDefault();
-                    if (drag.current) moveTo(drag.current, i);
-                    drag.current = null;
-                  }
-                : undefined
-            }
-          >
-            <Band work={it.w} roles={roles} href={it.href} owner={owner} tone={i % 2 === 0 ? "tint" : "plain"} onGrip={{ start: () => (drag.current = id), key: (dir) => moveTo(id, i + dir) }} />
-          </div>
-        );
-      })}
+      <div {...(owner ? reorder.listProps : {})}>
+        {reorder.order.map((id, i) => {
+          const it = byId.get(id);
+          if (!it) return null;
+          return (
+            <div key={id} className={reorder.dragging === id ? "cr-band-dragging" : undefined} {...(owner ? reorder.itemProps(id) : {})}>
+              <Band work={it.w} roles={roles} href={it.href} owner={owner} tone={i % 2 === 0 ? "tint" : "plain"} grip={reorder.gripProps(id)} />
+            </div>
+          );
+        })}
+      </div>
     </>
   );
 }
 
-function Band({ work, roles, href, owner, tone, onGrip }: { work: WorkCard; roles: Role[]; href: string; owner: boolean; tone: "tint" | "plain"; onGrip: { start: () => void; key: (dir: -1 | 1) => void } }) {
+function Band({ work, roles, href, owner, tone, grip }: { work: WorkCard; roles: Role[]; href: string; owner: boolean; tone: "tint" | "plain"; grip: ReturnType<ReturnType<typeof useLiveReorder>["gripProps"]> }) {
   const router = useRouter();
   const [pub, setPub] = useState(work.isPublic !== false);
   const [busy, setBusy] = useState(false);
@@ -125,23 +108,7 @@ function Band({ work, roles, href, owner, tone, onGrip }: { work: WorkCard; role
                   <Link href={`/portfolio/new?work=${work.id}`} className="cr-edit" aria-label={`${work.title} 수정`}>
                     수정
                   </Link>
-                  <button
-                    type="button"
-                    className="cr-grip"
-                    draggable
-                    aria-label={`${work.title} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`}
-                    onDragStart={(e) => {
-                      onGrip.start();
-                      e.dataTransfer.effectAllowed = "move";
-                      e.dataTransfer.setData("text/plain", work.id);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                        e.preventDefault();
-                        onGrip.key(e.key === "ArrowUp" ? -1 : 1);
-                      }
-                    }}
-                  >
+                  <button type="button" className="cr-grip" aria-label={`${work.title} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`} {...grip}>
                     ⠿
                   </button>
                 </div>

@@ -454,3 +454,5 @@
 /* 로그라인·문서 카드의 「제목 · 포맷」 뒤에도 음영(테두리색 #E8DFE3)을 넣는다(2026-11-13 아키텍터 지시) */
 .cr .cr-v2-cap.plain { align-self: flex-start; width: fit-content; padding: 3px 10px; gap: 6px; background: var(--line); }
 .cr .cr-v2-cap.plain .cr-v2-cap-dot { color: var(--body); }
+/* 손잡이로 끄는 동안 끌고 있는 작품 줄은 흐리게 */
+.cr .cr-band-dragging { opacity: .45; }

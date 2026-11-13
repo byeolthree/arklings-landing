@@ -70,13 +70,13 @@ export default async function RealPartsPreview({ searchParams }: { searchParams:
       {part === "edit" && (
         <>
           <RegisterHeader title="포트폴리오 등록" current="포트폴리오 등록" />
-          <div className="rg-main"><div className="rg-wrap"><RegisterScreen handle="sample" profilePublic={false} works={works} usedBytes={12 * 1024 * 1024} nickname="별뜨리" openWorkId={works[0].id} /></div></div>
+          <div className="rg-main"><div className="rg-wrap"><RegisterScreen profilePublic={false} works={works} usedBytes={12 * 1024 * 1024} nickname="별뜨리" openWorkId={works[0].id} /></div></div>
         </>
       )}
       {part === "register" && (
         <>
           <RegisterHeader title="포트폴리오 등록" current="포트폴리오 등록" />
-          <div className="rg-main"><div className="rg-wrap"><RegisterScreen handle="sample" profilePublic={false} works={works} usedBytes={12 * 1024 * 1024} nickname="별뜨리" openWorkId={null} /></div></div>
+          <div className="rg-main"><div className="rg-wrap"><RegisterScreen profilePublic={false} works={works} usedBytes={12 * 1024 * 1024} nickname="별뜨리" openWorkId={null} /></div></div>
         </>
       )}
       {part === "profile" && (

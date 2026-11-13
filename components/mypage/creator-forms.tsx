@@ -38,6 +38,7 @@ import { PublishProfile, type HandleCheck, type SaveResult } from "@/components/
 import { ROLES, type Role } from "@/lib/collab";
 import { BLOCK_LIMIT, DOC_SUBKINDS, IMAGE_SUBKINDS, LOGLINE_TOKEN, QUOTA_BYTES, TITLE_MAX, VIDEO_SUBKINDS, WORK_LIMIT, type ProfileErrors, type ProfileValues } from "@/lib/creator-rules";
 import { orderItems, representativeOf } from "@/lib/creator-cards";
+import { useLiveReorder } from "@/components/ui/use-live-reorder";
 import { kindOfMime, uploadToSlot } from "@/lib/creator-upload-client";
 import type { MyProfile, MyWork } from "@/lib/creators-mine";
 
@@ -516,7 +517,6 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
   const [del, setDel] = useState<MyWork | null>(null);
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
-  const drag = useRef<string | null>(null);
 
   // 공개 스위치: 누르는 즉시 바뀌어 보이고(서버 응답을 기다리지 않는다), 저장 중에는 그 스위치만 잠근다. 서버가 실패하면 원래대로 되돌리고 그 작품 줄 아래에 오류를 보여 준다.
   const [pubOverride, setPubOverride] = useState<Record<string, boolean>>({});
@@ -559,44 +559,22 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
     setMsg({ text: "작품을 지웠어요." });
     router.refresh();
   }
-  // 손잡이로 끄는 동안 줄이 바로 그 자리로 옮겨 보인다. 손을 놓으면 그 순서를 저장하고, 저장이 실패하면 원래 순서로 되돌린다(2026-11-13 아키텍터 지시).
-  const [order, setOrder] = useState<string[] | null>(null);
-  const live = useRef<string[] | null>(null);
-  const [dragging, setDragging] = useState<string | null>(null);
-  // 서버에서 받은 순서가 실제로 바뀌었을 때만(저장 후 새로 불러온 때) 화면 순서를 서버 순서로 맞춘다.
-  const serverKey = works.map((w) => w.id).join();
-  useEffect(() => {
-    setOrder(null);
-    live.current = null;
-  }, [serverKey]);
-  const list: MyWork[] = order ? (order.map((id) => works.find((w) => w.id === id)).filter(Boolean) as MyWork[]) : works;
-  function place(id: string, to: number) {
-    const ids = (live.current ?? works.map((w) => w.id)).slice();
-    const from = ids.indexOf(id);
-    if (from < 0 || to < 0 || to >= ids.length || from === to) return;
-    ids.splice(from, 1);
-    ids.splice(to, 0, id);
-    live.current = ids;
-    setOrder(ids);
-  }
-  async function commit() {
-    const ids = live.current;
-    setDragging(null);
-    drag.current = null;
-    if (!ids || ids.join() === works.map((w) => w.id).join()) return;
-    setMsg(null);
-    const r = await reorderWorks(ids);
-    if (!r.ok) {
-      live.current = null;
-      setOrder(null);
-      return setMsg({ text: r.error, err: true });
-    }
-    router.refresh();
-  }
-  function moveTo(id: string, to: number) {
-    place(id, to);
-    void commit();
-  }
+  // 손잡이 순서(공통 동작: components/ui/use-live-reorder.ts)
+  const reorder = useLiveReorder(
+    works.map((w) => w.id),
+    async (ids) => {
+      setMsg(null);
+      const r = await reorderWorks(ids);
+      if (!r.ok) {
+        setMsg({ text: r.error, err: true });
+        return false;
+      }
+      router.refresh();
+      return true;
+    },
+  );
+  const byId = new Map(works.map((w) => [w.id, w]));
+  const list = reorder.order.map((id) => byId.get(id)).filter((w): w is MyWork => Boolean(w));
 
   return (
     <div className="pf" aria-busy={busy || undefined}>
@@ -644,47 +622,11 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
         </div>
       )}
 
-      <div
-        className="pf-list"
-        onDragOver={(e) => {
-          if (drag.current) e.preventDefault();
-        }}
-        onDrop={(e) => {
-          e.preventDefault();
-          void commit();
-        }}
-      >
-      {list.map((w, i) => (
-        <div
-          key={w.id}
-          className={`pf-item${dragging === w.id ? " dragging" : ""}`}
-          onDragEnter={() => {
-            if (drag.current && drag.current !== w.id) place(drag.current, i);
-          }}
-        >
+      <div className="pf-list" {...reorder.listProps}>
+      {list.map((w) => (
+        <div key={w.id} className={`pf-item${reorder.dragging === w.id ? " dragging" : ""}`} {...reorder.itemProps(w.id)}>
           <div className={`pf-row${isPub(w) ? "" : " off"}`}>
-            <button
-              type="button"
-              className="pf-grip"
-              draggable
-              aria-label={`${w.title} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`}
-              onDragStart={(e) => {
-                drag.current = w.id;
-                live.current = list.map((x) => x.id);
-                setDragging(w.id);
-                e.dataTransfer.effectAllowed = "move";
-                e.dataTransfer.setData("text/plain", w.id);
-              }}
-              onDragEnd={() => {
-                if (drag.current) void commit();
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                  e.preventDefault();
-                  moveTo(w.id, e.key === "ArrowUp" ? i - 1 : i + 1);
-                }
-              }}
-            >
+            <button type="button" className="pf-grip" aria-label={`${w.title} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`} {...reorder.gripProps(w.id)}>
               ⠿
             </button>
             <span className="pf-title">{w.title}</span>
@@ -854,7 +796,15 @@ export function WorkEditor({
   const titleRef = useRef<HTMLInputElement>(null);
   // 새 작품: 승인 샘플처럼 글·이미지·영상·문서 칸이 처음부터 있고 순서를 바꾸거나 지울 수 있다. 「저장」을 누르면 작품을 만든 뒤 채운 칸을 이 순서대로 넣는다.
   const [slots, setSlots] = useState<Slot[]>(() => (work ? [] : (["logline", "text", "video", "image"] as SlotKind[]).map(newSlot)));
-  const dragSlot = useRef<string | null>(null);
+  // 새 작품의 칸은 화면에만 있으므로 손잡이 순서는 바로 화면 순서가 된다(저장은 「저장」을 누를 때).
+  const slotReorder = useLiveReorder(
+    slots.map((x) => x.id),
+    (ids) => {
+      setSlots((cur) => ids.map((id) => cur.find((x) => x.id === id)).filter((x): x is Slot => Boolean(x)));
+      return true;
+    },
+  );
+  const shownSlots = slotReorder.order.map((id) => slots.find((x) => x.id === id)).filter((x): x is Slot => Boolean(x));
   const moveSlotTo = (id: string, to: number) => setSlots((cur) => {
     const from = cur.findIndex((x) => x.id === id);
     if (from < 0 || to < 0 || to >= cur.length || from === to) return cur;
@@ -1086,40 +1036,16 @@ export function WorkEditor({
         <BlockList work={work} onMessage={setMsg} logline={logline} onLogline={setLogline} loglineErr={errs.logline} />
       ) : (
         <div className="we-body">
-          {slots.map((sl, i) => (
-            <div key={sl.id}>
+          <div {...slotReorder.listProps}>
+          {shownSlots.map((sl, i) => (
+            <div key={sl.id} className={slotReorder.dragging === sl.id ? "we-dragging" : undefined} {...slotReorder.itemProps(sl.id)}>
               <div className="we-gap">
                 <button type="button" className="we-mini" aria-label="여기에 요소 넣기" onClick={() => setSlots((cur) => [...cur.slice(0, i), newSlot("text"), ...cur.slice(i)])}>
                   +
                 </button>
               </div>
-              <div
-                className={`we-el${i === 0 ? " rep" : ""}`}
-                tabIndex={0}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  if (dragSlot.current) moveSlotTo(dragSlot.current, i);
-                  dragSlot.current = null;
-                }}
-              >
-                <button
-                  type="button"
-                  className="we-grip"
-                  draggable
-                  aria-label={`${sl.kind === "logline" ? "로그라인" : "요소"} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`}
-                  onDragStart={(e) => {
-                    dragSlot.current = sl.id;
-                    e.dataTransfer.effectAllowed = "move";
-                    e.dataTransfer.setData("text/plain", sl.id);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                      e.preventDefault();
-                      moveSlotTo(sl.id, e.key === "ArrowUp" ? i - 1 : i + 1);
-                    }
-                  }}
-                >
+              <div className={`we-el${i === 0 ? " rep" : ""}`} tabIndex={0}>
+                <button type="button" className="we-grip" aria-label={`${sl.kind === "logline" ? "로그라인" : "요소"} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`} {...slotReorder.gripProps(sl.id)}>
                   ⠿
                 </button>
                 <div className={`we-main${sl.kind !== "logline" ? " we-card" : ""}`}>
@@ -1148,6 +1074,7 @@ export function WorkEditor({
               </div>
             </div>
           ))}
+          </div>
           <div className="we-add">
             <span>추가</span>
             {([["text", "문서"], ["image", "이미지"], ["video", "영상"]] as [SlotKind, string][]).map(([k, l]) => (
@@ -1199,33 +1126,51 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
   // 작품에 이미지 요소가 하나도 없을 때만 맨 끝에 접힌 빈 이미지 칸 하나를 둔다(지울 수 있다). 이미지가 이미 있으면 붙이지 않는다.
   const [empties, setEmpties] = useState<EmptySlot[]>(() => (work.blocks.length >= BLOCK_LIMIT || work.blocks.some((b) => b.kind === "image") ? [] : [newEmpty("image", LAST, true)]));
   const full = work.blocks.length + empties.length >= BLOCK_LIMIT;
-  const dragId = useRef<string | null>(null);
   // 저장된 순서(로그라인 블록 포함, D35-2). 로그라인 자리는 글자 「logline」이다.
-  const items = orderItems(work.blocks, work.loglinePosition);
-  const idsOf = () => items.map((it) => (it === LOGLINE_TOKEN ? LOGLINE_TOKEN : it.id));
-  const moveItem = (id: string, to: number) => {
-    const ids = idsOf();
-    const from = ids.indexOf(id);
-    if (from < 0 || to < 0 || to >= ids.length || from === to) return;
-    ids.splice(from, 1);
-    ids.splice(to, 0, id);
-    void run(() => reorderWorkItems(work.id, ids));
-  };
+  // 손잡이로 바꾼 순서는 서버가 새 순서를 돌려줄 때까지 pending으로 화면에 그대로 둔다.
+  const serverItems = orderItems(work.blocks, work.loglinePosition);
+  const keyOfItem = (it: (typeof serverItems)[number]) => (it === LOGLINE_TOKEN ? LOGLINE_TOKEN : it.id);
+  const serverKey = serverItems.map(keyOfItem).join("|");
+  const [pendingState, setPendingState] = useState<{ base: string; ids: string[] } | null>(null);
+  const pending = pendingState && pendingState.base === serverKey ? pendingState.ids : null;
+  const setPending = (ids: string[] | null) => setPendingState(ids ? { base: serverKey, ids } : null);
+  const items = pending ? pending.map((k) => serverItems.find((it) => keyOfItem(it) === k)).filter((it): it is (typeof serverItems)[number] => it !== undefined) : serverItems;
+  const idsOf = () => items.map(keyOfItem);
 
   // 화면에 그릴 줄: 저장된 것 사이사이에 빈 칸을 at 자리에 끼운다.
   type Row = { type: "saved"; it: (typeof items)[number]; savedIndex: number } | { type: "empty"; e: EmptySlot };
-  const rows: Row[] = items.map((it, k) => ({ type: "saved" as const, it, savedIndex: k }));
-  [...empties].sort((a, b) => a.at - b.at).forEach((e) => rows.splice(Math.min(e.at, rows.length), 0, { type: "empty", e }));
+  const baseRows: Row[] = items.map((it, k) => ({ type: "saved" as const, it, savedIndex: k }));
+  [...empties].sort((a, b) => a.at - b.at).forEach((e) => baseRows.splice(Math.min(e.at, baseRows.length), 0, { type: "empty", e }));
+  const rowKey = (r: Row) => (r.type === "empty" ? r.e.id : keyOfItem(r.it));
+
+  // 저장된 요소와 빈 칸을 한 줄로 보고 순서를 바꾼다. 빈 칸은 화면 자리만 바꾸고, 저장된 요소의 순서가 바뀌었으면 서버에 저장한다.
+  async function applyRowOrder(keys: string[]) {
+    setEmpties((cur) => cur.map((x) => ({ ...x, at: keys.indexOf(x.id) })));
+    const saved = keys.filter((k) => !empties.some((x) => x.id === k));
+    if (saved.join("|") === idsOf().join("|")) return true;
+    setPending(saved);
+    onMessage(null);
+    const r = await reorderWorkItems(work.id, saved);
+    if (!r.ok) {
+      setPending(null);
+      onMessage({ text: r.error ?? "순서를 저장하지 못했어요.", err: true });
+      return false;
+    }
+    router.refresh();
+    return true;
+  }
+  const rowReorder = useLiveReorder(baseRows.map(rowKey), applyRowOrder);
+  const rows: Row[] = rowReorder.order.map((k) => baseRows.find((r) => rowKey(r) === k)).filter((r): r is Row => r !== undefined);
+  const moveRow = (ri: number, to: number) => {
+    if (to < 0 || to >= rows.length || ri === to) return;
+    const keys = rows.map(rowKey);
+    const [k] = keys.splice(ri, 1);
+    keys.splice(to, 0, k);
+    void applyRowOrder(keys);
+  };
   const savedBefore = (ri: number) => rows.slice(0, ri).filter((r) => r.type === "saved").length;
   const patchEmpty = (id: string, patch: Partial<EmptySlot>) => setEmpties((cur) => cur.map((x) => (x.id === id ? { ...x, ...patch } : x)));
   const dropEmpty = (id: string) => setEmpties((cur) => cur.filter((x) => x.id !== id));
-  const moveEmpty = (ri: number, to: number) => {
-    if (to < 0 || to >= rows.length) return;
-    const me = rows[ri];
-    const other = rows[to];
-    if (me.type !== "empty") return;
-    setEmpties((cur) => cur.map((x) => (x.id === me.e.id ? { ...x, at: to } : other.type === "empty" && x.id === other.e.id ? { ...x, at: ri } : x.at !== LAST ? x : { ...x, at: rows.findIndex((r) => r.type === "empty" && r.e.id === x.id) })));
-  };
   const removeEmpty = (ri: number, id: string) => setEmpties((cur) => cur.filter((x) => x.id !== id).map((x) => (x.at !== LAST && x.at > ri ? { ...x, at: x.at - 1 } : x)));
   const addEmpty = (kind: EmptyKind) => {
     setEmpties((cur) => [...cur, newEmpty(kind, insertAt ?? LAST)]);
@@ -1281,8 +1226,8 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
 
   const tools = (ri: number, up: () => void, down: () => void, del: () => void) => (
     <div className="we-tools">
-      <button type="button" className="we-mini" aria-label="위로" disabled={busy || ri === 0} onClick={up}>↑</button>
-      <button type="button" className="we-mini" aria-label="아래로" disabled={busy || ri === rows.length - 1} onClick={down}>↓</button>
+      <button type="button" className="we-mini" aria-label="위로" disabled={ri === 0} onClick={up}>↑</button>
+      <button type="button" className="we-mini" aria-label="아래로" disabled={ri === rows.length - 1} onClick={down}>↓</button>
       <button type="button" className="we-mini" aria-label="지우기" disabled={busy} onClick={del}>지우기</button>
     </div>
   );
@@ -1290,6 +1235,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
   return (
     <div className="we-body">
       {/* 작품 안에서 맨 위에 놓인 것(로그라인이든 요소든)이 그 작품의 대표다. 순서는 끌거나 ↑↓로 바꾼다(D35-2). */}
+      <div {...rowReorder.listProps}>
       {rows.map((row, ri) => {
         const gap = (
           <div className="we-gap">
@@ -1301,21 +1247,10 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
         if (row.type === "empty") {
           const e = row.e;
           return (
-            <div key={e.id}>
+            <div key={e.id} className={rowReorder.dragging === e.id ? "we-dragging" : undefined} {...rowReorder.itemProps(e.id)}>
               {gap}
               <div className="we-el" tabIndex={0}>
-                <button
-                  type="button"
-                  className="we-grip"
-                  disabled={busy}
-                  aria-label="요소 순서 바꾸기(위아래 화살표 키)"
-                  onKeyDown={(ev) => {
-                    if (ev.key === "ArrowUp" || ev.key === "ArrowDown") {
-                      ev.preventDefault();
-                      moveEmpty(ri, ev.key === "ArrowUp" ? ri - 1 : ri + 1);
-                    }
-                  }}
-                >
+                <button type="button" className="we-grip" aria-label="요소 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)" {...rowReorder.gripProps(e.id)}>
                   ⠿
                 </button>
                 <div className="we-main we-card">
@@ -1352,46 +1287,19 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
                     </>
                   )}
                 </div>
-                {tools(ri, () => moveEmpty(ri, ri - 1), () => moveEmpty(ri, ri + 1), () => removeEmpty(ri, e.id))}
+                {tools(ri, () => moveRow(ri, ri - 1), () => moveRow(ri, ri + 1), () => removeEmpty(ri, e.id))}
               </div>
             </div>
           );
         }
         const it = row.it;
-        const i = row.savedIndex;
-        const itemId = it === LOGLINE_TOKEN ? LOGLINE_TOKEN : it.id;
+        const itemId = keyOfItem(it);
         const b = it === LOGLINE_TOKEN ? null : it;
         return (
-        <div key={itemId}>
+        <div key={itemId} className={rowReorder.dragging === itemId ? "we-dragging" : undefined} {...rowReorder.itemProps(itemId)}>
         {gap}
-        <div
-          className={`we-el${i === 0 ? " rep" : ""}`}
-          tabIndex={0}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            if (dragId.current) moveItem(dragId.current, i);
-            dragId.current = null;
-          }}
-        >
-          <button
-            type="button"
-            className="we-grip"
-            draggable
-            disabled={busy}
-            aria-label={`${b ? "요소" : "로그라인"} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`}
-            onDragStart={(e) => {
-              dragId.current = itemId;
-              e.dataTransfer.effectAllowed = "move";
-              e.dataTransfer.setData("text/plain", itemId);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                e.preventDefault();
-                moveItem(itemId, e.key === "ArrowUp" ? i - 1 : i + 1);
-              }
-            }}
-          >
+        <div className={`we-el${savedBefore(ri) === 0 ? " rep" : ""}`} tabIndex={0}>
+          <button type="button" className="we-grip" aria-label={`${b ? "요소" : "로그라인"} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`} {...rowReorder.gripProps(itemId)}>
             ⠿
           </button>
           <div className={`we-main${b ? " we-card" : ""}`}>
@@ -1462,17 +1370,18 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
             )}
           </div>
           {b ? (
-            tools(ri, () => moveItem(itemId, i - 1), () => moveItem(itemId, i + 1), () => void clearSaved(ri, b))
+            tools(ri, () => moveRow(ri, ri - 1), () => moveRow(ri, ri + 1), () => void clearSaved(ri, b))
           ) : (
             <div className="we-tools">
-              <button type="button" className="we-mini" aria-label="위로" disabled={busy || i === 0} onClick={() => moveItem(itemId, i - 1)}>↑</button>
-              <button type="button" className="we-mini" aria-label="아래로" disabled={busy || i === items.length - 1} onClick={() => moveItem(itemId, i + 1)}>↓</button>
+              <button type="button" className="we-mini" aria-label="위로" disabled={ri === 0} onClick={() => moveRow(ri, ri - 1)}>↑</button>
+              <button type="button" className="we-mini" aria-label="아래로" disabled={ri === rows.length - 1} onClick={() => moveRow(ri, ri + 1)}>↓</button>
             </div>
           )}
         </div>
         </div>
         );
       })}
+      </div>
 
       <div className="we-add">
         <span>추가</span>

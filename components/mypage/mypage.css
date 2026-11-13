@@ -313,6 +313,6 @@
 .mp .we-fit > span { margin-right: 4px; }
 .mp .we-fit .opt { height: 28px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--body); font: inherit; font-size: 13px; cursor: pointer; }
 .mp .we-fit .opt[aria-pressed="true"] { background: var(--body); border-color: var(--body); color: #fff; font-weight: 700; }
-/* 손잡이로 끄는 동안: 줄 사이 틈도 놓을 수 있는 자리이고, 끌고 있는 줄은 흐리게 보인다 */
+/* 손잡이로 끄는 동안 끌고 있는 줄은 흐리게(components/ui/use-live-reorder.ts) */
 .pf-list { display: grid; gap: inherit; }
-.pf-item.dragging .pf-row { opacity: .45; }
+.pf-item.dragging .pf-row, .we-dragging .we-el { opacity: .45; }
