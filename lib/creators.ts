@@ -176,21 +176,49 @@ export async function listCreators(filter: CreatorFilterInput, page: number): Pr
   const rows = (data ?? []) as unknown as CreatorRow[];
   const heroUrls = await signPublicFiles(rows.map((r) => r.hero_path));
   // 대표 이미지·영상을 카드 맨 위에 거는 것은 역할에 영상 제작이나 아트디렉터가 있는 사람만이다(별뜨리님 규칙).
-  const covers = await loadCovers(rows.filter((r) => asRoles(r.roles).some((x) => x === "video" || x === "art_director")).map((r) => r.public_handle));
-  return { items: rows.map((r) => ({ ...toListItem(r, heroUrls), cover: covers.get(r.public_handle)?.src, coverKind: covers.get(r.public_handle)?.kind })), total: count ?? 0 };
+  // 카드에 먼저 보이는 작품은 그 크리에이터가 포트폴리오 등록 목록에서 맨 위에 올려 둔 작품이다(손잡이로 정한 순서).
+  const featured = await loadFeatured(rows.map((r) => r.public_handle));
+  const covers = await loadCovers(rows.filter((r) => asRoles(r.roles).some((x) => x === "video" || x === "art_director")).map((r) => r.public_handle), featured);
+  return {
+    items: rows.map((r) => {
+      const base = toListItem(r, heroUrls);
+      const f = featured.get(r.public_handle);
+      return { ...base, latest: f ? { title: f.title, logline: f.logline, genres: f.genres } : base.latest, cover: covers.get(r.public_handle)?.src, coverKind: covers.get(r.public_handle)?.kind };
+    }),
+    total: count ?? 0,
+  };
 }
 
-// 그 크리에이터들의 가장 최근 공개 작품에서 「대표」(D35-2: 작품 안에서 맨 위에 놓인 것)가 이미지·영상이면 그 그림 주소를 돌려준다.
+type FeaturedWork = { id: string; title: string; logline: string; genres: string[]; loglinePosition: number };
+// 크리에이터마다 공개 작품 중 등록 목록의 맨 위 작품(순서 번호가 가장 작은 것, 같으면 최근 공개)을 돌려준다.
+async function loadFeatured(handles: string[]): Promise<Map<string, FeaturedWork>> {
+  const out = new Map<string, FeaturedWork>();
+  if (handles.length === 0) return out;
+  const works = await getSupabase()
+    .from("creator_works_public")
+    .select("id, author_handle, title, logline, genres, logline_position")
+    .in("author_handle", handles)
+    .order("sort_order", { ascending: true })
+    .order("published_at", { ascending: false })
+    .order("id", { ascending: false });
+  if (works.error) return out;
+  type W = { id: string; author_handle: string; title: string; logline: string | null; genres: string[] | null; logline_position: number | null };
+  for (const w of (works.data ?? []) as W[]) {
+    if (!out.has(w.author_handle)) out.set(w.author_handle, { id: w.id, title: w.title, logline: w.logline ?? "", genres: w.genres ?? [], loglinePosition: w.logline_position ?? 0 });
+  }
+  return out;
+}
+
+// 그 크리에이터들이 카드에 먼저 보이게 정한 작품(등록 목록 맨 위)에서 「대표」(D35-2: 작품 안에서 맨 위에 놓인 것)가 이미지·영상이면 그 그림 주소를 돌려준다.
 // 맨 위가 로그라인이거나 글·문서면 그 사람은 빠진다(카드는 로그라인 모양으로 나온다). 영상은 유튜브라서 유튜브가 주는 대표 그림을 쓴다.
-async function loadCovers(handles: string[]): Promise<Map<string, { src: string; kind: "image" | "video" }>> {
+async function loadCovers(handles: string[], featured: Map<string, FeaturedWork>): Promise<Map<string, { src: string; kind: "image" | "video" }>> {
   const out = new Map<string, { src: string; kind: "image" | "video" }>();
   if (handles.length === 0) return out;
   const sb = getSupabase();
-  const works = await sb.from("creator_works_public").select("id, author_handle, logline_position").in("author_handle", handles).order("published_at", { ascending: false }).order("id", { ascending: false });
-  if (works.error) return out;
-  const latest = new Map<string, { id: string; loglinePosition: number }>(); // handle → 가장 최근 작품
-  for (const w of (works.data ?? []) as { id: string; author_handle: string; logline_position: number | null }[]) {
-    if (!latest.has(w.author_handle)) latest.set(w.author_handle, { id: w.id, loglinePosition: w.logline_position ?? 0 });
+  const latest = new Map<string, { id: string; loglinePosition: number }>(); // handle → 카드에 먼저 보이는 작품
+  for (const h of handles) {
+    const f = featured.get(h);
+    if (f) latest.set(h, { id: f.id, loglinePosition: f.loglinePosition });
   }
   const ids = Array.from(latest.values()).map((w) => w.id);
   if (ids.length === 0) return out;
