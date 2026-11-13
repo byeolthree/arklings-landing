@@ -34,7 +34,7 @@ import { GENRES } from "@/components/creators/genres";
 import { HERO_RULE, VIDEO_PROMPT } from "@/components/mypage/hero-guide";
 import { PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
 import { ROLES, type Role } from "@/lib/collab";
-import { BLOCK_LIMIT, DOC_SUBKINDS, LOGLINE_TOKEN, QUOTA_BYTES, TITLE_MAX, VIDEO_SUBKINDS, WORK_LIMIT, type ProfileErrors, type ProfileValues } from "@/lib/creator-rules";
+import { BLOCK_LIMIT, DOC_SUBKINDS, IMAGE_SUBKINDS, LOGLINE_TOKEN, QUOTA_BYTES, TITLE_MAX, VIDEO_SUBKINDS, WORK_LIMIT, type ProfileErrors, type ProfileValues } from "@/lib/creator-rules";
 import { orderItems, representativeOf } from "@/lib/creator-cards";
 import { kindOfMime, uploadToSlot } from "@/lib/creator-upload-client";
 import type { MyProfile, MyWork } from "@/lib/creators-mine";
@@ -105,7 +105,7 @@ function ElementName({ kind }: { kind: "logline" | "video" | "image" | "text" })
 }
 
 // 시안 01: 이미지 요소 = 「▾ 접기 · 이미지 (JPG·PNG·WEBP, 5MB 이하)」 줄 + 이미지가 들어갈 큰 칸(눌러서 고른다).
-function ImageSlotBox({ file, onFile, defaultFold = false }: { file: File | null; onFile: (f: File | null) => void; defaultFold?: boolean }) {
+function ImageSlotBox({ file, onFile, defaultFold = false, bare = false }: { file: File | null; onFile: (f: File | null) => void; defaultFold?: boolean; bare?: boolean }) {
   const [fold, setFold] = useState(defaultFold);
   const [msg, setMsg] = useState("");
   const ref = useRef<HTMLInputElement>(null);
@@ -127,13 +127,15 @@ function ImageSlotBox({ file, onFile, defaultFold = false }: { file: File | null
   }
   return (
     <div style={{ flex: "1 1 100%" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-        <button type="button" className="we-fold" aria-expanded={!fold} onClick={() => setFold(!fold)}>
-          {fold ? "▸ 펼치기" : "▾ 접기"}
-        </button>
-        <ElementName kind="image" />
-      </div>
-      {!fold && (
+      {!bare && (
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+          <button type="button" className="we-fold" aria-expanded={!fold} onClick={() => setFold(!fold)}>
+            {fold ? "▸ 펼치기" : "▾ 접기"}
+          </button>
+          <ElementName kind="image" />
+        </div>
+      )}
+      {(bare || !fold) && (
         <div className="we-media we-imgbox">
           {url ? (
             <button type="button" className="we-imgchange" onClick={() => ref.current?.click()} aria-label="이미지 바꾸기">
@@ -707,9 +709,15 @@ let slotSeq = 0;
 const newSlot = (kind: SlotKind): Slot => ({ id: `s${++slotSeq}`, kind, text: "", url: "", file: null, sub: "" });
 
 // 요소 종류 칩(시안 01). 영상은 티저·예고편…, 글·문서는 시놉시스·트리트먼트…를 고른다. 다시 누르면 비운다. 고른 것은 요소의 sub_kind(0012)에 저장된다.
-function SubChips({ items, value, onPick, label, disabled }: { items: readonly string[]; value: string; onPick: (v: string) => void; label: string; disabled?: boolean }) {
+// 요소 종류 태그. 고른 태그만 요소별 색(외곽선·글자)이 보인다: 영상 소프트 틸, 문서 딥 슬레이트 블루, 이미지 딥 올리브 세이지(2026-11-13).
+type SubTone = "video" | "doc" | "image";
+const SUB_ITEMS: Record<SubTone, readonly string[]> = { video: VIDEO_SUBKINDS, doc: DOC_SUBKINDS, image: IMAGE_SUBKINDS };
+const SUB_LABEL: Record<SubTone, string> = { video: "영상 종류", doc: "문서 종류", image: "이미지 종류" };
+const toneOf = (kind: string): SubTone => (kind === "video" ? "video" : kind === "image" ? "image" : "doc");
+function SubChips({ tone, value, onPick, disabled }: { tone: SubTone; value: string; onPick: (v: string) => void; disabled?: boolean }) {
+  const items = SUB_ITEMS[tone];
   return (
-    <div className="we-pick we-sub" role="group" aria-label={label}>
+    <div className={`we-pick we-sub tone-${tone}`} role="group" aria-label={SUB_LABEL[tone]}>
       {items.map((x) => (
         <button key={x} type="button" className="opt" aria-pressed={value === x} disabled={disabled} onClick={() => onPick(value === x ? "" : x)}>
           {x}
@@ -755,7 +763,7 @@ async function addSlots(workId: string, slots: Slot[]): Promise<{ error: string 
       if (!slot.ok) return { error: slot.error, order };
       const up = await uploadToSlot(slot.path, slot.token, sl.file);
       if (!up.ok) return { error: up.error, order };
-      const fin = await finishFileUpload(workId, { path: slot.path, kind, name: sl.file.name, subKind: kind === "document" || kind === "video" ? sl.sub || null : null });
+      const fin = await finishFileUpload(workId, { path: slot.path, kind, name: sl.file.name, subKind: sl.sub || null });
       if (!fin.ok) return { error: fin.error, order };
       order.push(fin.id);
     }
@@ -994,7 +1002,7 @@ export function WorkEditor({
           {nickname || "닉네임"}{work && work.isPublic ? ` · ${new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" })}` : ""}
         </p>
         {errs.roles && <AlertPopup key={errs.roles}>{errs.roles}</AlertPopup>}
-        <div className="we-pick" role="group" aria-label="장르">
+        <div className="we-pick we-genre" role="group" aria-label="장르">
           {GENRES.map((g) => (
             <button key={g} type="button" className="opt" aria-pressed={genres.includes(g)} onClick={() => setGenres(toggle(genres, g))}>
               {g}
@@ -1048,24 +1056,21 @@ export function WorkEditor({
                 >
                   ⠿
                 </button>
-                <div className={`we-main${sl.kind === "video" || sl.kind === "text" ? " we-card" : ""}`}>
-                  {sl.kind !== "image" && (
-                    <button type="button" className="we-fold" aria-expanded={!slotFold[sl.id]} onClick={() => setSlotFold({ ...slotFold, [sl.id]: !slotFold[sl.id] })}>
-                      {slotFold[sl.id] ? "▸ 펼치기" : "▾ 접기"}
-                    </button>
-                  )}
-                  {sl.kind !== "image" && <ElementName kind={sl.kind} />}
+                <div className={`we-main${sl.kind !== "logline" ? " we-card" : ""}`}>
+                  <button type="button" className="we-fold" aria-expanded={!slotFold[sl.id]} onClick={() => setSlotFold({ ...slotFold, [sl.id]: !slotFold[sl.id] })}>
+                    {slotFold[sl.id] ? "▸ 펼치기" : "▾ 접기"}
+                  </button>
+                  <ElementName kind={sl.kind} />
                   {sl.kind === "logline" && !slotFold[sl.id] && (
                     <label className="we-logline-label">
                       <textarea className="we-text" aria-label="로그라인" rows={3} value={logline} onChange={(e) => setLogline(e.target.value)} placeholder={LOGLINE_FRAME} aria-invalid={errs.logline ? true : undefined} />
                       {errs.logline && <AlertPopup key={errs.logline}>{errs.logline}</AlertPopup>}
                     </label>
                   )}
-                  {sl.kind === "video" && <SubChips items={VIDEO_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="영상 종류" />}
-                  {sl.kind === "text" && <SubChips items={DOC_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="문서 종류" />}
+                  {sl.kind !== "logline" && <SubChips tone={toneOf(sl.kind)} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} />}
                   {sl.kind === "text" && !slotFold[sl.id] && <DocFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
                   {sl.kind === "text" && !slotFold[sl.id] && <textarea className="we-text we-doc-text" rows={3} placeholder="〈직접 입력〉" aria-label="문서" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
-                  {sl.kind === "image" && <ImageSlotBox file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
+                  {sl.kind === "image" && !slotFold[sl.id] && <ImageSlotBox bare file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
                   {sl.kind === "video" && !slotFold[sl.id] && <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={sl.url} onChange={(e) => patchSlot(sl.id, { url: e.target.value })} />}
                   {sl.kind === "video" && !slotFold[sl.id] && <VideoFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
                 </div>
@@ -1247,16 +1252,15 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
                 >
                   ⠿
                 </button>
-                <div className={`we-main${e.kind !== "image" ? " we-card" : ""}`}>
-                  {e.kind === "image" ? (
-                    <ImageSlotBox file={null} defaultFold={e.fold} onFile={(f) => { if (f) void upload(f, "image", { ri, e }); }} />
-                  ) : (
+                <div className="we-main we-card">
+                  {(
                     <>
                       <button type="button" className="we-fold" aria-expanded={!e.fold} onClick={() => patchEmpty(e.id, { fold: !e.fold })}>
                         {e.fold ? "▸ 펼치기" : "▾ 접기"}
                       </button>
                       <ElementName kind={e.kind} />
-                      <SubChips items={e.kind === "video" ? VIDEO_SUBKINDS : DOC_SUBKINDS} value={e.sub} disabled={busy} label={e.kind === "video" ? "영상 종류" : "문서 종류"} onPick={(v) => patchEmpty(e.id, { sub: v })} />
+                      <SubChips tone={toneOf(e.kind)} value={e.sub} disabled={busy} onPick={(v) => patchEmpty(e.id, { sub: v })} />
+                      {!e.fold && e.kind === "image" && <ImageSlotBox bare file={null} onFile={(f) => { if (f) void upload(f, "image", { ri, e }); }} />}
                       {!e.fold && e.kind === "video" && (
                         <>
                           <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={e.url} onChange={(ev) => patchEmpty(e.id, { url: ev.target.value })} />
@@ -1324,7 +1328,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
           >
             ⠿
           </button>
-          <div className={`we-main${b && (b.kind === "video" || b.kind === "text" || b.kind === "document") ? " we-card" : ""}`}>
+          <div className={`we-main${b ? " we-card" : ""}`}>
             {!b && (
               <button type="button" className="we-fold" aria-expanded={!folded.logline} onClick={() => setFolded({ ...folded, logline: !folded.logline })}>
                 {folded.logline ? "▸ 펼치기" : "▾ 접기"}
@@ -1343,15 +1347,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
               </button>
             )}
             {b && <ElementName kind={b.kind === "document" ? "text" : b.kind} />}
-            {b && (b.kind === "video" || b.kind === "text" || b.kind === "document") && (
-              <SubChips
-                items={b.kind === "video" ? VIDEO_SUBKINDS : DOC_SUBKINDS}
-                value={b.sub ?? ""}
-                disabled={busy}
-                label={b.kind === "video" ? "영상 종류" : "문서 종류"}
-                onPick={(v) => void run(() => setBlockSubKind(b.id, v || null))}
-              />
-            )}
+            {b && <SubChips tone={toneOf(b.kind)} value={("sub" in b && b.sub) || ""} disabled={busy} onPick={(v) => void run(() => setBlockSubKind(b.id, v || null))} />}
             {b && b.kind === "text" && !folded[b.id] && (
               <>
                 <DocFilePick file={null} disabled={busy} onFile={(f) => { if (f) void upload(f, "document", { ri: ri + 1 }); }} />

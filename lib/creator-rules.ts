@@ -134,12 +134,13 @@ export const TEXT_BLOCK_MAX = 5000;
 // 작품 요소의 세부 종류(시안 01 요소 종류 칩의 글자 그대로, DB 0012가 같은 목록으로 거른다). 이미지 요소에는 세부 종류가 없다.
 export const VIDEO_SUBKINDS = ["티저", "예고편", "선공개", "파일럿", "피치 영상"] as const;
 export const DOC_SUBKINDS = ["시놉시스", "트리트먼트", "아웃라인", "시리즈 바이블", "파일럿", "피치 문서"] as const;
+export const IMAGE_SUBKINDS = ["포스터", "컨셉", "스토리보드", "B컷", "기타"] as const; // 2026-11-13 아키텍터 지시. DB는 0026이 받는다
 export type BlockKind = "text" | "image" | "video" | "document";
 // 비어 있으면 null(종류를 안 고른 것). 요소 종류에 없는 글자면 undefined(거절).
 export function parseSubKind(kind: BlockKind, raw: unknown): string | null | undefined {
   if (raw === undefined || raw === null || raw === "") return null;
   if (typeof raw !== "string") return undefined;
-  const list: readonly string[] = kind === "video" ? VIDEO_SUBKINDS : kind === "image" ? [] : DOC_SUBKINDS;
+  const list: readonly string[] = kind === "video" ? VIDEO_SUBKINDS : kind === "image" ? IMAGE_SUBKINDS : DOC_SUBKINDS;
   return list.includes(raw) ? raw : undefined;
 }
 

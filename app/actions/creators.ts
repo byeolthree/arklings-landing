@@ -69,7 +69,7 @@ function dbMessage(e: DbError): string {
   if (m.includes("work_plan_not_owned")) return "내 기획안만 붙일 수 있어요.";
   if (m.includes("logline_position")) return "로그라인 위치를 저장하려면 데이터베이스 준비(0013)가 먼저 필요해요. 로그라인을 맨 위에 두고 저장하거나 잠시 뒤에 다시 시도해 주세요.";
   if (m.includes("creator_work_blocks_shape") || m.includes("creator_work_blocks_file_path")) return "영상 파일을 저장하려면 데이터베이스 준비(0015)가 먼저 필요해요. 유튜브 주소로 넣거나 잠시 뒤에 다시 시도해 주세요.";
-  if (m.includes("creator_work_blocks_sub_kind")) return "고를 수 없는 종류예요.";
+  if (m.includes("creator_work_blocks_sub_kind")) return "고를 수 없는 종류예요. 이미지 종류는 데이터베이스 준비(0026)가 먼저 필요해요.";
   if (m.includes("sub_kind")) return "요소 종류를 저장하려면 데이터베이스 준비(0012)가 먼저 필요해요. 종류를 비우고 저장하거나 잠시 뒤에 다시 시도해 주세요.";
   if (e?.code === "23505" && m.includes("plan_id")) return "이 기획안은 이미 다른 작품에 붙어 있어요.";
   if (e?.code === "23505") return "이미 쓰고 있는 공개 주소예요. 다른 주소를 적어 주세요.";
