@@ -709,7 +709,7 @@ let slotSeq = 0;
 const newSlot = (kind: SlotKind): Slot => ({ id: `s${++slotSeq}`, kind, text: "", url: "", file: null, sub: "" });
 
 // 요소 종류 칩(시안 01). 영상은 티저·예고편…, 글·문서는 시놉시스·트리트먼트…를 고른다. 다시 누르면 비운다. 고른 것은 요소의 sub_kind(0012)에 저장된다.
-// 요소 종류 태그. 고른 태그만 요소별 색(외곽선·글자)이 보인다: 영상 소프트 틸, 문서 딥 슬레이트 블루, 이미지 딥 올리브 세이지(2026-11-13).
+// 요소 종류 태그. 고른 태그만 요소별 색(외곽선·글자)이 보인다: 영상 소프트 틸, 문서 딥 슬레이트 블루, 이미지 뮤트 세이지(2026-11-13).
 type SubTone = "video" | "doc" | "image";
 const SUB_ITEMS: Record<SubTone, readonly string[]> = { video: VIDEO_SUBKINDS, doc: DOC_SUBKINDS, image: IMAGE_SUBKINDS };
 const SUB_LABEL: Record<SubTone, string> = { video: "영상 종류", doc: "문서 종류", image: "이미지 종류" };
@@ -1085,7 +1085,7 @@ export function WorkEditor({
           <div className="we-add">
             <span>추가</span>
             {([["text", "문서"], ["image", "이미지"], ["video", "영상"]] as [SlotKind, string][]).map(([k, l]) => (
-              <button key={k} type="button" className="btn btn-ghost" onClick={() => setSlots((cur) => [...cur, newSlot(k)])}>
+              <button key={k} type="button" className={`btn btn-ghost we-add-${k}`} onClick={() => setSlots((cur) => [...cur, newSlot(k)])}>
                 + {l}
               </button>
             ))}
@@ -1401,9 +1401,9 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
 
       <div className="we-add">
         <span>추가</span>
-        <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => addEmpty("text")}>+ 문서</button>
-        <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => addEmpty("image")}>+ 이미지</button>
-        <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => addEmpty("video")}>+ 영상</button>
+        <button type="button" className="btn btn-ghost we-add-text" disabled={busy || full} onClick={() => addEmpty("text")}>+ 문서</button>
+        <button type="button" className="btn btn-ghost we-add-image" disabled={busy || full} onClick={() => addEmpty("image")}>+ 이미지</button>
+        <button type="button" className="btn btn-ghost we-add-video" disabled={busy || full} onClick={() => addEmpty("video")}>+ 영상</button>
       </div>
     </div>
   );
