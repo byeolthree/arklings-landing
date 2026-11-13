@@ -289,3 +289,4 @@
 .mp .we-imgbox { display: flex; align-items: center; justify-content: center; cursor: default; }
 .mp .we-imgempty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; font-size: 14px; color: var(--body); }
 .mp .we-imgchange { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
+.mp .we-imgempty .btn { height: 28px; min-height: 28px; padding: 0 14px; border-width: 1px; border-radius: 8px; font-size: 13px; }

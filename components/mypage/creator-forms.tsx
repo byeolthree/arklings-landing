@@ -205,8 +205,12 @@ function VideoFilePick({ file, onFile, disabled }: { file?: File | null; onFile:
     <div className="we-drop" style={{ flex: "1 1 100%" }}>
       <p className="mp-note">영상 파일 첨부 · {rule.hint}</p>
       <div className="we-pick">
-        <button type="button" className="btn btn-ghost" onClick={copyPrompt} disabled={disabled}>
-          영상 변환 프롬프트 복사
+        <button type="button" className="btn btn-ghost" onClick={copyPrompt} disabled={disabled} aria-label="영상 변환 프롬프트 복사" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+          영상 변환 프롬프트
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="11" height="11" rx="2" />
+            <path d="M5 15V6a2 2 0 0 1 2-2h9" />
+          </svg>
         </button>
         <label className="btn btn-ghost" style={{ cursor: "pointer" }}>
           파일 고르기

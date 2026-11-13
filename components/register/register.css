@@ -285,3 +285,4 @@
 .rg .we-main.we-card .we-text.we-doc-text, .rg .we-text.we-doc-text { background: #fff; }
 
 .rg .we-imgbox { display: flex; align-items: center; justify-content: center; }
+.rg .we-imgempty .btn { height: 28px; min-height: 28px; padding: 0 14px; border-width: 1px; border-radius: 8px; font-size: 13px; }
