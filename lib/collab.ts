@@ -1,6 +1,6 @@
 export const ROLES = {
-  video: "영상 제작",
-  script: "대본",
+  video: "제작·연출",
+  script: "기획·작가",
   art_director: "아트디렉터",
   history_advisor: "역사 자문",
   producer: "책임 프로듀서",

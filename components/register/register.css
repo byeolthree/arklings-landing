@@ -290,12 +290,12 @@
 /* 화면을 줄여 카드가 아래로 내려가는 폭에서는 「포트폴리오 화면에 보일 카드」를 감춘다 */
 @media (max-width: 1023px) { .rg .rg-side { display: none; } }
 
-/* 고른 태그만 색이 보인다: 외곽선과 글자(2026-11-13). 장르 딥 앰버, 영상 소프트 틸, 문서 딥 슬레이트 블루, 이미지 뮤트 세이지 */
+/* 고른 태그만 색이 보인다(2026-11-13). 장르는 딥 앰버 외곽선·글자, 종류 태그는 채우기·흰 글자: 영상 소프트 틸, 문서 딥 슬레이트 블루, 이미지 뮤트 세이지 */
 .rg .we-pick.we-genre .opt[aria-pressed="true"] { background: #fff; border-color: #a96e16; color: #a96e16; }
 .rg .we-main .we-pick.we-sub .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub .opt[aria-pressed="true"] { background: #fff; }
-.rg .we-main .we-pick.we-sub.tone-video .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub.tone-video .opt[aria-pressed="true"] { border-color: #6e9ca3; color: #6e9ca3; }
-.rg .we-main .we-pick.we-sub.tone-doc .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub.tone-doc .opt[aria-pressed="true"] { border-color: #40576f; color: #40576f; }
-.rg .we-main .we-pick.we-sub.tone-image .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub.tone-image .opt[aria-pressed="true"] { border-color: #6f8a7a; color: #6f8a7a; }
+.rg .we-main .we-pick.we-sub.tone-video .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub.tone-video .opt[aria-pressed="true"] { background: #6e9ca3; border-color: #6e9ca3; color: #fff; }
+.rg .we-main .we-pick.we-sub.tone-doc .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub.tone-doc .opt[aria-pressed="true"] { background: #40576f; border-color: #40576f; color: #fff; }
+.rg .we-main .we-pick.we-sub.tone-image .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub.tone-image .opt[aria-pressed="true"] { background: #6f8a7a; border-color: #6f8a7a; color: #fff; }
 .rg .we-pick.we-genre .opt[aria-pressed="true"], .rg .we-main .we-pick.we-sub .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub .opt[aria-pressed="true"] { font-weight: 700; }
 
 /* 요소 추가 버튼: 종류별 색으로 채우고 흰 글자(2026-11-13). 문서 딥 슬레이트 블루, 이미지 뮤트 세이지, 영상 소프트 틸 */
