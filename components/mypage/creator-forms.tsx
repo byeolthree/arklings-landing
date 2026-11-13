@@ -563,10 +563,12 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
   const [order, setOrder] = useState<string[] | null>(null);
   const live = useRef<string[] | null>(null);
   const [dragging, setDragging] = useState<string | null>(null);
+  // 서버에서 받은 순서가 실제로 바뀌었을 때만(저장 후 새로 불러온 때) 화면 순서를 서버 순서로 맞춘다.
+  const serverKey = works.map((w) => w.id).join();
   useEffect(() => {
     setOrder(null);
     live.current = null;
-  }, [works]);
+  }, [serverKey]);
   const list: MyWork[] = order ? (order.map((id) => works.find((w) => w.id === id)).filter(Boolean) as MyWork[]) : works;
   function place(id: string, to: number) {
     const ids = (live.current ?? works.map((w) => w.id)).slice();
