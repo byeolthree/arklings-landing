@@ -454,17 +454,3 @@
 /* 로그라인·문서 카드의 「제목 · 포맷」 뒤에도 음영(테두리색 #E8DFE3)을 넣는다(2026-11-13 아키텍터 지시) */
 .cr .cr-v2-cap.plain { align-self: flex-start; width: fit-content; padding: 3px 10px; gap: 6px; background: var(--line); }
 .cr .cr-v2-cap.plain .cr-v2-cap-dot { color: var(--body); }
-
-/* 역할 태그 색: 컬러 시스템의 딥 색(딥 베리·딥 앰버·딥 틸·딥 슬레이트 블루·딥 올리브 세이지·딥 토프)으로(2026-11-13 아키텍터 지시) */
-.cr .cr-tag.jaju { background: #761541; }
-.cr .cr-tag.gold { background: #a96e16; }
-.cr .cr-tag.teal { background: #153f48; }
-.cr .cr-tag.dusty { background: #40576f; }
-.cr .cr-tag.sage { background: #4e6658; }
-.cr .cr-tag.body { background: #76646e; }
-.cr .cr-tags-lead .cr-tag.line.jaju { color: #761541; }
-.cr .cr-tags-lead .cr-tag.line.gold { color: #a96e16; }
-.cr .cr-tags-lead .cr-tag.line.teal { color: #153f48; }
-.cr .cr-tags-lead .cr-tag.line.dusty { color: #40576f; }
-.cr .cr-tags-lead .cr-tag.line.sage { color: #4e6658; }
-.cr .cr-tags-lead .cr-tag.line.body { color: #76646e; }

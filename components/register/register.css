@@ -312,11 +312,3 @@
 .rg .we-fit > span { margin-right: 4px; }
 .rg .we-fit .opt { height: 28px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--body); font: inherit; font-size: 13px; cursor: pointer; }
 .rg .we-fit .opt[aria-pressed="true"] { background: var(--body); border-color: var(--body); color: #fff; font-weight: 700; }
-
-/* 역할 태그 색: 컬러 시스템의 딥 색(딥 베리·딥 앰버·딥 틸·딥 슬레이트 블루·딥 올리브 세이지·딥 토프)으로(2026-11-13 아키텍터 지시) */
-.rg .rg-pcard-tags .rg-roles li.tone-jaju { background: #761541; }
-.rg .rg-pcard-tags .rg-roles li.tone-gold { background: #a96e16; }
-.rg .rg-pcard-tags .rg-roles li.tone-teal { background: #153f48; }
-.rg .rg-pcard-tags .rg-roles li.tone-dusty { background: #40576f; }
-.rg .rg-pcard-tags .rg-roles li.tone-sage { background: #4e6658; }
-.rg .rg-pcard-tags .rg-roles li.tone-body { background: #76646e; }

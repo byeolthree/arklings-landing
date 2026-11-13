@@ -316,11 +316,3 @@
 /* 손잡이로 끄는 동안: 줄 사이 틈도 놓을 수 있는 자리이고, 끌고 있는 줄은 흐리게 보인다 */
 .pf-list { display: grid; gap: inherit; }
 .pf-item.dragging .pf-row { opacity: .45; }
-
-/* 역할 태그 색: 컬러 시스템의 딥 색(딥 베리·딥 앰버·딥 틸·딥 슬레이트 블루·딥 올리브 세이지·딥 토프)으로(2026-11-13 아키텍터 지시) */
-.mp .mp-tag.tone-jaju { background: #761541; }
-.mp .mp-tag.tone-gold { background: #a96e16; }
-.mp .mp-tag.tone-teal { background: #153f48; }
-.mp .mp-tag.tone-dusty { background: #40576f; }
-.mp .mp-tag.tone-sage { background: #4e6658; }
-.mp .mp-tag.tone-body { background: #76646e; }

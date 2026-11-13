@@ -167,11 +167,3 @@
 .pl .opt.role-opt.body { --rc: #574a50; }
 .pl .opt.role-opt[aria-pressed="true"] { background: var(--rc); border-color: var(--rc); color: #fff; }
 .pl .opt.role-opt .rep-badge { position: absolute; top: -13px; left: -8px; box-sizing: content-box; height: 18px; padding: 0 7px; display: grid; place-items: center; border: 2px solid #fff; border-radius: 999px; background: var(--body); color: #fff; font-size: 11px; font-weight: 700; line-height: 1; }
-
-/* 역할 태그 색: 컬러 시스템의 딥 색(딥 베리·딥 앰버·딥 틸·딥 슬레이트 블루·딥 올리브 세이지·딥 토프)으로(2026-11-13 아키텍터 지시) */
-.pl .opt.role-opt.jaju { --rc: #761541; }
-.pl .opt.role-opt.gold { --rc: #a96e16; }
-.pl .opt.role-opt.teal { --rc: #153f48; }
-.pl .opt.role-opt.dusty { --rc: #40576f; }
-.pl .opt.role-opt.sage { --rc: #4e6658; }
-.pl .opt.role-opt.body { --rc: #76646e; }

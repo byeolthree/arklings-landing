@@ -6,7 +6,7 @@ import { AlertPopup, ConfirmPopup } from "@/components/ui/alert-popup";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ROLE_TONE } from "@/components/creators/role-tone";
-const ROLE_HEX = { jaju: "#761541", dusty: "#40576f", gold: "#a96e16", sage: "#4e6658", teal: "#153f48", body: "#76646e" } as const; // 딥 색(2026-11-13)
+const ROLE_HEX = { jaju: "#a61e5c", dusty: "#5f7c99", gold: "#d89a24", sage: "#6f8a7a", teal: "#1f5a66", body: "#574a50" } as const;
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
