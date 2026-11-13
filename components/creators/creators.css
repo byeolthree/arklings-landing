@@ -412,3 +412,6 @@
 .cr .cr-v2-main .cr-main-media.has-src.cr-v2-img { background: #fff; }
 /* 그림·영상 위 글자(종류 글자·작품 제목)에 가는 흰 외곽선: 밝은 그림·어두운 영상 어디서든 글자 모양이 보이게(색은 그대로, 2026-11-13) */
 .cr .cr-v2-main.media .cr-v2-kind, .cr .cr-v2-main.media .cr-v2-title { -webkit-text-stroke: 1px #fff; paint-order: stroke fill; }
+/* 그림·영상 위 작품 제목: 외곽선 대신 제목 뒤 아래쪽에 옅은 흰 음영(제목 글자가 진한 제목색이라 밝은 음영) */
+.cr .cr-v2-main.media .cr-v2-title { -webkit-text-stroke: 0; }
+.cr .cr-v2-main.media::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 64px; z-index: 1; pointer-events: none; background: linear-gradient(to top, rgba(255,255,255,.72), rgba(255,255,255,0)); }
