@@ -1156,8 +1156,8 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
   const [insertAt, setInsertAt] = useState<number | null>(null); // 요소 사이의 「+」를 누르면 다음에 추가하는 빈 칸이 그 자리에 들어간다
   const [busy, setBusy] = useState(false);
   const [edits, setEdits] = useState<Record<string, string>>({});
-  // 처음에는 맨 끝에 접힌 빈 이미지 칸 하나를 둔다(지울 수 있다).
-  const [empties, setEmpties] = useState<EmptySlot[]>(() => (work.blocks.length >= BLOCK_LIMIT ? [] : [newEmpty("image", LAST, true)]));
+  // 작품에 이미지 요소가 하나도 없을 때만 맨 끝에 접힌 빈 이미지 칸 하나를 둔다(지울 수 있다). 이미지가 이미 있으면 붙이지 않는다.
+  const [empties, setEmpties] = useState<EmptySlot[]>(() => (work.blocks.length >= BLOCK_LIMIT || work.blocks.some((b) => b.kind === "image") ? [] : [newEmpty("image", LAST, true)]));
   const full = work.blocks.length + empties.length >= BLOCK_LIMIT;
   const dragId = useRef<string | null>(null);
   // 저장된 순서(로그라인 블록 포함, D35-2). 로그라인 자리는 글자 「logline」이다.
