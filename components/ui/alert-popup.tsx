@@ -43,19 +43,28 @@ export function ConfirmPopup({
   cancelLabel,
   onConfirm,
   onCancel,
+  onClose,
 }: {
   children: ReactNode;
   confirmLabel: string;
   cancelLabel?: string;
   onConfirm: () => void;
   onCancel?: () => void;
+  onClose?: () => void; // 있으면 오른쪽 위에 X(닫기)
 }) {
   const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
   if (!mounted) return null;
   const btn = { height: 40, padding: "0 24px", borderRadius: 999, fontSize: 14, fontWeight: 700, cursor: "pointer" } as const;
   return createPortal(
     <div role="alertdialog" aria-modal="true" style={{ position: "fixed", inset: 0, zIndex: 100, display: "grid", placeItems: "center", padding: 16, background: "rgba(42,32,37,.45)" }}>
-      <div style={{ width: "100%", maxWidth: 360, padding: "28px 24px 24px", borderRadius: 16, background: "#fff", textAlign: "center", color: "#2a2025", fontSize: 15, fontWeight: 400, lineHeight: 1.6, whiteSpace: "pre-line" }}>
+      <div style={{ position: "relative", width: "100%", maxWidth: 360, padding: "32px 24px 24px", borderRadius: 16, background: "#fff", textAlign: "center", color: "#2a2025", fontSize: 15, fontWeight: 400, lineHeight: 1.6, whiteSpace: "pre-line" }}>
+        {onClose && (
+          <button type="button" aria-label="닫기" onClick={onClose} style={{ position: "absolute", top: 12, right: 12, width: 32, height: 32, border: 0, borderRadius: 999, background: "none", display: "grid", placeItems: "center", color: "#574a50", cursor: "pointer" }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        )}
         <div>{children}</div>
         <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
           {cancelLabel && onCancel && (

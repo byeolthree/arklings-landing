@@ -11,7 +11,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   addTextBlock,
-  setProfileRoles,
   setBlockFit,
   addVideoBlock,
   checkHandle as checkHandleAction,
@@ -783,7 +782,7 @@ export function WorkEditor({
   const router = useRouter();
   const [title, setTitle] = useState(work?.title ?? "");
   // 역할은 프로필 한 곳에만 둔다. 프로필 역할을 먼저 쓰고, 프로필 역할을 못 받은 화면에서만 작품에 남은 역할을 쓴다(2026-11-13).
-  const [roles, setRoles] = useState<Role[]>(profileRoles ?? work?.roles ?? []);
+  const roles: Role[] = profileRoles ?? work?.roles ?? [];
   const [genres, setGenres] = useState<string[]>(work?.genres ?? []);
   const [kind] = useState(work?.kind ?? "");
   const [form] = useState<string>(work?.form ?? "");
@@ -850,40 +849,23 @@ export function WorkEditor({
   }, [title, logline, genresKey, rolesKey, topKind, mediaKey]);
 
   // 저장 전에 역할과 대표 콘텐츠가 맞는지 본다. 영상 제작·아트디렉터는 맨 위 이미지·영상이 카드에 보이고, 다른 역할은 로그라인이 카드에 보인다.
-  const [confirmMsg, setConfirmMsg] = useState<string | null>(null);
-  // 팝업에서 역할을 바꾼다. 태그를 1초 안에 다시 누르면 그 역할이 맨 앞(대표 역할)이 된다(프로필 등록 화면과 같은 방식).
-  const lastPress = useRef<{ r: Role; t: number } | null>(null);
-  function pressRole(r: Role, now: number) {
-    const prev = lastPress.current;
-    if (prev && prev.r === r && now - prev.t < 1000) {
-      lastPress.current = null;
-      setRoles((cur) => [r, ...cur.filter((x) => x !== r)]);
-      return;
-    }
-    lastPress.current = { r, t: now };
-    setRoles((cur) => (cur.includes(r) ? cur.filter((x) => x !== r) : [...cur, r]));
-  }
-  // 팝업에 보여 줄 지금 대표 콘텐츠 이름: 종류 태그가 있으면 「포스터 이미지」, 없으면 「이미지」.
-  const topLabel = (() => {
-    const kindName = (k: string) => (k === "image" ? "이미지" : k === "video" ? "영상" : k === "logline" ? "로그라인" : "문서");
-    if (typeof topItem === "string") {
-      if (work) return kindName(topItem === LOGLINE_TOKEN ? "logline" : topItem);
-      const sl = slots[0];
-      return sl ? `${sl.kind !== "logline" && sl.sub ? `${sl.sub} ` : ""}${kindName(sl.kind)}` : "로그라인";
-    }
-    const sub = "sub" in topItem && topItem.sub ? `${topItem.sub} ` : "";
-    return `${sub}${kindName(topItem.kind)}`;
+  const [mismatch, setMismatch] = useState(false);
+  // 팝업(시안 popup5)에 보여 줄 대표 콘텐츠 태그: 종류 태그가 있으면 그것(포스터·티저…), 없으면 요소 이름. 색은 요소 종류 색.
+  const topTag = (() => {
+    const name = (k: string) => (k === "image" ? "이미지" : k === "video" ? "영상" : k === "logline" ? "로그라인" : "문서");
+    const color = (k: string) => (k === "image" ? "#6f8a7a" : k === "video" ? "#6e9ca3" : k === "logline" ? "#1f5a66" : "#40576f");
+    if (typeof topItem !== "string") return { label: topItem.sub || name(topItem.kind), color: color(topItem.kind) };
+    if (work) return { label: name("logline"), color: color("logline") };
+    const sl = slots[0];
+    const k = sl?.kind ?? "logline";
+    return { label: (k !== "logline" && sl?.sub) || name(k), color: color(k) };
   })();
   function askSave() {
     if (!title.trim()) return void save();
     const visual = roles.some((x) => x === "video" || x === "art_director");
     const mediaTop = topKind === "image" || topKind === "video";
-    if (!visual && mediaTop) {
-      return setConfirmMsg(`지금 대표 콘텐츠는 「${topLabel}」입니다.\n역할에 맞는 대표 콘텐츠가 아닙니다.\n그래도 등록하시겠어요?`);
-    }
-    if (visual && !mediaTop) {
-      return setConfirmMsg(`지금 대표 콘텐츠는 「${topLabel}」입니다.\n역할에 맞는 대표 콘텐츠가 아닙니다.\n그래도 등록하시겠어요?`);
-    }
+    // 역할과 대표가 어긋나면 한 번 알려 줄 뿐이다. 등록하면 대표는 그대로 쓰인다(역할이 대표를 바꾸지 않는다, 2026-11-14 아키텍터 지시).
+    if (visual !== mediaTop) return setMismatch(true);
     void save();
   }
 
@@ -972,43 +954,43 @@ export function WorkEditor({
       </div>
 
       <div className="we-head">
-        {confirmMsg && (
+        {mismatch && (
           <ConfirmPopup
             confirmLabel="등록"
-            cancelLabel="다시 작성"
-            onCancel={() => setConfirmMsg(null)}
-            onConfirm={async () => {
-              setConfirmMsg(null);
-              // 팝업에서 바꾼 역할(맨 앞이 대표)을 프로필에 저장한다. 그래야 프로필·탐색 카드와 맞는다.
-              if (roles.join("|") !== (profileRoles ?? []).join("|")) {
-                const pr = await setProfileRoles(roles);
-                if (!pr.ok) return setMsg({ text: pr.error, err: true });
-              }
+            onClose={() => setMismatch(false)}
+            onConfirm={() => {
+              setMismatch(false);
               void save();
             }}
           >
-            {confirmMsg}
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 18 }}>
-              {(Object.keys(ROLES) as Role[]).map((r) => {
-                const on = roles.includes(r);
-                const rc = ROLE_HEX[ROLE_TONE[r]];
-                return (
-                  <button
-                    key={r}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={(e) => pressRole(r, e.timeStamp)}
-                    style={{ position: "relative", height: 34, padding: "0 15px", borderRadius: 999, border: `1.5px solid ${rc}`, background: on ? rc : "#fff", color: on ? "#fff" : rc, font: "inherit", fontSize: 14, fontWeight: 500, cursor: "pointer" }}
-                  >
-                    {roles[0] === r && (
-                      <span style={{ position: "absolute", top: -13, left: -8, height: 18, padding: "0 7px", display: "grid", placeItems: "center", border: "2px solid #fff", borderRadius: 999, background: "#574a50", color: "#fff", fontSize: 11, fontWeight: 700, lineHeight: 1, boxSizing: "content-box" }}>대표</span>
-                    )}
-                    {ROLES[r]}
-                  </button>
-                );
-              })}
+            <div className="we-mm-lab">
+              <span>대표 역할</span>
+              <span className="we-mm-bar">|</span>
+              <span>대표 콘텐츠</span>
             </div>
-            <p style={{ margin: "10px 0 0", fontSize: 12, color: "#574a50" }}>태그를 &apos;빠르게 두 번&apos; 클릭해서 대표 역할을 골라주세요.</p>
+            <div className="we-mm-pair">
+              {/* 대표 역할은 프로필에서 정한다: 누르면 프로필 등록 화면의 역할로 */}
+              <Link href="/portfolio/new?step=profile" className="we-mm-tag" style={{ background: roles[0] ? ROLE_HEX[ROLE_TONE[roles[0]]] : "#574a50" }}>
+                {roles[0] ? ROLES[roles[0]] : "역할 없음"}
+              </Link>
+              <span className="we-mm-bar">|</span>
+              {/* 대표 콘텐츠: 누르면 팝업을 닫고 이 작품의 맨 위 요소로 */}
+              <button
+                type="button"
+                className="we-mm-tag"
+                style={{ background: topTag.color }}
+                onClick={() => {
+                  setMismatch(false);
+                  const el = document.querySelector<HTMLElement>(".we .we-el.rep");
+                  el?.scrollIntoView({ block: "center", behavior: "smooth" });
+                  el?.focus({ preventScroll: true });
+                }}
+              >
+                {topTag.label}
+              </button>
+            </div>
+            <p className="we-mm-note">대표 역할과 대표 콘텐츠가 맞지 않습니다.</p>
+            <p className="we-mm-ask">그래도 등록할까요?</p>
           </ConfirmPopup>
         )}
         {askTitle &&
