@@ -414,7 +414,8 @@ export function CreatorProfileForm({ profile, workCount = 0, showSaved = false }
       router.replace("/portfolio/new?step=profile&saved=1");
       return { ok: true };
     }
-    router.refresh();
+    // 포트폴리오가 이미 있으면 저장 뒤 내 크리에이터 상세로 간다(포트폴리오 저장 뒤와 같이, 바뀐 모습을 바로 보게, 2026-11-13).
+    router.push(`/creators/${r.handle}`);
     return { ok: true };
   }
   async function togglePublic() {
