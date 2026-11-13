@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BlurImage } from "./blur-image";
+import { CollabFab } from "./collab-fab";
 import { HeroVideo } from "./hero-video";
 import { RoleTags } from "./role-tags";
 import { WORK_KINDS, type CreatorProfileData, type WorkCard } from "./types";
@@ -154,14 +155,8 @@ export function CreatorProfile({
         <WorkBands key={works.map((w) => `${w.id}${w.isPublic === false ? "0" : "1"}`).join()} works={works} hrefs={works.map((w) => workHref(w.id))} owner={Boolean(owner)} roles={creator.roles} />
       )}
 
-      {/* 스크롤해도 화면 아래에 붙어 있다가, 맨 끝에서는 제자리에 놓인다(바깥 틀이 키가 커야 붙으므로 맨 아래 직속으로 둔다) */}
-      {creator.openToCollab && showApply && applyHref && (
-        <div className="cr-apply-stick">
-          <Link href={applyHref} className="btn btn-primary">
-            이 크리에이터에게 협업 신청 <span className="arrow">→</span>
-          </Link>
-        </div>
-      )}
+      {/* 협업 신청: 대표 화면 소리 버튼 바로 위, 같은 크기의 아이콘 버튼. 화면에 고정되어 스크롤해도 그 자리에 있다 */}
+      {creator.openToCollab && showApply && applyHref && <CollabFab href={applyHref} />}
     </div>
   );
 }
