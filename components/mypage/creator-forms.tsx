@@ -331,7 +331,7 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
             영상
           </button>
           <button type="button" className="opt" onClick={copyVideoPrompt} aria-label="영상 변환 프롬프트 복사" style={{ position: "relative", paddingRight: 30 }}>
-            변환 프롬프트
+            영상 변환 프롬프트
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: "absolute", top: 5, right: 8 }}>
               <rect x="9" y="9" width="11" height="11" rx="2" />
               <path d="M5 15V6a2 2 0 0 1 2-2h9" />
