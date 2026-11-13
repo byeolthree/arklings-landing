@@ -177,7 +177,7 @@
 .rg .we-logline-label .we-label { margin-bottom: 5px; }
 .rg .we-logline-label .we-text { height: 90px; min-height: 90px; }
 .rg .we-fold { line-height: 20px; }
-.rg .we-imgbox { margin-top: 8px; min-height: 418px; height: 418px; }
+.rg .we-imgbox { margin-top: 8px; min-height: 418px; height: 418px; aspect-ratio: auto; }
 .rg .we-main.we-card { padding-bottom: 14px; }
 .rg .rg-pcard { background: #fff; }
 .rg .rg-pcard-media { background: var(--bg); }
