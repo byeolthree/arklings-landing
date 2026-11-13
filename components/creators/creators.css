@@ -370,3 +370,9 @@
 @media (min-width: 768px) { .cr .cr-v2-title { left: 24px; right: 24px; } }
 .cr .cr-genres-hash { gap: 4px 10px; }
 .cr .cr-genres-hash li { padding: 0; border: 0; background: none; color: var(--body); font-size: 13px; }
+/* 그림 위의 종류 글자가 밝은 그림에 묻히지 않게: 칸 위쪽에만 옅은 어두운 그라데이션을 깔고 글자에 그림자를 준다(자리·색은 그대로) */
+.cr .cr-v2-main.media::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 64px; z-index: 1; pointer-events: none; background: linear-gradient(to bottom, rgba(20,14,18,.62), rgba(20,14,18,0)); }
+.cr .cr-v2-main.media .cr-v2-kind { z-index: 2; text-shadow: 0 1px 3px rgba(0,0,0,.55); }
+.cr .cr-v2-main.media .cr-v2-kind.image { color: #a9bcaf; }
+.cr .cr-v2-main.media .cr-v2-kind.video { color: #a3c8cd; }
+.cr .cr-v2-main.media .cr-v2-title { z-index: 2; }
