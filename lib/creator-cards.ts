@@ -57,7 +57,7 @@ export function toProfileData(p: CreatorProfile): CreatorProfileData {
 }
 
 export function toCreatorCard(c: CreatorListItem): CreatorCard {
-  // 영상 제작·아트디렉터이고 가장 최근 작품의 대표(맨 위 이미지·영상)가 있으면 카드 메인에 건다. 아니면 로그라인.
+  // 작품의 대표가 이미지·영상이면 그것을 카드 메인에 건다. 글·문서면 문서 카드, 로그라인이면 로그라인 카드.
   const media = Boolean(c.cover);
   return {
     handle: c.handle,

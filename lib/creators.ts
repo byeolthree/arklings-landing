@@ -34,7 +34,7 @@ export type CreatorListItem = {
   docLabel?: string; // 대표가 글·문서일 때 카드의 종류 글자
   docText?: string; // 대표가 글·문서일 때 카드에 보일 글 앞부분(글이 없으면 파일 이름)
   coverBlockKind?: "image" | "video"; // 대표 콘텐츠 요소가 원래 이미지인지 영상인지(유튜브 영상도 video)
-  cover?: string; // 가장 최근 공개 작품의 대표(작품 안 맨 위에 놓인 것, D35-2)가 이미지·영상일 때 그 그림 주소. 영상 제작·아트디렉터 역할이 있는 사람만 채워진다
+  cover?: string; // 이 작품의 대표(작품 안 맨 위, D35-2)가 이미지·영상일 때 그 주소
 };
 
 export type CreatorProfile = {
@@ -143,149 +143,115 @@ function toListItem(r: CreatorRow, heroUrls: Map<string, string>): CreatorListIt
   };
 }
 
-// 공개 프로필 중 공개한 작품이 1건 이상인 크리에이터 목록. 최근에 만든 순서로 page쪽(1부터)의 CREATOR_PAGE_SIZE명과 전체 인원을 돌려준다.
-export async function listCreators(filter: CreatorFilterInput, page: number): Promise<{ items: CreatorListItem[]; total: number }> {
-  const sb = getSupabase();
-  const from = (Math.max(1, page) - 1) * CREATOR_PAGE_SIZE;
-  // 프로필만으로는 목록에 나오지 않는다. 공개한 작품이 1건 이상인 크리에이터만 나온다(별뜨리님 결정 2026-11-07).
-  let query = sb.from("creators_public").select(CREATOR_COLUMNS, { count: "exact" }).gte("work_count", 1);
-  if (filter.role) query = query.contains("roles", [filter.role]);
-  if (filter.genre) query = query.contains("genres", [filter.genre]);
-  if (filter.form) query = query.contains("forms", [filter.form]);
-  if (filter.open) query = query.eq("open_to_collab", true);
-  const q = cleanQuery(filter.q ?? "");
-  if (q) {
-    const like = `%${q}%`;
-    query = query.or(`display_name.ilike.${like},bio.ilike.${like},latest_title.ilike.${like},latest_logline.ilike.${like}`);
-  }
-  const { data, count, error } = await query
-    .order("created_at", { ascending: false })
-    .order("public_handle", { ascending: true })
-    .range(from, from + CREATOR_PAGE_SIZE - 1);
+// 탐색 화면: 공개 프로필의 공개 작품을 한 장씩 카드로(2026-11-13 아키텍터 지시).
+// 크리에이터 순서는 최근에 만든 사람부터, 한 사람의 작품은 그 사람이 포트폴리오 목록에서 정한 순서대로.
+// 카드 왼쪽은 작품의 대표(맨 위 요소, repOf)를 역할과 상관없이 그대로 보여 준다.
+// 거르기(역할·협업은 사람 기준, 장르·롱폼/숏폼·포맷·검색어는 작품 기준)를 모두 끝낸 뒤 쪽을 나눈다. total은 걸러진 카드 수다.
+const EXPLORE_CREATOR_LIMIT = 300;
 
-  if (error) {
-    // 마지막 쪽보다 뒤의 쪽(?page=99)은 오류가 아니라 「이 쪽에는 없어요」로 보여 준다.
-    if (error.code === "PGRST103") {
-      let countQuery = sb.from("creators_public").select("public_handle", { count: "exact", head: true }).gte("work_count", 1);
-      if (filter.role) countQuery = countQuery.contains("roles", [filter.role]);
-      if (filter.genre) countQuery = countQuery.contains("genres", [filter.genre]);
-      if (filter.form) countQuery = countQuery.contains("forms", [filter.form]);
-      if (filter.open) countQuery = countQuery.eq("open_to_collab", true);
-      if (q) {
-        const like = `%${q}%`;
-        countQuery = countQuery.or(`display_name.ilike.${like},bio.ilike.${like},latest_title.ilike.${like},latest_logline.ilike.${like}`);
-      }
-      const { count: total, error: countError } = await countQuery;
-      if (countError) throw new Error(countError.message);
-      return { items: [], total: total ?? 0 };
-    }
-    throw new Error(error.message);
-  }
-  const rows = (data ?? []) as unknown as CreatorRow[];
-  const heroUrls = await signPublicFiles(rows.map((r) => r.hero_path));
-  // 대표 이미지·영상을 카드 맨 위에 거는 것은 역할에 영상 제작이나 아트디렉터가 있는 사람만이다(별뜨리님 규칙).
-  // 카드에 먼저 보이는 작품은 그 크리에이터가 포트폴리오 등록 목록에서 맨 위에 올려 둔 작품이다(손잡이로 정한 순서).
-  // 탐색 화면에는 크리에이터가 공개한 작품을 하나씩 모두 카드로 보여 준다(2026-11-13 아키텍터 지시). 작품 순서는 그 사람의 포트폴리오 등록 목록 순서.
-  const allWorks = await loadAllWorks(rows.map((r) => r.public_handle));
-  const visual = new Set(rows.filter((r) => asRoles(r.roles).some((x) => x === "video" || x === "art_director")).map((r) => r.public_handle));
-  // 대표가 글·문서인 작품은 역할과 상관없이 문서 카드로 보인다. 이미지·영상 대표는 지금처럼 영상 제작·아트디렉터만.
-  const covers = await loadWorkCovers(rows.flatMap((r) => allWorks.get(r.public_handle) ?? []));
-  const docs = docTops.get(covers) ?? new Map<string, DocTop>();
-  const authorOf = new Map<string, string>(rows.flatMap((r) => (allWorks.get(r.public_handle) ?? []).map((w) => [w.id, r.public_handle] as [string, string])));
-  for (const id of Array.from(covers.keys())) if (!visual.has(authorOf.get(id) ?? "")) covers.delete(id);
-  const items = rows.flatMap((r) => {
-      const base = toListItem(r, heroUrls);
-      const works = allWorks.get(r.public_handle) ?? [];
-      if (works.length === 0) return [base];
-      return works.map((f) => {
-        const cv = covers.get(f.id);
-        const dt = docs.get(f.id);
-        return { ...base, docLabel: dt?.label, docText: dt?.text, workId: f.id, latest: { title: f.title, logline: f.logline, genres: f.genres }, cover: cv?.src, coverKind: cv?.kind, coverSub: cv?.sub, coverFit: cv?.fit, coverBlockKind: cv?.blockKind };
-      });
-    });
-  // 포맷 거르기: 카드에 보이는 종류 글자와 같은 것만 남긴다(대표가 이미지·영상이 아니면 「로그라인」).
-  const fmtOf = (it: CreatorListItem) => (it.cover ? it.coverSub : it.docLabel ?? "로그라인");
-  return { items: filter.fmt ? items.filter((it) => fmtOf(it) === filter.fmt) : items, total: count ?? 0 };
+export async function listCreators(filter: CreatorFilterInput, page: number): Promise<{ items: CreatorListItem[]; total: number }> {
+  let query = getSupabase().from("creators_public").select(CREATOR_COLUMNS).gte("work_count", 1);
+  if (filter.role) query = query.contains("roles", [filter.role]);
+  if (filter.open) query = query.eq("open_to_collab", true);
+  const { data, error } = await query.order("created_at", { ascending: false }).order("public_handle", { ascending: true }).limit(EXPLORE_CREATOR_LIMIT);
+  if (error) throw new Error(error.message);
+  const creators = (data ?? []) as unknown as CreatorRow[];
+
+  const worksBy = await loadAllWorks(creators.map((r) => r.public_handle));
+  const q = cleanQuery(filter.q ?? "").toLowerCase();
+  const pairs = creators.flatMap((c) =>
+    (worksBy.get(c.public_handle) ?? [])
+      .filter((w) => !filter.genre || w.genres.includes(filter.genre))
+      .filter((w) => !filter.form || w.form === filter.form)
+      .filter((w) => !q || [c.display_name, c.bio ?? "", w.title, w.logline].some((t) => t.toLowerCase().includes(q)))
+      .map((w) => ({ c, w })),
+  );
+  const reps = await loadExploreReps(pairs.map((p) => p.w));
+  const kept = filter.fmt ? pairs.filter((p) => repLabel(reps.get(p.w.id)) === filter.fmt) : pairs;
+
+  const from = (Math.max(1, page) - 1) * CREATOR_PAGE_SIZE;
+  const shown = kept.slice(from, from + CREATOR_PAGE_SIZE);
+  const urls = await signPublicFiles([...shown.map((p) => p.c.hero_path), ...shown.map((p) => reps.get(p.w.id)?.filePath ?? null)]);
+  const items = shown.map(({ c, w }): CreatorListItem => {
+    const r = reps.get(w.id);
+    const media = r && (r.rep.kind === "image" || r.rep.kind === "video") ? mediaSrc(r, urls) : null;
+    return {
+      ...toListItem(c, urls),
+      workId: w.id,
+      latest: { title: w.title, logline: w.logline, genres: w.genres },
+      cover: media?.src,
+      coverKind: media?.kind,
+      coverBlockKind: media ? (r?.rep.kind as "image" | "video") : undefined,
+      coverSub: media && r && r.rep.kind !== "logline" && r.rep.kind !== "doc" ? r.rep.sub : undefined,
+      coverFit: media ? r?.fit : undefined,
+      docLabel: r?.rep.kind === "doc" ? r.rep.label : undefined,
+      docText: r?.rep.kind === "doc" ? r.rep.text : undefined,
+    };
+  });
+  return { items, total: kept.length };
 }
 
+// 카드에 보이는 종류 글자(포맷 필터가 비교하는 값): 로그라인 · 문서 종류 · 이미지·영상 종류.
+export function repLabel(r: ExploreRep | undefined): string {
+  if (!r || r.rep.kind === "logline") return "로그라인";
+  if (r.rep.kind === "doc") return r.rep.label;
+  return r.rep.sub ?? (r.rep.kind === "video" ? "영상" : "이미지");
+}
+
+type ExploreWork = { id: string; title: string; logline: string; genres: string[]; form: WorkForm | null; loglinePosition: number };
+type ExploreRep = { rep: Rep; filePath: string | null; youtubeId: string | null; fit: "cover" | "contain" };
+
 // 크리에이터마다 공개 작품 전부(등록 목록 순서: 순서 번호가 작은 것부터, 같으면 최근 공개).
-async function loadAllWorks(handles: string[]): Promise<Map<string, FeaturedWork[]>> {
-  const out = new Map<string, FeaturedWork[]>();
+async function loadAllWorks(handles: string[]): Promise<Map<string, ExploreWork[]>> {
+  const out = new Map<string, ExploreWork[]>();
   if (handles.length === 0) return out;
-  const works = await getSupabase()
+  const { data, error } = await getSupabase()
     .from("creator_works_public")
-    .select("id, author_handle, title, logline, genres, logline_position")
+    .select("id, author_handle, title, logline, genres, form, logline_position")
     .in("author_handle", handles)
     .order("sort_order", { ascending: true })
     .order("published_at", { ascending: false })
     .order("id", { ascending: false });
-  if (works.error) return out;
-  type W = { id: string; author_handle: string; title: string; logline: string | null; genres: string[] | null; logline_position: number | null };
-  for (const w of (works.data ?? []) as W[]) out.set(w.author_handle, [...(out.get(w.author_handle) ?? []), { id: w.id, title: w.title, logline: w.logline ?? "", genres: w.genres ?? [], loglinePosition: w.logline_position ?? 0 }]);
+  if (error) throw new Error(error.message);
+  type W = { id: string; author_handle: string; title: string; logline: string | null; genres: string[] | null; form: string | null; logline_position: number | null };
+  for (const w of (data ?? []) as W[]) {
+    const list = out.get(w.author_handle) ?? [];
+    list.push({ id: w.id, title: w.title, logline: w.logline ?? "", genres: w.genres ?? [], form: asForm(w.form), loglinePosition: w.logline_position ?? 0 });
+    out.set(w.author_handle, list);
+  }
   return out;
 }
 
-// 작품마다 그 작품의 대표(작품 안 맨 위)가 이미지·영상이면 카드에 걸 그림 주소. loadCovers와 같은 규칙을 작품 번호 기준으로 쓴다.
-async function loadWorkCovers(works: FeaturedWork[]): Promise<Map<string, Cover>> {
-  const byHandle = new Map<string, FeaturedWork>(works.map((w) => [w.id, w]));
-  const per = await loadCovers(Array.from(byHandle.keys()), byHandle);
-  return per;
-}
-
-type FeaturedWork = { id: string; title: string; logline: string; genres: string[]; loglinePosition: number };
-
-// 그 크리에이터들이 카드에 먼저 보이게 정한 작품(등록 목록 맨 위)에서 「대표」(D35-2: 작품 안에서 맨 위에 놓인 것)가 이미지·영상이면 그 그림 주소를 돌려준다.
-// 맨 위가 로그라인이거나 글·문서면 그 사람은 빠진다(카드는 로그라인 모양으로 나온다). 영상은 유튜브라서 유튜브가 주는 대표 그림을 쓴다.
-type Cover = { src: string; kind: "image" | "video"; blockKind: "image" | "video"; sub?: string; fit?: "cover" | "contain" };
-// 대표(맨 위)가 글·문서인 작품: 카드에 종류 글자(시놉시스 등, 없으면 「문서」)와 그 글의 앞부분을 보인다(2026-11-13 아키텍터 지시).
-type DocTop = { label: string; text: string };
-const docTops = new WeakMap<Map<string, Cover>, Map<string, DocTop>>();
-async function loadCovers(handles: string[], featured: Map<string, FeaturedWork>): Promise<Map<string, Cover>> {
-  const out = new Map<string, Cover>();
-  if (handles.length === 0) return out;
-  const sb = getSupabase();
-  const latest = new Map<string, { id: string; loglinePosition: number }>(); // handle → 카드에 먼저 보이는 작품
-  for (const h of handles) {
-    const f = featured.get(h);
-    if (f) latest.set(h, { id: f.id, loglinePosition: f.loglinePosition });
-  }
-  const ids = Array.from(latest.values()).map((w) => w.id);
-  if (ids.length === 0) return out;
-  const blocks = await sb
+// 작품마다 대표(repOf)와, 대표가 이미지·영상이면 그 파일 정보.
+async function loadExploreReps(works: ExploreWork[]): Promise<Map<string, ExploreRep>> {
+  const out = new Map<string, ExploreRep>();
+  if (works.length === 0) return out;
+  const { data, error } = await getSupabase()
     .from("creator_blocks_public")
-    .select("work_id, kind, body, file_path, file_name, youtube_id, position, sub_kind, fit")
-    .in("work_id", ids)
+    .select("work_id, kind, body, file_path, file_name, youtube_id, sub_kind, fit")
+    .in("work_id", works.map((w) => w.id))
     .order("position", { ascending: true })
     .order("id", { ascending: true });
-  if (blocks.error) return out;
-  type Row = { work_id: string; kind: string; body?: string | null; file_path: string | null; file_name?: string | null; youtube_id: string | null; sub_kind?: string | null; fit?: string | null };
-  const byWork = new Map<string, Row[]>();
-  for (const b of (blocks.data ?? []) as Row[]) byWork.set(b.work_id, [...(byWork.get(b.work_id) ?? []), b]);
-  // 작품마다 로그라인을 그 자리에 끼운 순서에서 맨 위가 이미지·영상일 때만 대표 그림이 된다.
-  const topByWork = new Map<string, Row>();
-  const docs = new Map<string, DocTop>();
-  docTops.set(out, docs);
-  for (const [handle, w] of latest) {
-    const top = orderItems(byWork.get(w.id) ?? [], w.loglinePosition)[0];
-    if (top !== LOGLINE_TOKEN && (top.kind === "image" || top.kind === "video")) topByWork.set(w.id, top);
-    const r = repOf((byWork.get(w.id) ?? []).map((b) => ({ kind: b.kind, sub: b.sub_kind, body: b.body, fileName: b.file_name })), w.loglinePosition);
-    if (r.kind === "doc") docs.set(handle, { label: r.label, text: r.text });
-  }
-  const urls = await signPublicFiles(Array.from(topByWork.values()).map((b) => b.file_path));
-  for (const [handle, w] of latest) {
-    const b = topByWork.get(w.id);
-    if (!b) continue;
-    // 유튜브 영상은 유튜브가 주는 대표 그림, 올린 MP4는 그 영상 파일 그대로(카드가 소리 없이 재생), 이미지는 그 이미지.
-    const blockKind = b.kind === "video" ? "video" : "image";
-    const sub = b.sub_kind ?? undefined;
-    const fit = b.fit === "cover" ? "cover" : "contain";
-    if (b.kind === "video" && b.youtube_id) out.set(handle, { src: `https://i.ytimg.com/vi/${b.youtube_id}/hqdefault.jpg`, kind: "image", blockKind, sub });
-    else {
-      const src = b.file_path ? (urls.get(b.file_path) ?? null) : null;
-      if (src) out.set(handle, { src, kind: b.kind === "video" ? "video" : "image", blockKind, sub, fit });
-    }
+  if (error) throw new Error(error.message);
+  type B = { work_id: string; kind: string; body: string | null; file_path: string | null; file_name: string | null; youtube_id: string | null; sub_kind: string | null; fit: string | null };
+  const byWork = new Map<string, B[]>();
+  for (const b of (data ?? []) as B[]) byWork.set(b.work_id, [...(byWork.get(b.work_id) ?? []), b]);
+  for (const w of works) {
+    const blocks = byWork.get(w.id) ?? [];
+    const rep = repOf(blocks.map((b) => ({ kind: b.kind, sub: b.sub_kind, body: b.body, fileName: b.file_name })), w.loglinePosition);
+    const top = orderItems(blocks, w.loglinePosition)[0];
+    const b = top === LOGLINE_TOKEN ? null : top;
+    out.set(w.id, { rep, filePath: b?.file_path ?? null, youtubeId: b?.youtube_id ?? null, fit: b?.fit === "cover" ? "cover" : "contain" });
   }
   return out;
+}
+
+// 대표 이미지·영상의 카드용 주소. 유튜브는 유튜브가 주는 대표 그림, 올린 MP4는 영상 그대로, 이미지는 그 이미지.
+function mediaSrc(r: ExploreRep, urls: Map<string, string>): { src: string; kind: "image" | "video" } | null {
+  if (r.youtubeId) return { src: `https://i.ytimg.com/vi/${r.youtubeId}/hqdefault.jpg`, kind: "image" };
+  const src = r.filePath ? urls.get(r.filePath) : undefined;
+  if (!src) return null;
+  return { src, kind: r.rep.kind === "video" ? "video" : "image" };
 }
 
 // 공개 프로필 하나. 없거나 비공개면 null(화면은 404로 보여 준다. 본인 미리 보기는 화면이 따로 처리한다).

@@ -166,7 +166,7 @@ export function CreatorList({
             </div>
           ) : cards.length === 0 ? (
             <div className="panel cr-state">
-              <h2>이 쪽에는 크리에이터가 없어요</h2>
+              <h2>이 쪽에는 작품이 없어요</h2>
               <p>마지막 쪽은 {pages}쪽이에요.</p>
               <Link href={pageHref({ ...filter })} className="btn btn-ghost">
                 첫 쪽으로
@@ -174,18 +174,13 @@ export function CreatorList({
             </div>
           ) : (
             <>
-              <p className="cr-count">
-                {filtered ? "검색 결과" : "총"} {total}명
-                {filtered && (
-                  <>
-                    {" "}
-                    ·{" "}
-                    <Link href={pageHref({})} className="cr-clear">
-                      조건 지우기
-                    </Link>
-                  </>
-                )}
-              </p>
+              {filtered && (
+                <p className="cr-count">
+                  <Link href={pageHref({})} className="cr-clear">
+                    조건 지우기
+                  </Link>
+                </p>
+              )}
               <ul className="cr-grid">
                 {cards.map((c) => {
                   // 탐색 카드(2026-11-13 시안 card11): 프로필 동그라미 없음, 협업 신청은 오른쪽 위 아이콘 버튼,

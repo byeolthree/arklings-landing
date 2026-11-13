@@ -1,6 +1,6 @@
 import { ROLES, type Role } from "@/lib/collab";
 import { GENRES } from "./genres";
-import { IMAGE_SUBKINDS, VIDEO_SUBKINDS } from "@/lib/creator-rules";
+import { DOC_SUBKINDS, IMAGE_SUBKINDS, VIDEO_SUBKINDS } from "@/lib/creator-rules";
 import { FORM_LABEL, type CreatorCard, type WorkForm } from "./types";
 
 // 크리에이터 목록의 검색·필터 값. 주소의 ?q=(검색어) ?role=(역할 하나) ?genre=(장르 하나) ?form=(long|short) ?open=1(협업 받는 중)에서 읽는다.
@@ -9,7 +9,7 @@ export const MAX_QUERY = 30;
 
 export type CreatorFilter = { q: string; role?: Role; genre?: string; form?: WorkForm; open?: boolean; fmt?: string };
 // 포맷: 카드의 대표 콘텐츠 종류 글자(로그라인·티저·포스터 등)로 거른다(2026-11-13 아키텍터 지시). ?fmt=
-export const FORMATS: string[] = ["로그라인", ...VIDEO_SUBKINDS, ...IMAGE_SUBKINDS.filter((k) => k !== "기타")];
+export const FORMATS: string[] = Array.from(new Set(["로그라인", ...VIDEO_SUBKINDS, "영상", ...IMAGE_SUBKINDS, "이미지", ...DOC_SUBKINDS, "문서"]));
 
 export function isRole(v: unknown): v is Role {
   return typeof v === "string" && Object.prototype.hasOwnProperty.call(ROLES, v);
