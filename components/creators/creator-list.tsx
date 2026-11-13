@@ -3,6 +3,7 @@ import { ROLES } from "@/lib/collab";
 import { activeCount, hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
 import { GENRES } from "./genres";
 import { BlurVideo } from "./blur-video";
+import { MediaTitle } from "./media-title";
 import { RoleTags } from "./role-tags";
 import { FORM_LABEL, type CreatorCard, type WorkForm } from "./types";
 import "./creators.css";
@@ -217,7 +218,7 @@ export function CreatorList({
                               <p className="cr-box-logline">{c.latest.logline}</p>
                             </div>
                           )}
-                          {c.main === "media" && c.latest.title && <span className="cr-v2-title">{c.latest.title}</span>}
+                          {c.main === "media" && c.latest.title && (c.heroSrc && c.hero ? <MediaTitle src={c.heroSrc} kind={c.hero} title={c.latest.title} /> : <span className="cr-v2-title">{c.latest.title}</span>)}
                           {kindLabel && <span className={`cr-v2-kind ${kindTone}`}>{kindLabel}</span>}
                         </div>
                         {c.latest.genres && c.latest.genres.length > 0 && (

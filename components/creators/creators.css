@@ -421,3 +421,5 @@
 /* 위아래 전체 띠 음영을 없애고, 글자 주변에만 5px 흰 음영(2026-11-13) */
 .cr .cr-v2-main.media::before, .cr .cr-v2-main.media::after { content: none; }
 .cr .cr-v2-main.media .cr-v2-kind, .cr .cr-v2-main.media .cr-v2-title { -webkit-text-stroke: 0; text-shadow: 0 0 5px #fff, 0 0 5px #fff; }
+/* 제목 자리가 어두운 그림·영상: 흰 글자에 어두운 5px 음영 */
+.cr .cr-v2-main.media .cr-v2-title.on-dark { color: #fff; text-shadow: 0 0 5px rgba(0,0,0,.8), 0 0 5px rgba(0,0,0,.8); }
