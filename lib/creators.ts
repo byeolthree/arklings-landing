@@ -55,9 +55,9 @@ export type WorkListItem = {
 
 export type WorkBlock =
   | { id: string; kind: "text"; body: string; sub?: string }
-  | { id: string; kind: "image"; fileName: string | null; src: string | null; why?: string }
-  | { id: string; kind: "video"; youtubeId: string | null; fileName?: string | null; fileBytes?: number | null; src?: string | null; sub?: string; why?: string } // 유튜브 주소 또는 MP4 파일(2026-11-09 D18 개정)
-  | { id: string; kind: "document"; fileName: string | null; fileBytes: number | null; src: string | null; sub?: string; why?: string };
+  | { id: string; kind: "image"; fileName: string | null; src: string | null }
+  | { id: string; kind: "video"; youtubeId: string | null; fileName?: string | null; fileBytes?: number | null; src?: string | null; sub?: string } // 유튜브 주소 또는 MP4 파일(2026-11-09 D18 개정)
+  | { id: string; kind: "document"; fileName: string | null; fileBytes: number | null; src: string | null; sub?: string };
 
 export type WorkDetail = WorkListItem & {
   authorHandle: string;
