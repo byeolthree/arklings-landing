@@ -51,7 +51,31 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId, openNew
   const other = preview.top === "logline" ? "video" : "logline";
   const topNote = `내 포트폴리오 ${works.length} / ${WORK_LIMIT} · 파일 ${mb(usedBytes)} / ${mb(QUOTA_BYTES)}`;
 
+  // 새 등록 화면을 펼쳤을 때도 목록 화면과 같은 자리에 「새 포트폴리오 등록」 바를 두고, 펼치기·접기 글자만 바뀐다(2026-11-13 아키텍터 지시).
+  const closeNew = () => {
+    setFormKey((k) => k + 1);
+    setCurrent(works.length > 0 ? null : "new");
+  };
   return (
+    <>
+    {current === "new" && (
+      <div className="rg-grid rg-list rg-newbar">
+        <h2 className="rg-list-title">포트폴리오 등록</h2>
+        <section className="rg-card rg-card-list" aria-label="새 포트폴리오 등록">
+          <div className="pf">
+            <button type="button" className="pf-new" aria-expanded={true} onClick={closeNew}>
+              <span className="pf-new-main">
+                <span className="pf-plus" aria-hidden="true">＋</span> 새 포트폴리오 등록
+              </span>
+              <span className="pf-new-fold">
+                <span className="pf-long">등록 화면 접기 ▴</span>
+                <span className="pf-short">접기 ▴</span>
+              </span>
+            </button>
+          </div>
+        </section>
+      </div>
+    )}
     <div className={`rg-grid${current === null ? " rg-list" : ""}`}>
       {current === null && <h2 className="rg-list-title">포트폴리오 등록</h2>}
       <section className={`rg-card${current === null ? " rg-card-list" : ""}`} aria-label="포트폴리오 등록">
@@ -81,10 +105,7 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId, openNew
             nickname={nickname}
             profileRoles={profileRoles}
             topNote={topNote}
-            onClose={() => {
-              setFormKey((k) => k + 1);
-              setCurrent(works.length > 0 ? null : "new");
-            }}
+            onClose={closeNew}
             onCreated={(id, allSaved) => {
               // 작품을 만들고 빠짐없이 저장됐으면 내 크리에이터 상세로 간다. 프로필이 비공개이거나 일부가 저장되지 않았으면 이 화면에 남아 이유를 보여 준다.
               if (allSaved && profilePublic) return router.push("/creators");
@@ -109,5 +130,6 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId, openNew
         <p className="rg-side-note">역할은 프로필에서 가져옵니다(여기서 고르지 않음). 왼쪽 맨 위 요소를 끌어서 바꾸면 이 카드가 바로 바뀝니다.</p>
       </aside>
     </div>
+    </>
   );
 }
