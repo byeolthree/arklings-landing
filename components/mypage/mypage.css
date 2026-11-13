@@ -283,3 +283,5 @@
 .mp .mp-modal-btn { width: 100%; min-height: 44px; }
 .mp .mp-modal-note { margin: 12px 0 0; font-size: 13px; line-height: 20px; color: var(--body); }
 .mp .mp-modal-close { margin-top: 16px; border: 0; background: transparent; font: inherit; font-size: 13px; color: var(--body); cursor: pointer; text-decoration: underline; }
+
+.mp .we-text.we-doc-text { background: #fff; }

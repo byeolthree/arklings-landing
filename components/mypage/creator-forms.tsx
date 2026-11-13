@@ -90,9 +90,9 @@ function DocFilePick({ file, onFile, disabled }: { file?: File | null; onFile: (
 // 접어도 어떤 요소인지 알 수 있도록 요소 이름(굵게)과 받는 형식(보통 굵기)을 늘 보여 준다.
 const ELEMENT_NAME: Record<"logline" | "video" | "image" | "text", { name: string; note?: string }> = {
   logline: { name: "로그라인", note: "(이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)" },
-  video: { name: "영상", note: "(MP4, 10MB 이하)" },
+  video: { name: "영상" },
   image: { name: "이미지", note: "(JPG · PNG · WEBP, 5MB 이하)" },
-  text: { name: "문서", note: "(PDF, 10MB 이하)" },
+  text: { name: "문서" },
 };
 function ElementName({ kind }: { kind: "logline" | "video" | "image" | "text" }) {
   const e = ELEMENT_NAME[kind];
@@ -1052,8 +1052,8 @@ export function WorkEditor({
                   )}
                   {sl.kind === "video" && <SubChips items={VIDEO_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="영상 종류" />}
                   {sl.kind === "text" && <SubChips items={DOC_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="문서 종류" />}
-                  {sl.kind === "text" && !slotFold[sl.id] && <textarea className="we-text" rows={3} placeholder="〈문서〉" aria-label="문서" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
                   {sl.kind === "text" && !slotFold[sl.id] && <DocFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
+                  {sl.kind === "text" && !slotFold[sl.id] && <textarea className="we-text we-doc-text" rows={3} placeholder="〈직접 입력〉" aria-label="문서" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
                   {sl.kind === "image" && <ImageSlotBox file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
                   {sl.kind === "video" && !slotFold[sl.id] && <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={sl.url} onChange={(e) => patchSlot(sl.id, { url: e.target.value })} />}
                   {sl.kind === "video" && !slotFold[sl.id] && <VideoFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
@@ -1253,13 +1253,13 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
             )}
             {b && b.kind === "text" && !folded[b.id] && (
               <>
-                <textarea className="we-text" rows={3} aria-label="문서" value={edits[b.id] ?? b.body} onChange={(e) => setEdits({ ...edits, [b.id]: e.target.value })} />
+                <DocFilePick file={null} onFile={(f) => { if (f) void upload(f, "document"); }} disabled={busy} />
+                <textarea className="we-text we-doc-text" rows={3} placeholder="〈직접 입력〉" aria-label="문서" value={edits[b.id] ?? b.body} onChange={(e) => setEdits({ ...edits, [b.id]: e.target.value })} />
                 {edits[b.id] !== undefined && edits[b.id] !== b.body && (
                   <button type="button" className="btn btn-ghost" disabled={busy} onClick={async () => { if (await run(() => updateTextBlock(b.id, edits[b.id]), "문서를 저장했어요.")) setEdits((cur) => Object.fromEntries(Object.entries(cur).filter(([k]) => k !== b.id))); }}>
                     문서 저장
                   </button>
                 )}
-                <DocFilePick file={null} onFile={(f) => { if (f) void upload(f, "document"); }} disabled={busy} />
               </>
             )}
             {b && b.kind === "image" && (folded[b.id] ? <span className="we-line">이미지 {b.fileName ?? ""}</span> : b.src ? (

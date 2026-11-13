@@ -281,3 +281,5 @@
 .rg .cl-more { margin-top: 12px; font-size: 13px; color: var(--body); }
 .rg .cl-more a { text-decoration: underline; }
 .rg .cl-hr { margin: 32px 0 28px; border: 0; border-top: 1px solid var(--line); }
+
+.rg .we-main.we-card .we-text.we-doc-text, .rg .we-text.we-doc-text { background: #fff; }
