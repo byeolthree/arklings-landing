@@ -914,6 +914,10 @@
   .nav-ico[hidden] { display: none; }
   /* 로그아웃 상태 오른쪽 위: 기획안(→ 동그라미, 채움) · 협업 신청(종이비행기 동그라미, 외곽선) (2026-11-13 아키텍터 지시) */
   .nav-ico .arrow { font-size: 17px; line-height: 1; }
+  /* 두 아이콘 아래에 이름이 드롭다운처럼 보인다 */
+  .nav-out { position: relative; }
+  .nav-out::after { content: attr(data-tip); position: absolute; top: calc(100% + 8px); left: 50%; transform: translate(-50%, -4px); padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; color: var(--title); font-size: 13px; font-weight: 500; white-space: nowrap; box-shadow: 0 12px 24px -12px rgba(42,32,37,.35); opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s; z-index: 30; }
+  .nav-out:hover::after, .nav-out:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
   .hero-collab { align-self: center; width: 44px; height: 44px; }
   .nav-wrap { position: relative; display: inline-flex; }
   .nav-wrap[hidden] { display: none; }
@@ -1121,8 +1125,8 @@
     </nav>
     <div class="nav-right">
       <span class="nav-icons">
-        <a class="nav-ico fill nav-out" id="navCta" href="/planner" aria-label="기획안 만들기"><span class="arrow" aria-hidden="true">→</span></a>
-        <a class="nav-ico nav-out" id="navCollab" href="/collab/new" aria-label="협업 신청"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></a>
+        <a class="nav-ico fill nav-out" id="navCta" href="/planner" aria-label="기획안 만들기" data-tip="기획안 만들기"><span class="arrow" aria-hidden="true">→</span></a>
+        <a class="nav-ico nav-out" id="navCollab" href="/collab/new" aria-label="협업 문의" data-tip="협업 문의"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></a>
         <span class="nav-wrap" data-dd id="plusWrap" hidden><a class="nav-ico fill" id="navPlus" href="/login" aria-haspopup="menu" aria-expanded="false" aria-label="등록하기(로그인이 필요해요)"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></a><div class="nav-drop" id="plusDrop" role="menu" aria-label="등록할 곳" hidden><span>킹덤</span><span>스튜디오</span><a role="menuitem" href="/portfolio/new">크리에이터</a><a role="menuitem" href="/library">라이브러리</a><span>커뮤니티</span></div></span>
         <span class="nav-wrap" data-dd><a class="nav-ico" id="navAuth" href="/login" aria-haspopup="menu" aria-expanded="false" aria-label="로그인·회원가입"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/></svg></a><div class="nav-drop" id="navDrop" role="menu" hidden><div id="dropIn"><a role="menuitem" href="/mypage">기본 정보</a><a role="menuitem" href="/portfolio/new?step=profile">프로필 등록</a><a role="menuitem" href="/portfolio/new">포트폴리오 등록</a><a role="menuitem" href="/mypage/collab">협업 신청</a><a role="menuitem" href="/admin" id="navAdmin" hidden>운영자</a><hr><form method="post" action="/auth/signout"><button type="submit" role="menuitem">로그아웃</button></form></div><div id="dropOut" hidden><a role="menuitem" href="/login">로그인</a><a role="menuitem" href="/signup">회원가입</a></div></div></span>
         <span class="nav-wrap" data-dd id="bellWrap" hidden><a class="nav-ico" id="navBell" href="/collab" aria-haspopup="menu" aria-expanded="false" aria-label="알림"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg><span class="nav-badge" id="navBadge" hidden></span></a><div class="nav-drop nav-drop-bell" id="bellDrop" role="menu" aria-label="알림" hidden></div></span>
@@ -1143,7 +1147,7 @@
       <p class="lead reveal" data-delay="2"><span class="nb"><span class="nw">머릿속에만 머물던 그 아이디어,</span> <span class="nw">아클링스와 함께 정돈해보세요.</span></span><br /><span class="nb">근사한 시리즈IP가 탄생할 거예요!</span></p>
       <div class="ctas reveal" data-delay="3">
         <a class="btn btn-primary" href="/planner">기획안 만들기 <span class="arrow">→</span></a>
-        <a class="btn btn-ghost" href="/collab/new">협업 문의하기 <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></a>
+        <a class="btn btn-ghost" href="/collab/new">협업 문의 <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></a>
       </div>
     </div>
   </section>
