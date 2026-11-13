@@ -16,7 +16,21 @@ function PreviewCard({ p, kind }: { p: WorkPreview; kind: "video" | "image" | "d
   return (
     <div className="rg-pcard">
       <p className="rg-pcard-title">{p.title || "〈제목〉"}</p>
-      {kind === "logline" ? <p className="rg-pcard-log">{p.logline || FRAME}</p> : <div className="rg-pcard-media">{kind === "video" ? "영상" : kind === "doc" ? "문서" : "이미지"}</div>}
+      {kind === "logline" ? (
+        <p className="rg-pcard-log">{p.logline || FRAME}</p>
+      ) : kind === p.top && p.media ? (
+        // 실제 대표 이미지·영상을 꽉 채우기/비율 유지하기 선택대로(탐색 카드와 같은 규칙)
+        <div className={`rg-pcard-media has-src fit-${p.media.fit}`}>
+          {p.media.kind === "video" ? (
+            <video src={p.media.src} muted playsInline preload="metadata" />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={p.media.src} alt="" />
+          )}
+        </div>
+      ) : (
+        <div className="rg-pcard-media">{kind === "video" ? "영상" : kind === "doc" ? "문서" : "이미지"}</div>
+      )}
       <div className="rg-pcard-tags">
         {p.roles.length > 0 && (
           <ul className="rg-roles">

@@ -755,7 +755,9 @@ async function addSlots(workId: string, slots: Slot[]): Promise<{ error: string 
 }
 
 // 편집 칸이 바뀔 때마다 「포트폴리오 화면에 보일 카드」(독립 등록 화면 오른쪽)에 알려 주는 값. 대표는 작품 안 맨 위의 이미지·영상이고, 없으면 로그라인이다.
-export type WorkPreview = { title: string; logline: string; genres: string[]; roles: Role[]; top: "video" | "image" | "doc" | "logline" };
+export type WorkPreview = { title: string; logline: string; genres: string[]; roles: Role[]; top: "video" | "image" | "doc" | "logline"; media?: PreviewMedia };
+// 미리보기 카드에 실제로 걸 대표 이미지·영상(꽉 채우기/비율 유지하기 선택 포함)
+export type PreviewMedia = { kind: "image" | "video"; src: string; fit: "cover" | "contain" };
 
 export function WorkEditor({
   work,
@@ -823,13 +825,29 @@ export function WorkEditor({
     if (typeof topItem === "string") return topItem === "image" || topItem === "video" ? topItem : topItem === "text" ? "doc" : "logline";
     return topItem.kind === "image" || topItem.kind === "video" ? topItem.kind : "doc";
   })();
+  // 대표가 이미지·영상이면 미리보기 카드에 실제 그림을 건다. 새 작품은 고른 파일을 화면에서만 보여 준다.
+  const topFile = !work && typeof topItem === "string" ? (slots[0]?.file ?? null) : null;
+  const topFileUrl = useMemo(() => (topFile ? URL.createObjectURL(topFile) : null), [topFile]);
+  useEffect(() => () => { if (topFileUrl) URL.revokeObjectURL(topFileUrl); }, [topFileUrl]);
+  const media: PreviewMedia | undefined = (() => {
+    if (typeof topItem !== "string") {
+      if (topItem.kind === "image" && topItem.src) return { kind: "image", src: topItem.src, fit: topItem.fit ?? "contain" };
+      if (topItem.kind === "video" && topItem.youtubeId) return { kind: "image", src: `https://i.ytimg.com/vi/${topItem.youtubeId}/hqdefault.jpg`, fit: "cover" };
+      if (topItem.kind === "video" && topItem.src) return { kind: "video", src: topItem.src, fit: "cover" };
+      return undefined;
+    }
+    if (topFileUrl && (topItem === "image" || topItem === "video")) return { kind: topItem, src: topFileUrl, fit: topItem === "video" ? "cover" : "contain" };
+    return undefined;
+  })();
   const genresKey = genres.join("|");
   const rolesKey = roles.join("|");
+  const mediaKey = media ? `${media.kind}|${media.src}|${media.fit}` : "";
   useEffect(() => {
-    onPreview?.({ title, logline, genres: genresKey ? genresKey.split("|") : [], roles: (rolesKey ? rolesKey.split("|") : []) as Role[], top: topKind });
+    const [mk, msrc, mfit] = mediaKey ? mediaKey.split("|") : [];
+    onPreview?.({ title, logline, genres: genresKey ? genresKey.split("|") : [], roles: (rolesKey ? rolesKey.split("|") : []) as Role[], top: topKind, media: mk ? { kind: mk as PreviewMedia["kind"], src: msrc, fit: mfit as PreviewMedia["fit"] } : undefined });
     // onPreview는 부르는 쪽이 매번 새로 만들어도 다시 부르지 않게 뺀다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, logline, genresKey, rolesKey, topKind]);
+  }, [title, logline, genresKey, rolesKey, topKind, mediaKey]);
 
   // 저장 전에 역할과 대표 콘텐츠가 맞는지 본다. 영상 제작·아트디렉터는 맨 위 이미지·영상이 카드에 보이고, 다른 역할은 로그라인이 카드에 보인다.
   const [confirmMsg, setConfirmMsg] = useState<string | null>(null);
@@ -1336,10 +1354,10 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
             {b && b.kind === "image" && !folded[b.id] && (
               <>
                 <div className="we-line">{b.fileName ?? "첨부된 이미지"}{b.fileBytes ? ` · ${mb(b.fileBytes)}` : ""}</div>
-                {/* 카드에 보일 때: 꽉 채우기(가장자리가 조금 잘릴 수 있음) / 여백 두기(자르지 않고 남는 곳을 카드 배경색으로) */}
+                {/* 카드에 보일 때: 꽉 채우기(가장자리가 조금 잘릴 수 있음) / 비율 유지하기(자르지 않고 남는 곳을 카드 배경색으로) */}
                 <div className="we-fit" role="group" aria-label="카드에 보일 때">
                   <span>카드에 보일 때</span>
-                  {([["cover", "꽉 채우기"], ["contain", "여백 두기"]] as const).map(([v, l]) => (
+                  {([["cover", "꽉 채우기"], ["contain", "비율 유지하기"]] as const).map(([v, l]) => (
                     <button key={v} type="button" className="opt" aria-pressed={(b.fit ?? "contain") === v} disabled={busy} onClick={() => void run(() => setBlockFit(b.id, v))}>
                       {l}
                     </button>

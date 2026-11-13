@@ -322,3 +322,8 @@
 .rg .rg-newbar-in { margin: 2px 8px 20px; }
 .rg .rg-newbar-in .pf-new.is-open { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; justify-content: flex-end; background: #fff; border: 1.5px solid var(--jaju); color: var(--jaju); box-shadow: none; }
 .rg .rg-newbar-in .pf-new.is-open .pf-new-fold { color: var(--jaju); }
+/* 미리보기 카드의 실제 대표 이미지·영상: 꽉 채우기(cover) / 비율 유지하기(contain, 남는 곳은 흰색) */
+.rg .rg-pcard-media.has-src { overflow: hidden; background: #fff; }
+.rg .rg-pcard-media.has-src img, .rg .rg-pcard-media.has-src video { display: block; width: 100%; height: 100%; }
+.rg .rg-pcard-media.fit-cover img, .rg .rg-pcard-media.fit-cover video { object-fit: cover; }
+.rg .rg-pcard-media.fit-contain img, .rg .rg-pcard-media.fit-contain video { object-fit: contain; }
