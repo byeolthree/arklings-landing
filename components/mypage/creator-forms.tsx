@@ -1253,6 +1253,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
               </button>
             )}
             {b && <ElementName kind={b.kind === "document" ? "text" : b.kind} />}
+            {b && "why" in b && b.why && <span hidden data-why={b.why} />}
             {b && (b.kind === "video" || b.kind === "text" || b.kind === "document") && (
               <SubChips
                 items={b.kind === "video" ? VIDEO_SUBKINDS : DOC_SUBKINDS}

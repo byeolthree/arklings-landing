@@ -177,3 +177,18 @@ export async function signOwnFiles(userId: string, paths: readonly (string | nul
   const own = Array.from(new Set(paths.filter((p): p is string => Boolean(p) && fileBelongsTo(userId, p as string))));
   return sign(own);
 }
+
+// 임시 확인용: 본인 화면에서 파일 주소를 못 만든 이유를 글자로 돌려준다(원인 확인 뒤 지운다).
+export async function whyNoOwnUrl(userId: string, path: string): Promise<string> {
+  const shape = NAME_RE.test(path) ? "표식모양" : `이름모양다름(${path.length}자)`;
+  const tag = fileBelongsTo(userId, path) ? "표식맞음" : "표식다름";
+  let sign = "";
+  try {
+    const { data, error } = await createAdminClient().storage.from(CREATOR_BUCKET).createSignedUrls([path], SIGNED_URL_SECONDS);
+    const row = data?.[0];
+    sign = error ? `호출실패:${error.message}` : row?.signedUrl ? "주소만들어짐" : `주소실패:${row?.error ?? "?"}`;
+  } catch (e) {
+    sign = `예외:${e instanceof Error ? e.message : String(e)}`;
+  }
+  return `${shape}/${tag}/${sign}`;
+}

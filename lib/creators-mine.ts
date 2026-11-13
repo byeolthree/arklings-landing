@@ -2,7 +2,7 @@
 // 공개용 보기(lib/creators.ts)와 달리 비공개도 읽으므로 반드시 본인 확인을 마친 사용자 번호로만 부른다. 화면으로 넘기는 값에는 내 번호를 싣지 않는다.
 import type { Role } from "@/lib/collab";
 import { isRole } from "@/lib/creator-rules";
-import { signOwnFiles } from "@/lib/creator-files";
+import { signOwnFiles, whyNoOwnUrl } from "@/lib/creator-files";
 import type { WorkBlock, WorkListItem } from "@/lib/creators";
 import { createAuthClient } from "@/lib/supabase/server";
 
@@ -54,6 +54,8 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
 
   const brows = (blocks.data ?? []) as unknown as BlockRow[];
   const urls = await signOwnFiles(userId, brows.map((b) => b.file_path));
+  const whys = new Map<string, string>();
+  for (const b of brows) if (b.file_path && !urls.get(b.file_path)) whys.set(b.file_path, await whyNoOwnUrl(userId, b.file_path));
   const byWork = new Map<string, MyBlock[]>();
   let used = 0;
   for (const b of brows) {
@@ -62,9 +64,9 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
     const sub = b.sub_kind ?? undefined;
     if (b.kind === "text" && b.body) list.push({ id: b.id, kind: "text", body: b.body, sub });
     else if (b.kind === "video" && b.youtube_id) list.push({ id: b.id, kind: "video", youtubeId: b.youtube_id, sub });
-    else if (b.kind === "video" && b.file_path) list.push({ id: b.id, kind: "video", youtubeId: null, fileName: b.file_name, fileBytes: b.file_bytes, src: urls.get(b.file_path) ?? null, sub });
-    else if (b.kind === "image") list.push({ id: b.id, kind: "image", fileName: b.file_name, src: b.file_path ? (urls.get(b.file_path) ?? null) : null });
-    else if (b.kind === "document") list.push({ id: b.id, kind: "document", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, sub });
+    else if (b.kind === "video" && b.file_path) list.push({ id: b.id, kind: "video", youtubeId: null, fileName: b.file_name, fileBytes: b.file_bytes, src: urls.get(b.file_path) ?? null, sub, why: whys.get(b.file_path) });
+    else if (b.kind === "image") list.push({ id: b.id, kind: "image", fileName: b.file_name, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, why: b.file_path ? whys.get(b.file_path) : undefined });
+    else if (b.kind === "document") list.push({ id: b.id, kind: "document", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, sub, why: b.file_path ? whys.get(b.file_path) : undefined });
     byWork.set(b.work_id, list);
   }
 
