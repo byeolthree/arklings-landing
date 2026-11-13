@@ -2,7 +2,7 @@
 
 // 마이페이지의 「크리에이터 등록」과 「포트폴리오 등록」 실제 화면. 샘플(mypage-preview, work-editor)과 같은 모양이고 진짜로 저장한다.
 // 모든 저장은 app/actions/creators.ts의 Server Action이 하고(서버가 로그인·이메일 확인·글자 수를 다시 검사한다), 끝나면 서버에서 다시 읽는다(router.refresh).
-import { AlertPopup } from "@/components/ui/alert-popup";
+import { AlertPopup, ConfirmPopup } from "@/components/ui/alert-popup";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ROLE_TONE } from "@/components/creators/role-tone";
@@ -807,6 +807,21 @@ export function WorkEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, logline, genresKey, rolesKey, topKind]);
 
+  // 저장 전에 역할과 대표 콘텐츠가 맞는지 본다. 영상 제작·아트디렉터는 맨 위 이미지·영상이 카드에 보이고, 다른 역할은 로그라인이 카드에 보인다.
+  const [confirmMsg, setConfirmMsg] = useState<string | null>(null);
+  function askSave() {
+    if (!title.trim()) return void save();
+    const visual = roles.some((x) => x === "video" || x === "art_director");
+    const mediaTop = topKind === "image" || topKind === "video";
+    if (!visual && mediaTop) {
+      return setConfirmMsg("역할에 맞는 대표 콘텐츠가 아닙니다.\n그래도 등록하시겠어요?");
+    }
+    if (visual && !mediaTop) {
+      return setConfirmMsg("역할에 맞는 대표 콘텐츠가 아닙니다.\n그래도 등록하시겠어요?");
+    }
+    void save();
+  }
+
   async function save() {
     setBusy(true);
     setMsg(null);
@@ -893,6 +908,11 @@ export function WorkEditor({
       </div>
 
       <div className="we-head">
+        {confirmMsg && (
+          <ConfirmPopup confirmLabel="등록" cancelLabel="다시 작성" onConfirm={() => { setConfirmMsg(null); void save(); }} onCancel={() => setConfirmMsg(null)}>
+            {confirmMsg}
+          </ConfirmPopup>
+        )}
         {askTitle &&
           createPortal(
             <div role="dialog" aria-modal="true" aria-labelledby="ask-title-text" style={{ position: "fixed", inset: 0, zIndex: 100, display: "grid", placeItems: "center", padding: 16, background: "rgba(42,32,37,.45)" }}>
@@ -1031,7 +1051,7 @@ export function WorkEditor({
             삭제
           </button>
         )}
-        <button type="button" className="btn btn-primary" onClick={save} disabled={disabled}>
+        <button type="button" className="btn btn-primary" onClick={askSave} disabled={disabled}>
           {busy ? "저장하는 중…" : "저장"}
         </button>
       </div>

@@ -35,3 +35,38 @@ export function AlertPopup({
     document.body,
   );
 }
+
+// 저장 전에 한 번 더 묻는 팝업. 가운데 정렬 글 아래에 가운데 정렬 단추 둘(확인 쪽 · 취소 쪽)이 있다.
+export function ConfirmPopup({
+  children,
+  confirmLabel,
+  cancelLabel,
+  onConfirm,
+  onCancel,
+}: {
+  children: ReactNode;
+  confirmLabel: string;
+  cancelLabel: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const mounted = useSyncExternalStore(() => () => {}, () => true, () => false);
+  if (!mounted) return null;
+  const btn = { height: 40, padding: "0 24px", borderRadius: 999, fontSize: 14, fontWeight: 700, cursor: "pointer" } as const;
+  return createPortal(
+    <div role="alertdialog" aria-modal="true" style={{ position: "fixed", inset: 0, zIndex: 100, display: "grid", placeItems: "center", padding: 16, background: "rgba(42,32,37,.45)" }}>
+      <div style={{ width: "100%", maxWidth: 360, padding: "28px 24px 24px", borderRadius: 16, background: "#fff", textAlign: "center", color: "#2a2025", fontSize: 15, fontWeight: 400, lineHeight: 1.6, whiteSpace: "pre-line" }}>
+        <div>{children}</div>
+        <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
+          <button type="button" autoFocus onClick={onConfirm} style={{ ...btn, border: 0, background: "#a61e5c", color: "#fff" }}>
+            {confirmLabel}
+          </button>
+          <button type="button" onClick={onCancel} style={{ ...btn, border: "1px solid #a61e5c", background: "#fff", color: "#a61e5c" }}>
+            {cancelLabel}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
