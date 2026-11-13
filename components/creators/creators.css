@@ -390,3 +390,5 @@
 .cr .cr-open-go { display: inline-flex; align-items: center; gap: 5px; text-decoration: none; }
 .cr .cr-open-go .cr-open-ico { opacity: .55; }
 .cr a.cr-open-go:hover .cr-open-ico { opacity: 1; }
+/* 대표 화면: 「협업 신청 받는 중」 줄을 닉네임 쪽으로 붙인다(닉네임 큰 글자의 위쪽 여백 때문에 역할 태그 쪽보다 멀어 보여서) */
+.cr .cr-hero-body > .cr-open-go { margin-bottom: -8px; }
