@@ -302,3 +302,9 @@
 .rg .we-add .btn.btn-ghost.we-add-text { background: #40576f; border-color: #40576f; color: #fff; }
 .rg .we-add .btn.btn-ghost.we-add-image { background: #6f8a7a; border-color: #6f8a7a; color: #fff; }
 .rg .we-add .btn.btn-ghost.we-add-video { background: #6e9ca3; border-color: #6e9ca3; color: #fff; }
+
+/* 이미지 프레임: 비어 있을 때는 문서·영상 첨부 칸과 같은 높이, 이미지를 고르면 그 이미지 크기만큼(2026-11-13) */
+.rg .we-imgbox { min-height: 0; height: auto; aspect-ratio: auto; padding: 11px 14px 12px; }
+.rg .we-imgbox:has(.we-imgchange) { padding: 0; }
+.rg .we-imgbox .we-imgempty { gap: 6px; }
+.rg .we-imgbox .we-imgchange img { display: block; width: 100%; height: auto; max-height: none; object-fit: contain; }
