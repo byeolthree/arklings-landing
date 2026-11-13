@@ -37,11 +37,11 @@ export function WorkDetail({ work, closeHref, applyHref }: { work: WorkDetailDat
           <p className="cr-win-by">
             {work.authorName} · <time dateTime={work.publishedAt}>{formatKstDate(work.publishedAt)}</time>
           </p>
-          <RoleTags roles={work.roles} />
+          <RoleTags roles={work.roles} lead />
           {work.genres.length > 0 && (
-            <ul className="cr-genres cr-win-genres" aria-label="장르">
+            <ul className="cr-genres cr-genres-hash cr-win-genres" aria-label="장르">
               {work.genres.map((g) => (
-                <li key={g}>{g}</li>
+                <li key={g}>#{g}</li>
               ))}
             </ul>
           )}

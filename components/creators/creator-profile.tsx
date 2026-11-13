@@ -71,7 +71,7 @@ export function CreatorProfile({
           </Link>
           <div className="cr-hero-body">
             {privateNote && <span className="cr-open">비공개 상태입니다</span>}
-            <RoleTags roles={creator.roles} />
+            <RoleTags roles={creator.roles} lead />
             <h1 id="cr-hero-name" className="cr-hero-name">
               {creator.name}
             </h1>
@@ -141,7 +141,7 @@ export function CreatorProfile({
           </div>
         </section>
       ) : (
-        <WorkBands key={works.map((w) => `${w.id}${w.isPublic === false ? "0" : "1"}`).join()} works={works} hrefs={works.map((w) => workHref(w.id))} owner={Boolean(owner)} />
+        <WorkBands key={works.map((w) => `${w.id}${w.isPublic === false ? "0" : "1"}`).join()} works={works} hrefs={works.map((w) => workHref(w.id))} owner={Boolean(owner)} roles={creator.roles} />
       )}
 
       {/* 스크롤해도 화면 아래에 붙어 있다가, 맨 끝에서는 제자리에 놓인다(바깥 틀이 키가 커야 붙으므로 맨 아래 직속으로 둔다) */}

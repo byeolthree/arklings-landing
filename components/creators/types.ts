@@ -23,6 +23,8 @@ export type CreatorCard = {
   latest: { title: string; logline: string; genres?: string[] }; // 대표 작품(가장 최근에 공개한 작품)과 그 장르(D37)
   hero?: HeroKind; // 크리에이터가 자기를 대표하도록 올린 이미지나 영상(없으면 안 걸림)
   heroSrc?: string; // 그 파일 주소(샘플은 일부만 있고, 없으면 자리 표시)
+  mainSub?: string; // 카드 대표 콘텐츠의 종류 태그(포스터·티저 등). 메인이 이미지·영상일 때만
+  mainKind?: "image" | "video"; // 대표 콘텐츠 요소가 이미지인지 영상인지(종류 글자 색)
   main: "logline" | "media"; // 카드의 메인: 아트디렉터·영상 제작은 로그라인이 아니라 대표 이미지·영상을 걸 수 있다
 };
 

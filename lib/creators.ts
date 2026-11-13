@@ -28,6 +28,8 @@ export type CreatorListItem = {
   hero?: HeroKind;
   heroSrc?: string; // 대표 이미지·영상의 임시 주소
   coverKind?: "image" | "video"; // cover가 그림 주소인지 영상 파일 주소인지(올린 MP4는 영상 그대로 건다)
+  coverSub?: string; // 카드 대표 콘텐츠의 종류 태그(포스터·티저 등). 없으면 비어 있다
+  coverBlockKind?: "image" | "video"; // 대표 콘텐츠 요소가 원래 이미지인지 영상인지(유튜브 영상도 video)
   cover?: string; // 가장 최근 공개 작품의 대표(작품 안 맨 위에 놓인 것, D35-2)가 이미지·영상일 때 그 그림 주소. 영상 제작·아트디렉터 역할이 있는 사람만 채워진다
 };
 
@@ -183,7 +185,7 @@ export async function listCreators(filter: CreatorFilterInput, page: number): Pr
     items: rows.map((r) => {
       const base = toListItem(r, heroUrls);
       const f = featured.get(r.public_handle);
-      return { ...base, latest: f ? { title: f.title, logline: f.logline, genres: f.genres } : base.latest, cover: covers.get(r.public_handle)?.src, coverKind: covers.get(r.public_handle)?.kind };
+      return { ...base, latest: f ? { title: f.title, logline: f.logline, genres: f.genres } : base.latest, cover: covers.get(r.public_handle)?.src, coverKind: covers.get(r.public_handle)?.kind, coverSub: covers.get(r.public_handle)?.sub, coverBlockKind: covers.get(r.public_handle)?.blockKind };
     }),
     total: count ?? 0,
   };
@@ -211,8 +213,9 @@ async function loadFeatured(handles: string[]): Promise<Map<string, FeaturedWork
 
 // 그 크리에이터들이 카드에 먼저 보이게 정한 작품(등록 목록 맨 위)에서 「대표」(D35-2: 작품 안에서 맨 위에 놓인 것)가 이미지·영상이면 그 그림 주소를 돌려준다.
 // 맨 위가 로그라인이거나 글·문서면 그 사람은 빠진다(카드는 로그라인 모양으로 나온다). 영상은 유튜브라서 유튜브가 주는 대표 그림을 쓴다.
-async function loadCovers(handles: string[], featured: Map<string, FeaturedWork>): Promise<Map<string, { src: string; kind: "image" | "video" }>> {
-  const out = new Map<string, { src: string; kind: "image" | "video" }>();
+type Cover = { src: string; kind: "image" | "video"; blockKind: "image" | "video"; sub?: string };
+async function loadCovers(handles: string[], featured: Map<string, FeaturedWork>): Promise<Map<string, Cover>> {
+  const out = new Map<string, Cover>();
   if (handles.length === 0) return out;
   const sb = getSupabase();
   const latest = new Map<string, { id: string; loglinePosition: number }>(); // handle → 카드에 먼저 보이는 작품
@@ -224,12 +227,12 @@ async function loadCovers(handles: string[], featured: Map<string, FeaturedWork>
   if (ids.length === 0) return out;
   const blocks = await sb
     .from("creator_blocks_public")
-    .select("work_id, kind, file_path, youtube_id, position")
+    .select("work_id, kind, file_path, youtube_id, position, sub_kind")
     .in("work_id", ids)
     .order("position", { ascending: true })
     .order("id", { ascending: true });
   if (blocks.error) return out;
-  type Row = { work_id: string; kind: string; file_path: string | null; youtube_id: string | null };
+  type Row = { work_id: string; kind: string; file_path: string | null; youtube_id: string | null; sub_kind?: string | null };
   const byWork = new Map<string, Row[]>();
   for (const b of (blocks.data ?? []) as Row[]) byWork.set(b.work_id, [...(byWork.get(b.work_id) ?? []), b]);
   // 작품마다 로그라인을 그 자리에 끼운 순서에서 맨 위가 이미지·영상일 때만 대표 그림이 된다.
@@ -243,10 +246,12 @@ async function loadCovers(handles: string[], featured: Map<string, FeaturedWork>
     const b = topByWork.get(w.id);
     if (!b) continue;
     // 유튜브 영상은 유튜브가 주는 대표 그림, 올린 MP4는 그 영상 파일 그대로(카드가 소리 없이 재생), 이미지는 그 이미지.
-    if (b.kind === "video" && b.youtube_id) out.set(handle, { src: `https://i.ytimg.com/vi/${b.youtube_id}/hqdefault.jpg`, kind: "image" });
+    const blockKind = b.kind === "video" ? "video" : "image";
+    const sub = b.sub_kind ?? undefined;
+    if (b.kind === "video" && b.youtube_id) out.set(handle, { src: `https://i.ytimg.com/vi/${b.youtube_id}/hqdefault.jpg`, kind: "image", blockKind, sub });
     else {
       const src = b.file_path ? (urls.get(b.file_path) ?? null) : null;
-      if (src) out.set(handle, { src, kind: b.kind === "video" ? "video" : "image" });
+      if (src) out.set(handle, { src, kind: b.kind === "video" ? "video" : "image", blockKind, sub });
     }
   }
   return out;

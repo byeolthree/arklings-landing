@@ -6,13 +6,18 @@ import { BlurImage } from "./blur-image";
 import { BlurVideo } from "./blur-video";
 import { RoleTags } from "./role-tags";
 import { FORM_LABEL, type CreatorCard, type WorkForm } from "./types";
-import { ROLE_TONE } from "./role-tone";
 import "./creators.css";
 
-// 자주색(주 색)을 아끼려고, 프로필 원은 보조 색 세 가지(청록·더스티 블루·뮤트 세이지)를 번갈아 쓴다.
-// 목록 순서대로 한 칸씩, 줄이 바뀔 때마다 한 칸 더 밀어서 옆 카드·아래 카드와 색이 겹치지 않게 한다.
-const TONES = ["teal", "dusty", "sage"] as const;
-const toneAt = (index: number) => TONES[(index + Math.floor(index / 3)) % TONES.length];
+
+// 협업 신청 아이콘(종이비행기)
+function SendIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M22 2 11 13" />
+      <path d="M22 2 15 22l-4-9-9-4 20-7z" />
+    </svg>
+  );
+}
 
 // 크리에이터 목록 화면. 데이터를 받기만 하고 읽지 않는다(실제 화면과 샘플 미리보기가 함께 쓴다).
 export function CreatorList({
@@ -171,57 +176,55 @@ export function CreatorList({
                 )}
               </p>
               <ul className="cr-grid">
-                {cards.map((c, i) => {
-                  const tone = c.roles[0] ? ROLE_TONE[c.roles[0]] : toneAt(i);
+                {cards.map((c) => {
+                  // 탐색 카드(2026-11-13 시안 card11): 프로필 동그라미 없음, 협업 신청은 오른쪽 위 아이콘 버튼,
+                  // 대표 콘텐츠는 좌우 끝까지 채운 칸(로그라인도 같은 높이) 왼쪽 위에 종류 글자(굵은 색 글자), 장르는 #글자.
+                  const kindLabel = c.main === "media" ? c.mainSub : "로그라인";
+                  const kindTone = c.main === "media" ? (c.mainKind === "video" ? "video" : "image") : "logline";
                   return (
                   <li key={c.handle}>
-                    <div className="panel cr-card">
-                      <Link href={profileHref(c.handle)} className="cr-card-main">
-                        <div className="cr-who">
-                          <span className={`cr-av ${tone}`} aria-hidden="true">
-                            {c.name.slice(0, 1)}
-                          </span>
-                          <div className="cr-who-text">
-                            <span className="cr-name">{c.name}</span>
-                            {c.bio && <span className="cr-bio">{c.bio}</span>}
-                          </div>
-                        </div>
-                        {c.main === "media" && c.hero ? (
-                          c.hero === "video" && c.heroSrc ? (
-                            <BlurVideo src={c.heroSrc} className="cr-main-media has-src" label="대표 영상" />
-                          ) : c.hero === "image" && c.heroSrc ? (
-                            <BlurImage src={c.heroSrc} className="cr-main-media has-src" label="대표 이미지" />
-                          ) : (
-                            <div className="cr-main-media" role="img" aria-label={c.hero === "video" ? "대표 영상" : "대표 이미지"}>
-                              {c.hero === "video" ? "▶ 〈대표 영상〉" : "〈대표 이미지〉"}
-                            </div>
-                          )
-                        ) : (
-                          <div className="cr-box">
-                            <span className="cr-label">대표 작품</span>
-                            <h3 className="cr-box-title">{c.latest.title}</h3>
-                            <p className="cr-box-logline">{c.latest.logline}</p>
-                          </div>
+                    <div className="panel cr-card cr-card-v2">
+                      <div className="cr-v2-top">
+                        <Link href={profileHref(c.handle)} className="cr-v2-who">
+                          <span className="cr-name">{c.name}</span>
+                          {c.bio && <span className="cr-bio">{c.bio}</span>}
+                        </Link>
+                        {c.openToCollab && applyHref && (
+                          <Link href={applyHref(c)} className="cr-ask" aria-label={`${c.name}님에게 협업 신청`} title="협업 신청">
+                            <SendIcon />
+                          </Link>
                         )}
-                        <RoleTags roles={c.roles} />
+                      </div>
+                      <Link href={profileHref(c.handle)} className="cr-card-main">
+                        <RoleTags roles={c.roles} lead />
+                        <div className={`cr-v2-main ${c.main}`}>
+                          {c.main === "media" && c.hero ? (
+                            c.hero === "video" && c.heroSrc ? (
+                              <BlurVideo src={c.heroSrc} className="cr-main-media has-src" label="대표 영상" />
+                            ) : c.hero === "image" && c.heroSrc ? (
+                              <BlurImage src={c.heroSrc} className="cr-main-media has-src" label="대표 이미지" />
+                            ) : (
+                              <div className="cr-main-media" role="img" aria-label={c.hero === "video" ? "대표 영상" : "대표 이미지"}>
+                                {c.hero === "video" ? "▶ 〈대표 영상〉" : "〈대표 이미지〉"}
+                              </div>
+                            )
+                          ) : (
+                            <div className="cr-box">
+                              <h3 className="cr-box-title">{c.latest.title}</h3>
+                              <p className="cr-box-logline">{c.latest.logline}</p>
+                            </div>
+                          )}
+                          {c.main === "media" && c.latest.title && <span className="cr-v2-title">{c.latest.title}</span>}
+                          {kindLabel && <span className={`cr-v2-kind ${kindTone}`}>{kindLabel}</span>}
+                        </div>
                         {c.latest.genres && c.latest.genres.length > 0 && (
-                          <ul className="cr-genres" aria-label="장르">
+                          <ul className="cr-genres cr-genres-hash" aria-label="장르">
                             {c.latest.genres.map((g) => (
-                              <li key={g}>{g}</li>
+                              <li key={g}>#{g}</li>
                             ))}
                           </ul>
                         )}
                       </Link>
-                      {c.openToCollab && (
-                        <div className="cr-card-foot">
-                          <span className="cr-open">협업 받는 중</span>
-                          {applyHref && (
-                            <Link href={applyHref(c)} className="btn btn-ghost">
-                              협업 신청
-                            </Link>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </li>
                   );

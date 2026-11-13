@@ -334,3 +334,39 @@
 .cr .cr-band-in.nomedia { grid-template-columns: minmax(0, 1fr); }
 .cr .cr-band-msg { padding: 8px 0; font-size: 13px; color: #c83a3a; }
 .cr .cr-band-empty { padding-top: 24px; }
+
+/* ── 탐색 카드(2026-11-13 시안 card11) ─────────────────────────────────────────
+   프로필 동그라미 없음. 협업 신청은 오른쪽 위 아이콘 버튼. 동그란 태그와 색은 역할에만.
+   대표 콘텐츠 칸은 좌우를 카드 끝까지 채우고(안쪽 테두리·모서리 없음) 로그라인도 같은 높이. 칸 왼쪽 위에 종류 글자(굵은 색 글자).
+   장르는 #이 붙은 본문색 글자. */
+.cr .cr-card-v2 { overflow: hidden; }
+.cr .cr-v2-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.cr .cr-v2-who { min-width: 0; display: flex; flex-direction: column; text-decoration: none; color: inherit; }
+.cr .cr-v2-who .cr-name { font-size: 18px; font-weight: 700; color: var(--title); }
+.cr .cr-ask { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; color: var(--jaju); transition: border-color .15s, background .15s; }
+.cr .cr-ask:hover { border-color: var(--jaju); background: #fff; }
+.cr .cr-card-v2 .cr-card-main { gap: 14px; }
+.cr .cr-tags-lead { margin: 0; }
+.cr .cr-tags-lead .cr-tag { font-weight: 700; }
+.cr .cr-tags-lead .cr-tag.line { background: #fff; border: 1.5px solid currentColor; padding: 2.5px 10.5px; }
+.cr .cr-tags-lead .cr-tag.line.teal { color: var(--teal); }
+.cr .cr-tags-lead .cr-tag.line.dusty { color: var(--dusty); }
+.cr .cr-tags-lead .cr-tag.line.sage { color: var(--sage); }
+.cr .cr-tags-lead .cr-tag.line.jaju { color: var(--jaju); }
+.cr .cr-tags-lead .cr-tag.line.gold { color: #b07a10; }
+.cr .cr-tags-lead .cr-tag.line.body { color: var(--body); }
+.cr .cr-v2-main { position: relative; margin: 0 -20px; height: 200px; }
+@media (min-width: 768px) { .cr .cr-v2-main { margin: 0 -24px; height: 220px; } }
+.cr .cr-v2-main .cr-main-media, .cr .cr-v2-main .cr-box { height: 100%; border-radius: 0; }
+.cr .cr-v2-main .cr-box { box-sizing: border-box; padding: 40px 20px 16px; background: #f4eef1; }
+@media (min-width: 768px) { .cr .cr-v2-main .cr-box { padding: 42px 24px 18px; } }
+.cr .cr-v2-main .cr-box-logline { -webkit-line-clamp: 5; }
+.cr .cr-v2-kind { position: absolute; top: 14px; left: 20px; font-size: 13px; font-weight: 700; line-height: 1.4; }
+@media (min-width: 768px) { .cr .cr-v2-kind { left: 24px; } }
+.cr .cr-v2-kind.image { color: #6f8a7a; }
+.cr .cr-v2-kind.video { color: #6e9ca3; }
+.cr .cr-v2-kind.logline { color: var(--body); }
+.cr .cr-v2-title { position: absolute; left: 20px; right: 20px; bottom: 14px; color: #fff; font-size: 16px; font-weight: 700; text-shadow: 0 1px 6px rgba(0,0,0,.45); }
+@media (min-width: 768px) { .cr .cr-v2-title { left: 24px; right: 24px; } }
+.cr .cr-genres-hash { gap: 4px 10px; }
+.cr .cr-genres-hash li { padding: 0; border: 0; background: none; color: var(--body); font-size: 13px; }

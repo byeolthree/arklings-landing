@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { reorderWorks, setWorkPublic } from "@/app/actions/creators";
+import type { Role } from "@/lib/collab";
 import { RoleTags } from "./role-tags";
 import type { WorkCard } from "./types";
 import { WorkMedia } from "./work-media";
 
 // 프로필의 작품 섹션들(시안 03·08). 작품 하나가 한 섹션이고 배경이 번갈아 바뀐다.
 // 주인이 자기 프로필을 볼 때(owner)만 제목 줄 오른쪽에 공개 스위치와 순서 손잡이가 붙는다. 스위치는 setWorkPublic, 손잡이는 reorderWorks로 진짜 저장한다.
-export function WorkBands({ works, hrefs, owner }: { works: WorkCard[]; hrefs: string[]; owner: boolean }) {
+// 역할은 프로필 한 곳에서 가져온다(작품마다 복사된 역할은 쓰지 않는다, 2026-11-13).
+export function WorkBands({ works, hrefs, owner, roles }: { works: WorkCard[]; hrefs: string[]; owner: boolean; roles: Role[] }) {
   const router = useRouter();
   const [order, setOrder] = useState(() => works.map((w) => w.id));
   const [msg, setMsg] = useState<string | null>(null);
@@ -61,7 +63,7 @@ export function WorkBands({ works, hrefs, owner }: { works: WorkCard[]; hrefs: s
                 : undefined
             }
           >
-            <Band work={it.w} href={it.href} owner={owner} tone={i % 2 === 0 ? "tint" : "plain"} onGrip={{ start: () => (drag.current = id), key: (dir) => moveTo(id, i + dir) }} />
+            <Band work={it.w} roles={roles} href={it.href} owner={owner} tone={i % 2 === 0 ? "tint" : "plain"} onGrip={{ start: () => (drag.current = id), key: (dir) => moveTo(id, i + dir) }} />
           </div>
         );
       })}
@@ -69,7 +71,7 @@ export function WorkBands({ works, hrefs, owner }: { works: WorkCard[]; hrefs: s
   );
 }
 
-function Band({ work, href, owner, tone, onGrip }: { work: WorkCard; href: string; owner: boolean; tone: "tint" | "plain"; onGrip: { start: () => void; key: (dir: -1 | 1) => void } }) {
+function Band({ work, roles, href, owner, tone, onGrip }: { work: WorkCard; roles: Role[]; href: string; owner: boolean; tone: "tint" | "plain"; onGrip: { start: () => void; key: (dir: -1 | 1) => void } }) {
   const router = useRouter();
   const [pub, setPub] = useState(work.isPublic !== false);
   const [busy, setBusy] = useState(false);
@@ -144,11 +146,11 @@ function Band({ work, href, owner, tone, onGrip }: { work: WorkCard; href: strin
             <div className="cr-band-foot">
               {work.kind && <p className="cr-kind">{work.kind}</p>}
               <div className="cr-band-tags">
-                <RoleTags roles={work.roles} />
+                <RoleTags roles={roles} lead />
                 {work.genres.length > 0 && (
-                  <ul className="cr-genres" aria-label="장르">
+                  <ul className="cr-genres cr-genres-hash" aria-label="장르">
                     {work.genres.map((g) => (
-                      <li key={g}>{g}</li>
+                      <li key={g}>#{g}</li>
                     ))}
                   </ul>
                 )}
