@@ -144,7 +144,8 @@ function toListItem(r: CreatorRow, heroUrls: Map<string, string>): CreatorListIt
 }
 
 // 탐색 화면: 공개 프로필의 공개 작품을 한 장씩 카드로(2026-11-13 아키텍터 지시).
-// 크리에이터 순서는 최근에 만든 사람부터, 한 사람의 작품은 그 사람이 포트폴리오 목록에서 정한 순서대로.
+// 순서(2026-11-14 아키텍터 지시): 게시판처럼 새로 올린 작품이 맨 위. 각 작품이 차지하는 자리는 올린 시각 순서로 정해지고,
+// 크리에이터는 그 자리들 안에서만 자기 작품끼리 순서를 바꿀 수 있다(포트폴리오 목록의 손잡이 순서로 자기 자리를 채운다).
 // 카드 왼쪽은 작품의 대표(맨 위 요소, repOf)를 역할과 상관없이 그대로 보여 준다.
 // 거르기(역할·협업은 사람 기준, 장르·롱폼/숏폼·포맷·검색어는 작품 기준)를 모두 끝낸 뒤 쪽을 나눈다. total은 걸러진 카드 수다.
 const EXPLORE_CREATOR_LIMIT = 300;
@@ -166,8 +167,13 @@ export async function listCreators(filter: CreatorFilterInput, page: number): Pr
       .filter((w) => !q || [c.display_name, c.bio ?? "", w.title, w.logline].some((t) => t.toLowerCase().includes(q)))
       .map((w) => ({ c, w })),
   );
+  // 자리: 올린 시각이 최근인 것부터. 각 자리에는 그 자리 주인의 작품을 그 사람이 정한 순서대로 채운다.
+  const slots = [...pairs].sort((a, b) => b.w.publishedAt.localeCompare(a.w.publishedAt));
+  const queue = new Map<string, typeof pairs>();
+  for (const p of pairs) queue.set(p.c.public_handle, [...(queue.get(p.c.public_handle) ?? []), p]);
+  const ordered = slots.map((slot) => (queue.get(slot.c.public_handle) ?? []).shift() ?? slot);
   const reps = await loadExploreReps(pairs.map((p) => p.w));
-  const kept = filter.fmt ? pairs.filter((p) => repLabel(reps.get(p.w.id)) === filter.fmt) : pairs;
+  const kept = filter.fmt ? ordered.filter((p) => repLabel(reps.get(p.w.id)) === filter.fmt) : ordered;
 
   const from = (Math.max(1, page) - 1) * CREATOR_PAGE_SIZE;
   const shown = kept.slice(from, from + CREATOR_PAGE_SIZE);
@@ -198,7 +204,7 @@ export function repLabel(r: ExploreRep | undefined): string {
   return r.rep.sub ?? (r.rep.kind === "video" ? "영상" : "이미지");
 }
 
-type ExploreWork = { id: string; title: string; logline: string; genres: string[]; form: WorkForm | null; loglinePosition: number };
+type ExploreWork = { id: string; title: string; logline: string; genres: string[]; form: WorkForm | null; loglinePosition: number; publishedAt: string };
 type ExploreRep = { rep: Rep; filePath: string | null; youtubeId: string | null; fit: "cover" | "contain" };
 
 // 크리에이터마다 공개 작품 전부(등록 목록 순서: 순서 번호가 작은 것부터, 같으면 최근 공개).
@@ -207,16 +213,16 @@ async function loadAllWorks(handles: string[]): Promise<Map<string, ExploreWork[
   if (handles.length === 0) return out;
   const { data, error } = await getSupabase()
     .from("creator_works_public")
-    .select("id, author_handle, title, logline, genres, form, logline_position")
+    .select("id, author_handle, title, logline, genres, form, logline_position, published_at")
     .in("author_handle", handles)
     .order("sort_order", { ascending: true })
     .order("published_at", { ascending: false })
     .order("id", { ascending: false });
   if (error) throw new Error(error.message);
-  type W = { id: string; author_handle: string; title: string; logline: string | null; genres: string[] | null; form: string | null; logline_position: number | null };
+  type W = { id: string; author_handle: string; title: string; logline: string | null; genres: string[] | null; form: string | null; logline_position: number | null; published_at: string };
   for (const w of (data ?? []) as W[]) {
     const list = out.get(w.author_handle) ?? [];
-    list.push({ id: w.id, title: w.title, logline: w.logline ?? "", genres: w.genres ?? [], form: asForm(w.form), loglinePosition: w.logline_position ?? 0 });
+    list.push({ id: w.id, title: w.title, logline: w.logline ?? "", genres: w.genres ?? [], form: asForm(w.form), loglinePosition: w.logline_position ?? 0, publishedAt: w.published_at ?? "" });
     out.set(w.author_handle, list);
   }
   return out;

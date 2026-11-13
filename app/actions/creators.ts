@@ -44,10 +44,10 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type Sb = Awaited<ReturnType<typeof createAuthClient>>;
 
-// 새 작품은 내 목록의 맨 끝 순서 번호로 만든다(번호가 겹쳐 새 작품이 맨 위로 끼어들지 않게, 2026-11-14).
+// 새 작품은 내 목록의 맨 위 순서 번호로 만든다(지금 가장 작은 번호보다 1 작게). 새로 올린 작품이 맨 위에 오고, 순서는 손잡이로만 바꾼다(2026-11-14 아키텍터 지시).
 async function nextSortOrder(sb: Sb, userId: string): Promise<number> {
-  const { data } = await sb.from("creator_works").select("sort_order").eq("owner_id", userId).order("sort_order", { ascending: false }).limit(1).maybeSingle();
-  return ((data as { sort_order: number } | null)?.sort_order ?? -1) + 1;
+  const { data } = await sb.from("creator_works").select("sort_order").eq("owner_id", userId).order("sort_order", { ascending: true }).limit(1).maybeSingle();
+  return ((data as { sort_order: number } | null)?.sort_order ?? 1) - 1;
 }
 
 // 모든 동작의 맨 위: 로그인과 이메일 확인을 다시 한다.
