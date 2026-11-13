@@ -1276,7 +1276,11 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
             {b && b.kind === "image" && (folded[b.id] ? <span className="we-line">이미지 {b.fileName ?? ""}</span> : b.src ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={b.src} alt={b.fileName ?? "이미지"} style={{ maxWidth: "100%", borderRadius: 14 }} />
-            ) : <div className="we-media">이미지를 불러오지 못했어요</div>)}
+            ) : b.fileName ? (
+              <div className="we-line">{b.fileName}</div>
+            ) : (
+              <ImageSlotBox file={null} onFile={(f) => { if (f) void upload(f, "image"); }} />
+            ))}
             {b && b.kind === "video" && (folded[b.id] ? <span className="we-line">{b.youtubeId ? "영상" : `영상 파일 ${b.fileName ?? ""} · ${b.fileBytes ? mb(b.fileBytes) : ""}`}</span> : b.youtubeId ? (
               <div className="we-media" style={{ overflow: "hidden" }}>
                 <iframe src={`https://www.youtube-nocookie.com/embed/${b.youtubeId}`} title="영상" loading="lazy" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" style={{ width: "100%", height: "100%", border: 0 }} />
@@ -1285,7 +1289,11 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
               <div className="we-media" style={{ overflow: "hidden", background: "#000" }}>
                 <video src={b.src} controls playsInline preload="metadata" style={{ width: "100%", height: "100%" }} />
               </div>
-            ) : <div className="we-media">영상을 불러오지 못했어요</div>)}
+            ) : b.fileName ? (
+              <div className="we-line">{b.fileName}{b.fileBytes ? ` · ${mb(b.fileBytes)}` : ""}</div>
+            ) : (
+              <VideoFilePick disabled={busy} onFile={(f) => { if (f) void upload(f, "video"); }} />
+            ))}
             {b && b.kind === "document" && (folded[b.id] ? <span className="we-line">문서 {b.fileName ?? ""} · {b.fileBytes ? mb(b.fileBytes) : ""}</span> : (
               <div className="we-line">
                 {b.src ? <a href={b.src} target="_blank" rel="noopener noreferrer">{b.fileName ?? "문서"} 열기 ↗</a> : <span>{b.fileName ?? "첨부된 문서"}</span>}
