@@ -408,3 +408,5 @@
 .cr .cr-v2-kind, .cr .cr-v2-kind.image, .cr .cr-v2-kind.video, .cr .cr-v2-kind.logline,
 .cr .cr-v2-main.media .cr-v2-kind, .cr .cr-v2-main.media .cr-v2-kind.image, .cr .cr-v2-main.media .cr-v2-kind.video { color: var(--teal); text-shadow: none; }
 .cr .cr-v2-title { color: var(--title); text-shadow: none; }
+/* 여백 두기의 남는 곳은 흰색(영상·이미지 칸의 검은 바탕보다 우선) */
+.cr .cr-v2-main .cr-main-media.has-src.cr-v2-img { background: #fff; }
