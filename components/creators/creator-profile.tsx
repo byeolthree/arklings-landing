@@ -82,11 +82,12 @@ export function CreatorProfile({
           </Link>
           <div className="cr-hero-body">
             {privateNote && <span className="cr-open">비공개 상태입니다</span>}
-            <RoleTags roles={creator.roles} lead />
+            {/* 순서: 협업 신청 받는 중 → 닉네임 → 역할 태그(역할이 많아도 닉네임 위를 덮지 않게 맨 아래, 2026-11-13) */}
+            {creator.openToCollab && <span className="cr-open">협업 신청 받는 중</span>}
             <h1 id="cr-hero-name" className="cr-hero-name">
               {creator.name}
             </h1>
-            {creator.openToCollab && <span className="cr-open">협업 신청 받는 중</span>}
+            <RoleTags roles={creator.roles} lead />
           </div>
         </div>
       </section>
