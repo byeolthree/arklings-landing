@@ -2,21 +2,11 @@ import Link from "next/link";
 import { ROLES } from "@/lib/collab";
 import { activeCount, FORMATS, hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
 import { GENRES } from "./genres";
-import { BlurVideo } from "./blur-video";
-import { RoleTags } from "./role-tags";
 import { FORM_LABEL, type CreatorCard, type WorkForm } from "./types";
+import { ExploreCard } from "./explore-card";
 import "./creators.css";
 
 
-// 협업 신청 아이콘(종이비행기)
-function SendIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M22 2 11 13" />
-      <path d="M22 2 15 22l-4-9-9-4 20-7z" />
-    </svg>
-  );
-}
 
 // 크리에이터 목록 화면. 데이터를 받기만 하고 읽지 않는다(실제 화면과 샘플 미리보기가 함께 쓴다).
 export function CreatorList({
@@ -183,70 +173,10 @@ export function CreatorList({
               )}
               <ul className="cr-grid">
                 {cards.map((c) => {
-                  // 탐색 카드(2026-11-13 시안 card11): 프로필 동그라미 없음, 협업 신청은 오른쪽 위 아이콘 버튼,
-                  // 대표 콘텐츠는 좌우 끝까지 채운 칸(로그라인도 같은 높이) 왼쪽 위에 종류 글자(굵은 색 글자), 장르는 #글자.
-                  const kindLabel = c.main === "media" ? c.mainSub : c.docLabel ?? "로그라인";
                   return (
-                  <li key={c.workId ?? c.handle}>
-                    <div className="panel cr-card cr-card-v2">
-                      <div className="cr-v2-top">
-                        <Link href={profileHref(c.handle)} className="cr-v2-who cr-stretch">
-                          <span className="cr-name">{c.name}</span>
-                          {c.bio && <span className="cr-bio">{c.bio}</span>}
-                        </Link>
-                        {c.openToCollab && applyHref && (
-                          <Link href={applyHref(c)} className="cr-ask" aria-label={`${c.name}님에게 협업 신청`} title="협업 신청">
-                            <SendIcon />
-                          </Link>
-                        )}
-                      </div>
-                      <Link href={profileHref(c.handle)} className="cr-card-main">
-                        <RoleTags roles={c.roles} lead />
-                        <div className={`cr-v2-main ${c.main}`}>
-                          {c.main === "media" && c.hero ? (
-                            c.hero === "video" && c.heroSrc ? (
-                              <BlurVideo src={c.heroSrc} className="cr-main-media has-src" label="대표 영상" />
-                            ) : c.hero === "image" && c.heroSrc ? (
-                              // 대표 이미지: 등록 화면에서 고른 대로 꽉 채우거나(cover), 자르지 않고 남는 곳을 카드 배경색으로 둔다(contain)
-                              <div className={`cr-main-media has-src cr-v2-img ${c.mainFit === "cover" ? "fit-cover" : "fit-contain"}`} role="img" aria-label="대표 이미지">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={c.heroSrc} alt="" loading="lazy" />
-                              </div>
-                            ) : (
-                              <div className="cr-main-media" role="img" aria-label={c.hero === "video" ? "대표 영상" : "대표 이미지"}>
-                                {c.hero === "video" ? "▶ 〈대표 영상〉" : "〈대표 이미지〉"}
-                              </div>
-                            )
-                          ) : (
-                            <div className="cr-box">
-                              {/* 제목 · 종류를 한 줄로(밝은 칸이라 바탕 없음) */}
-                              <p className="cr-v2-cap plain">
-                                <span className="cr-v2-cap-t">{c.latest.title}</span>
-                                <span className="cr-v2-cap-dot" aria-hidden="true">·</span>
-                                <span className="cr-v2-cap-k">{c.docLabel ?? "로그라인"}</span>
-                              </p>
-                              <p className="cr-box-logline">{c.docLabel ? c.docText : c.latest.logline}</p>
-                            </div>
-                          )}
-                          {/* 그림·영상 위: 제목 · 종류를 한 줄로, 그 줄 뒤에만 반투명한 어두운 둥근 바탕(2026-11-13 아키텍터 참고 그림) */}
-                          {c.main === "media" && (c.latest.title || kindLabel) && (
-                            <p className="cr-v2-cap">
-                              {c.latest.title && <span className="cr-v2-cap-t">{c.latest.title}</span>}
-                              {c.latest.title && kindLabel && <span className="cr-v2-cap-dot" aria-hidden="true">·</span>}
-                              {kindLabel && <span className="cr-v2-cap-k">{kindLabel}</span>}
-                            </p>
-                          )}
-                        </div>
-                        {c.latest.genres && c.latest.genres.length > 0 && (
-                          <ul className="cr-genres cr-genres-hash" aria-label="장르">
-                            {c.latest.genres.map((g) => (
-                              <li key={g}>#{g}</li>
-                            ))}
-                          </ul>
-                        )}
-                      </Link>
-                    </div>
-                  </li>
+                    <li key={c.workId ?? c.handle}>
+                      <ExploreCard c={c} profileHref={profileHref(c.handle)} applyHref={applyHref ? applyHref(c) : undefined} />
+                    </li>
                   );
                 })}
               </ul>

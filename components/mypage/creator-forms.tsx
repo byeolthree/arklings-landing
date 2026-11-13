@@ -754,7 +754,7 @@ async function addSlots(workId: string, slots: Slot[]): Promise<{ error: string 
 }
 
 // 편집 칸이 바뀔 때마다 「포트폴리오 화면에 보일 카드」(독립 등록 화면 오른쪽)에 알려 주는 값. 대표는 작품 안 맨 위의 이미지·영상이고, 없으면 로그라인이다.
-export type WorkPreview = { title: string; logline: string; genres: string[]; roles: Role[]; top: "video" | "image" | "doc" | "logline"; media?: PreviewMedia };
+export type WorkPreview = { title: string; logline: string; genres: string[]; roles: Role[]; top: "video" | "image" | "doc" | "logline"; media?: PreviewMedia; topLabel?: string; docText?: string };
 // 미리보기 카드에 실제로 걸 대표 이미지·영상(꽉 채우기/비율 유지하기 선택 포함)
 export type PreviewMedia = { kind: "image" | "video"; src: string; fit: "cover" | "contain" };
 
@@ -824,6 +824,22 @@ export function WorkEditor({
     if (typeof topItem === "string") return topItem === "image" || topItem === "video" ? topItem : topItem === "text" ? "doc" : "logline";
     return topItem.kind === "image" || topItem.kind === "video" ? topItem.kind : "doc";
   })();
+  // 팝업(시안 popup5)에 보여 줄 대표 콘텐츠 태그: 종류 태그가 있으면 그것(포스터·티저…), 없으면 요소 이름. 색은 요소 종류 색.
+  const topTag = (() => {
+    const name = (k: string) => (k === "image" ? "이미지" : k === "video" ? "영상" : k === "logline" ? "로그라인" : "문서");
+    const color = (k: string) => (k === "image" ? "#6f8a7a" : k === "video" ? "#6e9ca3" : k === "logline" ? "#1f5a66" : "#40576f");
+    if (typeof topItem !== "string") return { label: topItem.sub || name(topItem.kind), color: color(topItem.kind) };
+    if (work) return { label: name("logline"), color: color("logline") };
+    const sl = slots[0];
+    const k = sl?.kind ?? "logline";
+    return { label: (k !== "logline" && sl?.sub) || name(k), color: color(k) };
+  })();
+  // 대표가 글·문서일 때 카드에 보일 글: 글이 있으면 그 글, 없으면 파일 이름(lib/creator-cards repOf와 같은 규칙)
+  const topDocText = (() => {
+    if (typeof topItem !== "string") return topItem.kind === "text" ? topItem.body : topItem.kind === "document" ? (topItem.fileName ?? "") : "";
+    const sl = slots[0];
+    return sl && sl.kind === "text" ? sl.text.trim() || sl.file?.name || "" : "";
+  })();
   // 대표가 이미지·영상이면 미리보기 카드에 실제 그림을 건다. 새 작품은 고른 파일을 화면에서만 보여 준다.
   const topFile = !work && typeof topItem === "string" ? (slots[0]?.file ?? null) : null;
   const topFileUrl = useMemo(() => (topFile ? URL.createObjectURL(topFile) : null), [topFile]);
@@ -843,23 +859,13 @@ export function WorkEditor({
   const mediaKey = media ? `${media.kind}|${media.src}|${media.fit}` : "";
   useEffect(() => {
     const [mk, msrc, mfit] = mediaKey ? mediaKey.split("|") : [];
-    onPreview?.({ title, logline, genres: genresKey ? genresKey.split("|") : [], roles: (rolesKey ? rolesKey.split("|") : []) as Role[], top: topKind, media: mk ? { kind: mk as PreviewMedia["kind"], src: msrc, fit: mfit as PreviewMedia["fit"] } : undefined });
+    onPreview?.({ title, logline, genres: genresKey ? genresKey.split("|") : [], roles: (rolesKey ? rolesKey.split("|") : []) as Role[], top: topKind, media: mk ? { kind: mk as PreviewMedia["kind"], src: msrc, fit: mfit as PreviewMedia["fit"] } : undefined, topLabel: topTag.label, docText: topDocText });
     // onPreview는 부르는 쪽이 매번 새로 만들어도 다시 부르지 않게 뺀다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, logline, genresKey, rolesKey, topKind, mediaKey]);
+  }, [title, logline, genresKey, rolesKey, topKind, mediaKey, topTag.label, topDocText]);
 
   // 저장 전에 역할과 대표 콘텐츠가 어울리는지 한 번 알려 준다(영상 제작·아트디렉터인데 맨 위가 이미지·영상이 아니거나, 그 반대). 알려 줄 뿐 대표는 바꾸지 않는다.
   const [mismatch, setMismatch] = useState(false);
-  // 팝업(시안 popup5)에 보여 줄 대표 콘텐츠 태그: 종류 태그가 있으면 그것(포스터·티저…), 없으면 요소 이름. 색은 요소 종류 색.
-  const topTag = (() => {
-    const name = (k: string) => (k === "image" ? "이미지" : k === "video" ? "영상" : k === "logline" ? "로그라인" : "문서");
-    const color = (k: string) => (k === "image" ? "#6f8a7a" : k === "video" ? "#6e9ca3" : k === "logline" ? "#1f5a66" : "#40576f");
-    if (typeof topItem !== "string") return { label: topItem.sub || name(topItem.kind), color: color(topItem.kind) };
-    if (work) return { label: name("logline"), color: color("logline") };
-    const sl = slots[0];
-    const k = sl?.kind ?? "logline";
-    return { label: (k !== "logline" && sl?.sub) || name(k), color: color(k) };
-  })();
   function askSave() {
     if (!title.trim()) return void save();
     const visual = roles.some((x) => x === "video" || x === "art_director");

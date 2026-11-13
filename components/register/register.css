@@ -58,14 +58,6 @@
 .rg .rg-side-h { font-size: 15px; font-weight: 700; }
 .rg .rg-side-sub { margin-bottom: 8px; font-size: 13px; font-weight: 700; color: var(--title); }
 .rg .rg-side-note { font-size: 13px; color: var(--body); }
-.rg .rg-pcard { display: grid; gap: 12px; padding: 18px 18px 20px; border-radius: 22px; background: #fff; border: 1px solid var(--line); box-shadow: 0 24px 48px -34px rgba(42,32,37,.4); }
-.rg .rg-pcard-title { font-size: 17px; color: var(--body); }
-.rg .rg-pcard-media { aspect-ratio: 16 / 9; border-radius: 12px; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--body); }
-.rg .rg-pcard-log { font-size: 14px; line-height: 1.7; color: var(--body); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.rg .rg-pcard-tags { display: grid; gap: 8px; }
-.rg .rg-pcard-tags ul { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
-.rg .rg-pcard-tags .rg-roles li { background: var(--teal); border-color: var(--teal); color: #fff; font-weight: 700; }
-.rg .rg-pcard-tags li { padding: 2px 12px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-size: 13px; color: var(--body); }
 .rg .rg-role { justify-self: start; padding: 3px 14px; border-radius: 999px; background: var(--jaju); color: #fff; font-size: 13px; font-weight: 700; }
 
 @media (max-width: 767px) {
@@ -159,18 +151,6 @@
 .rg .rg-side { gap: 14px; }
 .rg .rg-side-h { font-size: 13px; line-height: 20px; }
 .rg .rg-side-sub { font-size: 12px; margin-bottom: 8px; }
-.rg .rg-pcard { gap: 0; padding: 0; border-radius: 28px; background: var(--bg); overflow: hidden; }
-.rg .rg-pcard-title { padding: 14px 24px 12px; font-size: 16px; color: #b6abb0; }
-.rg .rg-pcard-media { border-radius: 0; aspect-ratio: 16 / 9; background: var(--bg); }
-.rg .rg-pcard-log { padding: 0 24px; }
-.rg .rg-pcard-tags { padding: 12px 24px 18px; }
-.rg .rg-pcard-tags .rg-roles li { border: 0; color: #fff; font-weight: 700; }
-.rg .rg-pcard-tags .rg-roles li.tone-teal { background: var(--teal); }
-.rg .rg-pcard-tags .rg-roles li.tone-dusty { background: #5f7c99; }
-.rg .rg-pcard-tags .rg-roles li.tone-gold { background: var(--gold); }
-.rg .rg-pcard-tags .rg-roles li.tone-sage { background: #6f8a7a; }
-.rg .rg-pcard-tags .rg-roles li.tone-jaju { background: var(--jaju); }
-.rg .rg-pcard-tags .rg-roles li.tone-body { background: var(--body); }
 /* 실측 보정 */
 .rg .we-main.we-card .mp-note { margin: -1px 0 3px; }
 .rg .we-drop:not(.we-drop-doc) { padding: 11px 14px 12px; }
@@ -181,8 +161,6 @@
 .rg .we-fold { line-height: 20px; }
 .rg .we-imgbox { margin-top: 8px; min-height: 418px; height: 418px; aspect-ratio: auto; }
 .rg .we-main.we-card { padding-bottom: 14px; }
-.rg .rg-pcard { background: #fff; }
-.rg .rg-pcard-media { background: var(--bg); }
 
 /* ───── 시안 01 B 「크리에이터 프로필 등록」 실측 맞춤(카드 가로 980, 안쪽 여백 36, 칸 이름 150 + 간격 24) ───── */
 .rg .rg-prof-wrap { max-width: 980px; padding: 0; }
@@ -316,8 +294,5 @@
 .rg .rg-newbar-in { margin: 2px 8px 20px; }
 .rg .rg-newbar-in .pf-new.is-open { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; justify-content: flex-end; background: #fff; border: 1.5px solid var(--jaju); color: var(--jaju); box-shadow: none; }
 .rg .rg-newbar-in .pf-new.is-open .pf-new-fold { color: var(--jaju); }
-/* 미리보기 카드의 실제 대표 이미지·영상: 꽉 채우기(cover) / 비율 유지하기(contain, 남는 곳은 흰색) */
-.rg .rg-pcard-media.has-src { overflow: hidden; background: #fff; }
-.rg .rg-pcard-media.has-src img, .rg .rg-pcard-media.has-src video { display: block; width: 100%; height: 100%; }
-.rg .rg-pcard-media.fit-cover img, .rg .rg-pcard-media.fit-cover video { object-fit: cover; }
-.rg .rg-pcard-media.fit-contain img, .rg .rg-pcard-media.fit-contain video { object-fit: contain; }
+/* 미리보기 카드: 탐색 화면과 같은 카드(ExploreCard). .cr 바탕·넘침 자르기는 이 칸에서는 쓰지 않는다 */
+.rg .rg-pcard-cr { flex: none; overflow: visible; background: transparent; }
