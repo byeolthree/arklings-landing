@@ -143,12 +143,27 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { logg
         </nav>
 
         <div className="lk-nav-right lk-icons">
-          {/* ＋ : 로그인했을 때만. 메뉴 맨 위 화면(지금은 크리에이터)으로 바로 간다 */}
+          {/* ＋ : 로그인했을 때만. 마우스를 올리면 등록할 곳 드롭다운이 열리고, 누르면 메뉴 맨 위 화면(지금은 크리에이터)으로 간다(사람·종 아이콘과 같은 방식) */}
           {isIn && (
-            <div className="lk-ico-wrap">
-              <Link href={PLUS_HREF} className="lk-ico lk-ico-fill" aria-label="등록하기" onClick={shut}>
+            <div className="lk-ico-wrap" {...hv("plus")}>
+              <Link href={PLUS_HREF} className="lk-ico lk-ico-fill" aria-label="등록하기" aria-haspopup="menu" aria-expanded={drop === "plus"} onClick={(e) => iconClick(e, "plus")}>
                 <PlusIcon />
               </Link>
+              {drop === "plus" && (
+                <div className="lk-drop" role="menu" aria-label="등록할 곳">
+                  {MENU.map((m) =>
+                    m.href ? (
+                      <Link key={m.label} role="menuitem" href={m.href === "/creators" ? "/portfolio/new" : m.href} onClick={shut} aria-current={(m.href === "/library" ? onLibrary : onCreators) ? "page" : undefined}>
+                        {m.label}
+                      </Link>
+                    ) : (
+                      <span key={m.label} role="presentation">
+                        {m.label}
+                      </span>
+                    ),
+                  )}
+                </div>
+              )}
             </div>
           )}
 
