@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ROLES } from "@/lib/collab";
-import { activeCount, hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
+import { activeCount, FORMATS, hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
 import { GENRES } from "./genres";
 import { BlurVideo } from "./blur-video";
 import { RoleTags } from "./role-tags";
@@ -49,8 +49,8 @@ export function CreatorList({
     <div className="cr">
       <section className="cr-top">
         <div className="wrap">
-          <h1 className="cr-title">크리에이터 — 포트폴리오 탐색</h1>
-          <p className="cr-desc">크리에이터를 눌러 프로필과 공개한 작품을 둘러보세요.</p>
+          <h1 className="cr-title">포트폴리오 탐색</h1>
+          <p className="cr-desc">카드를 눌러 크리에이터의 작품을 둘러보세요.</p>
         </div>
       </section>
 
@@ -66,6 +66,7 @@ export function CreatorList({
                 {filter.genre && <input type="hidden" name="genre" value={filter.genre} />}
                 {filter.form && <input type="hidden" name="form" value={filter.form} />}
                 {filter.open && <input type="hidden" name="open" value="1" />}
+                {filter.fmt && <input type="hidden" name="fmt" value={filter.fmt} />}
                 <label htmlFor="cr-q" className="sr-only">
                   크리에이터 검색
                 </label>
@@ -103,6 +104,17 @@ export function CreatorList({
                       </Link>
                     ))}
                   </div>
+                  <p className="cr-filter-title">포맷</p>
+                  <div className="cr-chips">
+                    <Link href={pageHref({ ...filter, fmt: undefined })} className="cr-fchip" aria-current={filter.fmt ? undefined : "true"}>
+                      전체
+                    </Link>
+                    {FORMATS.map((f) => (
+                      <Link key={f} href={pageHref({ ...filter, fmt: f })} className="cr-fchip" aria-current={filter.fmt === f ? "true" : undefined}>
+                        {f}
+                      </Link>
+                    ))}
+                  </div>
                   <p className="cr-filter-title">장르</p>
                   <div className="cr-chips">
                     <Link href={pageHref({ ...filter, genre: undefined })} className="cr-fchip" aria-current={filter.genre ? undefined : "true"}>
@@ -135,7 +147,7 @@ export function CreatorList({
               <p>
                 {filter.q ? `「${filter.q}」` : ""}
                 {filter.q && nFilters > 0 ? " · " : ""}
-                {[filter.genre, filter.form && FORM_LABEL[filter.form], filter.role && ROLES[filter.role], filter.open && "협업 받는 중"].filter(Boolean).join(" · ")} 조건에 맞는 크리에이터가 아직 없어요.
+                {[filter.genre, filter.form && FORM_LABEL[filter.form], filter.role && ROLES[filter.role], filter.fmt, filter.open && "협업 받는 중"].filter(Boolean).join(" · ")} 조건에 맞는 크리에이터가 아직 없어요.
               </p>
               <Link href={pageHref({})} className="btn btn-ghost">
                 조건 지우기

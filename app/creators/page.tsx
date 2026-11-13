@@ -24,17 +24,18 @@ export default function CreatorsPage({ searchParams }: { searchParams: SP }) {
 async function CreatorsContent({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
   const requested = Math.max(1, parseInt(one(sp.page) ?? "1", 10) || 1);
-  const filter = parseFilter({ q: one(sp.q), role: one(sp.role), genre: one(sp.genre), form: one(sp.form), open: one(sp.open) });
+  const filter = parseFilter({ q: one(sp.q), role: one(sp.role), genre: one(sp.genre), form: one(sp.form), open: one(sp.open), fmt: one(sp.fmt) });
   const { items, total } = await listCreators(filter, requested);
   const pages = Math.max(1, Math.ceil(total / CREATOR_PAGE_SIZE));
 
-  const href = ({ page, q, role, genre, form, open }: Partial<CreatorFilter> & { page?: number }) => {
+  const href = ({ page, q, role, genre, form, open, fmt }: Partial<CreatorFilter> & { page?: number }) => {
     const p = new URLSearchParams();
     if (q) p.set("q", q);
     if (role) p.set("role", role);
     if (genre) p.set("genre", genre);
     if (form) p.set("form", form);
     if (open) p.set("open", "1");
+    if (fmt) p.set("fmt", fmt);
     if (page && page > 1) p.set("page", String(page));
     const s = p.toString();
     return `/creators${s ? `?${s}` : ""}`;

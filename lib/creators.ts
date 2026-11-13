@@ -13,7 +13,7 @@ export const CREATOR_PAGE_SIZE = 12;
 export type HeroKind = "image" | "video";
 export type WorkForm = "long" | "short";
 
-export type CreatorFilterInput = { q?: string; role?: Role; genre?: string; form?: WorkForm; open?: boolean };
+export type CreatorFilterInput = { q?: string; role?: Role; genre?: string; form?: WorkForm; open?: boolean; fmt?: string };
 
 export type CreatorListItem = {
   handle: string;
@@ -185,8 +185,7 @@ export async function listCreators(filter: CreatorFilterInput, page: number): Pr
   const allWorks = await loadAllWorks(rows.map((r) => r.public_handle));
   const visual = new Set(rows.filter((r) => asRoles(r.roles).some((x) => x === "video" || x === "art_director")).map((r) => r.public_handle));
   const covers = await loadWorkCovers(rows.flatMap((r) => (visual.has(r.public_handle) ? (allWorks.get(r.public_handle) ?? []) : [])));
-  return {
-    items: rows.flatMap((r) => {
+  const items = rows.flatMap((r) => {
       const base = toListItem(r, heroUrls);
       const works = allWorks.get(r.public_handle) ?? [];
       if (works.length === 0) return [base];
@@ -194,9 +193,10 @@ export async function listCreators(filter: CreatorFilterInput, page: number): Pr
         const cv = covers.get(f.id);
         return { ...base, workId: f.id, latest: { title: f.title, logline: f.logline, genres: f.genres }, cover: cv?.src, coverKind: cv?.kind, coverSub: cv?.sub, coverFit: cv?.fit, coverBlockKind: cv?.blockKind };
       });
-    }),
-    total: count ?? 0,
-  };
+    });
+  // 포맷 거르기: 카드에 보이는 종류 글자와 같은 것만 남긴다(대표가 이미지·영상이 아니면 「로그라인」).
+  const fmtOf = (it: CreatorListItem) => (it.cover ? it.coverSub : "로그라인");
+  return { items: filter.fmt ? items.filter((it) => fmtOf(it) === filter.fmt) : items, total: count ?? 0 };
 }
 
 // 크리에이터마다 공개 작품 전부(등록 목록 순서: 순서 번호가 작은 것부터, 같으면 최근 공개).
