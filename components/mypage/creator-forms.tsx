@@ -855,15 +855,26 @@ export function WorkEditor({
     lastPress.current = { r, t: now };
     setRoles((cur) => (cur.includes(r) ? cur.filter((x) => x !== r) : [...cur, r]));
   }
+  // 팝업에 보여 줄 지금 대표 콘텐츠 이름: 종류 태그가 있으면 「포스터 이미지」, 없으면 「이미지」.
+  const topLabel = (() => {
+    const kindName = (k: string) => (k === "image" ? "이미지" : k === "video" ? "영상" : k === "logline" ? "로그라인" : "문서");
+    if (typeof topItem === "string") {
+      if (work) return kindName(topItem === LOGLINE_TOKEN ? "logline" : topItem);
+      const sl = slots[0];
+      return sl ? `${sl.kind !== "logline" && sl.sub ? `${sl.sub} ` : ""}${kindName(sl.kind)}` : "로그라인";
+    }
+    const sub = "sub" in topItem && topItem.sub ? `${topItem.sub} ` : "";
+    return `${sub}${kindName(topItem.kind)}`;
+  })();
   function askSave() {
     if (!title.trim()) return void save();
     const visual = roles.some((x) => x === "video" || x === "art_director");
     const mediaTop = topKind === "image" || topKind === "video";
     if (!visual && mediaTop) {
-      return setConfirmMsg("역할에 맞는 대표 콘텐츠가 아닙니다.\n그래도 등록하시겠어요?");
+      return setConfirmMsg(`지금 대표 콘텐츠는 「${topLabel}」입니다.\n역할에 맞는 대표 콘텐츠가 아닙니다.\n그래도 등록하시겠어요?`);
     }
     if (visual && !mediaTop) {
-      return setConfirmMsg("역할에 맞는 대표 콘텐츠가 아닙니다.\n그래도 등록하시겠어요?");
+      return setConfirmMsg(`지금 대표 콘텐츠는 「${topLabel}」입니다.\n역할에 맞는 대표 콘텐츠가 아닙니다.\n그래도 등록하시겠어요?`);
     }
     void save();
   }
