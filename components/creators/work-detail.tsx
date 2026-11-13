@@ -3,8 +3,9 @@ import { CopyLinkButton } from "@/components/portfolio/copy-link-button";
 import { formatKstDate } from "@/lib/time";
 import type { Role } from "@/lib/collab";
 import type { WorkBlock } from "@/lib/creators";
-import { orderItems } from "@/lib/creator-cards";
+import { formatsOf, orderItems, repBlockOf } from "@/lib/creator-cards";
 import { LOGLINE_TOKEN } from "@/lib/creator-rules";
+import { FormatTags } from "./format-tags";
 import { RoleTags } from "./role-tags";
 import "./creators.css";
 
@@ -37,6 +38,7 @@ export function WorkDetail({ work, closeHref, applyHref }: { work: WorkDetailDat
           <p className="cr-win-by">
             {work.authorName} · <time dateTime={work.publishedAt}>{formatKstDate(work.publishedAt)}</time>
           </p>
+          <FormatTags formats={work.blocks ? formatsOf(work.blocks.map(repBlockOf), work.loglinePosition ?? 0) : undefined} />
           <RoleTags roles={work.roles} lead />
           {work.genres.length > 0 && (
             <ul className="cr-genres cr-genres-hash cr-win-genres" aria-label="장르">

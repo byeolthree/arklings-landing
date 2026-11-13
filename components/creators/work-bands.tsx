@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useLiveReorder } from "@/components/ui/use-live-reorder";
 import { reorderWorks, setWorkPublic } from "@/app/actions/creators";
 import type { Role } from "@/lib/collab";
+import { FormatTags } from "./format-tags";
 import { RoleTags } from "./role-tags";
 import type { WorkCard } from "./types";
 import { WorkMedia } from "./work-media";
@@ -123,6 +124,7 @@ function Band({ work, roles, href, owner, tone, grip }: { work: WorkCard; roles:
             <div className="cr-band-foot">
               {work.kind && <p className="cr-kind">{work.kind}</p>}
               <div className="cr-band-tags">
+                <FormatTags formats={work.formats} />
                 <RoleTags roles={roles} lead />
                 {work.genres.length > 0 && (
                   <ul className="cr-genres cr-genres-hash" aria-label="장르">

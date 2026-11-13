@@ -6,9 +6,9 @@ import type { MyBlock, MyWork } from "@/lib/creators-mine";
 
 const asKind = (k: string | null): WorkKind | null => ((WORK_KINDS as readonly string[]).includes(k ?? "") ? (k as WorkKind) : null);
 
-export function toWorkCard(w: Pick<WorkListItem, "id" | "title" | "logline" | "roles" | "genres" | "kind" | "form" | "publishedAt">, media: WorkMediaItem[] = [], isPublic?: boolean, rep?: Rep): WorkCard {
+export function toWorkCard(w: Pick<WorkListItem, "id" | "title" | "logline" | "roles" | "genres" | "kind" | "form" | "publishedAt">, media: WorkMediaItem[] = [], isPublic?: boolean, rep?: Rep, formats?: Format[]): WorkCard {
   // 카드 왼쪽은 작품의 대표(repOf)를 따른다. 대표가 이미지·영상일 때만 이미지·영상을 건다.
-  return { id: w.id, title: w.title, logline: w.logline, roles: w.roles, genres: w.genres, kind: asKind(w.kind), form: w.form, publishedAt: w.publishedAt, slides: [], media, isPublic, rep };
+  return { id: w.id, title: w.title, logline: w.logline, roles: w.roles, genres: w.genres, kind: asKind(w.kind), form: w.form, publishedAt: w.publishedAt, slides: [], media, isPublic, rep, formats };
 }
 
 // 내 작품의 이미지·영상 요소를 카드에 걸 모양으로(위에서부터 순서대로).
@@ -34,6 +34,18 @@ export function orderItems<B>(blocks: B[], loglinePosition: number): (B | typeof
 // 로그라인이 맨 위면 로그라인, 글·문서면 그 종류(없으면 「문서」)와 글 앞부분(글이 없으면 파일 이름), 이미지·영상이면 그 종류.
 export type Rep = { kind: "logline" } | { kind: "doc"; label: string; text: string } | { kind: "image" | "video"; sub?: string };
 export type RepBlock = { kind: string; sub?: string | null; body?: string | null; fileName?: string | null };
+
+// 작품에 등록한 포맷 전부(작품 안 순서대로). 모든 화면에서 역할 태그 위에 보여 포트폴리오가 얼마나 채워졌는지 드러낸다(2026-11-14 아키텍터 지시).
+// 이름은 고른 종류 태그(포스터·티저·시놉시스…), 없으면 요소 이름(이미지·영상·문서).
+export type Format = { kind: "logline" | "image" | "video" | "doc"; label: string };
+export function formatsOf(blocks: RepBlock[], loglinePosition: number): Format[] {
+  return orderItems(blocks, loglinePosition).map((b): Format => {
+    if (b === LOGLINE_TOKEN) return { kind: "logline", label: "로그라인" };
+    if (b.kind === "image") return { kind: "image", label: b.sub || "이미지" };
+    if (b.kind === "video") return { kind: "video", label: b.sub || "영상" };
+    return { kind: "doc", label: b.sub || "문서" };
+  });
+}
 export function repOf(blocks: RepBlock[], loglinePosition: number): Rep {
   const top = orderItems(blocks, loglinePosition)[0];
   if (top === LOGLINE_TOKEN) return { kind: "logline" };
@@ -78,5 +90,6 @@ export function toCreatorCard(c: CreatorListItem): CreatorCard {
     mainKind: media ? c.coverBlockKind : undefined,
     docLabel: media ? undefined : c.docLabel,
     docText: media ? undefined : c.docText,
+    formats: c.formats,
   };
 }

@@ -2,7 +2,7 @@
 // DB의 공개용 보기(view) 4개(creators_public, creator_channels_public, creator_works_public, creator_blocks_public)에서만 읽고,
 // 로그인 없는 연결(lib/supabase.ts)을 쓴다. 보기에는 공개 프로필의 공개 작품만 있고 주인 번호(UUID)·이메일은 한 칸도 없다.
 // 화면으로 넘기는 값에도 싣지 않는다. 파일은 비공개 보관함에 있어서, 공개용 보기에 올라와 있는 것만 짧은 임시 주소로 바꿔 준다(lib/creator-files.ts).
-import { orderItems, repOf, type Rep } from "@/lib/creator-cards";
+import { formatsOf, orderItems, repOf, type Format, type Rep } from "@/lib/creator-cards";
 import type { Role } from "@/lib/collab";
 import { isRole, LOGLINE_TOKEN } from "@/lib/creator-rules";
 import { signPublicFiles } from "@/lib/creator-files";
@@ -33,6 +33,7 @@ export type CreatorListItem = {
   coverSub?: string; // 카드 대표 콘텐츠의 종류 태그(포스터·티저 등). 없으면 비어 있다
   docLabel?: string; // 대표가 글·문서일 때 카드의 종류 글자
   docText?: string; // 대표가 글·문서일 때 카드에 보일 글 앞부분(글이 없으면 파일 이름)
+  formats?: Format[]; // 이 작품에 등록한 포맷 전부(작품 안 순서)
   coverBlockKind?: "image" | "video"; // 대표 콘텐츠 요소가 원래 이미지인지 영상인지(유튜브 영상도 video)
   cover?: string; // 이 작품의 대표(작품 안 맨 위, D35-2)가 이미지·영상일 때 그 주소
 };
@@ -192,6 +193,7 @@ export async function listCreators(filter: CreatorFilterInput, page: number): Pr
       coverFit: media ? r?.fit : undefined,
       docLabel: r?.rep.kind === "doc" ? r.rep.label : undefined,
       docText: r?.rep.kind === "doc" ? r.rep.text : undefined,
+      formats: r?.formats,
     };
   });
   return { items, total: kept.length };
@@ -205,7 +207,7 @@ export function repLabel(r: ExploreRep | undefined): string {
 }
 
 type ExploreWork = { id: string; title: string; logline: string; genres: string[]; form: WorkForm | null; loglinePosition: number; publishedAt: string };
-type ExploreRep = { rep: Rep; filePath: string | null; youtubeId: string | null; fit: "cover" | "contain" };
+type ExploreRep = { rep: Rep; formats: Format[]; filePath: string | null; youtubeId: string | null; fit: "cover" | "contain" };
 
 // 크리에이터마다 공개 작품 전부(등록 목록 순서: 순서 번호가 작은 것부터, 같으면 최근 공개).
 async function loadAllWorks(handles: string[]): Promise<Map<string, ExploreWork[]>> {
@@ -244,10 +246,11 @@ async function loadExploreReps(works: ExploreWork[]): Promise<Map<string, Explor
   for (const b of (data ?? []) as B[]) byWork.set(b.work_id, [...(byWork.get(b.work_id) ?? []), b]);
   for (const w of works) {
     const blocks = byWork.get(w.id) ?? [];
-    const rep = repOf(blocks.map((b) => ({ kind: b.kind, sub: b.sub_kind, body: b.body, fileName: b.file_name })), w.loglinePosition);
+    const rb = blocks.map((b) => ({ kind: b.kind, sub: b.sub_kind, body: b.body, fileName: b.file_name }));
+    const rep = repOf(rb, w.loglinePosition);
     const top = orderItems(blocks, w.loglinePosition)[0];
     const b = top === LOGLINE_TOKEN ? null : top;
-    out.set(w.id, { rep, filePath: b?.file_path ?? null, youtubeId: b?.youtube_id ?? null, fit: b?.fit === "cover" ? "cover" : "contain" });
+    out.set(w.id, { rep, formats: formatsOf(rb, w.loglinePosition), filePath: b?.file_path ?? null, youtubeId: b?.youtube_id ?? null, fit: b?.fit === "cover" ? "cover" : "contain" });
   }
   return out;
 }
@@ -376,8 +379,8 @@ export async function loadWorkMedia(workIds: string[]): Promise<Map<string, Work
 }
 
 // 공개 작품마다 대표(맨 위)를 repOf 규칙으로 정한다(크리에이터 상세의 작품 줄).
-export async function loadWorkReps(works: { id: string; loglinePosition?: number }[]): Promise<Map<string, Rep>> {
-  const out = new Map<string, Rep>();
+export async function loadWorkReps(works: { id: string; loglinePosition?: number }[]): Promise<Map<string, { rep: Rep; formats: Format[] }>> {
+  const out = new Map<string, { rep: Rep; formats: Format[] }>();
   const ws = works.filter((w) => UUID_QUERY.test(w.id)).slice(0, 12);
   if (ws.length === 0) return out;
   const { data, error } = await getSupabase()
@@ -390,7 +393,10 @@ export async function loadWorkReps(works: { id: string; loglinePosition?: number
   type R = { work_id: string; kind: string; body: string | null; file_name: string | null; sub_kind: string | null };
   const by = new Map<string, R[]>();
   for (const b of (data ?? []) as R[]) by.set(b.work_id, [...(by.get(b.work_id) ?? []), b]);
-  for (const w of ws) out.set(w.id, repOf((by.get(w.id) ?? []).map((b) => ({ kind: b.kind, sub: b.sub_kind, body: b.body, fileName: b.file_name })), w.loglinePosition ?? 0));
+  for (const w of ws) {
+    const rb = (by.get(w.id) ?? []).map((b) => ({ kind: b.kind, sub: b.sub_kind, body: b.body, fileName: b.file_name }));
+    out.set(w.id, { rep: repOf(rb, w.loglinePosition ?? 0), formats: formatsOf(rb, w.loglinePosition ?? 0) });
+  }
   return out;
 }
 
