@@ -131,9 +131,7 @@ export async function inspectUploadedHero(userId: string, path: string, expect: 
 
 // 본인 표식이 붙은 파일만 지운다. 못 지운 것은 조용히 남는다(다음 정리에서 처리).
 export async function removeOwnFiles(userId: string, paths: readonly (string | null | undefined)[]): Promise<void> {
-  const given = Array.from(new Set(paths.filter((p): p is string => Boolean(p))));
-  const own = given.filter((p) => fileBelongsTo(userId, p));
-  if (own.length !== given.length) console.error("[signOwn] 본인 표식이 맞지 않은 파일:", given.filter((p) => !own.includes(p)));
+  const own = Array.from(new Set(paths.filter((p): p is string => Boolean(p) && fileBelongsTo(userId, p as string))));
   if (own.length === 0) return;
   try {
     await createAdminClient().storage.from(CREATOR_BUCKET).remove(own);
@@ -146,12 +144,8 @@ export async function removeOwnFiles(userId: string, paths: readonly (string | n
 async function sign(paths: string[]): Promise<Map<string, string>> {
   const out = new Map<string, string>();
   if (paths.length === 0) return out;
-  const { data, error } = await createAdminClient().storage.from(CREATOR_BUCKET).createSignedUrls(paths, SIGNED_URL_SECONDS);
-  if (error) console.error("[sign] 호출 실패:", error.message);
-  for (const row of data ?? []) {
-    if (row.path && row.signedUrl && !row.error) out.set(row.path, row.signedUrl);
-    else console.error("[sign] 주소 못 만듦:", row.path, row.error);
-  }
+  const { data } = await createAdminClient().storage.from(CREATOR_BUCKET).createSignedUrls(paths, SIGNED_URL_SECONDS);
+  for (const row of data ?? []) if (row.path && row.signedUrl && !row.error) out.set(row.path, row.signedUrl);
   return out;
 }
 
@@ -170,6 +164,35 @@ export async function signPublicFiles(paths: readonly (string | null | undefined
   for (const r of (blocks.data ?? []) as { file_path: string | null }[]) if (r.file_path) allowed.add(r.file_path);
   for (const r of (heroes.data ?? []) as { hero_path: string | null }[]) if (r.hero_path) allowed.add(r.hero_path);
   return sign(wanted.filter((p) => allowed.has(p)));
+}
+
+// 내 요소에 걸려 있는데 표식이 맞지 않는 파일을 새 이름으로 다시 저장해 표식을 맞춘다.
+// 다른 사람의 요소나 대표 파일에 걸린 이름이면 손대지 않는다. 바꾼 것은 「옛 이름 → 새 이름」으로 돌려준다.
+export async function retagOwnFiles(userId: string, rows: readonly { id: string; file_path: string | null }[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  const bad = rows.filter((r) => r.file_path && NAME_RE.test(r.file_path) && !fileBelongsTo(userId, r.file_path));
+  if (bad.length === 0) return out;
+  const admin = createAdminClient();
+  for (const r of bad) {
+    const old = r.file_path as string;
+    const [others, heroes] = await Promise.all([
+      admin.from("creator_work_blocks").select("id").eq("file_path", old).neq("owner_id", userId).limit(1),
+      admin.from("creator_profiles").select("user_id").eq("hero_path", old).neq("user_id", userId).limit(1),
+    ]);
+    if (others.error || heroes.error || (others.data ?? []).length > 0 || (heroes.data ?? []).length > 0) continue;
+    const ext = (NAME_RE.exec(old) as RegExpExecArray)[3] as Sniffed["ext"];
+    const fresh = newFileName(userId, ext);
+    const copied = await admin.storage.from(CREATOR_BUCKET).copy(old, fresh);
+    if (copied.error) continue;
+    const moved = await admin.from("creator_work_blocks").update({ file_path: fresh }).eq("id", r.id).eq("owner_id", userId).eq("file_path", old);
+    if (moved.error) {
+      await admin.storage.from(CREATOR_BUCKET).remove([fresh]);
+      continue;
+    }
+    await admin.storage.from(CREATOR_BUCKET).remove([old]);
+    out.set(old, fresh);
+  }
+  return out;
 }
 
 // 본인 화면용(비공개 작품 미리 보기, 마이페이지): 본인 표식이 붙은 파일만 임시 주소를 만든다. 호출하는 쪽이 본인 확인을 마쳤어야 한다.

@@ -2,7 +2,7 @@
 // 공개용 보기(lib/creators.ts)와 달리 비공개도 읽으므로 반드시 본인 확인을 마친 사용자 번호로만 부른다. 화면으로 넘기는 값에는 내 번호를 싣지 않는다.
 import type { Role } from "@/lib/collab";
 import { isRole } from "@/lib/creator-rules";
-import { signOwnFiles } from "@/lib/creator-files";
+import { retagOwnFiles, signOwnFiles } from "@/lib/creator-files";
 import type { WorkBlock, WorkListItem } from "@/lib/creators";
 import { createAuthClient } from "@/lib/supabase/server";
 
@@ -53,6 +53,9 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
   for (const r of [prof, chans, works, blocks]) if (r.error) throw new Error(r.error.message);
 
   const brows = (blocks.data ?? []) as unknown as BlockRow[];
+  // 표식이 어긋난 내 파일은 새 이름으로 다시 저장해 등록 화면에서도 열리게 한다(한 번 고치면 다음부터는 건너뛴다).
+  const renamed = await retagOwnFiles(userId, brows);
+  for (const b of brows) if (b.file_path && renamed.has(b.file_path)) b.file_path = renamed.get(b.file_path) as string;
   const urls = await signOwnFiles(userId, brows.map((b) => b.file_path));
   const byWork = new Map<string, MyBlock[]>();
   let used = 0;
