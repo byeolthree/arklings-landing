@@ -1363,12 +1363,15 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
                 )}
               </>
             )}
-            {b && b.kind === "image" && !folded[b.id] && (b.src ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={b.src} alt={b.fileName ?? "이미지"} style={{ maxWidth: "100%", borderRadius: 14 }} />
-            ) : (
-              <div className="we-line">{b.fileName ?? "첨부된 이미지"}</div>
-            ))}
+            {b && b.kind === "image" && !folded[b.id] && (
+              <>
+                <div className="we-line">{b.fileName ?? "첨부된 이미지"}{b.fileBytes ? ` · ${mb(b.fileBytes)}` : ""}</div>
+                {b.src && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={b.src} alt={b.fileName ?? "이미지"} style={{ maxWidth: "100%", borderRadius: 14 }} />
+                )}
+              </>
+            )}
             {b && b.kind === "video" && !folded[b.id] && (b.youtubeId ? (
               <div className="we-media" style={{ overflow: "hidden" }}>
                 <iframe src={`https://www.youtube-nocookie.com/embed/${b.youtubeId}`} title="영상" loading="lazy" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" style={{ width: "100%", height: "100%", border: 0 }} />

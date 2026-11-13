@@ -286,3 +286,6 @@
 
 .rg .we-imgbox { display: flex; align-items: center; justify-content: center; }
 .rg .we-imgempty .btn { height: 28px; min-height: 28px; padding: 0 14px; border-width: 1px; border-radius: 8px; font-size: 13px; }
+
+/* 화면을 줄여 카드가 아래로 내려가는 폭에서는 「포트폴리오 화면에 보일 카드」를 감춘다 */
+@media (max-width: 1023px) { .rg .rg-side { display: none; } }
