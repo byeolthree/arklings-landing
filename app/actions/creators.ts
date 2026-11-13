@@ -44,6 +44,12 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type Sb = Awaited<ReturnType<typeof createAuthClient>>;
 
+// 새 작품은 내 목록의 맨 끝 순서 번호로 만든다(번호가 겹쳐 새 작품이 맨 위로 끼어들지 않게, 2026-11-14).
+async function nextSortOrder(sb: Sb, userId: string): Promise<number> {
+  const { data } = await sb.from("creator_works").select("sort_order").eq("owner_id", userId).order("sort_order", { ascending: false }).limit(1).maybeSingle();
+  return ((data as { sort_order: number } | null)?.sort_order ?? -1) + 1;
+}
+
 // 모든 동작의 맨 위: 로그인과 이메일 확인을 다시 한다.
 async function needUser(): Promise<{ user: CurrentUser; sb: Sb } | Fail> {
   const user = await getCurrentUser();
@@ -219,7 +225,7 @@ export async function createWork(input: WorkInput): Promise<Ok<{ id: string }> |
   const v = checked.value;
   const { data, error } = await auth.sb
     .from("creator_works")
-    .insert({ owner_id: auth.user.id, title: v.title, roles: v.roles, genres: v.genres, kind: v.kind, form: v.form, logline: v.logline, plan_id: v.planId })
+    .insert({ owner_id: auth.user.id, title: v.title, roles: v.roles, genres: v.genres, kind: v.kind, form: v.form, logline: v.logline, plan_id: v.planId, sort_order: await nextSortOrder(auth.sb, auth.user.id) })
     .select("id")
     .single();
   if (error || !data) return { ok: false, error: dbMessage(error) };
@@ -709,7 +715,7 @@ export async function startWorkFromPlan(
   if (!lw.ok) return workFail(lw.errors);
   const ins = await sb
     .from("creator_works")
-    .insert({ owner_id: user.id, title: lw.value.title, roles: lw.value.roles, genres: [], logline: lw.value.logline, plan_id: planId })
+    .insert({ owner_id: user.id, title: lw.value.title, roles: lw.value.roles, genres: [], logline: lw.value.logline, plan_id: planId, sort_order: await nextSortOrder(sb, user.id) })
     .select("id")
     .single();
   if (ins.error || !ins.data) return { ok: false, error: dbMessage(ins.error) };
