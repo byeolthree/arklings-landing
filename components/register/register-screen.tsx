@@ -87,7 +87,7 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId, profile
             }}
             onCreated={(id, allSaved) => {
               // 작품을 만들고 빠짐없이 저장됐으면 내 크리에이터 상세로 간다. 프로필이 비공개이거나 일부가 저장되지 않았으면 이 화면에 남아 이유를 보여 준다.
-              if (allSaved && profilePublic) return router.push(`/creators/${handle}`);
+              if (allSaved && profilePublic) return router.push("/creators");
               setCurrent(id);
               router.refresh();
             }}

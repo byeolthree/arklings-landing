@@ -226,7 +226,7 @@ export function PublishProfile({
             </button>
           ))}
         </div>
-        {roles.length >= 2 && <p className="pp-hint">태그를 두 번 클릭해서 대표 역할을 골라주세요.</p>}
+        {roles.length >= 2 && <p className="pp-hint">태그를 두 번 '빠르게' 클릭해서 대표 역할을 골라주세요.</p>}
         {errors.roles && (
           <p className="pp-err" role="alert">
             {errors.roles}

@@ -861,10 +861,9 @@ export function WorkEditor({
       if (publishErr) return setMsg({ text: `작품은 저장했어요. 공개로 올리지는 못했어요. ${publishErr}`, err: true });
       if (failed) return setMsg({ text: `작품은 저장했어요. ${failed}`, err: true });
       if (moved) return setMsg({ text: `작품은 저장했어요. 로그라인 자리는 저장하지 못했어요. ${moved}`, err: true });
-      return setMsg({ text: "저장했어요." });
+      return;
     }
-    setMsg({ text: "저장했어요." });
-    router.refresh();
+    router.push("/creators");
   }
 
   async function removeWork() {
