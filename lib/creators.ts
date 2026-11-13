@@ -55,7 +55,7 @@ export type WorkListItem = {
 
 export type WorkBlock =
   | { id: string; kind: "text"; body: string; sub?: string }
-  | { id: string; kind: "image"; fileName: string | null; fileBytes?: number | null; src: string | null }
+  | { id: string; kind: "image"; fileName: string | null; fileBytes?: number | null; src: string | null; sub?: string }
   | { id: string; kind: "video"; youtubeId: string | null; fileName?: string | null; fileBytes?: number | null; src?: string | null; sub?: string } // 유튜브 주소 또는 MP4 파일(2026-11-09 D18 개정)
   | { id: string; kind: "document"; fileName: string | null; fileBytes: number | null; src: string | null; sub?: string };
 
@@ -333,7 +333,7 @@ export async function getWork(id: string): Promise<WorkDetail | null> {
     if (b.kind === "text" && b.body) blocks.push({ id: b.id, kind: "text", body: b.body, sub });
     else if (b.kind === "video" && b.youtube_id) blocks.push({ id: b.id, kind: "video", youtubeId: b.youtube_id, sub });
     else if (b.kind === "video" && b.file_path) blocks.push({ id: b.id, kind: "video", youtubeId: null, fileName: b.file_name, fileBytes: b.file_bytes, src: urls.get(b.file_path) ?? null, sub });
-    else if (b.kind === "image") blocks.push({ id: b.id, kind: "image", fileName: b.file_name, src: b.file_path ? (urls.get(b.file_path) ?? null) : null });
+    else if (b.kind === "image") blocks.push({ id: b.id, kind: "image", fileName: b.file_name, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, sub });
     else if (b.kind === "document") blocks.push({ id: b.id, kind: "document", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, sub });
   }
   return { ...toWorkItem(row), authorHandle: row.author_handle, authorName: row.author_name, blocks, loglinePosition: Math.max(0, row.logline_position ?? 0) };
