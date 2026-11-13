@@ -69,12 +69,15 @@ export function checkHeroHead(head: Uint8Array, size: number, expect: HeroFileKi
 }
 
 // ── 파일 이름과 본인 표식 ───────────────────────────────────────────────────────────
-function secret(): string {
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!key) throw new Error("서버 전용 Supabase 설정(SUPABASE_SERVICE_ROLE_KEY)이 없습니다.");
-  return key;
+// 표식을 만드는 비밀값. 서버 열쇠는 바뀔 수 있어서(바뀌면 그전에 올린 파일이 모두 막힌다) 따로 정한 고정 비밀값(CREATOR_FILE_TAG_SECRET)을 먼저 쓴다.
+// 고정 비밀값을 두기 전에 서버 열쇠로 만든 표식도 계속 인정한다.
+function secrets(): string[] {
+  const list = [process.env.CREATOR_FILE_TAG_SECRET, process.env.SUPABASE_SERVICE_ROLE_KEY].filter((k): k is string => Boolean(k));
+  if (list.length === 0) throw new Error("파일 표식용 비밀값(CREATOR_FILE_TAG_SECRET 또는 SUPABASE_SERVICE_ROLE_KEY)이 없습니다.");
+  return list;
 }
-const tagOf = (userId: string, rand: string) => createHmac("sha256", secret()).update(`creator-file:${userId}:${rand}`).digest("hex").slice(0, 15);
+const tagWith = (key: string, userId: string, rand: string) => createHmac("sha256", key).update(`creator-file:${userId}:${rand}`).digest("hex").slice(0, 15);
+const tagOf = (userId: string, rand: string) => tagWith(secrets()[0], userId, rand);
 const NAME_RE = /^([0-9a-f]{20})-([0-9a-f]{15})\.(jpg|png|webp|pdf|mp4)$/;
 
 export function newFileName(userId: string, ext: Sniffed["ext"] | "mp4"): string {
@@ -86,9 +89,11 @@ export function newFileName(userId: string, ext: Sniffed["ext"] | "mp4"): string
 export function fileBelongsTo(userId: string, name: string): boolean {
   const m = NAME_RE.exec(name);
   if (!m) return false;
-  const want = Buffer.from(tagOf(userId, m[1]));
   const got = Buffer.from(m[2]);
-  return want.length === got.length && timingSafeEqual(want, got);
+  return secrets().some((key) => {
+    const want = Buffer.from(tagWith(key, userId, m[1]));
+    return want.length === got.length && timingSafeEqual(want, got);
+  });
 }
 
 // ── 올리기 ─────────────────────────────────────────────────────────────────────────
