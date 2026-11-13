@@ -316,4 +316,5 @@
 .rg .rg-steps li:not([aria-current="step"]) { border-color: var(--body); font-weight: 700; }
 .rg .rg-steps li:not([aria-current="step"]), .rg .rg-steps li:not([aria-current="step"]) a { color: var(--body); }
 /* 새 등록을 펼쳤을 때 위에 놓는 「새 포트폴리오 등록」 바(목록 화면과 같은 자리) */
-.rg .rg-newbar { margin-bottom: 24px; }
+.rg .rg-newbar { margin-bottom: 0; }
+.rg .rg-newbar-in { margin-bottom: 20px; }

@@ -61,8 +61,13 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId, openNew
     {current === "new" && (
       <div className="rg-grid rg-list rg-newbar">
         <h2 className="rg-list-title">포트폴리오 등록</h2>
-        <section className="rg-card rg-card-list" aria-label="새 포트폴리오 등록">
-          <div className="pf">
+      </div>
+    )}
+    <div className={`rg-grid${current === null ? " rg-list" : ""}`}>
+      {current === null && <h2 className="rg-list-title">포트폴리오 등록</h2>}
+      <section className={`rg-card${current === null ? " rg-card-list" : ""}`} aria-label="포트폴리오 등록">
+        {current === "new" && (
+          <div className="pf rg-newbar-in">
             <button type="button" className="pf-new" aria-expanded={true} onClick={closeNew}>
               <span className="pf-new-main">
                 <span className="pf-plus" aria-hidden="true">＋</span> 새 포트폴리오 등록
@@ -73,12 +78,7 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId, openNew
               </span>
             </button>
           </div>
-        </section>
-      </div>
-    )}
-    <div className={`rg-grid${current === null ? " rg-list" : ""}`}>
-      {current === null && <h2 className="rg-list-title">포트폴리오 등록</h2>}
-      <section className={`rg-card${current === null ? " rg-card-list" : ""}`} aria-label="포트폴리오 등록">
+        )}
         {current === null ? (
           <PortfolioManager works={works} usedBytes={usedBytes} hasProfile={true} nickname={nickname} onOpenNew={() => setCurrent("new")} onOpenEdit={(id) => setCurrent(id)} />
         ) : cur ? (
