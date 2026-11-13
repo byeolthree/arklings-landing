@@ -435,3 +435,6 @@
 .cr .cr-v2-cap.plain .cr-v2-cap-dot { color: var(--line); }
 .cr .cr-v2-cap.plain .cr-v2-cap-k { color: var(--teal); }
 .cr .cr-v2-main .cr-box { padding-top: 18px; }
+/* 바탕을 글자 주변으로 더 작게, 종류 글자는 청록(2026-11-13) */
+.cr .cr-v2-cap:not(.plain) { left: 12px; bottom: 12px; gap: 6px; padding: 3px 10px; }
+.cr .cr-v2-cap:not(.plain) .cr-v2-cap-k { color: var(--teal); }
