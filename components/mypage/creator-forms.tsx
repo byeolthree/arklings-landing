@@ -1288,7 +1288,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
             ) : <div className="we-media">영상을 불러오지 못했어요</div>)}
             {b && b.kind === "document" && (folded[b.id] ? <span className="we-line">문서 {b.fileName ?? ""} · {b.fileBytes ? mb(b.fileBytes) : ""}</span> : (
               <div className="we-line">
-                {b.src ? <a href={b.src} target="_blank" rel="noopener noreferrer">{b.fileName ?? "문서"} 열기 ↗</a> : "문서를 불러오지 못했어요"}
+                {b.src ? <a href={b.src} target="_blank" rel="noopener noreferrer">{b.fileName ?? "문서"} 열기 ↗</a> : <span>{b.fileName ?? "첨부된 문서"}</span>}
                 {b.fileBytes ? ` · ${mb(b.fileBytes)}` : ""}
               </div>
             ))}
