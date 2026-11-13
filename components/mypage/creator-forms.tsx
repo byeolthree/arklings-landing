@@ -1096,7 +1096,7 @@ export function WorkEditor({
 function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: MyWork; onMessage: (m: { text: string; err?: boolean } | null) => void; logline: string; onLogline: (v: string) => void; loglineErr?: string }) {
   const router = useRouter();
   const [folded, setFolded] = useState<Record<string, boolean>>({});
-  const [adding, setAdding] = useState<null | "text" | "video" | "image">(null);
+  const [adding, setAdding] = useState<null | "text" | "video">(null);
   const [draftDoc, setDraftDoc] = useState<File | null>(null);
   const [insertAt, setInsertAt] = useState<number | null>(null); // 요소 사이의 「+」를 누르면 새 요소가 그 자리에 들어간다
   const [draft, setDraft] = useState("");
@@ -1280,16 +1280,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
         );
       })}
 
-      {adding === "image" && (
-        <div className="we-el">
-          <div className="we-main">
-            <ImageSlotBox file={null} onFile={(f) => { if (f) { setAdding(null); void upload(f, "image"); } }} />
-            <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => setAdding(null)}>취소</button>
-          </div>
-        </div>
-      )}
-
-      {adding && adding !== "image" && (
+      {adding && (
         <div className="we-el">
           <div className="we-main">
             {adding === "text" ? (
@@ -1310,7 +1301,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
       <div className="we-add">
         <span>추가</span>
         <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => { setAdding("text"); setDraft(""); }}>+ 문서</button>
-        <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => { setAdding("image"); setDraft(""); }}>+ 이미지</button>
+        <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => imgInput.current?.click()}>+ 이미지</button>
         <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => { setAdding("video"); setDraft(""); }}>+ 영상</button>
         <input ref={imgInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => { void upload(e.target.files?.[0], "image"); e.target.value = ""; }} />
       </div>
