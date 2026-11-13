@@ -6,7 +6,7 @@ import { ROLE_TONE } from "./role-tone";
 export function RoleTags({ roles, lead = false }: { roles: Role[]; lead?: boolean }) {
   return (
     <ul className={`cr-tags${lead ? " cr-tags-lead" : ""}`} aria-label="역할">
-      {roles.map((r, i) => (
+      {roles.map((r) => (
         <li key={r} className={`cr-tag ${ROLE_TONE[r]}${lead ? " line" : ""}`}>
           {ROLES[r]}
         </li>
