@@ -58,14 +58,14 @@ export function ConfirmPopup({
       <div style={{ width: "100%", maxWidth: 360, padding: "28px 24px 24px", borderRadius: 16, background: "#fff", textAlign: "center", color: "#2a2025", fontSize: 15, fontWeight: 400, lineHeight: 1.6, whiteSpace: "pre-line" }}>
         <div>{children}</div>
         <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
-          <button type="button" autoFocus onClick={onConfirm} style={{ ...btn, border: 0, background: "#a61e5c", color: "#fff" }}>
-            {confirmLabel}
-          </button>
           {cancelLabel && onCancel && (
             <button type="button" onClick={onCancel} style={{ ...btn, border: "1px solid #a61e5c", background: "#fff", color: "#a61e5c" }}>
               {cancelLabel}
             </button>
           )}
+          <button type="button" autoFocus onClick={onConfirm} style={{ ...btn, border: 0, background: "#a61e5c", color: "#fff" }}>
+            {confirmLabel}
+          </button>
         </div>
       </div>
     </div>,

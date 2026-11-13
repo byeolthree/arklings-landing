@@ -11,6 +11,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   addTextBlock,
+  setProfileRoles,
   addVideoBlock,
   checkHandle as checkHandleAction,
   createWork,
@@ -797,7 +798,8 @@ export function WorkEditor({
 }) {
   const router = useRouter();
   const [title, setTitle] = useState(work?.title ?? "");
-  const [roles, setRoles] = useState<Role[]>(work?.roles ?? profileRoles ?? []);
+  // 역할은 프로필 한 곳에만 둔다. 프로필 역할을 먼저 쓰고, 프로필 역할을 못 받은 화면에서만 작품에 남은 역할을 쓴다(2026-11-13).
+  const [roles, setRoles] = useState<Role[]>(profileRoles ?? work?.roles ?? []);
   const [genres, setGenres] = useState<string[]>(work?.genres ?? []);
   const [kind] = useState(work?.kind ?? "");
   const [form] = useState<string>(work?.form ?? "");
@@ -952,7 +954,20 @@ export function WorkEditor({
 
       <div className="we-head">
         {confirmMsg && (
-          <ConfirmPopup confirmLabel="등록" onConfirm={() => { setConfirmMsg(null); void save(); }}>
+          <ConfirmPopup
+            confirmLabel="등록"
+            cancelLabel="다시 작성"
+            onCancel={() => setConfirmMsg(null)}
+            onConfirm={async () => {
+              setConfirmMsg(null);
+              // 팝업에서 바꾼 역할(맨 앞이 대표)을 프로필에 저장한다. 그래야 프로필·탐색 카드와 맞는다.
+              if (roles.join("|") !== (profileRoles ?? []).join("|")) {
+                const pr = await setProfileRoles(roles);
+                if (!pr.ok) return setMsg({ text: pr.error, err: true });
+              }
+              void save();
+            }}
+          >
             {confirmMsg}
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center", marginTop: 18 }}>
               {(Object.keys(ROLES) as Role[]).map((r) => {
@@ -966,7 +981,7 @@ export function WorkEditor({
                     onClick={(e) => pressRole(r, e.timeStamp)}
                     style={{ position: "relative", height: 34, padding: "0 15px", borderRadius: 999, border: `1.5px solid ${rc}`, background: on ? rc : "#fff", color: on ? "#fff" : rc, font: "inherit", fontSize: 14, fontWeight: 500, cursor: "pointer" }}
                   >
-                    {roles.length >= 2 && roles[0] === r && (
+                    {roles[0] === r && (
                       <span style={{ position: "absolute", top: -13, left: -8, height: 18, padding: "0 7px", display: "grid", placeItems: "center", border: "2px solid #fff", borderRadius: 999, background: "#574a50", color: "#fff", fontSize: 11, fontWeight: 700, lineHeight: 1, boxSizing: "content-box" }}>대표</span>
                     )}
                     {ROLES[r]}

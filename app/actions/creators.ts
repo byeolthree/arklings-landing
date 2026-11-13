@@ -11,6 +11,7 @@ import {
   LOGLINE_TOKEN,
   QUOTA_BYTES,
   parseSubKind,
+  isRole,
   type BlockKind,
   parseYoutubeId,
   validateCreatorProfile,
@@ -153,6 +154,18 @@ export async function saveCreatorProfile(input: ProfileInput): Promise<Ok<{ crea
   }
   refresh(handle);
   return { ok: true, created, handle };
+}
+
+// 프로필 역할만 바꾼다(포트폴리오 등록 팝업에서 역할을 고칠 때). 역할은 프로필 한 곳에만 두고, 맨 앞이 대표 역할이다(2026-11-13).
+export async function setProfileRoles(input: string[]): Promise<Ok | Fail> {
+  const auth = await needUser();
+  if (!("user" in auth)) return auth;
+  const roles = Array.from(new Set((Array.isArray(input) ? input : []).filter(isRole)));
+  if (roles.length === 0) return { ok: false, error: "역할을 하나 이상 골라 주세요." };
+  const upd = await auth.sb.from("creator_profiles").update({ roles }).eq("user_id", auth.user.id).select("public_handle");
+  if (upd.error || !upd.data?.length) return { ok: false, error: upd.error ? dbMessage(upd.error) : UNAVAILABLE };
+  refresh((upd.data[0] as { public_handle: string }).public_handle);
+  return { ok: true };
 }
 
 // 채널 링크만 따로 저장한다(통째로 바꾼다). 프로필이 먼저 있어야 한다.
