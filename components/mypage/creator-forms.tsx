@@ -91,7 +91,7 @@ function DocFilePick({ file, onFile, disabled }: { file?: File | null; onFile: (
 const ELEMENT_NAME: Record<"logline" | "video" | "image" | "text", { name: string; note?: string }> = {
   logline: { name: "로그라인", note: "(이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)" },
   video: { name: "영상" },
-  image: { name: "이미지", note: "(JPG · PNG · WEBP, 5MB 이하)" },
+  image: { name: "이미지" },
   text: { name: "문서" },
 };
 function ElementName({ kind }: { kind: "logline" | "video" | "image" | "text" }) {
@@ -134,14 +134,21 @@ function ImageSlotBox({ file, onFile, defaultFold = false }: { file: File | null
         <ElementName kind="image" />
       </div>
       {!fold && (
-        <button type="button" className="we-media we-imgbox" onClick={() => ref.current?.click()} aria-label="이미지 고르기">
+        <div className="we-media we-imgbox">
           {url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={url} alt={file?.name ?? "고른 이미지"} />
+            <button type="button" className="we-imgchange" onClick={() => ref.current?.click()} aria-label="이미지 바꾸기">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={url} alt={file?.name ?? "고른 이미지"} />
+            </button>
           ) : (
-            "이미지"
+            <div className="we-imgempty">
+              <button type="button" className="btn btn-ghost" onClick={() => ref.current?.click()}>
+                파일 고르기
+              </button>
+              <span>(JPG · PNG · WEBP, 5MB 이하)</span>
+            </div>
           )}
-        </button>
+        </div>
       )}
       <input ref={ref} type="file" accept="image/jpeg,image/png,image/webp" hidden aria-label="이미지 파일" onChange={pick} />
       {file && (

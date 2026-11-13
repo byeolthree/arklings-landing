@@ -285,3 +285,7 @@
 .mp .mp-modal-close { margin-top: 16px; border: 0; background: transparent; font: inherit; font-size: 13px; color: var(--body); cursor: pointer; text-decoration: underline; }
 
 .mp .we-text.we-doc-text { background: #fff; }
+
+.mp .we-imgbox { display: flex; align-items: center; justify-content: center; cursor: default; }
+.mp .we-imgempty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; text-align: center; font-size: 14px; color: var(--body); }
+.mp .we-imgchange { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
