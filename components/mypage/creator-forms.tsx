@@ -88,8 +88,8 @@ function DocFilePick({ file, onFile, disabled }: { file?: File | null; onFile: (
 }
 
 // 시안 01: 이미지 요소 = 「▾ 접기 · 이미지 (JPG·PNG·WEBP, 5MB 이하)」 줄 + 이미지가 들어갈 큰 칸(눌러서 고른다).
-function ImageSlotBox({ file, onFile }: { file: File | null; onFile: (f: File | null) => void }) {
-  const [fold, setFold] = useState(false);
+function ImageSlotBox({ file, onFile, defaultFold = false }: { file: File | null; onFile: (f: File | null) => void; defaultFold?: boolean }) {
+  const [fold, setFold] = useState(defaultFold);
   const [msg, setMsg] = useState("");
   const ref = useRef<HTMLInputElement>(null);
   const url = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
@@ -1279,6 +1279,14 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
         </div>
         );
       })}
+
+      {!full && (
+        <div className="we-el">
+          <div className="we-main">
+            <ImageSlotBox file={null} defaultFold onFile={(f) => { if (f) void upload(f, "image"); }} />
+          </div>
+        </div>
+      )}
 
       {adding && (
         <div className="we-el">
