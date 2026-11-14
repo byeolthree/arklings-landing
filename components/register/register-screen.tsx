@@ -116,7 +116,7 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId, openNew
         <div className="cr rg-pcard-cr">
           <ExploreCard c={previewCard(preview, nickname, profileBio, profileOpen)} />
         </div>
-        <p className="rg-side-note">역할은 프로필에서 가져옵니다(여기서 고르지 않음). 왼쪽 맨 위 요소를 끌어서 바꾸면 이 카드가 바로 바뀝니다.</p>
+        <p className="rg-side-note">크리에이터의 역할은 프로필에서 선택할 수 있습니다.</p>
       </aside>
     </div>
     </>
