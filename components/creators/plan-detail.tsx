@@ -2,7 +2,6 @@ import Link from "next/link";
 import { CopyLinkButton } from "@/components/portfolio/copy-link-button";
 import { formatKstDate } from "@/lib/time";
 import { RoleTags } from "./role-tags";
-import { ROLE_TONE } from "./role-tone";
 import type { PlanDetailData } from "./types";
 import "./creators.css";
 
@@ -26,13 +25,10 @@ export function PlanDetail({
   profileHref: (handle: string) => string;
   applyHref: string;
 }) {
-  // 동그라미 색: 작성자 첫 역할의 태그 색(ROLE_TONE). 역할이 없으면 예전 색.
-  const firstRole = plan.authorRoles?.[0];
-  const avatarTone = firstRole ? ROLE_TONE[firstRole] : toneOf(plan.authorHandle ?? plan.authorName);
   const authorHref = plan.authorHandle ? profileHref(plan.authorHandle) : undefined;
   const author = (
     <>
-      <span className={`cr-av cr-av-sm ${avatarTone}`} aria-hidden="true">
+      <span className={`cr-av cr-av-sm ${toneOf(plan.authorHandle ?? plan.authorName)}`} aria-hidden="true">
         {plan.authorName.slice(0, 1)}
       </span>
       <span className="cr-d-author">{plan.authorName}</span>
