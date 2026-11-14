@@ -217,9 +217,12 @@
   .rg .rg-card-list .pf-count-end { margin-top: 18px; }
   .rg .rg-card-list .pf-count { padding: 0; gap: 4px 20px; font-size: 14px; line-height: 20px; }
   .rg .rg-card-list .pf { gap: 0; }
-  .rg .rg-card-list .pf-head { margin: 16.5px 0 7px; padding: 0 16px 0 12px; height: 20px; column-gap: 6px; font-size: 13px; line-height: 20px; grid-template-columns: 20px minmax(0, 1fr) minmax(0, 110px) minmax(0, 74px) 118px 128px; }
+  .rg .rg-card-list .pf-head { margin: 16.5px 0 7px; padding: 0 16px 0 12px; height: 20px; column-gap: 6px; font-size: 13px; line-height: 20px; grid-template-columns: 44px minmax(0, 1fr) minmax(0, 110px) minmax(0, 74px) 118px 128px; }
   .rg .rg-card-list .pf-head-end { grid-column: 5 / 7; text-align: right; }
-  .rg .rg-card-list .pf-row { box-sizing: border-box; min-height: 56px; padding: 8px 16px 8px 12px; column-gap: 6px; border-radius: 16px; box-shadow: none; grid-template-columns: 20px minmax(0, 1fr) minmax(0, 110px) minmax(0, 74px) 118px 128px; }
+  .rg .rg-card-list .pf-head-grip { text-align: center; }
+  .rg .rg-card-list .pf-grip { justify-self: center; }
+  .rg .rg-card-list .pf-title { font-weight: 400; }
+  .rg .rg-card-list .pf-row { box-sizing: border-box; min-height: 56px; padding: 8px 16px 8px 12px; column-gap: 6px; border-radius: 16px; box-shadow: none; grid-template-columns: 44px minmax(0, 1fr) minmax(0, 110px) minmax(0, 74px) 118px 128px; }
   .rg .rg-card-list .pf-new { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; border-radius: 16px; box-shadow: none; margin-bottom: 28px; }
   .rg .rg-card-list .pf-item { gap: 8px; }
   .rg .rg-card-list .pf-item + .pf-item { margin-top: 8px; }

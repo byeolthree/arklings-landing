@@ -612,7 +612,7 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
 
       {works.length > 0 && (
         <div className="pf-head" aria-hidden="true">
-          <span />
+          <span className="pf-head-grip">순서</span>
           <span>제목</span>
           <span>대표</span>
           <span>수정일</span>
