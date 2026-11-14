@@ -16,7 +16,8 @@ const mb = (n: number) => `${(n / 1024 / 1024).toFixed(1)}MB`;
 
 // 미리보기 카드: 탐색 화면과 같은 카드(ExploreCard)를 지금 편집 중인 값으로 그린다(2026-11-14). 링크는 없다.
 function previewCard(p: WorkPreview, nickname: string, bio: string, openToCollab: boolean): CreatorCard {
-  const media = p.top === "image" || p.top === "video";
+  // 이미지·영상을 맨 위에 두고 파일까지 있을 때만 그것이 대표, 아니면 로그라인(문서는 문서 칸)
+  const media = (p.top === "image" || p.top === "video") && Boolean(p.media);
   return {
     handle: "",
     name: nickname || "〈닉네임〉",
@@ -28,7 +29,7 @@ function previewCard(p: WorkPreview, nickname: string, bio: string, openToCollab
     forms: [],
     latest: { title: p.title || "〈제목〉", logline: p.logline || FRAME, genres: p.genres },
     main: media ? "media" : "logline",
-    hero: media ? (p.media?.kind ?? p.top as "image" | "video") : undefined,
+    hero: media ? p.media?.kind : undefined,
     heroSrc: media ? p.media?.src : undefined,
     mainFit: p.media?.fit,
     mainSub: media ? p.topLabel : undefined,
