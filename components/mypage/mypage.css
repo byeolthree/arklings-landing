@@ -292,9 +292,9 @@
 /* 고른 태그만 색이 보인다(2026-11-13). 장르는 딥 앰버 외곽선·글자, 종류 태그는 채우기·흰 글자: 영상 소프트 틸, 문서 딥 슬레이트 블루, 이미지 뮤트 세이지 */
 
 /* 요소 추가 버튼: 종류별 색으로 채우고 흰 글자(2026-11-13). 문서 딥 슬레이트 블루, 이미지 뮤트 세이지, 영상 소프트 틸 */
-.mp .we-add .btn.btn-ghost.we-add-text { background: #40576f; border-color: #40576f; color: #fff; }
-.mp .we-add .btn.btn-ghost.we-add-image { background: #6f8a7a; border-color: #6f8a7a; color: #fff; }
-.mp .we-add .btn.btn-ghost.we-add-video { background: #6e9ca3; border-color: #6e9ca3; color: #fff; }
+.mp .we-add .btn.btn-ghost.we-add-text { background: #fff; border-color: #40576f; color: #40576f; }
+.mp .we-add .btn.btn-ghost.we-add-image { background: #fff; border-color: #6f8a7a; color: #6f8a7a; }
+.mp .we-add .btn.btn-ghost.we-add-video { background: #fff; border-color: #6e9ca3; color: #6e9ca3; }
 
 /* 이미지 프레임: 비어 있을 때는 문서·영상 첨부 칸과 같은 높이, 이미지를 고르면 그 이미지 크기만큼(2026-11-13) */
 .mp .we-imgbox:has(.we-imgchange) { padding: 0; }
