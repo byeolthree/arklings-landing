@@ -128,7 +128,7 @@
 .rg .we-main.we-card .we-text { background: var(--bg); }
 .rg .we-main.we-card .mp-note { margin: -1px 0 0; font-size: 12px; line-height: 18px; color: var(--body); }
 /* 점선 상자(영상·문서 첨부) */
-.rg .we-drop { gap: 8px; padding: 12px 14px; border: 1px dashed var(--body); border-radius: 12px; background: #fff; }
+.rg .we-drop { gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
 .rg .we-drop .mp-note { font-size: 13px; color: var(--body); }
 .rg .we-drop-doc { padding: 10px 14px; }
 .rg .we-drop .btn, .rg .we-drop-row .btn { height: 28px; min-height: 28px; padding: 0 14px; border-width: 1px; border-radius: 8px; font-size: 13px; }
@@ -287,8 +287,8 @@
 .rg .we-fit .opt[aria-pressed="true"] { background: var(--body); border-color: var(--body); color: #fff; font-weight: 700; }
 /* 새 등록을 펼친 상태의 바: 접기 버튼일 뿐이라 외곽선, 오른쪽 「등록 화면 접기」만. 크기·자리는 목록 화면의 바와 같다 */
 .rg .rg-newbar-in { margin: 2px 8px 20px; }
-.rg .rg-newbar-in .pf-new.is-open { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; justify-content: flex-end; background: #fff; border: 1px dashed var(--jaju); color: var(--jaju); box-shadow: none; }
-.rg .rg-newbar-in .pf-new.is-open .pf-new-fold { color: var(--jaju); }
+.rg .rg-newbar-in .pf-new.is-open { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; justify-content: flex-end; background: #fff; border: 1px solid var(--line); color: var(--line); box-shadow: none; }
+.rg .rg-newbar-in .pf-new.is-open .pf-new-fold { color: var(--line); }
 /* 미리보기 카드: 탐색 화면과 같은 카드(ExploreCard). .cr 바탕·넘침 자르기는 이 칸에서는 쓰지 않는다 */
 .rg .rg-pcard-cr { flex: none; overflow: visible; background: transparent; }
 
