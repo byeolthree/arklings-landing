@@ -270,11 +270,6 @@
 @media (max-width: 1023px) { .rg .rg-side { display: none; } }
 
 /* 고른 태그만 색이 보인다(2026-11-13). 장르는 딥 앰버 외곽선·글자, 종류 태그는 채우기·흰 글자: 영상 소프트 틸, 문서 딥 슬레이트 블루, 이미지 뮤트 세이지 */
-.rg .we-pick.we-genre .opt[aria-pressed="true"] { background: #fff; border-color: #a96e16; color: #a96e16; }
-.rg .we-main .we-pick.we-sub.tone-video .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub.tone-video .opt[aria-pressed="true"] { background: #6e9ca3; border-color: #6e9ca3; color: #fff; }
-.rg .we-main .we-pick.we-sub.tone-doc .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub.tone-doc .opt[aria-pressed="true"] { background: #40576f; border-color: #40576f; color: #fff; }
-.rg .we-main .we-pick.we-sub.tone-image .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub.tone-image .opt[aria-pressed="true"] { background: #6f8a7a; border-color: #6f8a7a; color: #fff; }
-.rg .we-pick.we-genre .opt[aria-pressed="true"], .rg .we-main .we-pick.we-sub .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub .opt[aria-pressed="true"] { font-weight: 700; }
 
 /* 요소 추가 버튼: 종류별 색으로 채우고 흰 글자(2026-11-13). 문서 딥 슬레이트 블루, 이미지 뮤트 세이지, 영상 소프트 틸 */
 .rg .we-add .btn.btn-ghost.we-add-text { background: #40576f; border-color: #40576f; color: #fff; }
@@ -296,3 +291,18 @@
 .rg .rg-newbar-in .pf-new.is-open .pf-new-fold { color: var(--jaju); }
 /* 미리보기 카드: 탐색 화면과 같은 카드(ExploreCard). .cr 바탕·넘침 자르기는 이 칸에서는 쓰지 않는다 */
 .rg .rg-pcard-cr { flex: none; overflow: visible; background: transparent; }
+
+/* 장르·포맷 고르기는 둥근 태그 없이 실제 포트폴리오 화면처럼 글자로(2026-11-14 아키텍터 지시)
+   장르: #이 붙은 본문색 글자, 고르면 굵게. 포맷(종류): 세컨더리 청록 글자, 고르면 굵게. */
+.rg .we-pick.we-genre .opt, .rg .we-main .we-pick.we-sub .opt, .rg .we-main.we-card .we-pick.we-sub .opt { height: auto; padding: 2px 4px; border: 0; border-radius: 0; background: none; line-height: 1.6; font-weight: 400; }
+.rg .we-pick.we-genre .opt, .rg .we-pick.we-genre .opt[aria-pressed="true"] { background: none; color: var(--body); }
+.rg .we-pick.we-genre .opt::before { content: "#"; }
+.rg .we-main .we-pick.we-sub .opt, .rg .we-main.we-card .we-pick.we-sub .opt, .rg .we-main .we-pick.we-sub .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub .opt[aria-pressed="true"] { background: none; color: var(--teal); }
+.rg .we-pick.we-genre .opt[aria-pressed="true"], .rg .we-main .we-pick.we-sub .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub .opt[aria-pressed="true"] { font-weight: 700; }
+/* 마이 페이지 메뉴 탭도 둥근 태그 없이 글자로: 지금 화면은 제목색 굵게, 나머지는 본문색 */
+.rg .rg-steps { gap: 4px 18px; }
+.rg .rg-steps li, .rg .rg-steps li:not([aria-current="step"]), .rg .rg-steps li[aria-current="step"] { height: auto; padding: 0; border: 0; border-radius: 0; background: none; line-height: 1.6; font-size: 14px; }
+.rg .rg-steps li:not([aria-current="step"]), .rg .rg-steps li:not([aria-current="step"]) a { color: var(--body); font-weight: 400; }
+.rg .rg-steps li a, .rg .rg-steps li a:hover { margin: 0; padding: 0; border-radius: 0; background: none; }
+.rg .rg-steps li a:hover { color: var(--title); }
+.rg .rg-steps li[aria-current="step"] { color: var(--title); font-weight: 700; }
