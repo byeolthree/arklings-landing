@@ -210,6 +210,7 @@
 .rg .rg-card-list .pf-row { background: var(--bg); }
 .rg .rg-card-list .pf-new { background: #fff; border: 1.5px solid var(--jaju); color: var(--jaju); }
 .rg .rg-card-list .pf-new .pf-new-main, .rg .rg-card-list .pf-new .pf-new-fold { color: var(--jaju); }
+.rg .rg-card-list .pf-actions .btn { border-width: 1px; font-weight: 400; }
 .rg .rg-card-list .pf { margin: 0; }
 @media (min-width: 768px) {
   .rg .rg-card.rg-card-list { padding: 34px 44px 34px; }
