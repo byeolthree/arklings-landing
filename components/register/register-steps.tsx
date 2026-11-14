@@ -21,11 +21,20 @@ export function RegisterHeader({ current }: { title?: string; current: Step }) {
       <div className="rg-wrap">
         <h1 className="rg-title">마이 페이지</h1>
         <ol className="rg-steps" aria-label="마이페이지 이동">
-          {STEPS.map((s) => (
-            <li key={s} aria-current={s === current ? "step" : undefined}>
-              {s === current ? LABEL[s] : <Link href={HREFS[s]}>{LABEL[s]}</Link>}
-            </li>
-          ))}
+          {/* 번호 + 밑줄 탭(2026-11-14 아키텍터 승인 시안 tabs2): 지금 화면은 번호 자주색, 글자 제목색 굵게, 자주색 밑줄 */}
+          {STEPS.map((s, i) => {
+            const label = (
+              <>
+                <span className="rg-step-no">{String(i + 1).padStart(2, "0")}</span>
+                {LABEL[s]}
+              </>
+            );
+            return (
+              <li key={s} aria-current={s === current ? "step" : undefined}>
+                {s === current ? label : <Link href={HREFS[s]}>{label}</Link>}
+              </li>
+            );
+          })}
         </ol>
       </div>
     </div>

@@ -27,11 +27,6 @@
 @media (min-width: 768px) { .rg .rg-title { font-size: 32px; } }
 .rg .rg-desc { margin: 12px auto 0; max-width: 900px; font-size: 15px; }
 @media (min-width: 768px) { .rg .rg-desc { font-size: 18px; } }
-.rg .rg-steps { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 24px 0 0; padding: 0; list-style: none; }
-.rg .rg-steps li { padding: 5px 16px; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-size: 13px; color: var(--body); }
-.rg .rg-steps li a { display: block; margin: -5px -16px; padding: 5px 16px; border-radius: 999px; color: inherit; text-decoration: none; }
-.rg .rg-steps li a:hover { background: var(--tint, #f5ecf0); }
-.rg .rg-steps li[aria-current="step"] { background: var(--body); border-color: var(--body); color: #fff; font-weight: 700; }
 
 /* 프로필 등록 단계: 격자 바탕 위 흰 카드 */
 .rg .rg-prof { padding: 40px 0 84px; background-color: var(--bg); background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 28px 28px; }
@@ -72,13 +67,6 @@
 /* ───── 시안 01 C 「포트폴리오 등록」 실측 맞춤(2배 그림에서 잰 값, 프레임 1440 기준 CSS px) ───── */
 /* 맨 위 띠(마이페이지 네 화면 공통, D42): 제목은 .cr-title과 같은 22px / 데스크톱 32px · 굵게 · 줄 높이 1.3. 설명 줄은 없다. */
 /* 띠 높이는 위 「제목 띠」 규칙(크리에이터와 같은 --hero-h)으로 맞추고, 글자 묶음은 그 안에서 가운데에 둔다. */
-.rg .rg-steps { margin-top: 20px; gap: 8px; }
-@media (min-width: 768px) { .rg .rg-steps { margin-top: 24px; } }
-.rg .rg-steps li { box-sizing: border-box; height: 28px; padding: 0 11px; line-height: 26px; font-size: 12px; }
-.rg .rg-steps li a { margin: 0 -11px; padding: 0 11px; }
-/* 지금 화면이 아닌 탭도 잘 보이게 본문색 외곽선·굵은 글자(2026-11-13) */
-.rg .rg-steps li:not([aria-current="step"]) { border-color: var(--body); font-weight: 700; }
-.rg .rg-steps li:not([aria-current="step"]), .rg .rg-steps li:not([aria-current="step"]) a { color: var(--body); }
 
 /* 아래 바탕은 흰색, 왼쪽 카드는 #faf7f8·테두리 1px·모서리 28, 안쪽 여백 36(위 32) */
 @media (min-width: 1024px) { .rg .rg-main .rg-wrap { max-width: 1440px; padding: 0 80px; } }
@@ -302,12 +290,13 @@
 /* 고르면 굵게 + 그 색 점선 외곽선의 네모 태그(모서리 8px, 다른 네모 버튼과 같게) */
 .rg .we-pick.we-genre .opt[aria-pressed="true"] { background: #fff; border-color: #a96e16; color: #a96e16; font-weight: 700; }
 .rg .we-main .we-pick.we-sub .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub .opt[aria-pressed="true"] { background: #fff; border-color: var(--teal); color: var(--teal); font-weight: 700; }
-/* 마이 페이지 메뉴 탭도 둥근 태그 없이 글자로: 지금 화면은 제목색 굵게, 나머지는 본문색 */
-.rg .rg-steps { gap: 4px 18px; }
-.rg .rg-steps li, .rg .rg-steps li:not([aria-current="step"]), .rg .rg-steps li[aria-current="step"] { height: auto; padding: 0; border: 0; border-radius: 0; background: none; line-height: 1.6; font-size: 14px; }
-.rg .rg-steps li:not([aria-current="step"]), .rg .rg-steps li:not([aria-current="step"]) a { color: var(--body); font-weight: 400; }
-.rg .rg-steps li a, .rg .rg-steps li a:hover { margin: 0; padding: 0; border-radius: 0; background: none; }
-.rg .rg-steps li a:hover { color: var(--title); }
-.rg .rg-steps li[aria-current="step"] { color: var(--title); font-weight: 700; }
 /* 이미지 파일 고르기 칸(아직 파일 없음) 바탕을 문서·영상 파일 칸과 같은 흰색으로 (2026-11-14) */
 .rg .we-imgbox:not(:has(.we-imgchange)) { background: #fff; }
+/* 마이 페이지 탭: 번호 + 밑줄 탭(2026-11-14 승인 시안 tabs2) */
+.rg .rg-steps { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 28px; margin: 22px 0 0; padding: 0; list-style: none; border-bottom: 1px solid var(--line); }
+.rg .rg-steps li { display: flex; align-items: center; gap: 8px; padding: 10px 2px; font-size: 15px; color: var(--body); }
+.rg .rg-steps li a { display: flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; }
+.rg .rg-steps li a:hover { color: var(--title); }
+.rg .rg-step-no { font-size: 12px; font-weight: 700; color: #b6abb0; }
+.rg .rg-steps li[aria-current="step"] { color: var(--title); font-weight: 700; box-shadow: inset 0 -2px 0 var(--jaju); }
+.rg .rg-steps li[aria-current="step"] .rg-step-no { color: var(--jaju); }
