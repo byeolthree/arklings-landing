@@ -598,7 +598,6 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
         <WorkEditor
           key={`new${newKey}`}
           work={null}
-          nickname={nickname}
           onClose={() => {
             setNewOpen(false);
             setNewKey((k) => k + 1);
@@ -651,7 +650,7 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
           {rowErr[w.id] && (
             <AlertPopup key={rowErr[w.id]}>{rowErr[w.id]}</AlertPopup>
           )}
-          {editing === w.id && <WorkEditor key={w.id} work={{ ...w, isPublic: isPub(w) }} nickname={nickname} onClose={() => setEditing(null)} onTogglePublic={() => void togglePublic(w)} busyOuter={busy} />}
+          {editing === w.id && <WorkEditor key={w.id} work={{ ...w, isPublic: isPub(w) }} onClose={() => setEditing(null)} onTogglePublic={() => void togglePublic(w)} busyOuter={busy} />}
         </div>
       ))}
       </div>
@@ -762,7 +761,6 @@ export type PreviewMedia = { kind: "image" | "video"; src: string; fit: "cover" 
 
 export function WorkEditor({
   work,
-  nickname,
   onClose,
   onCreated,
   onTogglePublic,
@@ -772,7 +770,6 @@ export function WorkEditor({
   topNote,
 }: {
   work: MyWork | null;
-  nickname: string;
   profileRoles?: Role[]; // 작품의 역할은 프로필에서 가져온다(시안 01: 여기서 고르지 않음)
   topNote?: string; // 맨 윗줄에 보일 「내 포트폴리오 4 / 12 · 파일 12MB / 20MB」
   onClose: () => void;
@@ -1023,9 +1020,8 @@ export function WorkEditor({
             document.body,
           )}
         <input ref={titleRef} className="we-title" type="text" placeholder="〈제목〉" aria-label="작품 제목" value={title} maxLength={TITLE_MAX} onChange={(e) => setTitle(e.target.value)} aria-invalid={errs.title ? true : undefined} />
-        <p className="we-by">
-          {nickname || "닉네임"}{work && work.isPublic ? ` · ${new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" })}` : ""}
-        </p>
+        {/* 제목 밑 닉네임은 보이지 않는다(2026-11-14 아키텍터 지시). 공개한 작품은 공개한 날만 */}
+        {work && work.isPublic && <p className="we-by">{new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" })}</p>}
         {errs.roles && <AlertPopup key={errs.roles}>{errs.roles}</AlertPopup>}
         <div className="we-pick we-genre" role="group" aria-label="장르">
           {GENRES.map((g) => (
@@ -1038,7 +1034,7 @@ export function WorkEditor({
 
       <p className="we-rep-note">
         <span className="we-rep-tag">대표</span>
-        맨 위에 끌어다 놓은 것이 대표입니다. 포트폴리오 카드에 이것이 보입니다.
+        맨 위에 설정하는 것이 대표 콘텐츠입니다.
       </p>
 
       {work ? (
