@@ -90,13 +90,13 @@
 /* 맨 윗줄: 「공개하지 않음」 칩 + 개수 글 + 오른쪽 끝 「접기 ▴」·「포트폴리오에 올리기」 */
 .rg .we-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-height: 36px; }
 .rg .we-state { box-sizing: border-box; display: inline-flex; align-items: center; height: 28px; padding: 0 11px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--title); font-size: 12px; font-weight: 700; }
-.rg .we-note { font-size: 14px; color: var(--line); }
+.rg .we-note { font-size: 14px; color: var(--body); }
 .rg .we-top-btns { display: inline-flex; gap: 12px; margin-left: auto; }
 .rg .we-top-btns .btn { min-height: 36px; height: 36px; padding: 0 16px; border-radius: 8px; font-size: 13px; }
 .rg .we-top-btns .btn-ghost { border-width: 1px; background: transparent; }
 .rg .we-top-btns .btn-primary { box-shadow: 0 8px 16px -8px rgba(166,30,92,.55); }
 /* 제목·작성자 줄·장르 칩 */
-.rg .we-head { margin-top: 28px; }
+.rg .we-head { margin-top: 40px; }
 .rg .we-title { border: 0; border-bottom: 1px solid var(--body); padding: 0 0 6px; font-size: 24px; line-height: 31px; font-weight: 400; color: var(--title); }
 .rg .we-title:focus { outline: none; border-bottom-color: var(--primary, #A61E5C); }
 .rg .mp-state { cursor: pointer; font-family: inherit; }
@@ -106,7 +106,7 @@
 .rg .we-pick .opt { box-sizing: border-box; height: 32px; padding: 0 12px; line-height: 30px; font-size: 14px; border: 1px solid var(--line); background: #fff; color: var(--body); }
 .rg .we-pick .opt[aria-pressed="true"] { background: var(--body); border-color: var(--body); color: #fff; }
 /* 「대표」 안내: 높이 44, 왼쪽 3px 자주 줄 */
-.rg .we-rep-note { margin: 32px 0 6px; padding: 0 18px 0 15px; height: 44px; box-sizing: border-box; gap: 8px; border-radius: 12px; font-size: 14px; }
+.rg .we-rep-note { margin: 44px 0 6px; padding: 0 18px 0 15px; height: 44px; box-sizing: border-box; gap: 8px; border-radius: 12px; font-size: 14px; }
 .rg .we-rep-tag { padding: 0 12px; height: 24px; line-height: 24px; }
 /* 요소: 바깥 2px 줄(맨 위는 자주+흰 바탕, 나머지는 투명), 왼쪽 36은 ⠿ 자리, 안쪽 카드는 #faf7f8·테두리 1px·모서리 16 */
 .rg .we-body { margin-top: 0; }
@@ -287,8 +287,9 @@
 .rg .we-fit .opt[aria-pressed="true"] { background: var(--body); border-color: var(--body); color: #fff; font-weight: 700; }
 /* 새 등록을 펼친 상태의 바: 접기 버튼일 뿐이라 외곽선, 오른쪽 「등록 화면 접기」만. 크기·자리는 목록 화면의 바와 같다 */
 .rg .rg-newbar-in { margin: 2px 8px 20px; }
-.rg .rg-newbar-in .pf-new.is-open { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; justify-content: flex-end; background: #fff; border: 1px solid var(--line); color: var(--line); box-shadow: none; }
+.rg .rg-newbar-in .pf-new.is-open { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; justify-content: space-between; background: #fff; border: 1px solid var(--line); color: var(--line); box-shadow: none; }
 .rg .rg-newbar-in .pf-new.is-open .pf-new-fold { color: var(--body); }
+.rg .rg-newbar-in .pf-new-note { font-size: 14px; font-weight: 400; color: var(--body); text-align: left; }
 /* 미리보기 카드: 탐색 화면과 같은 카드(ExploreCard). .cr 바탕·넘침 자르기는 이 칸에서는 쓰지 않는다 */
 .rg .rg-pcard-cr { flex: none; overflow: visible; background: transparent; }
 
