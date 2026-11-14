@@ -308,5 +308,5 @@
 .rg .rg-steps li a, .rg .rg-steps li a:hover { margin: 0; padding: 0; border-radius: 0; background: none; }
 .rg .rg-steps li a:hover { color: var(--title); }
 .rg .rg-steps li[aria-current="step"] { color: var(--title); font-weight: 700; }
-/* 이미지 파일 고르기 칸(아직 파일 없음)도 문서·영상의 파일 고르기 칸과 같게: 흰 바탕, 본문색 1px 점선 (2026-11-14) */
-.rg .we-imgbox:not(:has(.we-imgchange)) { background: #fff; border: 1px dashed var(--body); border-radius: 12px; }
+/* 이미지 파일 고르기 칸(아직 파일 없음) 바탕을 문서·영상 파일 칸과 같은 흰색으로 (2026-11-14) */
+.rg .we-imgbox:not(:has(.we-imgchange)) { background: #fff; }
