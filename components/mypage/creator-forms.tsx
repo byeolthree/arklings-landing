@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ROLE_TONE } from "@/components/creators/role-tone";
 const ROLE_HEX = { jaju: "#a61e5c", dusty: "#5f7c99", gold: "#d89a24", sage: "#6f8a7a", teal: "#1f5a66", body: "#574a50" } as const;
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
   addTextBlock,
@@ -771,7 +771,7 @@ export function WorkEditor({
 }: {
   work: MyWork | null;
   profileRoles?: Role[]; // 작품의 역할은 프로필에서 가져온다(시안 01: 여기서 고르지 않음)
-  topNote?: string; // 맨 윗줄에 보일 「내 포트폴리오 4 / 12 · 파일 12MB / 20MB」
+  topNote?: ReactNode; // 맨 윗줄에 보일 「작품 4 / 12」「파일 12MB / 20MB」 두 칸
   onClose: () => void;
   onCreated?: (id: string, allSaved: boolean) => void;
   onTogglePublic?: () => void;

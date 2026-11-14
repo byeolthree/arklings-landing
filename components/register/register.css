@@ -78,7 +78,7 @@
 /* 맨 윗줄: 「공개하지 않음」 칩 + 개수 글 + 오른쪽 끝 「접기 ▴」·「포트폴리오에 올리기」 */
 .rg .we-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-height: 36px; }
 .rg .we-state { box-sizing: border-box; display: inline-flex; align-items: center; height: 28px; padding: 0 11px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--title); font-size: 12px; font-weight: 700; }
-.rg .we-note { font-size: 14px; color: var(--body); }
+.rg .we-note { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 14px; color: var(--body); }
 .rg .we-top-btns { display: inline-flex; gap: 12px; margin-left: auto; }
 .rg .we-top-btns .btn { min-height: 36px; height: 36px; padding: 0 16px; border-radius: 8px; font-size: 13px; }
 .rg .we-top-btns .btn-ghost { border-width: 1px; background: transparent; }
@@ -279,7 +279,7 @@
 .rg .rg-newbar-in { margin: 2px 8px 20px; }
 .rg .rg-newbar-in .pf-new.is-open { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; justify-content: space-between; background: #fff; border: 1px solid var(--line); color: var(--line); box-shadow: none; }
 .rg .rg-newbar-in .pf-new.is-open .pf-new-fold { color: var(--body); }
-.rg .rg-newbar-in .pf-new-note { font-size: 14px; font-weight: 400; color: var(--body); text-align: left; }
+.rg .rg-newbar-in .pf-new-note { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 14px; font-weight: 400; color: var(--body); text-align: left; }
 /* 미리보기 카드: 탐색 화면과 같은 카드(ExploreCard). .cr 바탕·넘침 자르기는 이 칸에서는 쓰지 않는다 */
 .rg .rg-pcard-cr { flex: none; overflow: visible; background: transparent; }
 

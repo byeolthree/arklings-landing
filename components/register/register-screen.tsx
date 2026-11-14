@@ -47,7 +47,17 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId, openNew
   const [formKey, setFormKey] = useState(0);
   const [preview, setPreview] = useState<WorkPreview>({ title: "", logline: "", genres: [], roles: [], top: "logline" });
   const cur = current && current !== "new" ? (works.find((w) => w.id === current) ?? null) : null;
-  const topNote = `내 포트폴리오 ${works.length} / ${WORK_LIMIT} · 파일 ${mb(usedBytes)} / ${mb(QUOTA_BYTES)}`;
+  // 목록 화면 맨 아래 줄과 같은 말·같은 간격: 「작품 3 / 12」「파일 6.6MB / 20.0MB」
+  const topNote = (
+    <>
+      <span>
+        작품 {works.length} / {WORK_LIMIT}
+      </span>
+      <span>
+        파일 {mb(usedBytes)} / {mb(QUOTA_BYTES)}
+      </span>
+    </>
+  );
 
   // 새 등록 화면을 펼쳤을 때도 목록 화면과 같은 자리에 「새 포트폴리오 등록」 바를 두고, 펼치기·접기 글자만 바뀐다(2026-11-13 아키텍터 지시).
   const closeNew = () => {
