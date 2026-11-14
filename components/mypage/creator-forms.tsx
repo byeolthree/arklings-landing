@@ -971,15 +971,15 @@ export function WorkEditor({
           >
             <div className="we-mm-pair">
               {/* 대표 역할은 프로필에서 정한다: 누르면 프로필 등록 화면의 역할로 */}
-              <Link href="/portfolio/new?step=profile" className="we-mm-tag" style={{ background: roles[0] ? ROLE_HEX[ROLE_TONE[roles[0]]] : "#574a50" }}>
+              <Link href="/portfolio/new?step=profile" className="we-mm-tag we-mm-role" style={{ color: roles[0] ? ROLE_HEX[ROLE_TONE[roles[0]]] : "#574a50" }}>
                 {roles[0] ? ROLES[roles[0]] : "역할 없음"}
               </Link>
               <span className="we-mm-bar">|</span>
               {/* 대표 콘텐츠: 누르면 팝업을 닫고 이 작품의 맨 위 요소로 */}
               <button
                 type="button"
-                className="we-mm-tag"
-                style={{ background: topTag.color }}
+                className="we-mm-tag we-mm-content"
+                style={{ color: topTag.color }}
                 onClick={() => {
                   setMismatch(false);
                   const el = document.querySelector<HTMLElement>(".we .we-el.rep");

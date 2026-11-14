@@ -310,7 +310,10 @@
 /* 역할·대표 콘텐츠 확인 팝업(시안 popup5). 팝업은 화면 맨 위(body)에 그려지므로 앞에 .mp를 붙이지 않는다 */
 .we-mm-pair { display: flex; justify-content: center; align-items: center; gap: 10px; }
 .we-mm-bar { color: #c3b5bc; }
-.we-mm-tag { display: inline-flex; align-items: center; height: 32px; padding: 0 15px; border: 0; border-radius: 8px; color: #fff; font: inherit; font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; }
+.we-mm-tag { display: inline-flex; align-items: center; box-sizing: border-box; height: 32px; padding: 0 15px; border-radius: 8px; background: #fff; font: inherit; font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; }
+/* 대표 역할: 역할 색 외곽선 + 역할 색 글자 / 대표 콘텐츠: 그 색 점선 외곽선 + 그 색 글자(둥근 네모, 모서리 8px) */
+.we-mm-role { border: 1px solid currentColor; }
+.we-mm-content { border: 1px dashed currentColor; }
 .we-mm-note { margin: 14px 0 0; font-size: 13px; color: #574a50; }
 .we-mm-ask { margin: 4px 0 0; font-size: 15px; }
 
