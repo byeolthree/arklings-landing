@@ -90,7 +90,7 @@
 /* 맨 윗줄: 「공개하지 않음」 칩 + 개수 글 + 오른쪽 끝 「접기 ▴」·「포트폴리오에 올리기」 */
 .rg .we-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-height: 36px; }
 .rg .we-state { box-sizing: border-box; display: inline-flex; align-items: center; height: 28px; padding: 0 11px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--title); font-size: 12px; font-weight: 700; }
-.rg .we-note { font-size: 14px; color: var(--body); }
+.rg .we-note { font-size: 14px; color: var(--line); }
 .rg .we-top-btns { display: inline-flex; gap: 12px; margin-left: auto; }
 .rg .we-top-btns .btn { min-height: 36px; height: 36px; padding: 0 16px; border-radius: 8px; font-size: 13px; }
 .rg .we-top-btns .btn-ghost { border-width: 1px; background: transparent; }
