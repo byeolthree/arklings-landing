@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "@/components/planner/planner.css";
 import { ProfileFormPreview } from "./profile-form-preview";
+import { one } from "@/lib/utils";
 
 // 디자인 확인용 샘플 미리보기. 기획안 화면의 「포트폴리오에 올리기」를 눌렀을 때 열리는 프로필 칸을 본다. 디자인이 끝나면 지운다.
 export const metadata: Metadata = { title: "프로필 만들기 칸 샘플 미리보기", robots: { index: false, follow: false } };
@@ -10,7 +11,7 @@ const MODES = { planner: "기획안 올리다가", "planner-private": "기획안
 
 export default async function ProfileFormPreviewPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
-  const raw = Array.isArray(sp.state) ? sp.state[0] : sp.state;
+  const raw = one(sp.state);
   const mode = (raw && raw in MODES ? raw : "planner") as keyof typeof MODES;
   return (
     <>

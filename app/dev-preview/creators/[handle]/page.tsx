@@ -4,12 +4,12 @@ import { notFound } from "next/navigation";
 import { CreatorProfile } from "@/components/creators/creator-profile";
 import { SAMPLE_CREATORS, sampleProfileOf, sampleWorksOf } from "@/components/creators/sample-data";
 import type { CreatorCard } from "@/components/creators/types";
+import { one } from "@/lib/utils";
 
 // 디자인 확인용 샘플 미리보기. 실제 DB와 연결되지 않고, 디자인이 끝나면 지운다.
 export const metadata: Metadata = { title: "크리에이터 프로필 샘플 미리보기", robots: { index: false, follow: false } };
 
 type Props = { params: Promise<{ handle: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
-const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 // my-name = 샘플 마이페이지의 내 프로필(mine=public|private). 이름·글은 자리 표시다.
 const MINE: CreatorCard = { handle: "my-name", name: "〈닉네임〉", roles: ["script", "video"], bio: "〈한 줄 소개〉\n〈경력〉\n〈참여한 일〉\n〈하고 싶은 협업〉", planCount: 2, openToCollab: true, genres: ["〈장르〉"], forms: ["long"], hero: "image", main: "logline", latest: { title: "〈작품 제목〉", logline: "〈로그라인〉", genres: ["〈장르〉"] } };

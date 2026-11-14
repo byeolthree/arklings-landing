@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CollabReply } from "@/components/collab-reply";
+import { CollabTargetRow, Row } from "@/components/collab-rows";
 import { DeleteButton } from "@/components/delete-button";
 import { PaperCard, PaperPage } from "@/components/paper-card";
 import { StatusBadge } from "@/components/status-badge";
@@ -12,6 +13,7 @@ import { createAuthClient } from "@/lib/supabase/server";
 import { formatKst } from "@/lib/time";
 import { collabTargetOf, ROLES, UUID_RE, type CollabRequest } from "@/lib/collab";
 import { creatorNames } from "@/lib/creators";
+import { EMAIL_RE } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "협업 신청 상세", robots: { index: false, follow: false } };
 
@@ -22,15 +24,6 @@ type Props = {
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
-
-function Row({ k, children }: { k: string; children: React.ReactNode }) {
-  return (
-    <div className="grid gap-1 py-4 sm:grid-cols-[8.5rem_1fr]">
-      <dt className="text-[13px] text-[#574a4f]">{k}</dt>
-      <dd className="text-[14px] text-[#292126]">{children}</dd>
-    </div>
-  );
-}
 
 export default async function CollabDetailPage({ params, searchParams }: Props) {
   const { id } = await params;
@@ -72,7 +65,7 @@ export default async function CollabDetailPage({ params, searchParams }: Props) 
   const mailKey = typeof sp.mail === "string" ? sp.mail : "";
   const saved = savedMessages[savedKey] ? savedMessages[savedKey] + (mailNotes[mailKey] ?? "") : null;
   const onSite = !!r.applicant_id;
-  const canMail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.contact.trim());
+  const canMail = EMAIL_RE.test(r.contact.trim());
 
   return (
     <PaperPage wide>
@@ -88,15 +81,7 @@ export default async function CollabDetailPage({ params, searchParams }: Props) 
         <dl className="mt-4 divide-y divide-[#e8dfe3] border-y border-[#e8dfe3]">
           <Row k="연락처">{r.contact}</Row>
           <Row k="SNS 아이디">{r.sns_handle}</Row>
-          {target.kind === "plan" ? (
-            <Row k="신청 기획안">{r.plans?.title ?? "제목을 불러오지 못했어요"}</Row>
-          ) : target.kind === "work" ? (
-            <Row k="신청 작품">{r.work_title}</Row>
-          ) : target.kind === "creator" ? (
-            <Row k="신청 크리에이터">{target.text}</Row>
-          ) : (
-            <Row k="신청 대상">{r.source_works?.title ?? "특정 이야기 아님 (전체적인 협업 제안)"}</Row>
-          )}
+          <CollabTargetRow r={r} target={target} />
           <Row k="역할">{r.roles.map((x) => ROLES[x]).join(" · ")}</Row>
           <Row k="하고 싶은 일 / 아이디어"><span className="whitespace-pre-wrap">{r.idea}</span></Row>
           <Row k="작업 링크">

@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { EvalPreview } from "./preview";
 import { EVAL_STATES } from "./states";
+import { one } from "@/lib/utils";
 
 // 디자인 확인용 샘플 미리보기(AI 평가 패널). 서버·AI를 부르지 않는다. 상단 메뉴·기획안 화면에는 잇지 않았다. 디자인이 끝나면 지운다.
 export const metadata: Metadata = { title: "AI 평가 패널 샘플 미리보기", robots: { index: false, follow: false } };
 
 export default async function AiEvaluationPreviewPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
-  const raw = Array.isArray(sp.state) ? sp.state[0] : sp.state;
+  const raw = one(sp.state);
   const key = raw && raw in EVAL_STATES ? raw : "ready";
   return (
     <>

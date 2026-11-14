@@ -95,7 +95,6 @@ export function ProfileFormPreview({ mode }: { mode: Mode }) {
                     ? {
                         handle: "jian-lee",
                         roles: ["script", "video"],
-                        bio: "사라지는 기억과 기록하는 사람을 쓰는 대본 작가예요.",
                         about: "소금비 내리는 나라 같은 이야기를 씁니다. 단편 대본과 시리즈 구성을 주로 하고, 영상 작업자와의 협업을 찾고 있어요.",
                         channels: [{ label: "인스타그램", url: "https://instagram.com/jian.lee" }],
                         openToCollab: true,

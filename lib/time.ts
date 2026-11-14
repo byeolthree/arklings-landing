@@ -31,10 +31,15 @@ export function formatKstDate(iso: string): string {
   return `${dateOnly.format(d)} KST`;
 }
 
+// 한국 시간으로 9시간을 더한 뒤 ISO 글자(YYYY-MM-DDTHH:mm:ss.sssZ)로 만든다. 자리를 잘라 쓰는 짧은 표시(아래 formatKstShort, 종 알림, 운영자 주별 표)가 같이 쓴다.
+export function kstIso(d: Date): string {
+  return new Date(d.getTime() + 9 * 3600 * 1000).toISOString();
+}
+
 // 표에 쓰는 짧은 시각: 「11-10 09:12」(한국 시간).
 export function formatKstShort(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "-";
-  const k = new Date(d.getTime() + 9 * 3600 * 1000).toISOString();
+  const k = kstIso(d);
   return `${k.slice(5, 10)} ${k.slice(11, 16)}`;
 }

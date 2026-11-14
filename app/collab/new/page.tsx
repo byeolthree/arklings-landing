@@ -7,6 +7,7 @@ import { getCreator, getWork } from "@/lib/creators";
 import { getPortfolio } from "@/lib/portfolio";
 import { getSupabase } from "@/lib/supabase";
 import { UUID_RE, type SourceWork } from "@/lib/collab";
+import { one } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "협업 신청" };
 export const dynamic = "force-dynamic"; // 빌드 때가 아니라 열 때마다 신청 대상 목록·기획안을 읽는다
@@ -15,9 +16,9 @@ type SP = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function NewCollabPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
-  const planParam = Array.isArray(sp.plan) ? sp.plan[0] : sp.plan;
-  const creatorParam = Array.isArray(sp.creator) ? sp.creator[0] : sp.creator;
-  const workParam = Array.isArray(sp.work) ? sp.work[0] : sp.work;
+  const planParam = one(sp.plan);
+  const creatorParam = one(sp.creator);
+  const workParam = one(sp.work);
 
   // 크리에이터 목록·프로필·작품 창에서 들어온 신청: 받는 사람은 그 프로필의 주인이다(서버가 접수할 때 다시 정한다).
   // 공개 프로필이고 협업 신청을 받는 중일 때만 신청 칸을 보여 준다(작품이면 공개한 작품).

@@ -1,5 +1,5 @@
 import { UUID_RE } from "@/lib/collab";
-import { fromStored, previewOf, type PlanDraft, type PlanPanel } from "@/lib/plans";
+import { emptyDraft, fromStored, previewOf, type PlanDraft, type PlanPanel } from "@/lib/plans";
 import { createAuthClient } from "@/lib/supabase/server";
 import { formatKst } from "@/lib/time";
 
@@ -34,12 +34,7 @@ export async function loadPlanPanel(planId: string, ownerId: string): Promise<Pl
     };
   });
   const latestRow = revs?.[0];
-  const latest: PlanDraft = (latestRow && fromStored(title, latestRow.selections, latestRow.edited)) || {
-    title,
-    slots: ["", "", "", "", ""],
-    checks: Array(21).fill("") as PlanDraft["checks"],
-    edited: null,
-  };
+  const latest: PlanDraft = (latestRow && fromStored(title, latestRow.selections, latestRow.edited)) || { ...emptyDraft(), title };
   return {
     plan: { id: row.id as string, isPublic: row.is_public as boolean, publishedAt: row.published_at ? formatKst(row.published_at as string) : null },
     revisions,

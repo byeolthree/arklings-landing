@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { ROLES, type Role } from "@/lib/collab";
 import { ROLE_TONE } from "@/components/creators/role-tone";
 import {
-  ABOUT_MAX,
+  BIO_MAX,
   CHANNEL_MAX,
   HANDLE_MAX,
   normalizeHandle,
@@ -120,7 +120,6 @@ export function PublishProfile({
     const checked = validateCreatorProfile({
       handle,
       roles,
-      bio: "", // 한 줄 소개 칸은 없앴다(D23 8차). 서버 규칙에는 아직 있으므로 빈 값을 보낸다
       // 기획안을 올리다가 열리는 칸에서는 필수 칸만 받는다. 나머지는 마이페이지에서 나중에 채운다.
       about: full ? about : "",
       channels: full ? channels.map((c) => ({ ...c, label: channelLabelFromUrl(c.url) ?? c.label })) : [],
@@ -251,8 +250,8 @@ export function PublishProfile({
             placeholder={"〈한 줄 소개〉\n〈경력〉\n〈참여한 일〉\n〈하고 싶은 협업〉"}
             aria-invalid={errors.about ? true : undefined}
           />
-          <p className={`len ${about.length > ABOUT_MAX ? "over" : ""}`}>
-            <span className="cnt">{about.length}</span> / {ABOUT_MAX}자
+          <p className={`len ${about.length > BIO_MAX ? "over" : ""}`}>
+            <span className="cnt">{about.length}</span> / {BIO_MAX}자
           </p>
           {errors.about && (
             <p className="pp-err" role="alert">

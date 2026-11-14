@@ -1,13 +1,13 @@
 import type { NewCollabNotice } from "@/lib/collab-count";
+import { kstIso } from "@/lib/time";
 
 export type NavNoticeItem = { id: string; text: string; when: string };
 
 // 시각 표시: 오늘·어제는 「오늘 14:20」, 그 밖은 「11.07 14:20」(한국 시간).
 export function whenKst(iso: string): string {
   const d = new Date(iso);
-  const kst = (x: Date) => new Date(x.getTime() + 9 * 3600 * 1000);
-  const day = (x: Date) => kst(x).toISOString().slice(0, 10);
-  const hm = kst(d).toISOString().slice(11, 16);
+  const day = (x: Date) => kstIso(x).slice(0, 10);
+  const hm = kstIso(d).slice(11, 16);
   const now = new Date();
   if (day(d) === day(now)) return `오늘 ${hm}`;
   if (day(d) === day(new Date(now.getTime() - 24 * 3600 * 1000))) return `어제 ${hm}`;

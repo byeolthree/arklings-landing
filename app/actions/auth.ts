@@ -9,6 +9,7 @@ import { getOrigin } from "@/lib/origin";
 import { safeNext } from "@/lib/safe-next";
 import { createAuthClient } from "@/lib/supabase/server";
 import { trackServer } from "@/lib/measure/server";
+import { EMAIL_RE, formText as text } from "@/lib/utils";
 
 export type AuthField = "displayName" | "email" | "password" | "passwordConfirm" | "consent";
 
@@ -27,13 +28,11 @@ export type AuthFormState = {
   saved?: boolean;
 };
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_EMAIL = 254;
 const MIN_PASSWORD = 8;
 const MAX_PASSWORD = 72; // 비밀번호 저장 방식(bcrypt)이 72바이트까지만 보기 때문
 const MAX_NAME = 30;
 
-const text = (fd: FormData, key: string) => String(fd.get(key) ?? "");
 const cleanEmail = (v: string) => v.trim().toLowerCase();
 
 // 확인 메일의 링크는 이 주소로 돌아온다(사이트 주소는 Supabase 화면의 허용 목록에 등록해 둔다).

@@ -7,12 +7,12 @@ import { createAuthClient } from "@/lib/supabase/server";
 import { formatKstDate } from "@/lib/time";
 import { collabTargetOf, PAGE_SIZE, ROLES, STATUSES, type CollabRequest, type Status } from "@/lib/collab";
 import { creatorNames } from "@/lib/creators";
+import { one } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "받은 협업 신청", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic"; // 로그인 확인과 최신 목록을 요청 때마다 확인한다
 
 type SP = Promise<Record<string, string | string[] | undefined>>;
-const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 export default async function CollabListPage({ searchParams }: { searchParams: SP }) {
   await requireUser("/collab");

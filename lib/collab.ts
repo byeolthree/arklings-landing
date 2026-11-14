@@ -1,3 +1,5 @@
+import { UUID_RE } from "@/lib/utils";
+
 export const ROLES = {
   video: "제작·연출",
   script: "기획·작가",
@@ -60,8 +62,7 @@ export const NO_TARGET_LABEL = "특정 이야기 아님 (전체적인 협업 제
 export const PAGE_SIZE = 10;
 export const MAX_FILE_BYTES = 4 * 1024 * 1024;
 export const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png"];
-export const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export { UUID_RE };
 
 export type FieldErrors = Partial<Record<string, string>>;
 

@@ -3,12 +3,12 @@ import Link from "next/link";
 import { CreatorList } from "@/components/creators/creator-list";
 import { matchesFilter, parseFilter, type CreatorFilter } from "@/components/creators/filter";
 import { SAMPLE_CREATORS, SAMPLE_PAGE_SIZE } from "@/components/creators/sample-data";
+import { one } from "@/lib/utils";
 
 // 디자인 확인용 샘플 미리보기. 실제 DB와 연결되지 않고, 디자인이 끝나면 지운다.
 export const metadata: Metadata = { title: "크리에이터 목록 샘플 미리보기", robots: { index: false, follow: false } };
 
 type SP = Promise<Record<string, string | string[] | undefined>>;
-const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 export default async function CreatorsPreviewPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;

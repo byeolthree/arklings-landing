@@ -4,10 +4,10 @@ import Link from "next/link";
 import "./ai.css";
 import { AlertPopup } from "@/components/ui/alert-popup";
 
-// 시안의 오류 안내 카드: 위에 회색 라벨 알약, 느낌표 원형 아이콘, 굵은 제목, 설명, (있으면) 단추.
+// 오류 안내: 가운데 팝업(AlertPopup)에 굵은 제목, 설명, (있으면) 단추.
 export type ErrorAction = { label: string; kind: "primary" | "line"; href?: string; onClick?: () => void };
 
-export function ErrorCard({ pill, title, desc, action }: { pill: string; title: string; desc: string; action?: ErrorAction }) {
+export function ErrorCard({ title, desc, action }: { title: string; desc: string; action?: ErrorAction }) {
   const act =
     action &&
     (action.href ? (
@@ -19,7 +19,6 @@ export function ErrorCard({ pill, title, desc, action }: { pill: string; title: 
         {action.label}
       </button>
     ));
-  void pill;
   return (
     <AlertPopup key={title + desc} actions={act}>
       <div>{title}</div>

@@ -8,12 +8,12 @@ import { USAGE_TEXT as U } from "./usage-text";
 import "./ai.css";
 
 // 라이브러리 화면(시안 「라이브러리 ① 목록과 질문칸 · ② 답이 나오는 과정 · ③ 로그인 전·비었음·오류」). 값만 받아 그리는 부품이다.
-const ERRORS: Record<AskErrorKind, { pill: string; title: string; desc: string; retry?: boolean }> = {
-  limit: { pill: U.askLimitPill, title: U.askLimitTitle, desc: U.askLimitDesc },
-  busy: { pill: "요청이 몰림", title: "지금 요청이 몰려 있어요", desc: `잠시 뒤에 다시 물어봐 주세요. ${U.notReduced}`, retry: true },
-  auth: { pill: "AI 연결 문제", title: "AI와 연결하지 못했어요", desc: `지금은 질문에 답할 수 없어요. 잠시 뒤에 다시 물어보시고, 계속되면 아클링스에 알려 주세요. ${U.notReduced}` },
-  retry: { pill: "일시 오류 · 시간 초과", title: "답을 가져오지 못했어요", desc: `질문은 입력칸에 그대로 남아 있어요. 다시 물어봐 주세요. ${U.notReduced}`, retry: true },
-  input: { pill: "질문 입력 오류", title: "질문을 확인해 주세요", desc: `질문이 비어 있거나 ${MAX_QUESTION_CHARS}자를 넘었어요. 고친 뒤에 다시 눌러 주세요.` },
+const ERRORS: Record<AskErrorKind, { title: string; desc: string; retry?: boolean }> = {
+  limit: { title: U.askLimitTitle, desc: U.askLimitDesc },
+  busy: { title: "지금 요청이 몰려 있어요", desc: `잠시 뒤에 다시 물어봐 주세요. ${U.notReduced}`, retry: true },
+  auth: { title: "AI와 연결하지 못했어요", desc: `지금은 질문에 답할 수 없어요. 잠시 뒤에 다시 물어보시고, 계속되면 아클링스에 알려 주세요. ${U.notReduced}` },
+  retry: { title: "답을 가져오지 못했어요", desc: `질문은 입력칸에 그대로 남아 있어요. 다시 물어봐 주세요. ${U.notReduced}`, retry: true },
+  input: { title: "질문을 확인해 주세요", desc: `질문이 비어 있거나 ${MAX_QUESTION_CHARS}자를 넘었어요. 고친 뒤에 다시 눌러 주세요.` },
 };
 
 export function LibraryQa({ loggedIn, ctrl, loginHref = "/login?next=/library" }: { items?: WikiItem[]; listError?: boolean; loggedIn: boolean; ctrl: AskController; loginHref?: string }) {
@@ -111,7 +111,7 @@ export function LibraryQa({ loggedIn, ctrl, loginHref = "/login?next=/library" }
                   {!chatting && !ctrl.error && <p className="ai-note">질문을 입력하면 단추가 켜져요. 로그인한 분만 물어볼 수 있어요.</p>}
                 </form>
 
-                {ctrl.error && <ErrorCard pill={ERRORS[ctrl.error].pill} title={ERRORS[ctrl.error].title} desc={ERRORS[ctrl.error].desc} action={errAction(ctrl.error)} />}
+                {ctrl.error && <ErrorCard title={ERRORS[ctrl.error].title} desc={ERRORS[ctrl.error].desc} action={errAction(ctrl.error)} />}
               </>
             )}
           </section>

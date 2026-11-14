@@ -15,7 +15,7 @@
 .rg .btn-ghost { background: transparent; color: var(--body); border-color: var(--body); }
 .rg .btn-primary:hover, .rg .btn-ghost:hover { transform: translateY(-2px); }
 .rg a:focus-visible, .rg button:focus-visible, .rg input:focus-visible, .rg textarea:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
-.rg .btn:not([disabled]):active, .rg .rg-chip:active { transform: scale(.97); filter: brightness(.92); }
+.rg .btn:not([disabled]):active { transform: scale(.97); filter: brightness(.92); }
 
 /* 맨 위: 가운데 제목 + 설명 + 단계 칩 */
 /* 제목 띠: 높이는 크리에이터와 같고, 프로필 등록 바탕의 격자 무늬가 제목 띠까지 이어진다(격자는 아래 칸과 선이 이어지도록 아래 끝에 맞춘다) */
@@ -25,8 +25,6 @@
   background-size: 100% 100%, 28px 28px, 28px 28px; background-position: 0 0, 0 calc(100% + 4px), 0 calc(100% + 4px); }
 .rg .rg-title { font-size: 22px; line-height: 1.3; font-weight: 700; }
 @media (min-width: 768px) { .rg .rg-title { font-size: 32px; } }
-.rg .rg-desc { margin: 12px auto 0; max-width: 900px; font-size: 15px; }
-@media (min-width: 768px) { .rg .rg-desc { font-size: 18px; } }
 
 /* 프로필 등록 단계: 격자 바탕 위 흰 카드 */
 .rg .rg-prof { padding: 40px 0 84px; background-color: var(--bg); background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 28px 28px; }
@@ -42,26 +40,14 @@
 @media (min-width: 1024px) { .rg .rg-grid { grid-template-columns: minmax(0, 1fr) 380px; gap: 48px; align-items: start; } }
 .rg .rg-card { padding: 20px 18px 24px; border-radius: 28px; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 30px 60px -36px rgba(42,32,37,.35); }
 @media (min-width: 768px) { .rg .rg-card { padding: 28px 32px 32px; } }
-.rg .rg-count { font-size: 14px; color: var(--title); font-weight: 500; }
-.rg .rg-rep-note { display: flex; align-items: center; gap: 10px; margin: 14px 0 6px; padding: 12px 16px; border-radius: 12px; background: #fff; border-left: 3px solid var(--jaju); font-size: 14px; color: var(--title); }
-.rg .rg-rep-tag { flex: none; padding: 2px 12px; border-radius: 999px; background: var(--jaju); color: #fff; font-size: 12px; font-weight: 700; }
 .rg .rg-card .mp-work.we { margin-top: 12px; border: 0; box-shadow: none; background: transparent; padding: 0; }
 
 /* 오른쪽: 포트폴리오 화면에 보일 카드 */
 .rg .rg-side { display: grid; gap: 14px; align-content: start; }
 @media (min-width: 1024px) { .rg .rg-side { position: sticky; top: 88px; } }
 .rg .rg-side-h { font-size: 15px; font-weight: 700; }
-.rg .rg-side-sub { margin-bottom: 8px; font-size: 13px; font-weight: 700; color: var(--title); }
 .rg .rg-side-note { font-size: 13px; color: var(--body); }
-.rg .rg-role { justify-self: start; padding: 3px 14px; border-radius: 999px; background: var(--jaju); color: #fff; font-size: 13px; font-weight: 700; }
 
-@media (max-width: 767px) {
-  .rg .rg-tools { flex-direction: row; opacity: 1; position: absolute; right: 12px; top: -2px; }
-  .rg .rg-el { padding-top: 30px; }
-  .rg .rg-bar-btns { margin-left: 0; width: 100%; }
-  .rg .rg-bar-btns .btn { flex: 1; }
-  .rg .rg-gap .rg-plus { opacity: 1; }
-}
 @media (prefers-reduced-motion: reduce) { .rg *, .rg *::before, .rg *::after { transition: none !important; animation: none !important; } }
 
 /* ───── 시안 01 C 「포트폴리오 등록」 실측 맞춤(2배 그림에서 잰 값, 프레임 1440 기준 CSS px) ───── */
@@ -77,7 +63,6 @@
 
 /* 맨 윗줄: 「공개하지 않음」 칩 + 개수 글 + 오른쪽 끝 「접기 ▴」·「포트폴리오에 올리기」 */
 .rg .we-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-height: 36px; }
-.rg .we-state { box-sizing: border-box; display: inline-flex; align-items: center; height: 28px; padding: 0 11px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--title); font-size: 12px; font-weight: 700; }
 .rg .we-note { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 14px; color: var(--body); }
 .rg .we-top-btns { display: inline-flex; gap: 12px; margin-left: auto; }
 .rg .we-top-btns .btn { min-height: 36px; height: 36px; padding: 0 16px; border-radius: 8px; font-size: 13px; }
@@ -123,7 +108,6 @@
 .rg .we-drop .we-pick { margin-top: 0; }
 .rg .we-drop .we-pick .opt { height: auto; }
 /* 로그라인·이미지 요소는 안쪽 카드 없이 */
-.rg .we-logline-label .we-label { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
 .rg .we-text { min-height: 90px; border-radius: 16px; background: var(--bg); font-size: 15px; }
 .rg .we-fold { font-size: 13px; }
 .rg .we-imgbox { min-height: 418px; border-radius: 16px; margin-top: 10px; background: var(--bg); border: 1px solid var(--line); }
@@ -138,13 +122,11 @@
 /* 오른쪽 「포트폴리오 화면에 보일 카드」: 가로 380, 첫 카드의 큰 칸은 카드 폭 가득 */
 .rg .rg-side { gap: 14px; }
 .rg .rg-side-h { font-size: 13px; line-height: 20px; }
-.rg .rg-side-sub { font-size: 12px; margin-bottom: 8px; }
 /* 실측 보정 */
 .rg .we-main.we-card .mp-note { margin: -1px 0 3px; }
 .rg .we-drop:not(.we-drop-doc) { padding: 11px 14px 12px; }
 .rg .we-drop .mp-note { line-height: 20px; }
 .rg .we-main.we-card .we-text { height: 89px; min-height: 89px; }
-.rg .we-logline-label .we-label { margin-bottom: 5px; }
 .rg .we-logline-label .we-text { height: 90px; min-height: 90px; }
 .rg .we-fold { line-height: 20px; }
 .rg .we-imgbox { margin-top: 8px; min-height: 418px; height: 418px; aspect-ratio: auto; }

@@ -4,9 +4,10 @@
 // 화면으로 넘기는 값에도 싣지 않는다. 파일은 비공개 보관함에 있어서, 공개용 보기에 올라와 있는 것만 짧은 임시 주소로 바꿔 준다(lib/creator-files.ts).
 import { formatsOf, orderItems, repOf, type Format, type Rep } from "@/lib/creator-cards";
 import type { Role } from "@/lib/collab";
-import { isRole, LOGLINE_TOKEN } from "@/lib/creator-rules";
+import { HANDLE_RE, isRole, LOGLINE_TOKEN } from "@/lib/creator-rules";
 import { signPublicFiles } from "@/lib/creator-files";
 import { getSupabase } from "@/lib/supabase";
+import { UUID_RE } from "@/lib/utils";
 
 export const CREATOR_PAGE_SIZE = 12;
 
@@ -121,8 +122,6 @@ type BlockRow = {
 const asRoles = (v: string[] | null | undefined): Role[] => (v ?? []).filter(isRole);
 const asForms = (v: string[] | null | undefined): WorkForm[] => (v ?? []).filter((f): f is WorkForm => f === "long" || f === "short");
 const asForm = (v: string | null): WorkForm | null => (v === "long" || v === "short" ? v : null);
-const HANDLE_QUERY = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
-export const UUID_QUERY = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // 보기(view)의 검색 조건에 넣기 전에 검색어의 특수 문자를 뺀다(PostgREST 조건 문법과 LIKE 기호).
 const cleanQuery = (q: string) => q.replace(/[%_,()*\\"'.:]/g, " ").replace(/\s+/g, " ").trim().slice(0, 30);
@@ -264,7 +263,7 @@ function mediaSrc(r: ExploreRep, urls: Map<string, string>): { src: string; kind
 // 공개 프로필 하나. 없거나 비공개면 null(화면은 404로 보여 준다. 본인 미리 보기는 화면이 따로 처리한다).
 export async function getCreator(handle: string): Promise<CreatorProfile | null> {
   const h = String(handle ?? "").toLowerCase();
-  if (!HANDLE_QUERY.test(h) || h.length > 20) return null;
+  if (!HANDLE_RE.test(h) || h.length > 20) return null;
   const sb = getSupabase();
   const { data, error } = await sb.from("creators_public").select(CREATOR_COLUMNS).eq("public_handle", h).maybeSingle();
   if (error) throw new Error(error.message);
@@ -304,7 +303,7 @@ const toWorkItem = (r: WorkRow): WorkListItem => ({
 // 그 크리에이터가 올린 작품(최대 12개라 쪽 나눔 없음). 처음 올린 순서의 최근 것 먼저.
 export async function listCreatorWorks(handle: string): Promise<WorkListItem[]> {
   const h = String(handle ?? "").toLowerCase();
-  if (!HANDLE_QUERY.test(h) || h.length > 20) return [];
+  if (!HANDLE_RE.test(h) || h.length > 20) return [];
   const { data, error } = await getSupabase()
     .from("creator_works_public")
     .select(WORK_COLUMNS)
@@ -319,7 +318,7 @@ export async function listCreatorWorks(handle: string): Promise<WorkListItem[]> 
 
 // 공개된 작품 하나와 그 안의 요소(만든 사람이 정한 순서). 없거나 공개가 아니면 null.
 export async function getWork(id: string): Promise<WorkDetail | null> {
-  if (!UUID_QUERY.test(String(id ?? ""))) return null;
+  if (!UUID_RE.test(String(id ?? ""))) return null;
   const sb = getSupabase();
   const { data, error } = await sb.from("creator_works_public").select(`${WORK_COLUMNS}, logline_position`).eq("id", id).maybeSingle();
   if (error) throw new Error(error.message);
@@ -354,7 +353,7 @@ export type WorkMediaItem = { kind: "image"; src: string } | { kind: "video"; yo
 
 export async function loadWorkMedia(workIds: string[]): Promise<Map<string, WorkMediaItem[]>> {
   const out = new Map<string, WorkMediaItem[]>();
-  const ids = workIds.filter((id) => UUID_QUERY.test(id)).slice(0, 12);
+  const ids = workIds.filter((id) => UUID_RE.test(id)).slice(0, 12);
   if (ids.length === 0) return out;
   const { data, error } = await getSupabase()
     .from("creator_blocks_public")
@@ -379,7 +378,7 @@ export async function loadWorkMedia(workIds: string[]): Promise<Map<string, Work
 // 공개 작품마다 대표(맨 위)를 repOf 규칙으로 정한다(크리에이터 상세의 작품 줄).
 export async function loadWorkReps(works: { id: string; loglinePosition?: number }[]): Promise<Map<string, { rep: Rep; formats: Format[] }>> {
   const out = new Map<string, { rep: Rep; formats: Format[] }>();
-  const ws = works.filter((w) => UUID_QUERY.test(w.id)).slice(0, 12);
+  const ws = works.filter((w) => UUID_RE.test(w.id)).slice(0, 12);
   if (ws.length === 0) return out;
   const { data, error } = await getSupabase()
     .from("creator_blocks_public")
@@ -401,7 +400,7 @@ export async function loadWorkReps(works: { id: string; loglinePosition?: number
 // 공개 주소 → 닉네임(받은·보낸 협업 신청 목록에서 크리에이터 이름을 보여 줄 때). 공개 프로필만 읽히므로 못 찾은 주소는 빠진다.
 export async function creatorNames(handles: (string | null | undefined)[]): Promise<Map<string, string>> {
   const out = new Map<string, string>();
-  const list = Array.from(new Set(handles.filter((h): h is string => typeof h === "string" && HANDLE_QUERY.test(h) && h.length <= 20))).slice(0, 30);
+  const list = Array.from(new Set(handles.filter((h): h is string => typeof h === "string" && HANDLE_RE.test(h) && h.length <= 20))).slice(0, 30);
   if (list.length === 0) return out;
   try {
     const { data } = await getSupabase().from("creators_public").select("public_handle, display_name").in("public_handle", list);

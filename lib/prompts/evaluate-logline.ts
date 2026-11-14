@@ -4,6 +4,7 @@
 // ※ 「로그라인 교정 질문 문서」 원본은 아직 받지 못했다. 원본과 questions.ts가 다르면 원본을 따라 이 기준을 다시 만든다.
 import { FINAL_CHECK_OFFSET, FINAL_CHECKS, SHORT_CHECK_OFFSET, SHORT_CHECKS, SLOT_QUESTIONS } from "@/components/planner/questions";
 import { CHECK_COUNT, loglineText, SLOT_COUNT, SLOT_LABELS, type CheckValue, type PlanDraft } from "@/lib/plans";
+import { fence, FENCE_CLOSE, FENCE_OPEN } from "@/lib/prompts/fence";
 
 export const EVALUATE_LOGLINE_INSTRUCTIONS = `당신은 아클링스의 로그라인 점검 도우미입니다. 한국 고대사(열국시대부터 삼한일통기까지)를 바탕으로 한 이야기의 기획안을 쓰는 사람을 돕습니다.
 
@@ -27,13 +28,6 @@ export const EVALUATE_LOGLINE_INSTRUCTIONS = `당신은 아클링스의 로그�
 
 [출력]
 요청이 정한 JSON 모양(slots 목록, 각 칸의 label·status·reason·fix)만 돌려줍니다. 다른 글은 붙이지 않습니다.`;
-
-// 자료 구분선과 같은 글이 사용자 글 안에 들어 있어도 자료 밖으로 빠져나가지 못하게 한다.
-const FENCE_OPEN = "<자료>";
-const FENCE_CLOSE = "</자료>";
-function fence(text: string): string {
-  return text.replaceAll(FENCE_OPEN, "〈자료〉").replaceAll(FENCE_CLOSE, "〈/자료〉");
-}
 
 const CHECK_WORD: Record<CheckValue, string> = { yes: "예", no: "아니오", "": "답하지 않음" };
 
