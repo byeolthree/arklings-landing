@@ -36,6 +36,24 @@
             "command": "jq -c '(.tool_input.command // \"\") | if test(\"(^|[^A-Za-z0-9_.-])rm([^A-Za-z0-9_.-]|$)\") then {hookSpecificOutput: {hookEventName: \"PreToolUse\", permissionDecision: \"deny\", permissionDecisionReason: \"삭제는 지우려는 파일과 이유를 사용자에게 먼저 설명하고 허락받은 뒤에만 가능합니다\"}} else empty end'"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|NotebookEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/scope-lock.py"
+          }
+        ]
+      },
+      {
+        "matcher": ".*tabs_create.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '{\"hookSpecificOutput\": {\"hookEventName\": \"PreToolUse\", \"permissionDecision\": \"deny\", \"permissionDecisionReason\": \"사용자 탭에서 하세요\"}}'"
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
@@ -46,7 +64,51 @@
             "command": "jq -c 'def luhn: (explode | map(. - 48) | reverse | to_entries | map(if .key % 2 == 1 then (.value * 2 | if . > 9 then . - 9 else . end) else .value end) | add) % 10 == 0; def rrn: test(\"^[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[01])[1-8][0-9]{6}$\"); def iin: test(\"^(4|5[1-5]|2(22[1-9]|2[3-9][0-9]|[3-6][0-9]{2}|7[01][0-9]|720)|3[47]|3(0[0-5]|[689])|35(2[89]|[3-8][0-9])|6(011|5|4[4-9]|2))\"); [(.prompt // \"\") | scan(\"[0-9]+(?:[ -][0-9]+)*\") | [splits(\"[ -]\")] as $g | range(0; $g | length) as $i | range(1; 5) as $k | select($i + $k <= ($g | length)) | $g[$i:$i+$k] | {l: map(length), d: join(\"\")} | if ((.l == [6,7] or .l == [13]) and (.d | rrn)) then \"주민등록번호\" elif ((((.l | length) == 1 and (.d | length) >= 13 and (.d | length) <= 16) or (.l | IN([4,4,4,4],[4,4,4,3],[4,4,4,2],[4,4,4,1],[4,6,5],[4,6,4]))) and (.d | iin) and (.d | luhn)) then \"카드번호\" else empty end] | unique | if length > 0 then {decision: \"block\", reason: (\"보내려는 글에 \" + join(\"·\") + \"로 보이는 숫자가 있어 보내기 전에 막았습니다. 해당 번호를 지우거나 가린 뒤 다시 보내 주세요.\"), suppressOriginalPrompt: true} else empty end'"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/approval.py"
+          }
+        ]
       }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-start.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/evidence.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/ban-phrases.py"
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "ask": [
+      "mcp__Vercel__create_project_env",
+      "mcp__Vercel__edit_project_env",
+      "mcp__Vercel__create_deployment",
+      "Bash(*AI_FAKE_MODEL*)",
+      "Bash(*OPENAI_*)",
+      "Bash(*vercel env*)",
+      "Bash(git push*main*)",
+      "Bash(git merge*main*)"
     ]
   }
 }
