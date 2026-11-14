@@ -287,18 +287,20 @@
 .rg .we-fit .opt[aria-pressed="true"] { background: var(--body); border-color: var(--body); color: #fff; font-weight: 700; }
 /* 새 등록을 펼친 상태의 바: 접기 버튼일 뿐이라 외곽선, 오른쪽 「등록 화면 접기」만. 크기·자리는 목록 화면의 바와 같다 */
 .rg .rg-newbar-in { margin: 2px 8px 20px; }
-.rg .rg-newbar-in .pf-new.is-open { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; justify-content: flex-end; background: #fff; border: 1.5px solid var(--jaju); color: var(--jaju); box-shadow: none; }
+.rg .rg-newbar-in .pf-new.is-open { box-sizing: border-box; height: 54px; padding: 0 22px 0 18px; justify-content: flex-end; background: #fff; border: 1px dashed var(--jaju); color: var(--jaju); box-shadow: none; }
 .rg .rg-newbar-in .pf-new.is-open .pf-new-fold { color: var(--jaju); }
 /* 미리보기 카드: 탐색 화면과 같은 카드(ExploreCard). .cr 바탕·넘침 자르기는 이 칸에서는 쓰지 않는다 */
 .rg .rg-pcard-cr { flex: none; overflow: visible; background: transparent; }
 
 /* 장르·포맷 고르기는 둥근 태그 없이 실제 포트폴리오 화면처럼 글자로(2026-11-14 아키텍터 지시)
-   장르: #이 붙은 본문색 글자, 고르면 굵게. 포맷(종류): 세컨더리 청록 글자, 고르면 굵게. */
-.rg .we-pick.we-genre .opt, .rg .we-main .we-pick.we-sub .opt, .rg .we-main.we-card .we-pick.we-sub .opt { height: auto; padding: 2px 4px; border: 0; border-radius: 0; background: none; line-height: 1.6; font-weight: 400; }
-.rg .we-pick.we-genre .opt, .rg .we-pick.we-genre .opt[aria-pressed="true"] { background: none; color: var(--body); }
+   장르: #이 붙은 황금색 글자, 포맷(종류): 세컨더리 청록 글자. 고르면 굵게 + 둥근 외곽선 태그. */
+.rg .we-pick.we-genre .opt, .rg .we-main .we-pick.we-sub .opt, .rg .we-main.we-card .we-pick.we-sub .opt { height: auto; padding: 2px 10px; border: 1px solid transparent; border-radius: 999px; background: none; line-height: 1.6; font-weight: 400; }
+.rg .we-pick.we-genre .opt { color: #a96e16; }
 .rg .we-pick.we-genre .opt::before { content: "#"; }
-.rg .we-main .we-pick.we-sub .opt, .rg .we-main.we-card .we-pick.we-sub .opt, .rg .we-main .we-pick.we-sub .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub .opt[aria-pressed="true"] { background: none; color: var(--teal); }
-.rg .we-pick.we-genre .opt[aria-pressed="true"], .rg .we-main .we-pick.we-sub .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub .opt[aria-pressed="true"] { font-weight: 700; }
+.rg .we-main .we-pick.we-sub .opt, .rg .we-main.we-card .we-pick.we-sub .opt { color: var(--teal); }
+/* 고르면 굵게 + 그 색 외곽선의 둥근 태그 */
+.rg .we-pick.we-genre .opt[aria-pressed="true"] { background: #fff; border-color: #a96e16; color: #a96e16; font-weight: 700; }
+.rg .we-main .we-pick.we-sub .opt[aria-pressed="true"], .rg .we-main.we-card .we-pick.we-sub .opt[aria-pressed="true"] { background: #fff; border-color: var(--teal); color: var(--teal); font-weight: 700; }
 /* 마이 페이지 메뉴 탭도 둥근 태그 없이 글자로: 지금 화면은 제목색 굵게, 나머지는 본문색 */
 .rg .rg-steps { gap: 4px 18px; }
 .rg .rg-steps li, .rg .rg-steps li:not([aria-current="step"]), .rg .rg-steps li[aria-current="step"] { height: auto; padding: 0; border: 0; border-radius: 0; background: none; line-height: 1.6; font-size: 14px; }

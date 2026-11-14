@@ -318,9 +318,11 @@
 .we-mm-ask { margin: 4px 0 0; font-size: 15px; }
 
 /* 장르·포맷 고르기는 둥근 태그 없이 실제 포트폴리오 화면처럼 글자로(2026-11-14 아키텍터 지시)
-   장르: #이 붙은 본문색 글자, 고르면 굵게. 포맷(종류): 세컨더리 청록 글자, 고르면 굵게. */
-.mp .we-pick.we-genre .opt, .mp .we-main .we-pick.we-sub .opt, .mp .we-main.we-card .we-pick.we-sub .opt { height: auto; padding: 2px 4px; border: 0; border-radius: 0; background: none; line-height: 1.6; font-weight: 400; }
-.mp .we-pick.we-genre .opt, .mp .we-pick.we-genre .opt[aria-pressed="true"] { background: none; color: var(--body); }
+   장르: #이 붙은 황금색 글자, 포맷(종류): 세컨더리 청록 글자. 고르면 굵게 + 둥근 외곽선 태그. */
+.mp .we-pick.we-genre .opt, .mp .we-main .we-pick.we-sub .opt, .mp .we-main.we-card .we-pick.we-sub .opt { height: auto; padding: 2px 10px; border: 1px solid transparent; border-radius: 999px; background: none; line-height: 1.6; font-weight: 400; }
+.mp .we-pick.we-genre .opt { color: #a96e16; }
 .mp .we-pick.we-genre .opt::before { content: "#"; }
-.mp .we-main .we-pick.we-sub .opt, .mp .we-main.we-card .we-pick.we-sub .opt, .mp .we-main .we-pick.we-sub .opt[aria-pressed="true"], .mp .we-main.we-card .we-pick.we-sub .opt[aria-pressed="true"] { background: none; color: var(--teal); }
-.mp .we-pick.we-genre .opt[aria-pressed="true"], .mp .we-main .we-pick.we-sub .opt[aria-pressed="true"], .mp .we-main.we-card .we-pick.we-sub .opt[aria-pressed="true"] { font-weight: 700; }
+.mp .we-main .we-pick.we-sub .opt, .mp .we-main.we-card .we-pick.we-sub .opt { color: var(--teal); }
+/* 고르면 굵게 + 그 색 외곽선의 둥근 태그 */
+.mp .we-pick.we-genre .opt[aria-pressed="true"] { background: #fff; border-color: #a96e16; color: #a96e16; font-weight: 700; }
+.mp .we-main .we-pick.we-sub .opt[aria-pressed="true"], .mp .we-main.we-card .we-pick.we-sub .opt[aria-pressed="true"] { background: #fff; border-color: var(--teal); color: var(--teal); font-weight: 700; }

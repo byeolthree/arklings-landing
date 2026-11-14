@@ -688,7 +688,9 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
 type SlotKind = "logline" | "text" | "image" | "video";
 type Slot = { id: string; kind: SlotKind; text: string; url: string; file: File | null; sub: string };
 let slotSeq = 0;
-const newSlot = (kind: SlotKind): Slot => ({ id: `s${++slotSeq}`, kind, text: "", url: "", file: null, sub: "" });
+// 새 칸의 종류는 처음부터 맨 앞 것이 골라져 있다(2026-11-14 아키텍터 지시)
+const firstSub = (kind: string) => (kind === "text" || kind === "document" ? DOC_SUBKINDS[0] : kind === "video" ? VIDEO_SUBKINDS[0] : kind === "image" ? IMAGE_SUBKINDS[0] : "");
+const newSlot = (kind: SlotKind): Slot => ({ id: `s${++slotSeq}`, kind, text: "", url: "", file: null, sub: firstSub(kind) });
 
 // 요소 종류 칩(시안 01). 영상은 티저·예고편…, 글·문서는 시놉시스·트리트먼트…를 고른다. 다시 누르면 비운다. 고른 것은 요소의 sub_kind(0012)에 저장된다.
 // 요소 종류 태그. 고른 태그만 요소별 색(외곽선·글자)이 보인다: 영상 소프트 틸, 문서 딥 슬레이트 블루, 이미지 뮤트 세이지(2026-11-13).
@@ -783,7 +785,8 @@ export function WorkEditor({
   const [title, setTitle] = useState(work?.title ?? "");
   // 역할은 프로필 한 곳에만 둔다. 프로필 역할을 먼저 쓰고, 프로필 역할을 못 받은 화면에서만 작품에 남은 역할을 쓴다(2026-11-13).
   const roles: Role[] = profileRoles ?? work?.roles ?? [];
-  const [genres, setGenres] = useState<string[]>(work?.genres ?? []);
+  // 새 작품은 처음에 드라마가 골라져 있다(2026-11-14 아키텍터 지시)
+  const [genres, setGenres] = useState<string[]>(work?.genres ?? ["드라마"]);
   const [kind] = useState(work?.kind ?? "");
   const [form] = useState<string>(work?.form ?? "");
   const [logline, setLogline] = useState(work?.logline ?? "");
@@ -1121,7 +1124,7 @@ type EmptyKind = "video" | "image" | "text";
 type EmptySlot = { id: string; kind: EmptyKind; at: number; sub: string; text: string; url: string; fold: boolean };
 let emptySeq = 0;
 const LAST = Number.MAX_SAFE_INTEGER;
-const newEmpty = (kind: EmptyKind, at: number, fold = false, sub = ""): EmptySlot => ({ id: `empty-${++emptySeq}`, kind, at, sub, text: "", url: "", fold });
+const newEmpty = (kind: EmptyKind, at: number, fold = false, sub = firstSub(kind)): EmptySlot => ({ id: `empty-${++emptySeq}`, kind, at, sub, text: "", url: "", fold });
 
 function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: MyWork; onMessage: (m: { text: string; err?: boolean } | null) => void; logline: string; onLogline: (v: string) => void; loglineErr?: string }) {
   const router = useRouter();
