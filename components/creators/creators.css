@@ -96,7 +96,7 @@
 .cr .cr-av.dusty { background: var(--dusty); }
 .cr .cr-av.sage { background: var(--sage); }
 .cr .cr-av.jaju { background: var(--jaju); }
-.cr .cr-av.gold { background: var(--gold); }
+.cr .cr-av.gold { background: var(--gold); color: var(--title); } /* 황금 바탕에는 흰 글자를 쓰지 않는다 */
 .cr .cr-av.body { background: var(--body); }
 .cr .cr-who-text { min-width: 0; display: flex; flex-direction: column; justify-content: center; }
 .cr .cr-name { font-size: 16px; font-weight: 700; color: var(--title); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
