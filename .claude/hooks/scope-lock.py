@@ -60,6 +60,10 @@ def main():
     if real == os.path.join(state, "scope.json"):
         return 0
 
+    # 저장소 밖 경로(임시 파일 등)는 통과
+    if os.path.commonpath([real, root]) != root:
+        return 0
+
     if not os.path.exists(os.path.join(state, "approved")):
         deny(MSG)
     try:

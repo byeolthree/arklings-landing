@@ -3,7 +3,7 @@
 DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 F="$DIR/.claude/mission.md"
 if [ -f "$F" ]; then
-  echo "[이번 임무] 이 임무에서 벗어나는 일은 하지 않는다."
+  echo "[이번 임무] 이 임무 안의 일만 한다."
   cat "$F"
 fi
 exit 0

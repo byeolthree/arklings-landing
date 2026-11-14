@@ -19,6 +19,23 @@ def text_of(c):
         return " ".join(b.get("text", "") for b in c if isinstance(b, dict))
     return ""
 
+SCREEN = re.compile(r"^(app|components|public|lib)/|\.css$")
+
+def touches_screen(cwd):
+    """push한 커밋(원격 추적 가지보다 앞선 커밋, 없으면 마지막 커밋)의 바뀐 파일에 화면 관련 파일이 있는가."""
+    import subprocess
+    def git(*a):
+        return subprocess.run(["git", *a], cwd=cwd or None, capture_output=True,
+                              text=True, timeout=20).stdout
+    try:
+        files = git("diff", "--name-only", "@{push}~1..HEAD").split() \
+            or git("diff", "--name-only", "HEAD~1..HEAD").split()
+        if not files:
+            files = git("diff", "--name-only", "HEAD~1..HEAD").split()
+    except Exception:
+        return True  # 확인 못 하면 요구한다
+    return any(SCREEN.search(f) for f in files)
+
 def main():
     try:
         data = json.load(sys.stdin)
@@ -58,11 +75,25 @@ def main():
         return 0
     p = min(push_at)
 
-    deploy_ok = any(
-        n > p and re.search(r"get_deployment|list_deployments|git_deployment", name, re.I)
-        and uid in results and re.search(r"READY|success", results[uid][1], re.I)
-        for n, name, _, uid in uses)
-    shot = any(n > p and re.search(r"screenshot|zoom", name, re.I) for n, name, _, _ in uses)
+    # 화면과 무관한 push(문서·훅 등)는 통과: 푸시한 커밋의 바뀐 파일을 본다
+    if not touches_screen(data.get("cwd")):
+        return 0
+
+    def deploy_check(name, inp, uid):
+        if uid not in results:
+            return False
+        out = results[uid][1]
+        if re.search(r"get_deployment|list_deployments|git_deployment", name, re.I):
+            return bool(re.search(r"READY|success", out, re.I))
+        if name == "Bash" and re.search(r"gh\s+api\b.*/status", inp.get("command", "")):
+            return bool(re.search(r"success", out, re.I))
+        return False
+
+    deploy_ok = any(n > p and deploy_check(name, inp, uid) for n, name, inp, uid in uses)
+    shot = any(
+        n > p and (re.search(r"screenshot|zoom", name, re.I)
+                   or str(inp.get("action", "")).lower() in ("screenshot", "zoom"))
+        for n, name, inp, _ in uses)
     if deploy_ok and shot:
         return 0
     sys.stderr.write(MSG)
