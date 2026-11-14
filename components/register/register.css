@@ -22,7 +22,7 @@
 .rg .rg-top { box-sizing: border-box; min-height: var(--hero-h); display: flex; flex-direction: column; justify-content: center; padding: 32px 0; text-align: center;
   background-color: var(--bg);
   background-image: linear-gradient(180deg, var(--hero-bg), transparent), linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 100% 100%, 28px 28px, 28px 28px; background-position: 0 0, left bottom, left bottom; }
+  background-size: 100% 100%, 28px 28px, 28px 28px; background-position: 0 0, 0 calc(100% + 4px), 0 calc(100% + 4px); }
 .rg .rg-title { font-size: 22px; line-height: 1.3; font-weight: 700; }
 @media (min-width: 768px) { .rg .rg-title { font-size: 32px; } }
 .rg .rg-desc { margin: 12px auto 0; max-width: 900px; font-size: 15px; }
