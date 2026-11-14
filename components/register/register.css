@@ -208,7 +208,8 @@
 .rg .rg-card.rg-card-list { padding: 32px 44px; border-radius: 28px; background: var(--paper); }
 /* 카드를 흰색으로 바꿨으므로, 안의 줄은 옅은 바탕색으로 두어 카드와 구분한다 */
 .rg .rg-card-list .pf-row { background: var(--bg); }
-.rg .rg-card-list .pf-new { background: var(--jaju); }
+.rg .rg-card-list .pf-new { background: #fff; border: 1.5px solid var(--jaju); color: var(--jaju); }
+.rg .rg-card-list .pf-new .pf-new-main, .rg .rg-card-list .pf-new .pf-new-fold { color: var(--jaju); }
 .rg .rg-card-list .pf { margin: 0; }
 @media (min-width: 768px) {
   .rg .rg-card.rg-card-list { padding: 34px 44px 34px; }
