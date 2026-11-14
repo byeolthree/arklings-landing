@@ -969,11 +969,6 @@ export function WorkEditor({
               void save();
             }}
           >
-            <div className="we-mm-lab">
-              <span>대표 역할</span>
-              <span className="we-mm-bar">|</span>
-              <span>대표 콘텐츠</span>
-            </div>
             <div className="we-mm-pair">
               {/* 대표 역할은 프로필에서 정한다: 누르면 프로필 등록 화면의 역할로 */}
               <Link href="/portfolio/new?step=profile" className="we-mm-tag" style={{ background: roles[0] ? ROLE_HEX[ROLE_TONE[roles[0]]] : "#574a50" }}>

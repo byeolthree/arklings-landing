@@ -308,10 +308,9 @@
 .pf-list { display: grid; gap: inherit; }
 .pf-item.dragging .pf-row, .we-dragging .we-el { opacity: .45; }
 /* 역할·대표 콘텐츠 확인 팝업(시안 popup5). 팝업은 화면 맨 위(body)에 그려지므로 앞에 .mp를 붙이지 않는다 */
-.we-mm-lab { display: flex; justify-content: center; gap: 14px; font-size: 12px; color: #574a50; }
-.we-mm-pair { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 8px; }
+.we-mm-pair { display: flex; justify-content: center; align-items: center; gap: 10px; }
 .we-mm-bar { color: #c3b5bc; }
-.we-mm-tag { display: inline-flex; align-items: center; height: 32px; padding: 0 15px; border: 0; border-radius: 999px; color: #fff; font: inherit; font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; }
+.we-mm-tag { display: inline-flex; align-items: center; height: 32px; padding: 0 15px; border: 0; border-radius: 8px; color: #fff; font: inherit; font-size: 14px; font-weight: 700; text-decoration: none; cursor: pointer; }
 .we-mm-note { margin: 14px 0 0; font-size: 13px; color: #574a50; }
 .we-mm-ask { margin: 4px 0 0; font-size: 15px; }
 
