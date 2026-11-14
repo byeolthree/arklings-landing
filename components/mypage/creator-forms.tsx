@@ -1034,7 +1034,7 @@ export function WorkEditor({
 
       <p className="we-rep-note">
         <span className="we-rep-tag">대표</span>
-        맨 위에 설정하는 것이 대표 콘텐츠입니다.
+        가장 위에 순서로 설정하는 것이 크리에이터의 대표 콘텐츠입니다.
       </p>
 
       {work ? (
@@ -1044,11 +1044,8 @@ export function WorkEditor({
           <div {...slotReorder.listProps}>
           {shownSlots.map((sl, i) => (
             <div key={sl.id} className={slotReorder.dragging === sl.id ? "we-dragging" : undefined} {...slotReorder.itemProps(sl.id)}>
-              <div className="we-gap">
-                <button type="button" className="we-mini" aria-label="여기에 요소 넣기" onClick={() => setSlots((cur) => [...cur.slice(0, i), newSlot("text"), ...cur.slice(i)])}>
-                  +
-                </button>
-              </div>
+              {/* 요소 사이 간격(가운데 + 버튼은 뺌, 2026-11-14 아키텍터 지시) */}
+              <div className="we-gap" aria-hidden="true" />
               <div className={`we-el${i === 0 ? " rep" : ""}`} tabIndex={0}>
                 <button type="button" className="we-grip" aria-label={`${sl.kind === "logline" ? "로그라인" : "요소"} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`} {...slotReorder.gripProps(sl.id)}>
                   ⠿
@@ -1125,7 +1122,6 @@ const newEmpty = (kind: EmptyKind, at: number, fold = false, sub = firstSub(kind
 function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: MyWork; onMessage: (m: { text: string; err?: boolean } | null) => void; logline: string; onLogline: (v: string) => void; loglineErr?: string }) {
   const router = useRouter();
   const [folded, setFolded] = useState<Record<string, boolean>>({});
-  const [insertAt, setInsertAt] = useState<number | null>(null); // 요소 사이의 「+」를 누르면 다음에 추가하는 빈 칸이 그 자리에 들어간다
   const [busy, setBusy] = useState(false);
   const [edits, setEdits] = useState<Record<string, string>>({});
   // 작품에 이미지 요소가 하나도 없을 때만 맨 끝에 접힌 빈 이미지 칸 하나를 둔다(지울 수 있다). 이미지가 이미 있으면 붙이지 않는다.
@@ -1178,8 +1174,7 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
   const dropEmpty = (id: string) => setEmpties((cur) => cur.filter((x) => x.id !== id));
   const removeEmpty = (ri: number, id: string) => setEmpties((cur) => cur.filter((x) => x.id !== id).map((x) => (x.at !== LAST && x.at > ri ? { ...x, at: x.at - 1 } : x)));
   const addEmpty = (kind: EmptyKind) => {
-    setEmpties((cur) => [...cur, newEmpty(kind, insertAt ?? LAST)]);
-    setInsertAt(null);
+    setEmpties((cur) => [...cur, newEmpty(kind, LAST)]);
   };
 
   async function run(fn: () => Promise<{ ok: boolean; error?: string; id?: string }>, savedPos?: number) {
@@ -1242,13 +1237,8 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
       {/* 작품 안에서 맨 위에 놓인 것(로그라인이든 요소든)이 그 작품의 대표다. 순서는 끌거나 ↑↓로 바꾼다(D35-2). */}
       <div {...rowReorder.listProps}>
       {rows.map((row, ri) => {
-        const gap = (
-          <div className="we-gap">
-            <button type="button" className="we-mini" aria-label="여기에 요소 넣기" aria-pressed={insertAt === ri} onClick={() => setInsertAt(insertAt === ri ? null : ri)}>
-              +
-            </button>
-          </div>
-        );
+        // 요소 사이 간격(가운데 + 버튼은 뺌, 2026-11-14 아키텍터 지시)
+        const gap = <div className="we-gap" aria-hidden="true" />;
         if (row.type === "empty") {
           const e = row.e;
           return (

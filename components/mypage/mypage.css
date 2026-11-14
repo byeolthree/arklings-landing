@@ -220,8 +220,6 @@
 .mp .we-text { width: 100%; resize: vertical; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); padding: 12px 14px; font: inherit; font-size: 14px; line-height: 1.6; color: var(--title); }
 .mp .we-body { margin-top: 12px; }
 .mp .we-gap { height: 16px; display: flex; justify-content: center; align-items: center; }
-.mp .we-gap .we-mini { opacity: 0; }
-.mp .we-gap:hover .we-mini, .mp .we-gap:focus-within .we-mini { opacity: 1; }
 .mp .we-mini { min-width: 28px; height: 28px; padding: 0 8px; border: 1px solid var(--body); border-radius: 999px; background: #fff; color: var(--body); font: inherit; font-size: 12px; cursor: pointer; }
 .mp .we-mini:disabled { opacity: .35; cursor: default; }
 .mp .we-el { position: relative; display: flex; gap: 10px; align-items: flex-start; padding: 10px; border: 1px solid transparent; border-radius: 14px; }
