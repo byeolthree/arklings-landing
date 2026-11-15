@@ -22,16 +22,27 @@ def text_of(c):
 SCREEN = re.compile(r"^(app|components|public|lib)/|\.css$")
 
 def touches_screen(cwd):
-    """push한 커밋(원격 추적 가지보다 앞선 커밋, 없으면 마지막 커밋)의 바뀐 파일에 화면 관련 파일이 있는가."""
+    """push한 모든 커밋의 바뀐 파일에 화면 관련 파일이 있는가.
+    기준: push 직전 원격 가지 위치(원격 추적 가지의 직전 기록)부터 HEAD까지.
+    알 수 없으면 origin/dev와의 갈림점부터 HEAD까지."""
     import subprocess
     def git(*a):
-        return subprocess.run(["git", *a], cwd=cwd or None, capture_output=True,
-                              text=True, timeout=20).stdout
+        r = subprocess.run(["git", *a], cwd=cwd or None, capture_output=True,
+                           text=True, timeout=20)
+        return r.stdout.strip() if r.returncode == 0 else ""
     try:
-        files = git("diff", "--name-only", "@{push}~1..HEAD").split() \
-            or git("diff", "--name-only", "HEAD~1..HEAD").split()
-        if not files:
-            files = git("diff", "--name-only", "HEAD~1..HEAD").split()
+        base = git("rev-parse", "--verify", "-q", "@{push}@{1}")
+        if base:
+            # 직전 위치가 HEAD의 조상이 아니거나(강제 푸시 등) 새 커밋이 없으면 쓰지 않는다
+            anc = subprocess.run(["git", "merge-base", "--is-ancestor", base, "HEAD"],
+                                 cwd=cwd or None, capture_output=True, timeout=20).returncode == 0
+            if not anc or not git("rev-list", "-1", base + "..HEAD"):
+                base = ""
+        if not base:
+            base = git("merge-base", "origin/dev", "HEAD")
+        if not base:
+            return True  # 확인 못 하면 요구한다
+        files = git("diff", "--name-only", base, "HEAD").split()
     except Exception:
         return True  # 확인 못 하면 요구한다
     return any(SCREEN.search(f) for f in files)
