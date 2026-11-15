@@ -1,5 +1,6 @@
 // 기획안 내용의 모양과 검사 규칙. 화면(브라우저)과 서버가 같은 규칙을 쓴다.
 // 서버는 화면이 보낸 값을 그대로 믿지 않고 여기서 다시 검사한다.
+import { FORBIDDEN_CHARS, isObj } from "@/lib/utils";
 
 export const SECTIONS = [{ id: "logline", label: "로그라인" }] as const;
 export type SectionId = (typeof SECTIONS)[number]["id"];
@@ -53,9 +54,6 @@ export function titleOrDefault(title: string, draft?: Pick<PlanDraft, "slots" | 
   const first = (draft?.slots[0] ?? "").trim();
   return first ? first.slice(0, 30) : DEFAULT_TITLE;
 }
-
-const isObj = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
-const FORBIDDEN_CHARS = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
 
 export type DraftResult = { ok: true; draft: PlanDraft } | { ok: false; error: string };
 
@@ -117,15 +115,8 @@ export function fromStored(title: string, selections: unknown, edited: unknown):
   return parsed.ok ? parsed.draft : null;
 }
 
-// 공개용 사본(비로그인 방문자가 읽는 것). 이력·선택지는 싣지 않고 완성된 글만 담는다.
+// 공개용 사본(비로그인 방문자가 읽는 것). 이력·선택지는 싣지 않고 완성된 글만 담는다. 지금은 DB에 남은 사본을 읽을 때(lib/portfolio.ts)만 쓴다.
 export type PublicContent = { sections: { id: SectionId; label: string; text: string }[]; answers: { label: string; text: string }[] };
-
-export function toPublicContent(d: PlanDraft): PublicContent {
-  return {
-    sections: [{ id: "logline", label: "로그라인", text: loglineText(d) }],
-    answers: SLOT_LABELS.map((label, k) => ({ label, text: d.slots[k].trim() })).filter((a) => a.text),
-  };
-}
 
 // 이력 목록에 보여 줄 짧은 미리보기
 export function previewOf(d: PlanDraft, max = 48): string {

@@ -1,4 +1,5 @@
 // 사용 기록(0021)의 행동 종류와 검사 규칙. 브라우저·서버가 함께 쓴다. DB(0021)의 허용 목록과 같은 이름이어야 한다.
+import { isObj } from "@/lib/utils";
 // 기록하는 것은 행동의 종류·시각·화면 경로·작은 부가 값뿐이다. 글 내용·이메일·이름은 기록하지 않는다.
 //
 // 각 행동의 부가 값(props)은 여기에 적은 키와 값만 받는다(그 밖의 키·값은 거절).
@@ -21,8 +22,6 @@ export const ANON_ID_RE = /^[A-Za-z0-9_-]{16,64}$/;
 
 export type UsageRecord = { event: UsageEvent; anonId: string | null; page: string | null; props: UsageProps };
 export type UsageParse = { ok: true; value: UsageRecord } | { ok: false };
-
-const isObj = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
 // 화면 경로만 남긴다(? 뒤와 # 뒤는 버린다). 우리 화면의 주소 글자만 받는다.
 export function normalizePage(raw: unknown): string | null {

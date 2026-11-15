@@ -101,10 +101,6 @@
 .pl .save-note { margin-top: 6px; font-size: 12px; color: var(--body); }
 @media (max-width: 640px) { .pl .deck-foot { flex-direction: column-reverse; align-items: stretch; } .pl .foot-actions { justify-content: stretch; } .pl .foot-actions .btn { flex: 1 1 100%; } }
 
-.pl .notice { margin-top: 16px; padding: 16px 18px; border-radius: 14px; border: 1px solid var(--line); background: #fff; font-size: 13px; color: var(--title); }
-.pl .notice .row-actions { margin-top: 10px; }
-.pl .notice.login { border-color: var(--jaju); }
-
 .pl .panel { margin-top: 24px; background: var(--paper); border: 1px solid var(--line); border-radius: 20px; padding: 20px; }
 @media (min-width: 768px) { .pl .panel { padding: 28px; } }
 .pl .panel h2 { font-size: 18px; }
@@ -125,10 +121,6 @@
 /* 포트폴리오에 올리기 → 크리에이터 프로필 칸 */
 .pl .pp-form { margin-top: 16px; padding: 18px; border-radius: 16px; background: var(--tint); }
 @media (min-width: 768px) { .pl .pp-form { padding: 22px 24px; } }
-.pl .pp-title { font-size: 16px; }
-.pl .pp-sub { margin-top: 4px; font-size: 13px; }
-.pl .pp-notice { margin-top: 14px; padding: 10px 14px; border-radius: 10px; background: #fff; border-left: 3px solid var(--teal); font-size: 14px; font-weight: 700; color: var(--title); }
-.pl .pp-notice span { font-size: 12px; font-weight: 400; color: var(--body); }
 .pl .pp-field { margin-top: 16px; }
 .pl .pp-label { display: block; font-size: 13px; font-weight: 700; color: var(--title); }
 .pl .pp-hint, .pl .pp-hint-inline { font-size: 12px; font-weight: 400; color: var(--body); }
@@ -146,8 +138,6 @@
 .pl .pp-avail.taken { color: var(--jaju); }
 
 /* 프로필 칸: 첫 열기 안내 두 줄, 역할별 한 줄, 채널 링크 */
-.pl .pp-notice p { margin: 0; }
-.pl .pp-notice p + p { margin-top: 4px; }
 .pl .pp-channels { display: grid; gap: 8px; margin-top: 8px; }
 .pl .pp-channel { display: grid; grid-template-columns: 1fr; gap: 8px; }
 @media (min-width: 768px) { .pl .pp-channel { grid-template-columns: minmax(0, 1fr) 96px auto; align-items: center; } }
@@ -156,3 +146,14 @@
 
 /* 누르는 동안 살짝 작아지고 진해진다(잠긴 버튼 제외) */
 .pl .btn:not([disabled]):active, .pl .opt:not([disabled]):active { transform: scale(.97); filter: brightness(.92); }
+
+/* 역할 태그: 역할마다 다른 색 외곽선과 글자, 누르면 그 색으로 채우고 글자는 흰색. 두 번 누른 역할에는 「대표」 딱지(본문색, 왼쪽 위) */
+.pl .opt.role-opt { position: relative; --rc: var(--body); border-color: var(--rc); color: var(--rc); }
+.pl .opt.role-opt.jaju { --rc: #a61e5c; }
+.pl .opt.role-opt.dusty { --rc: #5f7c99; }
+.pl .opt.role-opt.gold { --rc: #d89a24; }
+.pl .opt.role-opt.sage { --rc: #6f8a7a; }
+.pl .opt.role-opt.teal { --rc: #1f5a66; }
+.pl .opt.role-opt.body { --rc: #574a50; }
+.pl .opt.role-opt[aria-pressed="true"] { background: var(--rc); border-color: var(--rc); color: #fff; }
+.pl .opt.role-opt .rep-badge { position: absolute; top: -13px; left: -8px; box-sizing: content-box; height: 18px; padding: 0 7px; display: grid; place-items: center; border: 2px solid #fff; border-radius: 999px; background: var(--body); color: #fff; font-size: 11px; font-weight: 700; line-height: 1; }

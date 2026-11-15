@@ -2,12 +2,16 @@
 
 // 마이페이지의 「크리에이터 등록」과 「포트폴리오 등록」 실제 화면. 샘플(mypage-preview, work-editor)과 같은 모양이고 진짜로 저장한다.
 // 모든 저장은 app/actions/creators.ts의 Server Action이 하고(서버가 로그인·이메일 확인·글자 수를 다시 검사한다), 끝나면 서버에서 다시 읽는다(router.refresh).
+import { AlertPopup, ConfirmPopup } from "@/components/ui/alert-popup";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ROLE_TONE } from "@/components/creators/role-tone";
-import { useEffect, useMemo, useRef, useState } from "react";
+const ROLE_HEX = { jaju: "#a61e5c", dusty: "#5f7c99", gold: "#d89a24", sage: "#6f8a7a", teal: "#1f5a66", body: "#574a50" } as const;
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import {
   addTextBlock,
+  setBlockFit,
   addVideoBlock,
   checkHandle as checkHandleAction,
   createWork,
@@ -31,8 +35,9 @@ import { GENRES } from "@/components/creators/genres";
 import { HERO_RULE, VIDEO_PROMPT } from "@/components/mypage/hero-guide";
 import { PublishProfile, type HandleCheck, type SaveResult } from "@/components/planner/publish-profile";
 import { ROLES, type Role } from "@/lib/collab";
-import { BLOCK_LIMIT, DOC_SUBKINDS, LOGLINE_TOKEN, QUOTA_BYTES, TITLE_MAX, VIDEO_SUBKINDS, WORK_LIMIT, type ProfileErrors, type ProfileValues } from "@/lib/creator-rules";
+import { BLOCK_LIMIT, DOC_SUBKINDS, IMAGE_SUBKINDS, LOGLINE_TOKEN, QUOTA_BYTES, TITLE_MAX, VIDEO_SUBKINDS, WORK_LIMIT, type ProfileErrors, type ProfileValues } from "@/lib/creator-rules";
 import { orderItems, representativeOf } from "@/lib/creator-cards";
+import { useLiveReorder } from "@/components/ui/use-live-reorder";
 import { kindOfMime, uploadToSlot } from "@/lib/creator-upload-client";
 import type { MyProfile, MyWork } from "@/lib/creators-mine";
 
@@ -84,9 +89,26 @@ function DocFilePick({ file, onFile, disabled }: { file?: File | null; onFile: (
   );
 }
 
+// 접어도 어떤 요소인지 알 수 있도록 요소 이름(굵게)과 받는 형식(보통 굵기)을 늘 보여 준다.
+const ELEMENT_NAME: Record<"logline" | "video" | "image" | "text", { name: string; note?: string }> = {
+  logline: { name: "로그라인", note: "(이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)" },
+  video: { name: "영상" },
+  image: { name: "이미지" },
+  text: { name: "문서" },
+};
+function ElementName({ kind }: { kind: "logline" | "video" | "image" | "text" }) {
+  const e = ELEMENT_NAME[kind];
+  return (
+    <span className="we-name">
+      {e.name}
+      {e.note && <span> {e.note}</span>}
+    </span>
+  );
+}
+
 // 시안 01: 이미지 요소 = 「▾ 접기 · 이미지 (JPG·PNG·WEBP, 5MB 이하)」 줄 + 이미지가 들어갈 큰 칸(눌러서 고른다).
-function ImageSlotBox({ file, onFile }: { file: File | null; onFile: (f: File | null) => void }) {
-  const [fold, setFold] = useState(false);
+function ImageSlotBox({ file, onFile, defaultFold = false, bare = false }: { file: File | null; onFile: (f: File | null) => void; defaultFold?: boolean; bare?: boolean }) {
+  const [fold, setFold] = useState(defaultFold);
   const [msg, setMsg] = useState("");
   const ref = useRef<HTMLInputElement>(null);
   const url = useMemo(() => (file ? URL.createObjectURL(file) : null), [file]);
@@ -107,21 +129,30 @@ function ImageSlotBox({ file, onFile }: { file: File | null; onFile: (f: File | 
   }
   return (
     <div style={{ flex: "1 1 100%" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-        <button type="button" className="we-fold" aria-expanded={!fold} onClick={() => setFold(!fold)}>
-          {fold ? "▸ 펼치기" : "▾ 접기"}
-        </button>
-        <span className="mp-note">· 이미지 (JPG · PNG · WEBP, 5MB 이하)</span>
-      </div>
-      {!fold && (
-        <button type="button" className="we-media we-imgbox" onClick={() => ref.current?.click()} aria-label="이미지 고르기">
+      {!bare && (
+        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+          <button type="button" className="we-fold" aria-expanded={!fold} onClick={() => setFold(!fold)}>
+            {fold ? "▸ 펼치기" : "▾ 접기"}
+          </button>
+          <ElementName kind="image" />
+        </div>
+      )}
+      {(bare || !fold) && (
+        <div className="we-media we-imgbox">
           {url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={url} alt={file?.name ?? "고른 이미지"} />
+            <button type="button" className="we-imgchange" onClick={() => ref.current?.click()} aria-label="이미지 바꾸기">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={url} alt={file?.name ?? "고른 이미지"} />
+            </button>
           ) : (
-            "이미지"
+            <div className="we-imgempty">
+              <button type="button" className="btn btn-ghost" onClick={() => ref.current?.click()}>
+                파일 고르기
+              </button>
+              <span>(JPG · PNG · WEBP, 5MB 이하)</span>
+            </div>
           )}
-        </button>
+        </div>
       )}
       <input ref={ref} type="file" accept="image/jpeg,image/png,image/webp" hidden aria-label="이미지 파일" onChange={pick} />
       {file && (
@@ -178,8 +209,12 @@ function VideoFilePick({ file, onFile, disabled }: { file?: File | null; onFile:
     <div className="we-drop" style={{ flex: "1 1 100%" }}>
       <p className="mp-note">영상 파일 첨부 · {rule.hint}</p>
       <div className="we-pick">
-        <button type="button" className="btn btn-ghost" onClick={copyPrompt} disabled={disabled}>
-          영상 변환 프롬프트 복사
+        <button type="button" className="btn btn-ghost" onClick={copyPrompt} disabled={disabled} aria-label="영상 변환 프롬프트 복사" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+          영상 변환 프롬프트
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="11" height="11" rx="2" />
+            <path d="M5 15V6a2 2 0 0 1 2-2h9" />
+          </svg>
         </button>
         <label className="btn btn-ghost" style={{ cursor: "pointer" }}>
           파일 고르기
@@ -300,7 +335,7 @@ function HeroUpload({ hero, hasProfile, pending, onPending, onDone }: { hero?: N
             영상
           </button>
           <button type="button" className="opt" onClick={copyVideoPrompt} aria-label="영상 변환 프롬프트 복사" style={{ position: "relative", paddingRight: 30 }}>
-            변환 프롬프트
+            영상 변환 프롬프트
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ position: "absolute", top: 5, right: 8 }}>
               <rect x="9" y="9" width="11" height="11" rx="2" />
               <path d="M5 15V6a2 2 0 0 1 2-2h9" />
@@ -380,7 +415,8 @@ export function CreatorProfileForm({ profile, workCount = 0, showSaved = false }
       router.replace("/portfolio/new?step=profile&saved=1");
       return { ok: true };
     }
-    router.refresh();
+    // 포트폴리오가 이미 있으면 저장 뒤 내 크리에이터 상세로 간다(포트폴리오 저장 뒤와 같이, 바뀐 모습을 바로 보게, 2026-11-13).
+    router.push(`/creators/${r.handle}`);
     return { ok: true };
   }
   async function togglePublic() {
@@ -471,7 +507,7 @@ const kstDate = (iso: string) => {
   return `${g("year")}.${g("month")}.${g("day")}`;
 };
 
-export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null, nickname = "", onOpenNew, onOpenEdit }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null; nickname?: string; onOpenNew?: () => void; onOpenEdit?: (id: string) => void }) {
+export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null, onOpenNew, onOpenEdit }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null; onOpenNew?: () => void; onOpenEdit?: (id: string) => void }) {
   const router = useRouter();
   // 기획안 화면의 「포트폴리오 작성하기」로 넘어오면(?work=) 그 작품의 편집 칸이 열려 있다.
   const [editing, setEditing] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : null);
@@ -480,7 +516,6 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
   const [del, setDel] = useState<MyWork | null>(null);
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
-  const drag = useRef<string | null>(null);
 
   // 공개 스위치: 누르는 즉시 바뀌어 보이고(서버 응답을 기다리지 않는다), 저장 중에는 그 스위치만 잠근다. 서버가 실패하면 원래대로 되돌리고 그 작품 줄 아래에 오류를 보여 준다.
   const [pubOverride, setPubOverride] = useState<Record<string, boolean>>({});
@@ -523,46 +558,31 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
     setMsg({ text: "작품을 지웠어요." });
     router.refresh();
   }
-  async function moveTo(id: string, to: number) {
-    const ids = works.map((w) => w.id);
-    const from = ids.indexOf(id);
-    if (from < 0 || to < 0 || to >= ids.length || from === to) return;
-    ids.splice(from, 1);
-    ids.splice(to, 0, id);
-    setBusy(true);
-    setMsg(null);
-    const r = await reorderWorks(ids);
-    setBusy(false);
-    if (!r.ok) return setMsg({ text: r.error, err: true });
-    router.refresh();
-  }
+  // 손잡이 순서(공통 동작: components/ui/use-live-reorder.ts)
+  const reorder = useLiveReorder(
+    works.map((w) => w.id),
+    async (ids) => {
+      setMsg(null);
+      const r = await reorderWorks(ids);
+      if (!r.ok) {
+        setMsg({ text: r.error, err: true });
+        return false;
+      }
+      router.refresh();
+      return true;
+    },
+  );
+  const byId = new Map(works.map((w) => [w.id, w]));
+  const list = reorder.order.map((id) => byId.get(id)).filter((w): w is MyWork => Boolean(w));
 
   return (
     <div className="pf" aria-busy={busy || undefined}>
-      <div className="pf-count">
-        <span>
-          작품 {works.length} / {WORK_LIMIT}
-        </span>
-        <span>
-          파일 {mb(usedBytes)} / {mb(QUOTA_BYTES)}
-        </span>
-      </div>
       {!hasProfile && <p className="mp-note">작품을 포트폴리오에 올리려면 먼저 위의 「크리에이터 등록」에서 프로필을 만들어 주세요.</p>}
       {msg && (
         <p role={msg.err ? "alert" : "status"} className={`mp-msg ${msg.err ? "err" : "ok"}`}>
           {msg.text}
         </p>
       )}
-
-      <div className="pf-head" aria-hidden="true">
-        <span />
-        <span>제목</span>
-        <span>대표</span>
-        <span>역할</span>
-        <span>장르</span>
-        <span>수정일</span>
-        <span className="pf-head-end">관리</span>
-      </div>
 
       {/* 맨 윗줄이 접힌 등록 화면이다. 누르면 이 줄 아래로 등록 화면이 펼쳐진다. */}
       <button type="button" className="pf-new" aria-expanded={newOpen} onClick={() => (onOpenNew ? onOpenNew() : setNewOpen((v) => !v))} disabled={!newOpen && works.length >= WORK_LIMIT} title={works.length >= WORK_LIMIT ? `작품은 ${WORK_LIMIT}개까지 만들 수 있어요.` : undefined}>
@@ -578,7 +598,6 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
         <WorkEditor
           key={`new${newKey}`}
           work={null}
-          nickname={nickname}
           onClose={() => {
             setNewOpen(false);
             setNewKey((k) => k + 1);
@@ -591,48 +610,28 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
         />
       )}
 
-      {works.map((w, i) => (
-        <div
-          key={w.id}
-          className="pf-item"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            if (drag.current) void moveTo(drag.current, i);
-            drag.current = null;
-          }}
-        >
+      {works.length > 0 && (
+        <div className="pf-head" aria-hidden="true">
+          <span className="pf-head-grip">순서</span>
+          <span>제목</span>
+          <span>대표</span>
+          <span>수정일</span>
+          <span className="pf-head-end">관리</span>
+        </div>
+      )}
+
+      <div className="pf-list" {...reorder.listProps}>
+      {list.map((w) => (
+        <div key={w.id} className={`pf-item${reorder.dragging === w.id ? " dragging" : ""}`} {...reorder.itemProps(w.id)}>
           <div className={`pf-row${isPub(w) ? "" : " off"}`}>
-            <button
-              type="button"
-              className="pf-grip"
-              draggable
-              aria-label={`${w.title} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`}
-              onDragStart={(e) => {
-                drag.current = w.id;
-                e.dataTransfer.effectAllowed = "move";
-                e.dataTransfer.setData("text/plain", w.id);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                  e.preventDefault();
-                  void moveTo(w.id, e.key === "ArrowUp" ? i - 1 : i + 1);
-                }
-              }}
-            >
+            <button type="button" className="pf-grip" aria-label={`${w.title} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`} {...reorder.gripProps(w.id)}>
               ⠿
             </button>
             <span className="pf-title">{w.title}</span>
             <span className="pf-meta">
               <span className="pf-rep">{representativeOf(w)}</span>
-              <span className="pf-roles">{w.roles.map((x) => ROLES[x]).join(" · ")}</span>
-              <span className="pf-genres">
-                {w.genres.map((g) => (
-                  <span key={g}>{g}</span>
-                ))}
-              </span>
             </span>
-            <span className="pf-date">{kstDate(w.updatedAt)}</span>
+            <span className="pf-date">{kstDate(w.updatedAt).slice(2)}</span>
             <span className="pf-sw-wrap">
               <button type="button" role="switch" aria-checked={isPub(w)} aria-label={`${w.title} 공개`} className="pf-sw" disabled={busy || savingId === w.id} onClick={() => void togglePublic(w)}>
                 <i aria-hidden="true" />
@@ -649,13 +648,21 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
             </span>
           </div>
           {rowErr[w.id] && (
-            <p role="alert" className="mp-msg err">
-              {rowErr[w.id]}
-            </p>
+            <AlertPopup key={rowErr[w.id]}>{rowErr[w.id]}</AlertPopup>
           )}
-          {editing === w.id && <WorkEditor key={w.id} work={{ ...w, isPublic: isPub(w) }} nickname={nickname} onClose={() => setEditing(null)} onTogglePublic={() => void togglePublic(w)} busyOuter={busy} />}
+          {editing === w.id && <WorkEditor key={w.id} work={{ ...w, isPublic: isPub(w) }} onClose={() => setEditing(null)} onTogglePublic={() => void togglePublic(w)} busyOuter={busy} />}
         </div>
       ))}
+      </div>
+
+      <div className="pf-count pf-count-end">
+        <span>
+          작품 {works.length} / {WORK_LIMIT}
+        </span>
+        <span>
+          파일 {mb(usedBytes)} / {mb(QUOTA_BYTES)}
+        </span>
+      </div>
 
       {del && (
         <div className="pf-back" onMouseDown={(e) => e.target === e.currentTarget && !busy && setDel(null)}>
@@ -680,12 +687,20 @@ export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = nu
 type SlotKind = "logline" | "text" | "image" | "video";
 type Slot = { id: string; kind: SlotKind; text: string; url: string; file: File | null; sub: string };
 let slotSeq = 0;
-const newSlot = (kind: SlotKind): Slot => ({ id: `s${++slotSeq}`, kind, text: "", url: "", file: null, sub: "" });
+// 새 칸의 종류는 처음부터 맨 앞 것이 골라져 있다(2026-11-14 아키텍터 지시)
+const firstSub = (kind: string) => (kind === "text" || kind === "document" ? DOC_SUBKINDS[0] : kind === "video" ? VIDEO_SUBKINDS[0] : kind === "image" ? IMAGE_SUBKINDS[0] : "");
+const newSlot = (kind: SlotKind): Slot => ({ id: `s${++slotSeq}`, kind, text: "", url: "", file: null, sub: firstSub(kind) });
 
 // 요소 종류 칩(시안 01). 영상은 티저·예고편…, 글·문서는 시놉시스·트리트먼트…를 고른다. 다시 누르면 비운다. 고른 것은 요소의 sub_kind(0012)에 저장된다.
-function SubChips({ items, value, onPick, label, disabled }: { items: readonly string[]; value: string; onPick: (v: string) => void; label: string; disabled?: boolean }) {
+// 요소 종류 태그. 고른 태그만 요소별 색(외곽선·글자)이 보인다: 영상 소프트 틸, 문서 딥 슬레이트 블루, 이미지 뮤트 세이지(2026-11-13).
+type SubTone = "video" | "doc" | "image";
+const SUB_ITEMS: Record<SubTone, readonly string[]> = { video: VIDEO_SUBKINDS, doc: DOC_SUBKINDS, image: IMAGE_SUBKINDS };
+const SUB_LABEL: Record<SubTone, string> = { video: "영상 종류", doc: "문서 종류", image: "이미지 종류" };
+const toneOf = (kind: string): SubTone => (kind === "video" ? "video" : kind === "image" ? "image" : "doc");
+function SubChips({ tone, value, onPick, disabled }: { tone: SubTone; value: string; onPick: (v: string) => void; disabled?: boolean }) {
+  const items = SUB_ITEMS[tone];
   return (
-    <div className="we-pick we-sub" role="group" aria-label={label}>
+    <div className={`we-pick we-sub tone-${tone}`} role="group" aria-label={SUB_LABEL[tone]}>
       {items.map((x) => (
         <button key={x} type="button" className="opt" aria-pressed={value === x} disabled={disabled} onClick={() => onPick(value === x ? "" : x)}>
           {x}
@@ -731,7 +746,7 @@ async function addSlots(workId: string, slots: Slot[]): Promise<{ error: string 
       if (!slot.ok) return { error: slot.error, order };
       const up = await uploadToSlot(slot.path, slot.token, sl.file);
       if (!up.ok) return { error: up.error, order };
-      const fin = await finishFileUpload(workId, { path: slot.path, kind, name: sl.file.name, subKind: kind === "document" || kind === "video" ? sl.sub || null : null });
+      const fin = await finishFileUpload(workId, { path: slot.path, kind, name: sl.file.name, subKind: sl.sub || null });
       if (!fin.ok) return { error: fin.error, order };
       order.push(fin.id);
     }
@@ -740,11 +755,12 @@ async function addSlots(workId: string, slots: Slot[]): Promise<{ error: string 
 }
 
 // 편집 칸이 바뀔 때마다 「포트폴리오 화면에 보일 카드」(독립 등록 화면 오른쪽)에 알려 주는 값. 대표는 작품 안 맨 위의 이미지·영상이고, 없으면 로그라인이다.
-export type WorkPreview = { title: string; logline: string; genres: string[]; roles: Role[]; top: "video" | "image" | "doc" | "logline" };
+export type WorkPreview = { title: string; logline: string; genres: string[]; roles: Role[]; top: "video" | "image" | "doc" | "logline"; media?: PreviewMedia; topLabel?: string; docText?: string };
+// 미리보기 카드에 실제로 걸 대표 이미지·영상(꽉 채우기/비율 유지하기 선택 포함)
+export type PreviewMedia = { kind: "image" | "video"; src: string; fit: "cover" | "contain" };
 
 export function WorkEditor({
   work,
-  nickname,
   onClose,
   onCreated,
   onTogglePublic,
@@ -754,9 +770,8 @@ export function WorkEditor({
   topNote,
 }: {
   work: MyWork | null;
-  nickname: string;
   profileRoles?: Role[]; // 작품의 역할은 프로필에서 가져온다(시안 01: 여기서 고르지 않음)
-  topNote?: string; // 맨 윗줄에 보일 「내 포트폴리오 4 / 12 · 파일 12MB / 20MB」
+  topNote?: ReactNode; // 맨 윗줄에 보일 「작품 4 / 12」「파일 12MB / 20MB」 두 칸
   onClose: () => void;
   onCreated?: (id: string, allSaved: boolean) => void;
   onTogglePublic?: () => void;
@@ -765,8 +780,10 @@ export function WorkEditor({
 }) {
   const router = useRouter();
   const [title, setTitle] = useState(work?.title ?? "");
-  const [roles, setRoles] = useState<Role[]>(work?.roles ?? profileRoles ?? []);
-  const [genres, setGenres] = useState<string[]>(work?.genres ?? []);
+  // 역할은 프로필 한 곳에만 둔다. 프로필 역할을 먼저 쓰고, 프로필 역할을 못 받은 화면에서만 작품에 남은 역할을 쓴다(2026-11-13).
+  const roles: Role[] = profileRoles ?? work?.roles ?? [];
+  // 새 작품은 처음에 드라마가 골라져 있다(2026-11-14 아키텍터 지시)
+  const [genres, setGenres] = useState<string[]>(work?.genres ?? ["드라마"]);
   const [kind] = useState(work?.kind ?? "");
   const [form] = useState<string>(work?.form ?? "");
   const [logline, setLogline] = useState(work?.logline ?? "");
@@ -774,9 +791,21 @@ export function WorkEditor({
   const [msg, setMsg] = useState<{ text: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const [newPublic, setNewPublic] = useState(true);
+  // 제목 없이 저장하면 가운데 팝업으로 알리고, 버튼을 누르면 제목 칸에 커서를 둔다.
+  const [askTitle, setAskTitle] = useState(false);
+  const [slotFold, setSlotFold] = useState<Record<string, boolean>>({});
+  const titleRef = useRef<HTMLInputElement>(null);
   // 새 작품: 승인 샘플처럼 글·이미지·영상·문서 칸이 처음부터 있고 순서를 바꾸거나 지울 수 있다. 「저장」을 누르면 작품을 만든 뒤 채운 칸을 이 순서대로 넣는다.
-  const [slots, setSlots] = useState<Slot[]>(() => (work ? [] : (["video", "logline", "text", "image"] as SlotKind[]).map(newSlot)));
-  const dragSlot = useRef<string | null>(null);
+  const [slots, setSlots] = useState<Slot[]>(() => (work ? [] : (["logline", "text", "video", "image"] as SlotKind[]).map(newSlot)));
+  // 새 작품의 칸은 화면에만 있으므로 손잡이 순서는 바로 화면 순서가 된다(저장은 「저장」을 누를 때).
+  const slotReorder = useLiveReorder(
+    slots.map((x) => x.id),
+    (ids) => {
+      setSlots((cur) => ids.map((id) => cur.find((x) => x.id === id)).filter((x): x is Slot => Boolean(x)));
+      return true;
+    },
+  );
+  const shownSlots = slotReorder.order.map((id) => slots.find((x) => x.id === id)).filter((x): x is Slot => Boolean(x));
   const moveSlotTo = (id: string, to: number) => setSlots((cur) => {
     const from = cur.findIndex((x) => x.id === id);
     if (from < 0 || to < 0 || to >= cur.length || from === to) return cur;
@@ -795,13 +824,56 @@ export function WorkEditor({
     if (typeof topItem === "string") return topItem === "image" || topItem === "video" ? topItem : topItem === "text" ? "doc" : "logline";
     return topItem.kind === "image" || topItem.kind === "video" ? topItem.kind : "doc";
   })();
+  // 팝업(시안 popup5)에 보여 줄 대표 콘텐츠 태그: 종류 태그가 있으면 그것(포스터·티저…), 없으면 요소 이름. 색은 요소 종류 색.
+  const topTag = (() => {
+    const name = (k: string) => (k === "image" ? "이미지" : k === "video" ? "영상" : k === "logline" ? "로그라인" : "문서");
+    const color = (k: string) => (k === "image" ? "#6f8a7a" : k === "video" ? "#6e9ca3" : k === "logline" ? "#1f5a66" : "#40576f");
+    if (typeof topItem !== "string") return { label: topItem.sub || name(topItem.kind), color: color(topItem.kind) };
+    if (work) return { label: name("logline"), color: color("logline") };
+    const sl = slots[0];
+    const k = sl?.kind ?? "logline";
+    return { label: (k !== "logline" && sl?.sub) || name(k), color: color(k) };
+  })();
+  // 대표가 글·문서일 때 카드에 보일 글: 글이 있으면 그 글, 없으면 파일 이름(lib/creator-cards repOf와 같은 규칙)
+  const topDocText = (() => {
+    if (typeof topItem !== "string") return topItem.kind === "text" ? topItem.body : topItem.kind === "document" ? (topItem.fileName ?? "") : "";
+    const sl = slots[0];
+    return sl && sl.kind === "text" ? sl.text.trim() || sl.file?.name || "" : "";
+  })();
+  // 대표가 이미지·영상이면 미리보기 카드에 실제 그림을 건다. 새 작품은 고른 파일을 화면에서만 보여 준다.
+  const topFile = !work && typeof topItem === "string" ? (slots[0]?.file ?? null) : null;
+  const topFileUrl = useMemo(() => (topFile ? URL.createObjectURL(topFile) : null), [topFile]);
+  useEffect(() => () => { if (topFileUrl) URL.revokeObjectURL(topFileUrl); }, [topFileUrl]);
+  const media: PreviewMedia | undefined = (() => {
+    if (typeof topItem !== "string") {
+      if (topItem.kind === "image" && topItem.src) return { kind: "image", src: topItem.src, fit: topItem.fit ?? "contain" };
+      if (topItem.kind === "video" && topItem.youtubeId) return { kind: "image", src: `https://i.ytimg.com/vi/${topItem.youtubeId}/hqdefault.jpg`, fit: "cover" };
+      if (topItem.kind === "video" && topItem.src) return { kind: "video", src: topItem.src, fit: "cover" };
+      return undefined;
+    }
+    if (topFileUrl && (topItem === "image" || topItem === "video")) return { kind: topItem, src: topFileUrl, fit: topItem === "video" ? "cover" : "contain" };
+    return undefined;
+  })();
   const genresKey = genres.join("|");
   const rolesKey = roles.join("|");
+  const mediaKey = media ? `${media.kind}|${media.src}|${media.fit}` : "";
   useEffect(() => {
-    onPreview?.({ title, logline, genres: genresKey ? genresKey.split("|") : [], roles: (rolesKey ? rolesKey.split("|") : []) as Role[], top: topKind });
+    const [mk, msrc, mfit] = mediaKey ? mediaKey.split("|") : [];
+    onPreview?.({ title, logline, genres: genresKey ? genresKey.split("|") : [], roles: (rolesKey ? rolesKey.split("|") : []) as Role[], top: topKind, media: mk ? { kind: mk as PreviewMedia["kind"], src: msrc, fit: mfit as PreviewMedia["fit"] } : undefined, topLabel: topTag.label, docText: topDocText });
     // onPreview는 부르는 쪽이 매번 새로 만들어도 다시 부르지 않게 뺀다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, logline, genresKey, rolesKey, topKind]);
+  }, [title, logline, genresKey, rolesKey, topKind, mediaKey, topTag.label, topDocText]);
+
+  // 저장 전에 역할과 대표 콘텐츠가 어울리는지 한 번 알려 준다(영상 제작·아트디렉터인데 맨 위가 이미지·영상이 아니거나, 그 반대). 알려 줄 뿐 대표는 바꾸지 않는다.
+  const [mismatch, setMismatch] = useState(false);
+  function askSave() {
+    if (!title.trim()) return void save();
+    const visual = roles.some((x) => x === "video" || x === "art_director");
+    const mediaTop = topKind === "image" || topKind === "video";
+    // 역할과 대표가 어긋나면 한 번 알려 줄 뿐이다. 등록하면 대표는 그대로 쓰인다(역할이 대표를 바꾸지 않는다, 2026-11-14 아키텍터 지시).
+    if (visual !== mediaTop) return setMismatch(true);
+    void save();
+  }
 
   async function save() {
     setBusy(true);
@@ -811,7 +883,15 @@ export function WorkEditor({
     const r = work ? await updateWork(work.id, input) : await createWork(input);
     setBusy(false);
     if (!r.ok) {
-      setErrs(r.fieldErrors ?? {});
+      const fe = { ...(r.fieldErrors ?? {}) } as Record<string, string>;
+      if (fe.title) {
+        delete fe.title;
+        setErrs(fe);
+        setAskTitle(true);
+        const rest = Object.values(fe);
+        return rest.length ? setMsg({ text: rest[0], err: true }) : undefined;
+      }
+      setErrs(fe);
       return setMsg({ text: r.error, err: true });
     }
     if (!work) {
@@ -834,10 +914,9 @@ export function WorkEditor({
       if (publishErr) return setMsg({ text: `작품은 저장했어요. 공개로 올리지는 못했어요. ${publishErr}`, err: true });
       if (failed) return setMsg({ text: `작품은 저장했어요. ${failed}`, err: true });
       if (moved) return setMsg({ text: `작품은 저장했어요. 로그라인 자리는 저장하지 못했어요. ${moved}`, err: true });
-      return setMsg({ text: "저장했어요." });
+      return;
     }
-    setMsg({ text: "저장했어요." });
-    router.refresh();
+    router.push("/creators");
   }
 
   async function removeWork() {
@@ -881,13 +960,65 @@ export function WorkEditor({
       </div>
 
       <div className="we-head">
-        <input className="we-title" type="text" placeholder="〈제목〉" aria-label="작품 제목" value={title} maxLength={TITLE_MAX} onChange={(e) => setTitle(e.target.value)} aria-invalid={errs.title ? true : undefined} />
-        {errs.title && <p className="mp-msg err" role="alert">{errs.title}</p>}
-        <p className="we-by">
-          {nickname || "닉네임"} · {work && work.isPublic ? new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" }) : work || !newPublic ? "비공개" : "저장하면 공개"}
-        </p>
-        {errs.roles && <p className="mp-msg err" role="alert">{errs.roles}</p>}
-        <div className="we-pick" role="group" aria-label="장르">
+        {mismatch && (
+          <ConfirmPopup
+            confirmLabel="등록"
+            onClose={() => setMismatch(false)}
+            onConfirm={() => {
+              setMismatch(false);
+              void save();
+            }}
+          >
+            <div className="we-mm-pair">
+              {/* 대표 역할은 프로필에서 정한다: 누르면 프로필 등록 화면의 역할로 */}
+              <Link href="/portfolio/new?step=profile" className="we-mm-tag we-mm-role" style={{ color: roles[0] ? ROLE_HEX[ROLE_TONE[roles[0]]] : "#574a50" }}>
+                {roles[0] ? ROLES[roles[0]] : "역할 없음"}
+              </Link>
+              <span className="we-mm-bar">|</span>
+              {/* 대표 콘텐츠: 누르면 팝업을 닫고 이 작품의 맨 위 요소로 */}
+              <button
+                type="button"
+                className="we-mm-tag we-mm-content"
+                style={{ color: topTag.color }}
+                onClick={() => {
+                  setMismatch(false);
+                  const el = document.querySelector<HTMLElement>(".we .we-el.rep");
+                  el?.scrollIntoView({ block: "center", behavior: "smooth" });
+                  el?.focus({ preventScroll: true });
+                }}
+              >
+                {topTag.label}
+              </button>
+            </div>
+            <p className="we-mm-note">대표 역할과 대표 콘텐츠가 맞지 않습니다.</p>
+            <p className="we-mm-ask">그래도 등록할까요?</p>
+          </ConfirmPopup>
+        )}
+        {askTitle &&
+          createPortal(
+            <div role="dialog" aria-modal="true" aria-labelledby="ask-title-text" style={{ position: "fixed", inset: 0, zIndex: 100, display: "grid", placeItems: "center", padding: 16, background: "rgba(42,32,37,.45)" }}>
+              <div style={{ width: "100%", maxWidth: 320, padding: "28px 24px 24px", borderRadius: 16, background: "#fff", textAlign: "center" }}>
+                <p id="ask-title-text" style={{ margin: 0, fontSize: 15, fontWeight: 400, color: "#2a2025" }}>작품 제목을 입력해 주세요.</p>
+                <button
+                  type="button"
+                  autoFocus
+                  onClick={() => {
+                    setAskTitle(false);
+                    titleRef.current?.focus();
+                  }}
+                  style={{ marginTop: 20, height: 40, padding: "0 28px", border: 0, borderRadius: 999, background: "#a61e5c", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}
+                >
+                  확인
+                </button>
+              </div>
+            </div>,
+            document.body,
+          )}
+        <input ref={titleRef} className="we-title" type="text" placeholder="〈제목〉" aria-label="작품 제목" value={title} maxLength={TITLE_MAX} onChange={(e) => setTitle(e.target.value)} aria-invalid={errs.title ? true : undefined} />
+        {/* 제목 밑 닉네임은 보이지 않는다(2026-11-14 아키텍터 지시). 공개한 작품은 공개한 날만 */}
+        {work && work.isPublic && <p className="we-by">{new Date(work.publishedAt).toLocaleDateString("ko-KR", { timeZone: "Asia/Seoul" })}</p>}
+        {errs.roles && <AlertPopup key={errs.roles}>{errs.roles}</AlertPopup>}
+        <div className="we-pick we-genre" role="group" aria-label="장르">
           {GENRES.map((g) => (
             <button key={g} type="button" className="opt" aria-pressed={genres.includes(g)} onClick={() => setGenres(toggle(genres, g))}>
               {g}
@@ -898,65 +1029,39 @@ export function WorkEditor({
 
       <p className="we-rep-note">
         <span className="we-rep-tag">대표</span>
-        맨 위에 끌어다 놓은 것이 대표입니다. 포트폴리오 카드에 이것이 보입니다.
+        가장 위에 순서로 설정하는 것이 크리에이터의 대표 콘텐츠입니다.
       </p>
 
       {work ? (
         <BlockList work={work} onMessage={setMsg} logline={logline} onLogline={setLogline} loglineErr={errs.logline} />
       ) : (
         <div className="we-body">
-          {slots.map((sl, i) => (
-            <div key={sl.id}>
-              <div className="we-gap">
-                <button type="button" className="we-mini" aria-label="여기에 요소 넣기" onClick={() => setSlots((cur) => [...cur.slice(0, i), newSlot("text"), ...cur.slice(i)])}>
-                  +
-                </button>
-              </div>
-              <div
-                className={`we-el${i === 0 ? " rep" : ""}`}
-                tabIndex={0}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  if (dragSlot.current) moveSlotTo(dragSlot.current, i);
-                  dragSlot.current = null;
-                }}
-              >
-                <button
-                  type="button"
-                  className="we-grip"
-                  draggable
-                  aria-label={`${sl.kind === "logline" ? "로그라인" : "요소"} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`}
-                  onDragStart={(e) => {
-                    dragSlot.current = sl.id;
-                    e.dataTransfer.effectAllowed = "move";
-                    e.dataTransfer.setData("text/plain", sl.id);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                      e.preventDefault();
-                      moveSlotTo(sl.id, e.key === "ArrowUp" ? i - 1 : i + 1);
-                    }
-                  }}
-                >
+          <div {...slotReorder.listProps}>
+          {shownSlots.map((sl, i) => (
+            <div key={sl.id} className={slotReorder.dragging === sl.id ? "we-dragging" : undefined} {...slotReorder.itemProps(sl.id)}>
+              {/* 요소 사이 간격(가운데 + 버튼은 뺌, 2026-11-14 아키텍터 지시) */}
+              <div className="we-gap" aria-hidden="true" />
+              <div className={`we-el${i === 0 ? " rep" : ""}`} tabIndex={0}>
+                <button type="button" className="we-grip" aria-label={`${sl.kind === "logline" ? "로그라인" : "요소"} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`} {...slotReorder.gripProps(sl.id)}>
                   ⠿
                 </button>
-                <div className={`we-main${sl.kind === "video" || sl.kind === "text" ? " we-card" : ""}`}>
-                  {sl.kind === "logline" && (
+                <div className={`we-main${sl.kind !== "logline" ? " we-card" : ""}`}>
+                  <button type="button" className="we-fold" aria-expanded={!slotFold[sl.id]} onClick={() => setSlotFold({ ...slotFold, [sl.id]: !slotFold[sl.id] })}>
+                    {slotFold[sl.id] ? "▸ 펼치기" : "▾ 접기"}
+                  </button>
+                  <ElementName kind={sl.kind} />
+                  {sl.kind === "logline" && !slotFold[sl.id] && (
                     <label className="we-logline-label">
-                      <span className="we-label">로그라인 (이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)</span>
-                      <textarea className="we-text" rows={3} value={logline} onChange={(e) => setLogline(e.target.value)} placeholder={LOGLINE_FRAME} aria-invalid={errs.logline ? true : undefined} />
-                      {errs.logline && <span className="mp-msg err" role="alert">{errs.logline}</span>}
+                      <textarea className="we-text" aria-label="로그라인" rows={3} value={logline} onChange={(e) => setLogline(e.target.value)} placeholder={LOGLINE_FRAME} aria-invalid={errs.logline ? true : undefined} />
+                      {errs.logline && <AlertPopup key={errs.logline}>{errs.logline}</AlertPopup>}
                     </label>
                   )}
-                  {sl.kind === "video" && <SubChips items={VIDEO_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="영상 종류" />}
-                  {sl.kind === "text" && <SubChips items={DOC_SUBKINDS} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} label="문서 종류" />}
-                  {sl.kind === "text" && <textarea className="we-text" rows={3} placeholder="〈문서〉" aria-label="문서" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
-                  {sl.kind === "text" && <DocFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
-                  {sl.kind === "image" && <ImageSlotBox file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
-                  {sl.kind === "video" && <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={sl.url} onChange={(e) => patchSlot(sl.id, { url: e.target.value })} />}
-                  {sl.kind === "video" && <p className="mp-note" style={{ flex: "1 1 100%" }}>유튜브 주소로 넣으면 용량 제한 없이 올릴 수 있어요.</p>}
-                  {sl.kind === "video" && <VideoFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
+                  {sl.kind !== "logline" && <SubChips tone={toneOf(sl.kind)} value={sl.sub} onPick={(v) => patchSlot(sl.id, { sub: v })} />}
+                  {sl.kind === "text" && !slotFold[sl.id] && <DocFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
+                  {sl.kind === "text" && !slotFold[sl.id] && <textarea className="we-text we-doc-text" rows={3} placeholder="〈직접 입력〉" aria-label="문서" value={sl.text} onChange={(e) => patchSlot(sl.id, { text: e.target.value })} />}
+                  {sl.kind === "image" && !slotFold[sl.id] && <ImageSlotBox bare file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
+                  {sl.kind === "video" && !slotFold[sl.id] && <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={sl.url} onChange={(e) => patchSlot(sl.id, { url: e.target.value })} />}
+                  {sl.kind === "video" && !slotFold[sl.id] && <VideoFilePick file={sl.file} onFile={(f) => patchSlot(sl.id, { file: f })} />}
                 </div>
                 <div className="we-tools">
                   <button type="button" className="we-mini" aria-label="위로" disabled={i === 0} onClick={() => moveSlotTo(sl.id, i - 1)}>↑</button>
@@ -966,10 +1071,11 @@ export function WorkEditor({
               </div>
             </div>
           ))}
+          </div>
           <div className="we-add">
             <span>추가</span>
             {([["text", "문서"], ["image", "이미지"], ["video", "영상"]] as [SlotKind, string][]).map(([k, l]) => (
-              <button key={k} type="button" className="btn btn-ghost" onClick={() => setSlots((cur) => [...cur, newSlot(k)])}>
+              <button key={k} type="button" className={`btn btn-ghost we-add-${k}`} onClick={() => setSlots((cur) => [...cur, newSlot(k)])}>
                 + {l}
               </button>
             ))}
@@ -983,11 +1089,6 @@ export function WorkEditor({
         </p>
       )}
       <div className="we-foot">
-        {work && (
-          <Link className="btn btn-ghost" href={`/portfolio/${work.id}`} target="_blank" rel="noopener noreferrer">
-            미리 보기
-          </Link>
-        )}
         <button type="button" className="btn btn-ghost" onClick={onClose} disabled={disabled}>
           취소
         </button>
@@ -996,7 +1097,7 @@ export function WorkEditor({
             삭제
           </button>
         )}
-        <button type="button" className="btn btn-primary" onClick={save} disabled={disabled}>
+        <button type="button" className="btn btn-primary" onClick={askSave} disabled={disabled}>
           {busy ? "저장하는 중…" : "저장"}
         </button>
       </div>
@@ -1005,31 +1106,73 @@ export function WorkEditor({
 }
 
 // 작품 안 요소. 접기는 이 편집 화면을 정리하는 용도일 뿐이고, 저장한 요소는 접어도 남에게 보인다(D36 안 3).
+// 등록 화면의 빈 칸(파일·글을 아직 넣지 않은 요소). 서버에는 없고 화면에만 있다. 넣으면 그 자리에 저장된다.
+// at은 화면 전체 순서(로그라인·저장된 요소·빈 칸을 모두 센 자리)다.
+type EmptyKind = "video" | "image" | "text";
+type EmptySlot = { id: string; kind: EmptyKind; at: number; sub: string; text: string; url: string; fold: boolean };
+let emptySeq = 0;
+const LAST = Number.MAX_SAFE_INTEGER;
+const newEmpty = (kind: EmptyKind, at: number, fold = false, sub = firstSub(kind)): EmptySlot => ({ id: `empty-${++emptySeq}`, kind, at, sub, text: "", url: "", fold });
+
 function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: MyWork; onMessage: (m: { text: string; err?: boolean } | null) => void; logline: string; onLogline: (v: string) => void; loglineErr?: string }) {
   const router = useRouter();
   const [folded, setFolded] = useState<Record<string, boolean>>({});
-  const [adding, setAdding] = useState<null | "text" | "video">(null);
-  const [draftDoc, setDraftDoc] = useState<File | null>(null);
-  const [insertAt, setInsertAt] = useState<number | null>(null); // 요소 사이의 「+」를 누르면 새 요소가 그 자리에 들어간다
-  const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [edits, setEdits] = useState<Record<string, string>>({});
-  const imgInput = useRef<HTMLInputElement>(null);
-  const full = work.blocks.length >= BLOCK_LIMIT;
-  const dragId = useRef<string | null>(null);
-  // 화면에 보이는 순서(로그라인 블록 포함, D35-2). 로그라인 자리는 글자 「logline」이다.
-  const items = orderItems(work.blocks, work.loglinePosition);
-  const idsOf = () => items.map((it) => (it === LOGLINE_TOKEN ? LOGLINE_TOKEN : it.id));
-  const moveItem = (id: string, to: number) => {
-    const ids = idsOf();
-    const from = ids.indexOf(id);
-    if (from < 0 || to < 0 || to >= ids.length || from === to) return;
-    ids.splice(from, 1);
-    ids.splice(to, 0, id);
-    void run(() => reorderWorkItems(work.id, ids));
+  // 작품에 이미지 요소가 하나도 없을 때만 맨 끝에 접힌 빈 이미지 칸 하나를 둔다(지울 수 있다). 이미지가 이미 있으면 붙이지 않는다.
+  const [empties, setEmpties] = useState<EmptySlot[]>(() => (work.blocks.length >= BLOCK_LIMIT || work.blocks.some((b) => b.kind === "image") ? [] : [newEmpty("image", LAST, true)]));
+  const full = work.blocks.length + empties.length >= BLOCK_LIMIT;
+  // 저장된 순서(로그라인 블록 포함, D35-2). 로그라인 자리는 글자 「logline」이다.
+  // 손잡이로 바꾼 순서는 서버가 새 순서를 돌려줄 때까지 pending으로 화면에 그대로 둔다.
+  const serverItems = orderItems(work.blocks, work.loglinePosition);
+  const keyOfItem = (it: (typeof serverItems)[number]) => (it === LOGLINE_TOKEN ? LOGLINE_TOKEN : it.id);
+  const serverKey = serverItems.map(keyOfItem).join("|");
+  const [pendingState, setPendingState] = useState<{ base: string; ids: string[] } | null>(null);
+  const pending = pendingState && pendingState.base === serverKey ? pendingState.ids : null;
+  const setPending = (ids: string[] | null) => setPendingState(ids ? { base: serverKey, ids } : null);
+  const items = pending ? pending.map((k) => serverItems.find((it) => keyOfItem(it) === k)).filter((it): it is (typeof serverItems)[number] => it !== undefined) : serverItems;
+  const idsOf = () => items.map(keyOfItem);
+
+  // 화면에 그릴 줄: 저장된 것 사이사이에 빈 칸을 at 자리에 끼운다.
+  type Row = { type: "saved"; it: (typeof items)[number]; savedIndex: number } | { type: "empty"; e: EmptySlot };
+  const baseRows: Row[] = items.map((it, k) => ({ type: "saved" as const, it, savedIndex: k }));
+  [...empties].sort((a, b) => a.at - b.at).forEach((e) => baseRows.splice(Math.min(e.at, baseRows.length), 0, { type: "empty", e }));
+  const rowKey = (r: Row) => (r.type === "empty" ? r.e.id : keyOfItem(r.it));
+
+  // 저장된 요소와 빈 칸을 한 줄로 보고 순서를 바꾼다. 빈 칸은 화면 자리만 바꾸고, 저장된 요소의 순서가 바뀌었으면 서버에 저장한다.
+  async function applyRowOrder(keys: string[]) {
+    setEmpties((cur) => cur.map((x) => ({ ...x, at: keys.indexOf(x.id) })));
+    const saved = keys.filter((k) => !empties.some((x) => x.id === k));
+    if (saved.join("|") === idsOf().join("|")) return true;
+    setPending(saved);
+    onMessage(null);
+    const r = await reorderWorkItems(work.id, saved);
+    if (!r.ok) {
+      setPending(null);
+      onMessage({ text: r.error ?? "순서를 저장하지 못했어요.", err: true });
+      return false;
+    }
+    router.refresh();
+    return true;
+  }
+  const rowReorder = useLiveReorder(baseRows.map(rowKey), applyRowOrder);
+  const rows: Row[] = rowReorder.order.map((k) => baseRows.find((r) => rowKey(r) === k)).filter((r): r is Row => r !== undefined);
+  const moveRow = (ri: number, to: number) => {
+    if (to < 0 || to >= rows.length || ri === to) return;
+    const keys = rows.map(rowKey);
+    const [k] = keys.splice(ri, 1);
+    keys.splice(to, 0, k);
+    void applyRowOrder(keys);
+  };
+  const savedBefore = (ri: number) => rows.slice(0, ri).filter((r) => r.type === "saved").length;
+  const patchEmpty = (id: string, patch: Partial<EmptySlot>) => setEmpties((cur) => cur.map((x) => (x.id === id ? { ...x, ...patch } : x)));
+  const dropEmpty = (id: string) => setEmpties((cur) => cur.filter((x) => x.id !== id));
+  const removeEmpty = (ri: number, id: string) => setEmpties((cur) => cur.filter((x) => x.id !== id).map((x) => (x.at !== LAST && x.at > ri ? { ...x, at: x.at - 1 } : x)));
+  const addEmpty = (kind: EmptyKind) => {
+    setEmpties((cur) => [...cur, newEmpty(kind, LAST)]);
   };
 
-  async function run(fn: () => Promise<{ ok: boolean; error?: string; id?: string }>, okText?: string) {
+  async function run(fn: () => Promise<{ ok: boolean; error?: string; id?: string }>, savedPos?: number) {
     setBusy(true);
     onMessage(null);
     const r = await fn();
@@ -1037,131 +1180,168 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
       setBusy(false);
       return onMessage({ text: r.error ?? "처리하지 못했어요.", err: true }), false;
     }
-    // 새 요소가 생겼고 「여기에 넣기」로 자리를 골랐다면 그 자리로 옮긴다.
-    if (insertAt !== null && r.id) {
+    // 빈 칸을 채워 새 요소가 생겼으면 그 빈 칸이 있던 자리로 옮긴다.
+    if (savedPos !== undefined && r.id) {
       const ids = idsOf();
-      ids.splice(Math.min(insertAt, ids.length), 0, r.id);
+      ids.splice(Math.min(savedPos, ids.length), 0, r.id);
       await reorderWorkItems(work.id, ids);
-      setInsertAt(null);
     }
     setBusy(false);
-    if (okText) onMessage({ text: okText });
     router.refresh();
     return true;
   }
 
-  async function add() {
-    if (adding === "text" && !draft.trim() && draftDoc) {
-      const f = draftDoc;
-      setDraftDoc(null);
-      setAdding(null);
-      return void upload(f, "document");
-    }
-    const ok = await run(() => (adding === "text" ? addTextBlock(work.id, draft) : addVideoBlock(work.id, draft)));
-    if (ok) {
-      const f = adding === "text" ? draftDoc : null;
-      setDraft("");
-      setAdding(null);
-      setDraftDoc(null);
-      if (f) void upload(f, "document");
-    }
-  }
-
-  async function upload(file: File | undefined, kind: "image" | "document" | "video") {
+  async function upload(file: File | undefined, kind: "image" | "document" | "video", slot: { ri: number; e?: EmptySlot }) {
     if (!file) return;
     const k = kindOfMime(file.type);
     if (k !== kind) return onMessage({ text: kind === "image" ? "JPG, PNG, WEBP 이미지만 올릴 수 있어요." : kind === "video" ? "MP4 파일만 올릴 수 있어요." : "PDF 파일만 올릴 수 있어요.", err: true });
-    await run(async () => {
-      const slot = await prepareFileUpload(work.id, { kind, type: file.type, size: file.size });
-      if (!slot.ok) return slot;
-      const up = await uploadToSlot(slot.path, slot.token, file);
+    const ok = await run(async () => {
+      const up = await prepareFileUpload(work.id, { kind, type: file.type, size: file.size });
       if (!up.ok) return up;
-      return finishFileUpload(work.id, { path: slot.path, kind, name: file.name });
-    }, "올렸어요.");
+      const sent = await uploadToSlot(up.path, up.token, file);
+      if (!sent.ok) return sent;
+      return finishFileUpload(work.id, { path: up.path, kind, name: file.name, subKind: slot.e?.sub || null });
+    }, savedBefore(slot.ri));
+    if (ok && slot.e) dropEmpty(slot.e.id);
   }
+
+  async function saveEmpty(ri: number, e: EmptySlot) {
+    const ok = await run(() => (e.kind === "video" ? addVideoBlock(work.id, e.url, e.sub || null) : addTextBlock(work.id, e.text, e.sub || null)), savedBefore(ri));
+    if (ok) dropEmpty(e.id);
+  }
+
+  // 저장된 요소의 「지우기」: 내용(파일·주소·글)만 지우고 같은 자리에 같은 종류의 빈 칸을 남긴다.
+  async function clearSaved(ri: number, b: Exclude<(typeof items)[number], typeof LOGLINE_TOKEN>) {
+    if (!window.confirm("이 요소의 내용을 지울까요? 빈 칸은 남고, 지운 내용은 되돌릴 수 없어요.")) return;
+    const kind: EmptyKind = b.kind === "video" ? "video" : b.kind === "image" ? "image" : "text";
+    const sub = "sub" in b && b.sub ? b.sub : "";
+    const ok = await run(() => deleteBlock(b.id));
+    if (ok) setEmpties((cur) => [...cur, newEmpty(kind, ri, false, sub)]);
+  }
+
+  const tools = (ri: number, up: () => void, down: () => void, del: () => void) => (
+    <div className="we-tools">
+      <button type="button" className="we-mini" aria-label="위로" disabled={ri === 0} onClick={up}>↑</button>
+      <button type="button" className="we-mini" aria-label="아래로" disabled={ri === rows.length - 1} onClick={down}>↓</button>
+      <button type="button" className="we-mini" aria-label="지우기" disabled={busy} onClick={del}>지우기</button>
+    </div>
+  );
 
   return (
     <div className="we-body">
       {/* 작품 안에서 맨 위에 놓인 것(로그라인이든 요소든)이 그 작품의 대표다. 순서는 끌거나 ↑↓로 바꾼다(D35-2). */}
-      {items.map((it, i) => {
-        const itemId = it === LOGLINE_TOKEN ? LOGLINE_TOKEN : it.id;
+      <div {...rowReorder.listProps}>
+      {rows.map((row, ri) => {
+        // 요소 사이 간격(가운데 + 버튼은 뺌, 2026-11-14 아키텍터 지시)
+        const gap = <div className="we-gap" aria-hidden="true" />;
+        if (row.type === "empty") {
+          const e = row.e;
+          return (
+            <div key={e.id} className={rowReorder.dragging === e.id ? "we-dragging" : undefined} {...rowReorder.itemProps(e.id)}>
+              {gap}
+              <div className="we-el" tabIndex={0}>
+                <button type="button" className="we-grip" aria-label="요소 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)" {...rowReorder.gripProps(e.id)}>
+                  ⠿
+                </button>
+                <div className="we-main we-card">
+                  {(
+                    <>
+                      <button type="button" className="we-fold" aria-expanded={!e.fold} onClick={() => patchEmpty(e.id, { fold: !e.fold })}>
+                        {e.fold ? "▸ 펼치기" : "▾ 접기"}
+                      </button>
+                      <ElementName kind={e.kind} />
+                      <SubChips tone={toneOf(e.kind)} value={e.sub} disabled={busy} onPick={(v) => patchEmpty(e.id, { sub: v })} />
+                      {!e.fold && e.kind === "image" && <ImageSlotBox bare file={null} onFile={(f) => { if (f) void upload(f, "image", { ri, e }); }} />}
+                      {!e.fold && e.kind === "video" && (
+                        <>
+                          <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={e.url} onChange={(ev) => patchEmpty(e.id, { url: ev.target.value })} />
+                          {e.url.trim() && (
+                            <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => void saveEmpty(ri, e)}>
+                              주소 저장
+                            </button>
+                          )}
+                          <VideoFilePick disabled={busy} onFile={(f) => { if (f) void upload(f, "video", { ri, e }); }} />
+                        </>
+                      )}
+                      {!e.fold && e.kind === "text" && (
+                        <>
+                          <DocFilePick file={null} disabled={busy} onFile={(f) => { if (f) void upload(f, "document", { ri, e }); }} />
+                          <textarea className="we-text we-doc-text" rows={3} placeholder="〈직접 입력〉" aria-label="문서" value={e.text} onChange={(ev) => patchEmpty(e.id, { text: ev.target.value })} />
+                          {e.text.trim() && (
+                            <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => void saveEmpty(ri, e)}>
+                              문서 저장
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
+                {tools(ri, () => moveRow(ri, ri - 1), () => moveRow(ri, ri + 1), () => removeEmpty(ri, e.id))}
+              </div>
+            </div>
+          );
+        }
+        const it = row.it;
+        const itemId = keyOfItem(it);
         const b = it === LOGLINE_TOKEN ? null : it;
         return (
-        <div key={itemId}>
-        <div className="we-gap">
-          <button type="button" className="we-mini" aria-label="여기에 요소 넣기" aria-pressed={insertAt === i} onClick={() => setInsertAt(insertAt === i ? null : i)}>
-            +
-          </button>
-        </div>
-        <div
-          className={`we-el${i === 0 ? " rep" : ""}`}
-          tabIndex={0}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault();
-            if (dragId.current) moveItem(dragId.current, i);
-            dragId.current = null;
-          }}
-        >
-          <button
-            type="button"
-            className="we-grip"
-            draggable
-            disabled={busy}
-            aria-label={`${b ? "요소" : "로그라인"} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`}
-            onDragStart={(e) => {
-              dragId.current = itemId;
-              e.dataTransfer.effectAllowed = "move";
-              e.dataTransfer.setData("text/plain", itemId);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                e.preventDefault();
-                moveItem(itemId, e.key === "ArrowUp" ? i - 1 : i + 1);
-              }
-            }}
-          >
+        <div key={itemId} className={rowReorder.dragging === itemId ? "we-dragging" : undefined} {...rowReorder.itemProps(itemId)}>
+        {gap}
+        <div className={`we-el${savedBefore(ri) === 0 ? " rep" : ""}`} tabIndex={0}>
+          <button type="button" className="we-grip" aria-label={`${b ? "요소" : "로그라인"} 순서 바꾸기(끌어서 옮기거나 위아래 화살표 키)`} {...rowReorder.gripProps(itemId)}>
             ⠿
           </button>
-          <div className={`we-main${b && (b.kind === "video" || b.kind === "text" || b.kind === "document") ? " we-card" : ""}`}>
+          <div className={`we-main${b ? " we-card" : ""}`}>
             {!b && (
+              <button type="button" className="we-fold" aria-expanded={!folded.logline} onClick={() => setFolded({ ...folded, logline: !folded.logline })}>
+                {folded.logline ? "▸ 펼치기" : "▾ 접기"}
+              </button>
+            )}
+            {!b && <ElementName kind="logline" />}
+            {!b && !folded.logline && (
               <label className="we-logline-label">
-                <span className="we-label">로그라인 (이미지, 영상 담당 크리에이터는 컨셉 등 기획을 소개해주세요)</span>
-                <textarea className="we-text" rows={3} value={logline} onChange={(e) => onLogline(e.target.value)} placeholder={LOGLINE_FRAME} aria-invalid={loglineErr ? true : undefined} />
-                {loglineErr && <span className="mp-msg err" role="alert">{loglineErr}</span>}
+                <textarea className="we-text" aria-label="로그라인" rows={3} value={logline} onChange={(e) => onLogline(e.target.value)} placeholder={LOGLINE_FRAME} aria-invalid={loglineErr ? true : undefined} />
+                {loglineErr && <AlertPopup key={loglineErr}>{loglineErr}</AlertPopup>}
               </label>
             )}
-            {b && (b.kind === "video" || b.kind === "text" || b.kind === "document") && (
-              <SubChips
-                items={b.kind === "video" ? VIDEO_SUBKINDS : DOC_SUBKINDS}
-                value={b.sub ?? ""}
-                disabled={busy}
-                label={b.kind === "video" ? "영상 종류" : "문서 종류"}
-                onPick={(v) => void run(() => setBlockSubKind(b.id, v || null))}
-              />
-            )}
-            {b && b.kind !== "text" && (
+            {b && (
               <button type="button" className="we-fold" aria-expanded={!folded[b.id]} onClick={() => setFolded({ ...folded, [b.id]: !folded[b.id] })}>
                 {folded[b.id] ? "▸ 펼치기" : "▾ 접기"}
               </button>
             )}
-            {b && b.kind === "image" && <span className="mp-note">· 이미지 (JPG · PNG · WEBP, 5MB 이하)</span>}
-            {b && b.kind === "text" && (
+            {b && <ElementName kind={b.kind === "document" ? "text" : b.kind} />}
+            {b && <SubChips tone={toneOf(b.kind)} value={("sub" in b && b.sub) || ""} disabled={busy} onPick={(v) => void run(() => setBlockSubKind(b.id, v || null))} />}
+            {b && b.kind === "text" && !folded[b.id] && (
               <>
-                <textarea className="we-text" rows={3} aria-label="문서" value={edits[b.id] ?? b.body} onChange={(e) => setEdits({ ...edits, [b.id]: e.target.value })} />
+                <DocFilePick file={null} disabled={busy} onFile={(f) => { if (f) void upload(f, "document", { ri: ri + 1 }); }} />
+                <textarea className="we-text we-doc-text" rows={3} placeholder="〈직접 입력〉" aria-label="문서" value={edits[b.id] ?? b.body} onChange={(e) => setEdits({ ...edits, [b.id]: e.target.value })} />
                 {edits[b.id] !== undefined && edits[b.id] !== b.body && (
-                  <button type="button" className="btn btn-ghost" disabled={busy} onClick={async () => { if (await run(() => updateTextBlock(b.id, edits[b.id]), "문서를 저장했어요.")) setEdits((cur) => Object.fromEntries(Object.entries(cur).filter(([k]) => k !== b.id))); }}>
+                  <button type="button" className="btn btn-ghost" disabled={busy} onClick={async () => { if (await run(() => updateTextBlock(b.id, edits[b.id]))) setEdits((cur) => Object.fromEntries(Object.entries(cur).filter(([k]) => k !== b.id))); }}>
                     문서 저장
                   </button>
                 )}
-                <DocFilePick file={null} onFile={(f) => { if (f) void upload(f, "document"); }} disabled={busy} />
               </>
             )}
-            {b && b.kind === "image" && (folded[b.id] ? <span className="we-line">이미지 {b.fileName ?? ""}</span> : b.src ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={b.src} alt={b.fileName ?? "이미지"} style={{ maxWidth: "100%", borderRadius: 14 }} />
-            ) : <div className="we-media">이미지를 불러오지 못했어요</div>)}
-            {b && b.kind === "video" && (folded[b.id] ? <span className="we-line">{b.youtubeId ? "영상" : `영상 파일 ${b.fileName ?? ""} · ${b.fileBytes ? mb(b.fileBytes) : ""}`}</span> : b.youtubeId ? (
+            {b && b.kind === "image" && !folded[b.id] && (
+              <>
+                <div className="we-line">{b.fileName ?? "첨부된 이미지"}{b.fileBytes ? ` · ${mb(b.fileBytes)}` : ""}</div>
+                {/* 카드에 보일 때: 꽉 채우기(가장자리가 조금 잘릴 수 있음) / 비율 유지하기(자르지 않고 남는 곳을 카드 배경색으로) */}
+                <div className="we-fit" role="group" aria-label="카드에 보일 때">
+                  <span>카드에 보일 때</span>
+                  {([["cover", "꽉 채우기"], ["contain", "비율 유지하기"]] as const).map(([v, l]) => (
+                    <button key={v} type="button" className="opt" aria-pressed={(b.fit ?? "contain") === v} disabled={busy} onClick={() => void run(() => setBlockFit(b.id, v))}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
+                {b.src && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={b.src} alt={b.fileName ?? "이미지"} style={{ maxWidth: "100%", borderRadius: 14 }} />
+                )}
+              </>
+            )}
+            {b && b.kind === "video" && !folded[b.id] && (b.youtubeId ? (
               <div className="we-media" style={{ overflow: "hidden" }}>
                 <iframe src={`https://www.youtube-nocookie.com/embed/${b.youtubeId}`} title="영상" loading="lazy" allowFullScreen referrerPolicy="strict-origin-when-cross-origin" style={{ width: "100%", height: "100%", border: 0 }} />
               </div>
@@ -1169,49 +1349,35 @@ function BlockList({ work, onMessage, logline, onLogline, loglineErr }: { work: 
               <div className="we-media" style={{ overflow: "hidden", background: "#000" }}>
                 <video src={b.src} controls playsInline preload="metadata" style={{ width: "100%", height: "100%" }} />
               </div>
-            ) : <div className="we-media">영상을 불러오지 못했어요</div>)}
-            {b && b.kind === "document" && (folded[b.id] ? <span className="we-line">문서 {b.fileName ?? ""} · {b.fileBytes ? mb(b.fileBytes) : ""}</span> : (
+            ) : (
+              <div className="we-line">{b.fileName ?? "첨부된 영상"}{b.fileBytes ? ` · ${mb(b.fileBytes)}` : ""}</div>
+            ))}
+            {b && b.kind === "document" && !folded[b.id] && (
               <div className="we-line">
-                {b.src ? <a href={b.src} target="_blank" rel="noopener noreferrer">{b.fileName ?? "문서"} 열기 ↗</a> : "문서를 불러오지 못했어요"}
+                {b.src ? <a href={b.src} target="_blank" rel="noopener noreferrer">{b.fileName ?? "문서"} 열기 ↗</a> : <span>{b.fileName ?? "첨부된 문서"}</span>}
                 {b.fileBytes ? ` · ${mb(b.fileBytes)}` : ""}
               </div>
-            ))}
+            )}
           </div>
-          <div className="we-tools">
-            <button type="button" className="we-mini" aria-label="위로" disabled={busy || i === 0} onClick={() => moveItem(itemId, i - 1)}>↑</button>
-            <button type="button" className="we-mini" aria-label="아래로" disabled={busy || i === items.length - 1} onClick={() => moveItem(itemId, i + 1)}>↓</button>
-            {b && <button type="button" className="we-mini" aria-label="지우기" disabled={busy} onClick={() => { if (window.confirm("이 요소를 지울까요? 되돌릴 수 없어요.")) void run(() => deleteBlock(b.id)); }}>지우기</button>}
-          </div>
+          {b ? (
+            tools(ri, () => moveRow(ri, ri - 1), () => moveRow(ri, ri + 1), () => void clearSaved(ri, b))
+          ) : (
+            <div className="we-tools">
+              <button type="button" className="we-mini" aria-label="위로" disabled={ri === 0} onClick={() => moveRow(ri, ri - 1)}>↑</button>
+              <button type="button" className="we-mini" aria-label="아래로" disabled={ri === rows.length - 1} onClick={() => moveRow(ri, ri + 1)}>↓</button>
+            </div>
+          )}
         </div>
         </div>
         );
       })}
-
-      {adding && (
-        <div className="we-el">
-          <div className="we-main">
-            {adding === "text" ? (
-              <textarea className="we-text" rows={3} aria-label="새 문서" placeholder="문서를 입력해 주세요" value={draft} onChange={(e) => setDraft(e.target.value)} />
-            ) : (
-              <>
-                <input className="mp-input" type="url" aria-label="유튜브 주소" placeholder="영상 〈유튜브 주소〉 https://youtu.be/…" value={draft} onChange={(e) => setDraft(e.target.value)} />
-                <p className="mp-note" style={{ flex: "1 1 100%" }}>유튜브 주소로 넣으면 용량 제한 없이 올릴 수 있어요.</p>
-              </>
-            )}
-            {adding === "text" && <DocFilePick file={draftDoc} onFile={setDraftDoc} disabled={busy} />}
-            {adding === "video" && <VideoFilePick disabled={busy} onFile={(f) => { if (f) { setAdding(null); setDraft(""); void upload(f, "video"); } }} />}
-            <button type="button" className="btn btn-primary" disabled={busy} onClick={add}>추가</button>
-            <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => { setAdding(null); setDraft(""); setDraftDoc(null); }}>취소</button>
-          </div>
-        </div>
-      )}
+      </div>
 
       <div className="we-add">
         <span>추가</span>
-        <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => { setAdding("text"); setDraft(""); }}>+ 문서</button>
-        <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => imgInput.current?.click()}>+ 이미지</button>
-        <button type="button" className="btn btn-ghost" disabled={busy || full} onClick={() => { setAdding("video"); setDraft(""); }}>+ 영상</button>
-        <input ref={imgInput} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => { void upload(e.target.files?.[0], "image"); e.target.value = ""; }} />
+        <button type="button" className="btn btn-ghost we-add-text" disabled={busy || full} onClick={() => addEmpty("text")}>+ 문서</button>
+        <button type="button" className="btn btn-ghost we-add-image" disabled={busy || full} onClick={() => addEmpty("image")}>+ 이미지</button>
+        <button type="button" className="btn btn-ghost we-add-video" disabled={busy || full} onClick={() => addEmpty("video")}>+ 영상</button>
       </div>
     </div>
   );

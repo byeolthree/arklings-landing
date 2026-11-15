@@ -13,6 +13,7 @@ import { safeNext } from "@/lib/safe-next";
 import { findPendingLink } from "@/lib/social-link";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createAuthClient } from "@/lib/supabase/server";
+import { EMAIL_RE, formText as text } from "@/lib/utils";
 
 const UNAVAILABLE = "지금은 이 기능을 쓸 수 없어요. 잠시 뒤에 다시 시도해 주세요.";
 
@@ -22,8 +23,6 @@ function logStep(step: string, e: unknown) {
   const msg = String(err?.message ?? e ?? "").replace(/[^\s@<>]+@[^\s@<>]+/g, "***").replace(/\s+/g, " ").slice(0, 160);
   console.error(`[social] ${step} 실패 코드=${err?.code ?? "?"} 상태=${err?.status ?? "?"} 문구=${msg || "없음"}`);
 }
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const text = (fd: FormData, key: string) => String(fd.get(key) ?? "");
 
 async function callbackUrl(next: string): Promise<string> {
   return `${await getOrigin()}/auth/callback?next=${encodeURIComponent(next)}`;

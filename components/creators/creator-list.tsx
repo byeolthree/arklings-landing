@@ -1,17 +1,12 @@
 import Link from "next/link";
 import { ROLES } from "@/lib/collab";
-import { activeCount, hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
+import { activeCount, FORMATS, hasFilter, MAX_QUERY, type CreatorFilter } from "./filter";
 import { GENRES } from "./genres";
-import { BlurImage } from "./blur-image";
-import { BlurVideo } from "./blur-video";
-import { RoleTags } from "./role-tags";
 import { FORM_LABEL, type CreatorCard, type WorkForm } from "./types";
+import { ExploreCard } from "./explore-card";
 import "./creators.css";
 
-// 자주색(주 색)을 아끼려고, 프로필 원은 보조 색 세 가지(청록·더스티 블루·뮤트 세이지)를 번갈아 쓴다.
-// 목록 순서대로 한 칸씩, 줄이 바뀔 때마다 한 칸 더 밀어서 옆 카드·아래 카드와 색이 겹치지 않게 한다.
-const TONES = ["teal", "dusty", "sage"] as const;
-const toneAt = (index: number) => TONES[(index + Math.floor(index / 3)) % TONES.length];
+
 
 // 크리에이터 목록 화면. 데이터를 받기만 하고 읽지 않는다(실제 화면과 샘플 미리보기가 함께 쓴다).
 export function CreatorList({
@@ -44,8 +39,8 @@ export function CreatorList({
     <div className="cr">
       <section className="cr-top">
         <div className="wrap">
-          <h1 className="cr-title">크리에이터 — 포트폴리오 탐색</h1>
-          <p className="cr-desc">크리에이터를 눌러 프로필과 공개한 작품을 둘러보세요.</p>
+          <h1 className="cr-title">포트폴리오 탐색</h1>
+          <p className="cr-desc">카드를 눌러 크리에이터의 작품을 둘러보세요.</p>
         </div>
       </section>
 
@@ -61,6 +56,7 @@ export function CreatorList({
                 {filter.genre && <input type="hidden" name="genre" value={filter.genre} />}
                 {filter.form && <input type="hidden" name="form" value={filter.form} />}
                 {filter.open && <input type="hidden" name="open" value="1" />}
+                {filter.fmt && <input type="hidden" name="fmt" value={filter.fmt} />}
                 <label htmlFor="cr-q" className="sr-only">
                   크리에이터 검색
                 </label>
@@ -98,6 +94,17 @@ export function CreatorList({
                       </Link>
                     ))}
                   </div>
+                  <p className="cr-filter-title">포맷</p>
+                  <div className="cr-chips">
+                    <Link href={pageHref({ ...filter, fmt: undefined })} className="cr-fchip" aria-current={filter.fmt ? undefined : "true"}>
+                      전체
+                    </Link>
+                    {FORMATS.map((f) => (
+                      <Link key={f} href={pageHref({ ...filter, fmt: f })} className="cr-fchip" aria-current={filter.fmt === f ? "true" : undefined}>
+                        {f}
+                      </Link>
+                    ))}
+                  </div>
                   <p className="cr-filter-title">장르</p>
                   <div className="cr-chips">
                     <Link href={pageHref({ ...filter, genre: undefined })} className="cr-fchip" aria-current={filter.genre ? undefined : "true"}>
@@ -130,7 +137,7 @@ export function CreatorList({
               <p>
                 {filter.q ? `「${filter.q}」` : ""}
                 {filter.q && nFilters > 0 ? " · " : ""}
-                {[filter.genre, filter.form && FORM_LABEL[filter.form], filter.role && ROLES[filter.role], filter.open && "협업 받는 중"].filter(Boolean).join(" · ")} 조건에 맞는 크리에이터가 아직 없어요.
+                {[filter.genre, filter.form && FORM_LABEL[filter.form], filter.role && ROLES[filter.role], filter.fmt, filter.open && "협업 받는 중"].filter(Boolean).join(" · ")} 조건에 맞는 크리에이터가 아직 없어요.
               </p>
               <Link href={pageHref({})} className="btn btn-ghost">
                 조건 지우기
@@ -149,7 +156,7 @@ export function CreatorList({
             </div>
           ) : cards.length === 0 ? (
             <div className="panel cr-state">
-              <h2>이 쪽에는 크리에이터가 없어요</h2>
+              <h2>이 쪽에는 작품이 없어요</h2>
               <p>마지막 쪽은 {pages}쪽이에요.</p>
               <Link href={pageHref({ ...filter })} className="btn btn-ghost">
                 첫 쪽으로
@@ -157,72 +164,19 @@ export function CreatorList({
             </div>
           ) : (
             <>
-              <p className="cr-count">
-                {filtered ? "검색 결과" : "총"} {total}명
-                {filtered && (
-                  <>
-                    {" "}
-                    ·{" "}
-                    <Link href={pageHref({})} className="cr-clear">
-                      조건 지우기
-                    </Link>
-                  </>
-                )}
-              </p>
+              {filtered && (
+                <p className="cr-count">
+                  <Link href={pageHref({})} className="cr-clear">
+                    조건 지우기
+                  </Link>
+                </p>
+              )}
               <ul className="cr-grid">
-                {cards.map((c, i) => {
-                  const tone = toneAt(i);
+                {cards.map((c) => {
                   return (
-                  <li key={c.handle}>
-                    <div className="panel cr-card">
-                      <Link href={profileHref(c.handle)} className="cr-card-main">
-                        <div className="cr-who">
-                          <span className={`cr-av ${tone}`} aria-hidden="true">
-                            {c.name.slice(0, 1)}
-                          </span>
-                          <div className="cr-who-text">
-                            <span className="cr-name">{c.name}</span>
-                            {c.bio && <span className="cr-bio">{c.bio}</span>}
-                          </div>
-                        </div>
-                        {c.main === "media" && c.hero ? (
-                          c.hero === "video" && c.heroSrc ? (
-                            <BlurVideo src={c.heroSrc} className="cr-main-media has-src" label="대표 영상" />
-                          ) : c.hero === "image" && c.heroSrc ? (
-                            <BlurImage src={c.heroSrc} className="cr-main-media has-src" label="대표 이미지" />
-                          ) : (
-                            <div className="cr-main-media" role="img" aria-label={c.hero === "video" ? "대표 영상" : "대표 이미지"}>
-                              {c.hero === "video" ? "▶ 〈대표 영상〉" : "〈대표 이미지〉"}
-                            </div>
-                          )
-                        ) : (
-                          <div className="cr-box">
-                            <span className="cr-label">대표 작품</span>
-                            <h3 className="cr-box-title">{c.latest.title}</h3>
-                            <p className="cr-box-logline">{c.latest.logline}</p>
-                          </div>
-                        )}
-                        <RoleTags roles={c.roles} />
-                        {c.latest.genres && c.latest.genres.length > 0 && (
-                          <ul className="cr-genres" aria-label="장르">
-                            {c.latest.genres.map((g) => (
-                              <li key={g}>{g}</li>
-                            ))}
-                          </ul>
-                        )}
-                      </Link>
-                      {c.openToCollab && (
-                        <div className="cr-card-foot">
-                          <span className="cr-open">협업 받는 중</span>
-                          {applyHref && (
-                            <Link href={applyHref(c)} className="btn btn-ghost">
-                              협업 신청
-                            </Link>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </li>
+                    <li key={c.workId ?? c.handle}>
+                      <ExploreCard c={c} profileHref={profileHref(c.handle)} applyHref={applyHref ? applyHref(c) : undefined} />
+                    </li>
                   );
                 })}
               </ul>

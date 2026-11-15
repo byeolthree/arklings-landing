@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AlertPopup } from "@/components/ui/alert-popup";
 import { redirect } from "next/navigation";
 import "@/components/planner/planner.css";
 import "@/components/mypage/mypage.css";
@@ -6,9 +7,9 @@ import "@/components/register/register.css";
 import { CreatorProfileForm } from "@/components/mypage/creator-forms";
 import { RegisterHeader } from "@/components/register/register-steps";
 import { RegisterScreen } from "@/components/register/register-screen";
-import { requireUser } from "@/lib/auth";
+import { readDisplayName, requireUser } from "@/lib/auth";
 import { loadMyCreator, type MyCreatorData } from "@/lib/creators-mine";
-import { createAuthClient } from "@/lib/supabase/server";
+import { UUID_RE } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "포트폴리오 등록", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -18,7 +19,7 @@ export const dynamic = "force-dynamic";
 export default async function PortfolioNewPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const user = await requireUser("/portfolio/new");
   const sp = await searchParams;
-  const workParam = typeof sp.work === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(sp.work) ? sp.work : null;
+  const workParam = typeof sp.work === "string" && UUID_RE.test(sp.work) ? sp.work : null;
 
   let data: MyCreatorData | null = null;
   try {
@@ -26,13 +27,7 @@ export default async function PortfolioNewPage({ searchParams }: { searchParams:
   } catch {
     data = null;
   }
-  let nickname = "";
-  try {
-    const { data: row } = await (await createAuthClient()).from("profiles").select("display_name").eq("id", user.id).maybeSingle();
-    nickname = (row as { display_name?: string } | null)?.display_name ?? "";
-  } catch {
-    nickname = "";
-  }
+  const nickname = await readDisplayName(user.id);
 
   if (!data) {
     return (
@@ -40,9 +35,7 @@ export default async function PortfolioNewPage({ searchParams }: { searchParams:
         <RegisterHeader current="포트폴리오 등록" />
         <div className="rg-main">
           <div className="rg-wrap">
-            <p role="alert" className="mp-msg err">
-              불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
-            </p>
+            <AlertPopup>불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.</AlertPopup>
           </div>
         </div>
       </div>
@@ -72,7 +65,7 @@ export default async function PortfolioNewPage({ searchParams }: { searchParams:
       <RegisterHeader current="포트폴리오 등록" />
       <div className="rg-main">
         <div className="rg-wrap">
-          <RegisterScreen works={data.works} usedBytes={data.usedBytes} nickname={nickname} openWorkId={workParam} profileRoles={data.profile.roles} handle={data.profile.handle} profilePublic={data.profile.isPublic} />
+          <RegisterScreen works={data.works} usedBytes={data.usedBytes} nickname={nickname} openWorkId={workParam} openNew={sp.new === "1"} profileRoles={data.profile.roles} profilePublic={data.profile.isPublic} profileBio={data.profile.bio} profileOpen={data.profile.openToCollab} />
         </div>
       </div>
     </div>

@@ -14,7 +14,6 @@ import {
   type BlockKind,
   parseYoutubeId,
   validateCreatorProfile,
-  validateChannels,
   validateHandle,
   validateTextBlock,
   validateWork,
@@ -31,6 +30,7 @@ import { createUploadSlot, fileBelongsTo, inspectUploaded, inspectUploadedHero, 
 import { createAuthClient } from "@/lib/supabase/server";
 import { getSupabase } from "@/lib/supabase";
 import { loglineText, parseDraft, titleOrDefault } from "@/lib/plans";
+import { UUID_RE } from "@/lib/utils";
 
 export type Fail = { ok: false; error: string; needLogin?: boolean; fieldErrors?: Record<string, string> };
 type Ok<T = object> = { ok: true } & T;
@@ -39,9 +39,14 @@ const LOGIN_MESSAGE = "로그인이 필요해요.";
 const UNAVAILABLE = "지금은 처리할 수 없어요. 잠시 뒤에 다시 시도해 주세요.";
 const WORK_NOT_FOUND = "찾을 수 없는 작품이에요.";
 const BLOCK_NOT_FOUND = "찾을 수 없는 요소예요.";
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type Sb = Awaited<ReturnType<typeof createAuthClient>>;
+
+// 새 작품은 내 목록의 맨 위 순서 번호로 만든다(지금 가장 작은 번호보다 1 작게). 새로 올린 작품이 맨 위에 오고, 순서는 손잡이로만 바꾼다(2026-11-14 아키텍터 지시).
+async function nextSortOrder(sb: Sb, userId: string): Promise<number> {
+  const { data } = await sb.from("creator_works").select("sort_order").eq("owner_id", userId).order("sort_order", { ascending: true }).limit(1).maybeSingle();
+  return ((data as { sort_order: number } | null)?.sort_order ?? 1) - 1;
+}
 
 // 모든 동작의 맨 위: 로그인과 이메일 확인을 다시 한다.
 async function needUser(): Promise<{ user: CurrentUser; sb: Sb } | Fail> {
@@ -69,7 +74,7 @@ function dbMessage(e: DbError): string {
   if (m.includes("work_plan_not_owned")) return "내 기획안만 붙일 수 있어요.";
   if (m.includes("logline_position")) return "로그라인 위치를 저장하려면 데이터베이스 준비(0013)가 먼저 필요해요. 로그라인을 맨 위에 두고 저장하거나 잠시 뒤에 다시 시도해 주세요.";
   if (m.includes("creator_work_blocks_shape") || m.includes("creator_work_blocks_file_path")) return "영상 파일을 저장하려면 데이터베이스 준비(0015)가 먼저 필요해요. 유튜브 주소로 넣거나 잠시 뒤에 다시 시도해 주세요.";
-  if (m.includes("creator_work_blocks_sub_kind")) return "고를 수 없는 종류예요.";
+  if (m.includes("creator_work_blocks_sub_kind")) return "고를 수 없는 종류예요. 이미지 종류는 데이터베이스 준비(0026)가 먼저 필요해요.";
   if (m.includes("sub_kind")) return "요소 종류를 저장하려면 데이터베이스 준비(0012)가 먼저 필요해요. 종류를 비우고 저장하거나 잠시 뒤에 다시 시도해 주세요.";
   if (e?.code === "23505" && m.includes("plan_id")) return "이 기획안은 이미 다른 작품에 붙어 있어요.";
   if (e?.code === "23505") return "이미 쓰고 있는 공개 주소예요. 다른 주소를 적어 주세요.";
@@ -155,18 +160,16 @@ export async function saveCreatorProfile(input: ProfileInput): Promise<Ok<{ crea
   return { ok: true, created, handle };
 }
 
-// 채널 링크만 따로 저장한다(통째로 바꾼다). 프로필이 먼저 있어야 한다.
-export async function saveChannels(channels: Channel[]): Promise<Ok<{ count: number }> | Fail> {
+// 이미지 요소가 카드에 보일 때 꽉 채울지(cover), 자르지 않고 여백을 둘지(contain) 정한다(0027).
+export async function setBlockFit(blockId: string, fit: "cover" | "contain"): Promise<Ok | Fail> {
   const auth = await needUser();
   if (!("user" in auth)) return auth;
-  const checked = validateChannels(Array.isArray(channels) ? channels : []);
-  if (!checked.ok) return { ok: false, error: checked.error, fieldErrors: { channels: checked.error } };
-  const { data } = await auth.sb.from("creator_profiles").select("public_handle").eq("user_id", auth.user.id).maybeSingle();
-  if (!data) return { ok: false, error: "먼저 크리에이터 프로필을 만들어 주세요." };
-  const msg = await replaceChannels(auth.sb, checked.value);
-  if (msg) return { ok: false, error: msg, fieldErrors: { channels: msg } };
-  refresh((data as { public_handle: string }).public_handle);
-  return { ok: true, count: checked.value.length };
+  if (!UUID_RE.test(String(blockId)) || (fit !== "cover" && fit !== "contain")) return { ok: false, error: BLOCK_NOT_FOUND };
+  const { data, error } = await auth.sb.from("creator_work_blocks").update({ fit }).eq("id", blockId).eq("owner_id", auth.user.id).eq("kind", "image").select("work_id");
+  if (error) return { ok: false, error: error.message.includes("fit") ? "이미지 보이기 방식을 저장하려면 데이터베이스 준비(0027)가 먼저 필요해요." : dbMessage(error) };
+  if (!data?.length) return { ok: false, error: BLOCK_NOT_FOUND };
+  refresh();
+  return { ok: true };
 }
 
 // 프로필 공개·비공개. 비공개로 돌리면 남에게는 프로필과 모든 작품이 보이지 않는다.
@@ -194,7 +197,7 @@ export async function createWork(input: WorkInput): Promise<Ok<{ id: string }> |
   const v = checked.value;
   const { data, error } = await auth.sb
     .from("creator_works")
-    .insert({ owner_id: auth.user.id, title: v.title, roles: v.roles, genres: v.genres, kind: v.kind, form: v.form, logline: v.logline, plan_id: v.planId })
+    .insert({ owner_id: auth.user.id, title: v.title, roles: v.roles, genres: v.genres, kind: v.kind, form: v.form, logline: v.logline, plan_id: v.planId, sort_order: await nextSortOrder(auth.sb, auth.user.id) })
     .select("id")
     .single();
   if (error || !data) return { ok: false, error: dbMessage(error) };
@@ -205,7 +208,7 @@ export async function createWork(input: WorkInput): Promise<Ok<{ id: string }> |
 export async function updateWork(workId: string, input: WorkInput): Promise<Ok<{ id: string }> | Fail> {
   const auth = await needUser();
   if (!("user" in auth)) return auth;
-  if (!UUID.test(String(workId))) return { ok: false, error: WORK_NOT_FOUND };
+  if (!UUID_RE.test(String(workId))) return { ok: false, error: WORK_NOT_FOUND };
   const checked = validateWork(input);
   if (!checked.ok) return workFail(checked.errors);
   const v = checked.value;
@@ -226,7 +229,7 @@ export async function updateWork(workId: string, input: WorkInput): Promise<Ok<{
 export async function deleteWork(workId: string): Promise<Ok | Fail> {
   const auth = await needUser();
   if (!("user" in auth)) return auth;
-  if (!UUID.test(String(workId))) return { ok: false, error: WORK_NOT_FOUND };
+  if (!UUID_RE.test(String(workId))) return { ok: false, error: WORK_NOT_FOUND };
   const blocks = await auth.sb.from("creator_work_blocks").select("file_path").eq("work_id", workId).eq("owner_id", auth.user.id);
   if (blocks.error) return { ok: false, error: UNAVAILABLE };
   const { data, error } = await auth.sb.from("creator_works").delete().eq("id", workId).eq("owner_id", auth.user.id).select("id");
@@ -242,7 +245,7 @@ export async function deleteWork(workId: string): Promise<Ok | Fail> {
 export async function setWorkPublic(workId: string, isPublic: boolean): Promise<Ok<{ isPublic: boolean }> | Fail> {
   const auth = await needUser();
   if (!("user" in auth)) return auth;
-  if (!UUID.test(String(workId))) return { ok: false, error: WORK_NOT_FOUND };
+  if (!UUID_RE.test(String(workId))) return { ok: false, error: WORK_NOT_FOUND };
   const { data, error } = await auth.sb.from("creator_works").update({ is_public: Boolean(isPublic) }).eq("id", workId).eq("owner_id", auth.user.id).select("id");
   if (error) return { ok: false, error: dbMessage(error) };
   if (!data?.length) return { ok: false, error: WORK_NOT_FOUND };
@@ -256,7 +259,7 @@ export async function setWorkPublic(workId: string, isPublic: boolean): Promise<
 export async function reorderWorks(orderedIds: string[]): Promise<Ok | Fail> {
   const auth = await needUser();
   if (!("user" in auth)) return auth;
-  if (!Array.isArray(orderedIds) || orderedIds.length === 0 || orderedIds.length > 12 || !orderedIds.every((id) => UUID.test(String(id))) || new Set(orderedIds).size !== orderedIds.length) {
+  if (!Array.isArray(orderedIds) || orderedIds.length === 0 || orderedIds.length > 12 || !orderedIds.every((id) => UUID_RE.test(String(id))) || new Set(orderedIds).size !== orderedIds.length) {
     return { ok: false, error: "작품 순서를 저장하지 못했어요. 새로고침한 뒤 다시 시도해 주세요." };
   }
   const own = await auth.sb.from("creator_works").select("id, sort_order").eq("owner_id", auth.user.id);
@@ -278,7 +281,7 @@ export async function reorderWorks(orderedIds: string[]): Promise<Ok | Fail> {
 // ── 작품 안 요소 ─────────────────────────────────────────────────────────────────
 
 async function ownWork(sb: Sb, userId: string, workId: string): Promise<boolean> {
-  if (!UUID.test(String(workId))) return false;
+  if (!UUID_RE.test(String(workId))) return false;
   const { data } = await sb.from("creator_works").select("id").eq("id", workId).eq("owner_id", userId).maybeSingle();
   return Boolean(data);
 }
@@ -321,7 +324,7 @@ export async function addTextBlock(workId: string, body: string, subKind?: strin
 export async function setBlockSubKind(blockId: string, subKind: string | null): Promise<Ok | Fail> {
   const auth = await needUser();
   if (!("user" in auth)) return auth;
-  if (!UUID.test(String(blockId))) return { ok: false, error: BLOCK_NOT_FOUND };
+  if (!UUID_RE.test(String(blockId))) return { ok: false, error: BLOCK_NOT_FOUND };
   const row = await auth.sb.from("creator_work_blocks").select("kind, work_id").eq("id", blockId).eq("owner_id", auth.user.id).maybeSingle();
   if (row.error) return { ok: false, error: UNAVAILABLE };
   if (!row.data) return { ok: false, error: BLOCK_NOT_FOUND };
@@ -338,7 +341,7 @@ export async function setBlockSubKind(blockId: string, subKind: string | null): 
 export async function updateTextBlock(blockId: string, body: string): Promise<Ok | Fail> {
   const auth = await needUser();
   if (!("user" in auth)) return auth;
-  if (!UUID.test(String(blockId))) return { ok: false, error: BLOCK_NOT_FOUND };
+  if (!UUID_RE.test(String(blockId))) return { ok: false, error: BLOCK_NOT_FOUND };
   const text = validateTextBlock(body);
   if (!text.ok) return { ok: false, error: text.error };
   const { data, error } = await auth.sb
@@ -486,7 +489,7 @@ export async function finishFileUpload(workId: string, upload: { path: string; k
 export async function reorderWorkItems(workId: string, items: string[]): Promise<Ok | Fail> {
   const auth = await needUser();
   if (!("user" in auth)) return auth;
-  if (!UUID.test(String(workId)) || !Array.isArray(items)) return { ok: false, error: WORK_NOT_FOUND };
+  if (!UUID_RE.test(String(workId)) || !Array.isArray(items)) return { ok: false, error: WORK_NOT_FOUND };
   const want = items.map(String);
   if (want.filter((x) => x === LOGLINE_TOKEN).length !== 1 || want.length > BLOCK_LIMIT + 1) return { ok: false, error: "요소 목록이 바뀌었어요. 새로고침한 뒤 다시 옮겨 주세요." };
   const blockIds = want.filter((x) => x !== LOGLINE_TOKEN);
@@ -600,7 +603,7 @@ export async function removeHero(): Promise<Ok | Fail> {
 export async function deleteBlock(blockId: string): Promise<Ok | Fail> {
   const auth = await needUser();
   if (!("user" in auth)) return auth;
-  if (!UUID.test(String(blockId))) return { ok: false, error: BLOCK_NOT_FOUND };
+  if (!UUID_RE.test(String(blockId))) return { ok: false, error: BLOCK_NOT_FOUND };
   const { data, error } = await auth.sb.from("creator_work_blocks").delete().eq("id", blockId).eq("owner_id", auth.user.id).select("work_id, file_path");
   if (error) return { ok: false, error: dbMessage(error) };
   if (!data?.length) return { ok: false, error: BLOCK_NOT_FOUND };
@@ -609,39 +612,6 @@ export async function deleteBlock(blockId: string): Promise<Ok | Fail> {
   refresh();
   revalidatePath(`/portfolio/${row.work_id}`);
   return { ok: true };
-}
-
-// 요소 한 칸 위·아래로 옮기기
-export async function moveBlock(blockId: string, direction: "up" | "down"): Promise<Ok | Fail> {
-  const auth = await needUser();
-  if (!("user" in auth)) return auth;
-  if (!UUID.test(String(blockId)) || (direction !== "up" && direction !== "down")) return { ok: false, error: BLOCK_NOT_FOUND };
-  const one = await auth.sb.from("creator_work_blocks").select("work_id").eq("id", blockId).eq("owner_id", auth.user.id).maybeSingle();
-  if (!one.data) return { ok: false, error: BLOCK_NOT_FOUND };
-  const workId = (one.data as { work_id: string }).work_id;
-  const all = await auth.sb.from("creator_work_blocks").select("id").eq("work_id", workId).eq("owner_id", auth.user.id).order("position", { ascending: true }).order("created_at", { ascending: true });
-  if (all.error) return { ok: false, error: UNAVAILABLE };
-  const ids = ((all.data ?? []) as { id: string }[]).map((r) => r.id);
-  const i = ids.indexOf(blockId);
-  const j = direction === "up" ? i - 1 : i + 1;
-  if (i < 0 || j < 0 || j >= ids.length) return { ok: true }; // 이미 맨 위·맨 아래
-  [ids[i], ids[j]] = [ids[j], ids[i]];
-  return writeOrder(auth.sb, auth.user.id, workId, ids);
-}
-
-// 요소 순서를 통째로 정한다(끌어서 옮기기). 작품 안의 모든 요소 번호를 원하는 순서대로 한 번씩 넘겨야 한다.
-export async function reorderBlocks(workId: string, orderedIds: string[]): Promise<Ok | Fail> {
-  const auth = await needUser();
-  if (!("user" in auth)) return auth;
-  if (!UUID.test(String(workId)) || !Array.isArray(orderedIds)) return { ok: false, error: WORK_NOT_FOUND };
-  const all = await auth.sb.from("creator_work_blocks").select("id").eq("work_id", workId).eq("owner_id", auth.user.id);
-  if (all.error) return { ok: false, error: UNAVAILABLE };
-  const have = new Set(((all.data ?? []) as { id: string }[]).map((r) => r.id));
-  const want = orderedIds.map(String);
-  if (want.length !== have.size || new Set(want).size !== want.length || !want.every((id) => have.has(id))) {
-    return { ok: false, error: "요소 목록이 바뀌었어요. 새로고침한 뒤 다시 옮겨 주세요." };
-  }
-  return writeOrder(auth.sb, auth.user.id, workId, want);
 }
 
 async function writeOrder(sb: Sb, userId: string, workId: string, ids: string[]): Promise<Ok | Fail> {
@@ -663,7 +633,7 @@ export async function startWorkFromPlan(
   const auth = await needUser();
   if (!("user" in auth)) return auth;
   const { user, sb } = auth;
-  if (!UUID.test(String(planId))) return { ok: false, error: "찾을 수 없는 기획안이에요." };
+  if (!UUID_RE.test(String(planId))) return { ok: false, error: "찾을 수 없는 기획안이에요." };
 
   const plan = await sb.from("plans").select("id").eq("id", planId).eq("owner_id", user.id).maybeSingle();
   if (plan.error) return { ok: false, error: UNAVAILABLE };
@@ -684,7 +654,7 @@ export async function startWorkFromPlan(
   if (!lw.ok) return workFail(lw.errors);
   const ins = await sb
     .from("creator_works")
-    .insert({ owner_id: user.id, title: lw.value.title, roles: lw.value.roles, genres: [], logline: lw.value.logline, plan_id: planId })
+    .insert({ owner_id: user.id, title: lw.value.title, roles: lw.value.roles, genres: [], logline: lw.value.logline, plan_id: planId, sort_order: await nextSortOrder(sb, user.id) })
     .select("id")
     .single();
   if (ins.error || !ins.data) return { ok: false, error: dbMessage(ins.error) };

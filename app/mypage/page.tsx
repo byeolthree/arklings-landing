@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AlertPopup } from "@/components/ui/alert-popup";
 import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
 import { startLinkIdentity, unlinkProvider } from "@/app/actions/social";
@@ -62,9 +63,7 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
           <dt>닉네임</dt>
           <dd>
             {profileLoadFailed ? (
-              <p role="alert" className="mp-msg err">
-                프로필을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.
-              </p>
+              <AlertPopup>프로필을 불러오지 못했어요. 잠시 뒤에 다시 시도해 주세요.</AlertPopup>
             ) : (
               <DisplayNameForm initial={displayName} />
             )}

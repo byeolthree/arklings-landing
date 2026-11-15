@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertPopup } from "@/components/ui/alert-popup";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -702,31 +703,23 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, work
           </div>
 
           {loginPrompt && !authed && (
-            <div className="notice login" role="alert">
+            <AlertPopup key={loginPrompt} onClose={() => setLoginPrompt(null)} actions={<><Link className="btn btn-primary sm" href={loginHref}>로그인</Link><Link className="btn btn-ghost sm" href={signupHref}>회원가입</Link></>}>
               {loginPrompt === "저장" ? (
                 <>
                   <b>로그인하지 않아 이 브라우저에만 임시로 저장돼요.</b>
-                  <p style={{ marginTop: 4 }}>
+                  <p style={{ marginTop: 4, fontWeight: 400, fontSize: 13 }}>
                     로그인하면 서버에 저장하고 포트폴리오에도 올릴 수 있어요. 지금 쓴 내용은 이 기기에 남아 있으니, 로그인하고 돌아와서 이어서 저장하면 돼요.
                   </p>
                 </>
               ) : (
                 <>
                   <b>{loginPrompt}은(는) 로그인이 필요합니다.</b>
-                  <p style={{ marginTop: 4 }}>
+                  <p style={{ marginTop: 4, fontWeight: 400, fontSize: 13 }}>
                     로그인한 뒤에 할 수 있어요. 지금 쓴 내용은 이 기기에 남아 있으니, 로그인하고 돌아와서 이어서 하면 돼요.
                   </p>
                 </>
               )}
-              <div className="row-actions">
-                <Link className="btn btn-primary sm" href={loginHref}>
-                  로그인
-                </Link>
-                <Link className="btn btn-ghost sm" href={signupHref}>
-                  회원가입
-                </Link>
-              </div>
-            </div>
+            </AlertPopup>
           )}
         </div>
       </section>

@@ -6,9 +6,8 @@ import { describeAuthError } from "@/lib/auth-messages";
 import { CONFIRM_FIRST_MESSAGE, getCurrentUser, isConfirmed } from "@/lib/auth";
 import { getOrigin } from "@/lib/origin";
 import { createAuthClient } from "@/lib/supabase/server";
+import { EMAIL_RE, formText as text } from "@/lib/utils";
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const text = (fd: FormData, key: string) => String(fd.get(key) ?? "");
 const UNAVAILABLE = "지금은 이 기능을 쓸 수 없어요. 잠시 뒤에 다시 시도해 주세요.";
 
 // 비밀번호 설정·재설정 메일. 소셜로 가입한 사람이 이메일 로그인도 쓰고 싶을 때, 비밀번호를 잊었을 때 같은 길을 쓴다.

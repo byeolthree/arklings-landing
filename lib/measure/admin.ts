@@ -3,6 +3,7 @@
 // 화면에는 시각·행동·화면 경로·로그인 여부만 내보낸다. 회원 번호(user_id)·브라우저 무작위 값(anon_id)·부가 값은 화면에 보내지 않는다.
 import { USAGE_EVENTS, type UsageEvent } from "@/lib/measure/events";
 import { createAuthClient } from "@/lib/supabase/server";
+import { one } from "@/lib/utils";
 
 export const USAGE_PAGE_SIZE = 20;
 
@@ -29,8 +30,6 @@ export type UsageRow = { id: string; created_at: string; event: UsageEvent; page
 export type UsageLoad =
   | { ok: true; rows: UsageRow[]; total: number; counts: { event: UsageEvent; count: number }[]; periodTotal: number }
   | { ok: false; reason: "no_table" | "error" };
-
-const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 // 주소의 값을 검사해 정해진 값만 받는다(그 밖의 값은 기본값).
 export function parseUsageQuery(sp: Record<string, string | string[] | undefined>): UsageQuery {

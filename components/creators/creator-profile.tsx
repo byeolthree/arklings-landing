@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BlurImage } from "./blur-image";
+import { CollabFab } from "./collab-fab";
 import { HeroVideo } from "./hero-video";
 import { RoleTags } from "./role-tags";
 import { WORK_KINDS, type CreatorProfileData, type WorkCard } from "./types";
@@ -11,10 +12,20 @@ const iconProps = { width: 18, height: 18, viewBox: "0 0 24 24", "aria-hidden": 
 function ChannelLogo({ label }: { label: string }) {
   if (/인스타|instagram/i.test(label))
     return (
-      <svg {...iconProps} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+      // 인스타그램 브랜드 색(노랑→주황→분홍→보라→파랑 그라데이션). 유튜브 로고처럼 브랜드 색을 그대로 쓴다.
+      <svg {...iconProps} fill="none" stroke="url(#cr-ig-grad)" strokeWidth="1.8" strokeLinecap="round">
+        <defs>
+          <linearGradient id="cr-ig-grad" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0" stopColor="#feda75" />
+            <stop offset="0.3" stopColor="#fa7e1e" />
+            <stop offset="0.55" stopColor="#d62976" />
+            <stop offset="0.8" stopColor="#962fbf" />
+            <stop offset="1" stopColor="#4f5bd5" />
+          </linearGradient>
+        </defs>
         <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
         <circle cx="12" cy="12" r="4" />
-        <circle cx="17.2" cy="6.8" r="0.8" fill="currentColor" stroke="none" />
+        <circle cx="17.2" cy="6.8" r="0.8" fill="#d62976" stroke="none" />
       </svg>
     );
   if (/유튜브|youtube/i.test(label))
@@ -25,6 +36,16 @@ function ChannelLogo({ label }: { label: string }) {
       </svg>
     );
   return null;
+}
+
+// 「협업 신청 받는 중」 옆의 작은 반투명 종이비행기(배경 없음). 내 프로필에서도 보이고, 남의 프로필에서만 눌린다.
+function OpenSendIcon() {
+  return (
+    <svg className="cr-open-ico" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M22 2 11 13" />
+      <path d="M22 2 15 22l-4-9-9-4 20-7z" />
+    </svg>
+  );
 }
 
 // 크리에이터 프로필 화면. 마이페이지 「크리에이터 등록」에 적은 것(닉네임·역할·소개 글·채널 링크·협업 신청 받는 중)이
@@ -71,11 +92,21 @@ export function CreatorProfile({
           </Link>
           <div className="cr-hero-body">
             {privateNote && <span className="cr-open">비공개 상태입니다</span>}
-            <RoleTags roles={creator.roles} />
+            {/* 순서: 협업 신청 받는 중 → 닉네임 → 역할 태그(역할이 많아도 닉네임 위를 덮지 않게 맨 아래, 2026-11-13) */}
+            {creator.openToCollab &&
+              (showApply && applyHref && !owner ? (
+                <Link href={applyHref} className="cr-open cr-open-go" aria-label="협업 신청 받는 중. 누르면 협업을 신청합니다">
+                  협업 신청 받는 중 <OpenSendIcon />
+                </Link>
+              ) : (
+                <span className="cr-open cr-open-go">
+                  협업 신청 받는 중 <OpenSendIcon />
+                </span>
+              ))}
             <h1 id="cr-hero-name" className="cr-hero-name">
               {creator.name}
             </h1>
-            {creator.openToCollab && <span className="cr-open">협업 신청 받는 중</span>}
+            <RoleTags roles={creator.roles} lead />
           </div>
         </div>
       </section>
@@ -107,6 +138,8 @@ export function CreatorProfile({
                 </ul>
               )}
             </div>
+            {/* 남의 프로필: 주인 버튼 자리에 협업 신청 아이콘 버튼의 자리를 둔다(버튼은 CollabFab이 이 자리에 맞춰 화면에 고정해 띄운다) */}
+            {!owner && creator.openToCollab && showApply && applyHref && <span className="cr-fab-slot" aria-hidden="true" />}
             {owner && (
               <div className="cr-owner-btns">
                 <Link href={owner.editHref} className="btn btn-ghost">
@@ -141,17 +174,11 @@ export function CreatorProfile({
           </div>
         </section>
       ) : (
-        <WorkBands key={works.map((w) => `${w.id}${w.isPublic === false ? "0" : "1"}`).join()} works={works} hrefs={works.map((w) => workHref(w.id))} owner={Boolean(owner)} />
+        <WorkBands key={works.map((w) => `${w.id}${w.isPublic === false ? "0" : "1"}`).join()} works={works} hrefs={works.map((w) => workHref(w.id))} owner={Boolean(owner)} roles={creator.roles} />
       )}
 
-      {/* 스크롤해도 화면 아래에 붙어 있다가, 맨 끝에서는 제자리에 놓인다(바깥 틀이 키가 커야 붙으므로 맨 아래 직속으로 둔다) */}
-      {creator.openToCollab && showApply && applyHref && (
-        <div className="cr-apply-stick">
-          <Link href={applyHref} className="btn btn-primary">
-            이 크리에이터에게 협업 신청 <span className="arrow">→</span>
-          </Link>
-        </div>
-      )}
+      {/* 협업 신청: 대표 화면 소리 버튼 바로 위, 같은 크기의 아이콘 버튼. 화면에 고정되어 스크롤해도 그 자리에 있다 */}
+      {creator.openToCollab && showApply && applyHref && <CollabFab href={applyHref} />}
     </div>
   );
 }

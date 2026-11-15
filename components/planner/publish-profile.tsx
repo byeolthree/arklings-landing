@@ -3,8 +3,9 @@
 import { channelLabelFromUrl } from "@/lib/channel-label";
 import { useEffect, useRef, useState } from "react";
 import { ROLES, type Role } from "@/lib/collab";
+import { ROLE_TONE } from "@/components/creators/role-tone";
 import {
-  ABOUT_MAX,
+  BIO_MAX,
   CHANNEL_MAX,
   HANDLE_MAX,
   normalizeHandle,
@@ -95,6 +96,22 @@ export function PublishProfile({
   function toggle(r: Role) {
     setRoles((cur) => (cur.includes(r) ? cur.filter((x) => x !== r) : [...cur, r]));
   }
+  // 역할 태그를 두 번 누르면 그 역할이 맨 앞(대표 역할)이 된다.
+  function makeRep(r: Role) {
+    setRoles((cur) => [r, ...cur.filter((x) => x !== r)]);
+  }
+  // 같은 태그를 1초 안에 다시 누르면 「두 번 누름」으로 본다(빠르게 두 번이든 천천히 두 번이든). 두 번째 누름은 선택을 풀지 않고 대표로만 정한다.
+  const lastPress = useRef<{ r: Role; t: number } | null>(null);
+  function pressRole(r: Role, now: number) {
+    const prev = lastPress.current;
+    if (prev && prev.r === r && now - prev.t < 1000) {
+      lastPress.current = null;
+      makeRep(r);
+      return;
+    }
+    lastPress.current = { r, t: now };
+    toggle(r);
+  }
   const setChannel = (i: number, patch: Partial<Channel>) => setChannels((cur) => cur.map((c, k) => (k === i ? { ...c, ...patch } : c)));
 
   async function submit(e: React.FormEvent) {
@@ -103,7 +120,6 @@ export function PublishProfile({
     const checked = validateCreatorProfile({
       handle,
       roles,
-      bio: "", // 한 줄 소개 칸은 없앴다(D23 8차). 서버 규칙에는 아직 있으므로 빈 값을 보낸다
       // 기획안을 올리다가 열리는 칸에서는 필수 칸만 받는다. 나머지는 마이페이지에서 나중에 채운다.
       about: full ? about : "",
       channels: full ? channels.map((c) => ({ ...c, label: channelLabelFromUrl(c.url) ?? c.label })) : [],
@@ -203,11 +219,13 @@ export function PublishProfile({
         </span>
         <div className="pp-roles" role="group" aria-labelledby="pp-roles-label">
           {(Object.keys(ROLES) as Role[]).map((r) => (
-            <button key={r} type="button" className="opt" aria-pressed={roles.includes(r)} onClick={() => toggle(r)}>
+            <button key={r} type="button" className={`opt role-opt ${ROLE_TONE[r]}`} aria-pressed={roles.includes(r)} onClick={(e) => pressRole(r, e.timeStamp)}>
+              {roles.length >= 2 && roles[0] === r && <span className="rep-badge">대표</span>}
               {ROLES[r]}
             </button>
           ))}
         </div>
+        {roles.length >= 2 && <p className="pp-hint">{"태그를 '빠르게 두 번' 클릭해서 대표 역할을 골라주세요."}</p>}
         {errors.roles && (
           <p className="pp-err" role="alert">
             {errors.roles}
@@ -232,8 +250,8 @@ export function PublishProfile({
             placeholder={"〈한 줄 소개〉\n〈경력〉\n〈참여한 일〉\n〈하고 싶은 협업〉"}
             aria-invalid={errors.about ? true : undefined}
           />
-          <p className={`len ${about.length > ABOUT_MAX ? "over" : ""}`}>
-            <span className="cnt">{about.length}</span> / {ABOUT_MAX}자
+          <p className={`len ${about.length > BIO_MAX ? "over" : ""}`}>
+            <span className="cnt">{about.length}</span> / {BIO_MAX}자
           </p>
           {errors.about && (
             <p className="pp-err" role="alert">

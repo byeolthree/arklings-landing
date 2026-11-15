@@ -7,11 +7,10 @@
 // 파일 이름은 "임의 글자 20자-표식 15자"(36자, 0009의 경로 검사와 같은 모양)다. 표식은 (서버 비밀값, 주인 번호, 임의 글자)로 만든 서명이라
 // 다른 사람의 파일 이름을 자기 요소에 적어 넣어도(DB는 이름 모양만 본다) 서버가 그 파일을 지우거나 본인 것처럼 보여 주지 않는다.
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
-import { DOCUMENT_MAX_BYTES, HERO_VIDEO_MAX_BYTES, IMAGE_MAX_BYTES, type FileKind, type HeroFileKind } from "@/lib/creator-rules";
+import { CREATOR_BUCKET, DOCUMENT_MAX_BYTES, HERO_VIDEO_MAX_BYTES, IMAGE_MAX_BYTES, type FileKind, type HeroFileKind } from "@/lib/creator-rules";
 import { getSupabase } from "@/lib/supabase";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export const CREATOR_BUCKET = "creator-works";
 export const SIGNED_URL_SECONDS = 600; // 임시 주소 유효 시간(10분)
 
 type Sniffed = { kind: FileKind; type: "image/jpeg" | "image/png" | "image/webp" | "application/pdf" | "video/mp4"; ext: "jpg" | "png" | "webp" | "pdf" | "mp4" };
@@ -69,12 +68,15 @@ export function checkHeroHead(head: Uint8Array, size: number, expect: HeroFileKi
 }
 
 // ── 파일 이름과 본인 표식 ───────────────────────────────────────────────────────────
-function secret(): string {
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!key) throw new Error("서버 전용 Supabase 설정(SUPABASE_SERVICE_ROLE_KEY)이 없습니다.");
-  return key;
+// 표식을 만드는 비밀값. 서버 열쇠는 바뀔 수 있어서(바뀌면 그전에 올린 파일이 모두 막힌다) 따로 정한 고정 비밀값(CREATOR_FILE_TAG_SECRET)을 먼저 쓴다.
+// 고정 비밀값을 두기 전에 서버 열쇠로 만든 표식도 계속 인정한다.
+function secrets(): string[] {
+  const list = [process.env.CREATOR_FILE_TAG_SECRET, process.env.SUPABASE_SERVICE_ROLE_KEY].filter((k): k is string => Boolean(k));
+  if (list.length === 0) throw new Error("파일 표식용 비밀값(CREATOR_FILE_TAG_SECRET 또는 SUPABASE_SERVICE_ROLE_KEY)이 없습니다.");
+  return list;
 }
-const tagOf = (userId: string, rand: string) => createHmac("sha256", secret()).update(`creator-file:${userId}:${rand}`).digest("hex").slice(0, 15);
+const tagWith = (key: string, userId: string, rand: string) => createHmac("sha256", key).update(`creator-file:${userId}:${rand}`).digest("hex").slice(0, 15);
+const tagOf = (userId: string, rand: string) => tagWith(secrets()[0], userId, rand);
 const NAME_RE = /^([0-9a-f]{20})-([0-9a-f]{15})\.(jpg|png|webp|pdf|mp4)$/;
 
 export function newFileName(userId: string, ext: Sniffed["ext"] | "mp4"): string {
@@ -86,9 +88,11 @@ export function newFileName(userId: string, ext: Sniffed["ext"] | "mp4"): string
 export function fileBelongsTo(userId: string, name: string): boolean {
   const m = NAME_RE.exec(name);
   if (!m) return false;
-  const want = Buffer.from(tagOf(userId, m[1]));
   const got = Buffer.from(m[2]);
-  return want.length === got.length && timingSafeEqual(want, got);
+  return secrets().some((key) => {
+    const want = Buffer.from(tagWith(key, userId, m[1]));
+    return want.length === got.length && timingSafeEqual(want, got);
+  });
 }
 
 // ── 올리기 ─────────────────────────────────────────────────────────────────────────
@@ -164,6 +168,35 @@ export async function signPublicFiles(paths: readonly (string | null | undefined
   for (const r of (blocks.data ?? []) as { file_path: string | null }[]) if (r.file_path) allowed.add(r.file_path);
   for (const r of (heroes.data ?? []) as { hero_path: string | null }[]) if (r.hero_path) allowed.add(r.hero_path);
   return sign(wanted.filter((p) => allowed.has(p)));
+}
+
+// 내 요소에 걸려 있는데 표식이 맞지 않는 파일을 새 이름으로 다시 저장해 표식을 맞춘다.
+// 다른 사람의 요소나 대표 파일에 걸린 이름이면 손대지 않는다. 바꾼 것은 「옛 이름 → 새 이름」으로 돌려준다.
+export async function retagOwnFiles(userId: string, rows: readonly { id: string; file_path: string | null }[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  const bad = rows.filter((r) => r.file_path && NAME_RE.test(r.file_path) && !fileBelongsTo(userId, r.file_path));
+  if (bad.length === 0) return out;
+  const admin = createAdminClient();
+  for (const r of bad) {
+    const old = r.file_path as string;
+    const [others, heroes] = await Promise.all([
+      admin.from("creator_work_blocks").select("id").eq("file_path", old).neq("owner_id", userId).limit(1),
+      admin.from("creator_profiles").select("user_id").eq("hero_path", old).neq("user_id", userId).limit(1),
+    ]);
+    if (others.error || heroes.error || (others.data ?? []).length > 0 || (heroes.data ?? []).length > 0) continue;
+    const ext = (NAME_RE.exec(old) as RegExpExecArray)[3] as Sniffed["ext"];
+    const fresh = newFileName(userId, ext);
+    const copied = await admin.storage.from(CREATOR_BUCKET).copy(old, fresh);
+    if (copied.error) continue;
+    const moved = await admin.from("creator_work_blocks").update({ file_path: fresh }).eq("id", r.id).eq("owner_id", userId).eq("file_path", old);
+    if (moved.error) {
+      await admin.storage.from(CREATOR_BUCKET).remove([fresh]);
+      continue;
+    }
+    await admin.storage.from(CREATOR_BUCKET).remove([old]);
+    out.set(old, fresh);
+  }
+  return out;
 }
 
 // 본인 화면용(비공개 작품 미리 보기, 마이페이지): 본인 표식이 붙은 파일만 임시 주소를 만든다. 호출하는 쪽이 본인 확인을 마쳤어야 한다.

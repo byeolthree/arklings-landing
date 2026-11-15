@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CreatorListSkeleton, CreatorProfileSkeleton, NotFoundView, PlanDetailSkeleton } from "@/components/creators/state-views";
 import { ErrorPreview } from "./error-preview";
+import { one } from "@/lib/utils";
 
 // 디자인 확인용 샘플 미리보기. 크리에이터 화면의 상태 화면(불러오는 중·오류·404)을 한 곳에서 본다. 디자인이 끝나면 지운다.
 export const metadata: Metadata = { title: "상태 화면 샘플 미리보기", robots: { index: false, follow: false } };
@@ -23,7 +24,7 @@ const VIEWS: Record<string, { label: string; node: React.ReactNode }> = {
 
 export default async function StatesPreviewPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const sp = await searchParams;
-  const raw = Array.isArray(sp.view) ? sp.view[0] : sp.view;
+  const raw = one(sp.view);
   const key = raw && raw in VIEWS ? raw : "list-loading";
   return (
     <>

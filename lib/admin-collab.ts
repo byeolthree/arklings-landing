@@ -1,5 +1,7 @@
 import { ROLES, STATUSES, type Role, type Status } from "@/lib/collab";
 import { createAuthClient } from "@/lib/supabase/server";
+import { kstIso } from "@/lib/time";
+import { one } from "@/lib/utils";
 
 // 운영자 화면(/admin)이 읽는 협업 신청 기록. DB의 collab_log(0016)만 읽고, 로그인한 본인의 권한(RLS)으로 읽는다.
 // 운영자 표시(admins)가 없는 계정은 DB가 한 줄도 돌려주지 않는다. 내용·연락처·첨부는 이 기록에 없다.
@@ -53,8 +55,6 @@ export type AdminQuery = {
   stale?: boolean; // 3일 넘게 접수 상태
   q?: string;
 };
-
-const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 // 주소의 값을 믿지 않고 허용 목록으로만 받는다.
 export function parseAdminQuery(sp: Record<string, string | string[] | undefined>): AdminQuery {
@@ -224,7 +224,7 @@ export async function loadMetrics(period: PeriodKey): Promise<Metrics | null> {
   const median = resp.length === 0 ? null : resp.length % 2 ? resp[(resp.length - 1) / 2] : (resp[resp.length / 2 - 1] + resp[resp.length / 2]) / 2;
   const total = rows.length;
   const decided = counts.accepted + counts.rejected;
-  const kst = (t: number) => new Date(t + 9 * 3600 * 1000).toISOString().slice(5, 10).replace("-", "/");
+  const kst = (t: number) => kstIso(new Date(t)).slice(5, 10).replace("-", "/");
 
   const sorted = Array.from(per.entries()).sort((a, b) => b[1].sent - a[1].sent);
   const top = sorted.slice(0, 5).map(([name, v]) => ({ name, sent: v.sent, rate: Math.round((v.done / v.sent) * 100) }));

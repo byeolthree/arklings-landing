@@ -2,7 +2,7 @@
 // 공개용 보기(lib/creators.ts)와 달리 비공개도 읽으므로 반드시 본인 확인을 마친 사용자 번호로만 부른다. 화면으로 넘기는 값에는 내 번호를 싣지 않는다.
 import type { Role } from "@/lib/collab";
 import { isRole } from "@/lib/creator-rules";
-import { signOwnFiles } from "@/lib/creator-files";
+import { retagOwnFiles, signOwnFiles } from "@/lib/creator-files";
 import type { WorkBlock, WorkListItem } from "@/lib/creators";
 import { createAuthClient } from "@/lib/supabase/server";
 
@@ -37,7 +37,7 @@ type WorkRow = {
 };
 type BlockRow = {
   id: string; work_id: string; position: number; kind: "text" | "image" | "video" | "document";
-  body: string | null; file_path: string | null; file_name: string | null; file_bytes: number | null; youtube_id: string | null; sub_kind?: string | null;
+  body: string | null; file_path: string | null; file_name: string | null; file_bytes: number | null; youtube_id: string | null; sub_kind?: string | null; fit?: string | null;
 };
 
 export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
@@ -48,11 +48,14 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
     sb.from("creator_profiles").select("public_handle, roles, bio, open_to_collab, is_public, hero_kind, hero_path, hero_bytes").eq("user_id", userId).maybeSingle(),
     sb.from("creator_channels").select("label, url, position").eq("user_id", userId).order("position", { ascending: true }),
     readWorks(`${workCols}, logline_position`),
-    sb.from("creator_work_blocks").select("id, work_id, position, kind, body, file_path, file_name, file_bytes, youtube_id, sub_kind").eq("owner_id", userId).order("position", { ascending: true }).order("created_at", { ascending: true }),
+    sb.from("creator_work_blocks").select("id, work_id, position, kind, body, file_path, file_name, file_bytes, youtube_id, sub_kind, fit").eq("owner_id", userId).order("position", { ascending: true }).order("created_at", { ascending: true }),
   ]);
   for (const r of [prof, chans, works, blocks]) if (r.error) throw new Error(r.error.message);
 
   const brows = (blocks.data ?? []) as unknown as BlockRow[];
+  // 표식이 어긋난 내 파일은 새 이름으로 다시 저장해 등록 화면에서도 열리게 한다(한 번 고치면 다음부터는 건너뛴다).
+  const renamed = await retagOwnFiles(userId, brows);
+  for (const b of brows) if (b.file_path && renamed.has(b.file_path)) b.file_path = renamed.get(b.file_path) as string;
   const urls = await signOwnFiles(userId, brows.map((b) => b.file_path));
   const byWork = new Map<string, MyBlock[]>();
   let used = 0;
@@ -63,7 +66,7 @@ export async function loadMyCreator(userId: string): Promise<MyCreatorData> {
     if (b.kind === "text" && b.body) list.push({ id: b.id, kind: "text", body: b.body, sub });
     else if (b.kind === "video" && b.youtube_id) list.push({ id: b.id, kind: "video", youtubeId: b.youtube_id, sub });
     else if (b.kind === "video" && b.file_path) list.push({ id: b.id, kind: "video", youtubeId: null, fileName: b.file_name, fileBytes: b.file_bytes, src: urls.get(b.file_path) ?? null, sub });
-    else if (b.kind === "image") list.push({ id: b.id, kind: "image", fileName: b.file_name, src: b.file_path ? (urls.get(b.file_path) ?? null) : null });
+    else if (b.kind === "image") list.push({ id: b.id, kind: "image", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, sub, fit: b.fit === "cover" ? "cover" : "contain" });
     else if (b.kind === "document") list.push({ id: b.id, kind: "document", fileName: b.file_name, fileBytes: b.file_bytes, src: b.file_path ? (urls.get(b.file_path) ?? null) : null, sub });
     byWork.set(b.work_id, list);
   }

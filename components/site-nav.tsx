@@ -14,6 +14,9 @@ const MENU: { label: string; href?: string }[] = [
   { label: "커뮤니티" },
 ];
 
+// ＋가 가는 곳: 메뉴에서 맨 위에 있는 화면. 지금은 크리에이터(/creators)다.
+const PLUS_HREF = MENU.find((m) => m.href)?.href ?? "/";
+
 export type NavNotice = { id: string; text: string; when: string };
 
 type Drop = "plus" | "person" | "bell" | null;
@@ -38,7 +41,7 @@ const BellIcon = () => (
 );
 
 // 로그인하면 아이콘 셋(＋ · 사람 · 종), 아니면 ＋와 사람 둘. 종의 개수와 목록은 서버가 읽은 새 협업 신청(SiteHeader)이다.
-export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { loggedIn: boolean; newCount: number | null; notices: NavNotice[]; isAdmin?: boolean }) {
+export function SiteNav({ loggedIn, newCount, notices, isAdmin = false, plusHref }: { loggedIn: boolean; newCount: number | null; notices: NavNotice[]; isAdmin?: boolean; plusHref?: string }) {
   const [open, setOpen] = useState(false);
   const [drop, setDrop] = useState<Drop>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -140,12 +143,12 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false }: { logg
         </nav>
 
         <div className="lk-nav-right lk-icons">
-          {/* ＋ : 로그인했을 때만. 등록할 곳 드롭다운 */}
+          {/* ＋ : 로그인했을 때만. 마우스를 올리면 등록할 곳 드롭다운이 열리고, 누르면 내 크리에이터 상세(프로필 편집·포트폴리오 등록 버튼이 있는 화면, 프로필이 없으면 프로필 등록)로 간다. 내 것을 더하는 동작이라서다(2026-11-13) */}
           {isIn && (
             <div className="lk-ico-wrap" {...hv("plus")}>
-              <button type="button" className="lk-ico lk-ico-fill" aria-label="등록하기" aria-haspopup="menu" aria-expanded={drop === "plus"} onClick={() => toggleDrop("plus")}>
+              <Link href={plusHref ?? PLUS_HREF} className="lk-ico lk-ico-fill" aria-label="등록하기" aria-haspopup="menu" aria-expanded={drop === "plus"} onClick={(e) => iconClick(e, "plus")}>
                 <PlusIcon />
-              </button>
+              </Link>
               {drop === "plus" && (
                 <div className="lk-drop" role="menu" aria-label="등록할 곳">
                   {MENU.map((m) =>
