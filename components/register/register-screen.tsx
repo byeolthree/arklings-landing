@@ -87,7 +87,7 @@ export function RegisterScreen({ works, usedBytes, nickname, openWorkId, openNew
           </div>
         )}
         {current === null ? (
-          <PortfolioManager works={works} usedBytes={usedBytes} hasProfile={true} nickname={nickname} onOpenNew={() => setCurrent("new")} onOpenEdit={(id) => setCurrent(id)} />
+          <PortfolioManager works={works} usedBytes={usedBytes} hasProfile={true} onOpenNew={() => setCurrent("new")} onOpenEdit={(id) => setCurrent(id)} />
         ) : cur ? (
           <WorkEditor
             key={cur.id}

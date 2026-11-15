@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/apply", destination: "/collab/new", permanent: false },
-      // 예전 기획안 화면 주소. 파일(public/planner.html)은 남겨 두고 새 화면으로 보낸다.
+      // 예전 기획안 화면 주소(public/planner.html 파일은 2026-11-07에 지웠다). 새 화면으로 보낸다.
       { source: "/planner.html", destination: "/planner", permanent: false },
     ];
   },

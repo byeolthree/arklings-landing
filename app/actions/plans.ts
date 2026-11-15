@@ -12,7 +12,6 @@ import {
   parseDraft,
   type PlanPanel,
   titleOrDefault,
-  toPublicContent,
   toStored,
   type PlanDraft,
 } from "@/lib/plans";
@@ -173,36 +172,6 @@ export async function deletePlan(planId: string): Promise<Ok<object> | Fail> {
     if (error || !data || data.length === 0) return { ok: false, error: "삭제하지 못했어요. 이미 지워진 기획안일 수 있어요." };
     revalidatePath("/mypage");
     return { ok: true };
-  } catch {
-    return { ok: false, error: UNAVAILABLE };
-  }
-}
-
-// 공개 여부. 켤 때는 "지금 화면의 완성 내용"을 공개용 사본으로 저장한다(이력·선택지는 공개되지 않는다).
-// 끄면 공개용 사본도 함께 지운다.
-export async function setPlanPublic(planId: string, makePublic: boolean, raw: unknown): Promise<Ok<{ panel: PlanPanel | null }> | Fail> {
-  const auth = await needUser();
-  if ("ok" in auth) return auth;
-  if (!UUID_RE.test(planId)) return { ok: false, error: NOT_FOUND };
-
-  let patch: { is_public: boolean; published_at: string | null; public_content: unknown; title?: string };
-  if (makePublic) {
-    const parsed = draftOf(raw);
-    if ("ok" in parsed) return parsed;
-    const { draft } = parsed;
-    const hasContent = draft.slots.some((s) => s.trim()) || (draft.edited ?? "").trim() !== "";
-    if (!hasContent) return { ok: false, error: "공개하려면 먼저 내용을 써 주세요." };
-    patch = { is_public: true, published_at: new Date().toISOString(), public_content: toPublicContent(draft), title: titleOrDefault(draft.title, draft) };
-  } else {
-    patch = { is_public: false, published_at: null, public_content: null };
-  }
-  try {
-    const sb = await createAuthClient();
-    const { data, error } = await sb.from("plans").update(patch).eq("id", planId).select("id");
-    if (error || !data || data.length === 0) return { ok: false, error: NOT_FOUND };
-    revalidatePath("/mypage");
-    revalidatePath("/portfolio");
-    return { ok: true, panel: await panelOf(planId, auth.user.id) };
   } catch {
     return { ok: false, error: UNAVAILABLE };
   }

@@ -1,8 +1,7 @@
 import { applicantReceipt, newRequestNotice } from "@/lib/mail-templates";
 import { sendMail } from "@/lib/mail";
 import { createAdminClient } from "@/lib/supabase/admin";
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { EMAIL_RE } from "@/lib/utils";
 
 // 받는 사람의 이메일. 아클링스 앞 신청은 환경 변수(ADMIN_NOTIFY_EMAIL), 회원 앞 신청은 그 회원의 확인된 이메일.
 async function recipientEmail(kind: "arklings" | "user", recipientId: string | null): Promise<string | null> {

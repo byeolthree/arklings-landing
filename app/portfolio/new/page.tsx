@@ -7,9 +7,9 @@ import "@/components/register/register.css";
 import { CreatorProfileForm } from "@/components/mypage/creator-forms";
 import { RegisterHeader } from "@/components/register/register-steps";
 import { RegisterScreen } from "@/components/register/register-screen";
-import { requireUser } from "@/lib/auth";
+import { readDisplayName, requireUser } from "@/lib/auth";
 import { loadMyCreator, type MyCreatorData } from "@/lib/creators-mine";
-import { createAuthClient } from "@/lib/supabase/server";
+import { UUID_RE } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "포트폴리오 등록", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 export default async function PortfolioNewPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const user = await requireUser("/portfolio/new");
   const sp = await searchParams;
-  const workParam = typeof sp.work === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(sp.work) ? sp.work : null;
+  const workParam = typeof sp.work === "string" && UUID_RE.test(sp.work) ? sp.work : null;
 
   let data: MyCreatorData | null = null;
   try {
@@ -27,13 +27,7 @@ export default async function PortfolioNewPage({ searchParams }: { searchParams:
   } catch {
     data = null;
   }
-  let nickname = "";
-  try {
-    const { data: row } = await (await createAuthClient()).from("profiles").select("display_name").eq("id", user.id).maybeSingle();
-    nickname = (row as { display_name?: string } | null)?.display_name ?? "";
-  } catch {
-    nickname = "";
-  }
+  const nickname = await readDisplayName(user.id);
 
   if (!data) {
     return (

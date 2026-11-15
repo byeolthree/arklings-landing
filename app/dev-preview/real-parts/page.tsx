@@ -42,7 +42,7 @@ export default async function RealPartsPreview({ searchParams }: { searchParams:
           <div className="wrap">
             <div className="mp-sh"><h2>포트폴리오 등록</h2></div>
             <div className="mp-card">
-              <PortfolioManager works={works} usedBytes={12 * 1024 * 1024} hasProfile nickname="별뜨리" />
+              <PortfolioManager works={works} usedBytes={12 * 1024 * 1024} hasProfile />
             </div>
           </div>
         </section>

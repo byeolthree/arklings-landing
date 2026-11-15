@@ -11,42 +11,39 @@ type BaseCard = Omit<CreatorCard, "openToCollab" | "genres" | "forms" | "hero" |
 
 // 샘플 로그라인은 지어낸 문장 없이 문장 틀(어느 날 〈사건〉이 벌어지자, 〈주인공〉은 〈장애물〉을 극복해야 〈목표〉를 달성할 수 있다. 그렇지 않으면 〈위험〉이 닥친다.) 그대로 둔다(별뜨리님 지시 2026-11-07: 지어낸 로그라인 삭제).
 const LOGLINE_TEMPLATE = "어느 날 〈사건〉이 벌어지자, 〈주인공〉은 〈장애물〉을 극복해야 〈목표〉를 달성할 수 있다. 그렇지 않으면 〈위험〉이 닥친다.";
-const loglineOf = (_title: string): string => LOGLINE_TEMPLATE;
 
 const RAW_CREATORS: BaseCard[] = [
-  { handle: "jian-lee", name: "별뜨리", roles: ["video"], bio: "사라지는 기억과 기록하는 사람을 쓰는 대본 작가예요.", planCount: 3, latest: { title: "소금비 내리는 나라", logline: loglineOf("소금비 내리는 나라"), genres: ["드라마", "판타지"] } },
-  { handle: "seoha-park", name: "하삘라", roles: ["video", "producer"], bio: "밤에만 열리는 문 같은 이야기를 영상으로 옮겨요.", planCount: 2, latest: { title: "달빛 아래 두 번째 문", logline: loglineOf("달빛 아래 두 번째 문"), genres: ["판타지", "미스터리"] } },
-  { handle: "dayun-choi", name: "morningstar", roles: ["art_director"], bio: "옛 베 짜기와 복식을 이야기 속에 살려 내는 역사 자문가입니다.", planCount: 1, latest: { title: "실이 이어 준 사람들", logline: loglineOf("실이 이어 준 사람들"), genres: ["드라마"] } },
-  { handle: "hayun-jung", name: "정하윤", roles: ["script", "art_director"], bio: "붉은 강과 나루터처럼 장면이 먼저 떠오르는 글을 써요.", planCount: 5, latest: { title: "붉은 강이 흐르는 밤", logline: loglineOf("붉은 강이 흐르는 밤"), genres: ["드라마", "로맨스"] } },
-  { handle: "dohyun-kim", name: "김도현", roles: ["video"], bio: "짧은 영상으로 세계관의 첫인상을 만듭니다.", planCount: 4, latest: { title: "삼한의 마지막 등불", logline: loglineOf("삼한의 마지막 등불"), genres: ["전쟁", "드라마"] } },
-  { handle: "seoyun-choi", name: "최서윤", roles: ["other"], bio: "지도에 없는 마을을 찾아다니는 사람.", planCount: 1, latest: { title: "지도에 없는 마을", logline: loglineOf("지도에 없는 마을"), genres: ["미스터리"] } },
-  { handle: "minjun-han", name: "한민준", roles: ["script", "video", "art_director", "producer"], bio: "대본부터 영상, 제작 관리까지 한 편을 끝까지 같이 만들어요.", planCount: 7, latest: { title: "바람의 값", logline: loglineOf("바람의 값"), genres: ["액션", "스릴러", "범죄"] } },
-  { handle: "yuna-oh", name: "오유나", roles: ["art_director"], planCount: 2, latest: { title: "짧은 글", logline: loglineOf("짧은 글"), genres: ["애니메이션"] } },
-  { handle: "taeyang-baek", name: "백태양", roles: ["producer"], bio: "책임 프로듀서로 여러 팀의 일정을 맞춥니다.", planCount: 1, latest: { title: "아주 아주 긴 제목의 기획안이 카드 안에서 어떻게 잘리는지 확인하기 위한 샘플 제목입니다", logline: loglineOf("아주 아주 긴 제목의 기획안이 카드 안에서 어떻게 잘리는지 확인하기 위한 샘플 제목입니다"), genres: ["다큐멘터리"] } },
-  { handle: "sora-yoon", name: "윤소라", roles: ["video", "history_advisor"], bio: "물길과 뱃사공 이야기를 좋아하는 영상 크리에이터입니다.", planCount: 3, latest: { title: "나루터의 약속", logline: loglineOf("나루터의 약속"), genres: ["드라마", "로맨스"] } },
-  { handle: "junho-seo", name: "서준호", roles: ["script"], bio: "봉화대 같은 짧고 단단한 이야기를 씁니다.", planCount: 2, latest: { title: "마지막 봉화", logline: loglineOf("마지막 봉화"), genres: ["전쟁", "액션"] } },
-  { handle: "hana-kang", name: "강하나", roles: ["art_director", "other"], bio: "색이 사라지는 도읍 같은 장면의 색을 설계해요.", planCount: 6, latest: { title: "색을 잃은 도읍", logline: loglineOf("색을 잃은 도읍"), genres: ["판타지", "애니메이션"] } },
-  { handle: "eunseo-jo", name: "조은서아라온다미리내", roles: ["script"], bio: "공개 이름이 길어도 소개 한 줄이 카드 밖으로 넘치지 않는지 확인하는 샘플 소개 문구입니다. 이 문장은 일부러 길게 적었습니다.", planCount: 1, latest: { title: "이름이 매우 긴 크리에이터", logline: loglineOf("이름이 매우 긴 크리에이터"), genres: ["드라마", "미스터리"] } },
-  { handle: "gunwoo-lim", name: "임건우", roles: ["video", "script", "producer", "other"], bio: "여름이 끝나는 날의 쓸쓸함을 좋아해요.", planCount: 3, latest: { title: "여름이 끝나는 날", logline: loglineOf("여름이 끝나는 날"), genres: ["로맨스", "코미디"] } },
+  { handle: "jian-lee", name: "별뜨리", roles: ["video"], bio: "사라지는 기억과 기록하는 사람을 쓰는 대본 작가예요.", planCount: 3, latest: { title: "소금비 내리는 나라", logline: LOGLINE_TEMPLATE, genres: ["드라마", "판타지"] } },
+  { handle: "seoha-park", name: "하삘라", roles: ["video", "producer"], bio: "밤에만 열리는 문 같은 이야기를 영상으로 옮겨요.", planCount: 2, latest: { title: "달빛 아래 두 번째 문", logline: LOGLINE_TEMPLATE, genres: ["판타지", "미스터리"] } },
+  { handle: "dayun-choi", name: "morningstar", roles: ["art_director"], bio: "옛 베 짜기와 복식을 이야기 속에 살려 내는 역사 자문가입니다.", planCount: 1, latest: { title: "실이 이어 준 사람들", logline: LOGLINE_TEMPLATE, genres: ["드라마"] } },
+  { handle: "hayun-jung", name: "정하윤", roles: ["script", "art_director"], bio: "붉은 강과 나루터처럼 장면이 먼저 떠오르는 글을 써요.", planCount: 5, latest: { title: "붉은 강이 흐르는 밤", logline: LOGLINE_TEMPLATE, genres: ["드라마", "로맨스"] } },
+  { handle: "dohyun-kim", name: "김도현", roles: ["video"], bio: "짧은 영상으로 세계관의 첫인상을 만듭니다.", planCount: 4, latest: { title: "삼한의 마지막 등불", logline: LOGLINE_TEMPLATE, genres: ["전쟁", "드라마"] } },
+  { handle: "seoyun-choi", name: "최서윤", roles: ["other"], bio: "지도에 없는 마을을 찾아다니는 사람.", planCount: 1, latest: { title: "지도에 없는 마을", logline: LOGLINE_TEMPLATE, genres: ["미스터리"] } },
+  { handle: "minjun-han", name: "한민준", roles: ["script", "video", "art_director", "producer"], bio: "대본부터 영상, 제작 관리까지 한 편을 끝까지 같이 만들어요.", planCount: 7, latest: { title: "바람의 값", logline: LOGLINE_TEMPLATE, genres: ["액션", "스릴러", "범죄"] } },
+  { handle: "yuna-oh", name: "오유나", roles: ["art_director"], planCount: 2, latest: { title: "짧은 글", logline: LOGLINE_TEMPLATE, genres: ["애니메이션"] } },
+  { handle: "taeyang-baek", name: "백태양", roles: ["producer"], bio: "책임 프로듀서로 여러 팀의 일정을 맞춥니다.", planCount: 1, latest: { title: "아주 아주 긴 제목의 기획안이 카드 안에서 어떻게 잘리는지 확인하기 위한 샘플 제목입니다", logline: LOGLINE_TEMPLATE, genres: ["다큐멘터리"] } },
+  { handle: "sora-yoon", name: "윤소라", roles: ["video", "history_advisor"], bio: "물길과 뱃사공 이야기를 좋아하는 영상 크리에이터입니다.", planCount: 3, latest: { title: "나루터의 약속", logline: LOGLINE_TEMPLATE, genres: ["드라마", "로맨스"] } },
+  { handle: "junho-seo", name: "서준호", roles: ["script"], bio: "봉화대 같은 짧고 단단한 이야기를 씁니다.", planCount: 2, latest: { title: "마지막 봉화", logline: LOGLINE_TEMPLATE, genres: ["전쟁", "액션"] } },
+  { handle: "hana-kang", name: "강하나", roles: ["art_director", "other"], bio: "색이 사라지는 도읍 같은 장면의 색을 설계해요.", planCount: 6, latest: { title: "색을 잃은 도읍", logline: LOGLINE_TEMPLATE, genres: ["판타지", "애니메이션"] } },
+  { handle: "eunseo-jo", name: "조은서아라온다미리내", roles: ["script"], bio: "공개 이름이 길어도 소개 한 줄이 카드 밖으로 넘치지 않는지 확인하는 샘플 소개 문구입니다. 이 문장은 일부러 길게 적었습니다.", planCount: 1, latest: { title: "이름이 매우 긴 크리에이터", logline: LOGLINE_TEMPLATE, genres: ["드라마", "미스터리"] } },
+  { handle: "gunwoo-lim", name: "임건우", roles: ["video", "script", "producer", "other"], bio: "여름이 끝나는 날의 쓸쓸함을 좋아해요.", planCount: 3, latest: { title: "여름이 끝나는 날", logline: LOGLINE_TEMPLATE, genres: ["로맨스", "코미디"] } },
 ];
 
 export const SAMPLE_PAGE_SIZE = 12;
 
-export const SAMPLE_PROFILE_PAGE_SIZE = 9;
-
 const PLAN_POOL: { title: string; logline: string }[] = [
-  { title: "달빛 아래 두 번째 문", logline: loglineOf("달빛 아래 두 번째 문") },
-  { title: "실이 이어 준 사람들", logline: loglineOf("실이 이어 준 사람들") },
-  { title: "붉은 강이 흐르는 밤", logline: loglineOf("붉은 강이 흐르는 밤") },
-  { title: "삼한의 마지막 등불", logline: loglineOf("삼한의 마지막 등불") },
-  { title: "지도에 없는 마을", logline: loglineOf("지도에 없는 마을") },
-  { title: "바람의 값", logline: loglineOf("바람의 값") },
-  { title: "나루터의 약속", logline: loglineOf("나루터의 약속") },
-  { title: "마지막 봉화", logline: loglineOf("마지막 봉화") },
-  { title: "색을 잃은 도읍", logline: loglineOf("색을 잃은 도읍") },
-  { title: "여름이 끝나는 날", logline: loglineOf("여름이 끝나는 날") },
-  { title: "소금비 내리는 나라", logline: loglineOf("소금비 내리는 나라") },
-  { title: "짧은 글", logline: loglineOf("짧은 글") },
+  { title: "달빛 아래 두 번째 문", logline: LOGLINE_TEMPLATE },
+  { title: "실이 이어 준 사람들", logline: LOGLINE_TEMPLATE },
+  { title: "붉은 강이 흐르는 밤", logline: LOGLINE_TEMPLATE },
+  { title: "삼한의 마지막 등불", logline: LOGLINE_TEMPLATE },
+  { title: "지도에 없는 마을", logline: LOGLINE_TEMPLATE },
+  { title: "바람의 값", logline: LOGLINE_TEMPLATE },
+  { title: "나루터의 약속", logline: LOGLINE_TEMPLATE },
+  { title: "마지막 봉화", logline: LOGLINE_TEMPLATE },
+  { title: "색을 잃은 도읍", logline: LOGLINE_TEMPLATE },
+  { title: "여름이 끝나는 날", logline: LOGLINE_TEMPLATE },
+  { title: "소금비 내리는 나라", logline: LOGLINE_TEMPLATE },
+  { title: "짧은 글", logline: LOGLINE_TEMPLATE },
 ];
 
 // 한 크리에이터의 샘플 기획안 목록(최신 공개 순). 대표 기획안(latest)이 맨 위에 온다.

@@ -4,13 +4,13 @@ import { notFound } from "next/navigation";
 import { CreatorProfile } from "@/components/creators/creator-profile";
 import { SAMPLE_CREATORS, sampleDetailOf, sampleProfileOf, sampleWorksOf } from "@/components/creators/sample-data";
 import { WorkDetail } from "@/components/creators/work-detail";
+import { one } from "@/lib/utils";
 
 // 디자인 확인용 샘플 미리보기. 실제 DB와 연결되지 않고, 디자인이 끝나면 지운다.
 // 작품 상세 창(D28): 작성자의 프로필 위에서 열린다. 프로필 화면은 아직 예전 구조라 다음 화면에서 고친다.
 export const metadata: Metadata = { title: "작품 상세 샘플 미리보기", robots: { index: false, follow: false } };
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
-const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 export default async function WorkDetailPreviewPage({ params, searchParams }: Props) {
   const { id } = await params;

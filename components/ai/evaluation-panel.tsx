@@ -27,14 +27,14 @@ function summaryOf(needs: string[]): string {
   return `${needs.join(", ")} ${needs.length}칸을${tail}`;
 }
 
-const ERRORS: Record<EvalErrorKind, { pill: string; title: string; desc: string; action?: "login" | "retry" }> = {
-  login: { pill: "로그인 안 함", title: "로그인하면 평가를 받을 수 있어요", desc: U.evalLoginDesc, action: "login" },
-  input: { pill: "입력이 너무 김", title: "평가할 수 있는 길이를 넘었어요", desc: `칸마다 ${MAX_SLOT_CHARS}자까지 평가할 수 있어요. 글을 줄인 뒤에 다시 눌러 주세요.` },
-  limit: { pill: U.evalLimitPill, title: U.evalLimitTitle, desc: U.evalLimitDesc },
-  auth: { pill: "AI 연결 문제", title: "AI와 연결하지 못했어요", desc: `지금은 평가를 받을 수 없어요. 잠시 뒤에 다시 눌러 보시고, 계속되면 아클링스에 알려 주세요. ${U.notReduced}` },
-  busy: { pill: "요청이 몰림", title: "지금 요청이 몰려 있어요", desc: `잠시 뒤에 다시 눌러 주세요. ${U.notReduced}`, action: "retry" },
-  retry: { pill: "일시 오류 · 시간 초과", title: "평가를 마치지 못했어요", desc: `시간이 오래 걸리거나 일시적인 오류가 났어요. 다시 눌러 주세요. ${U.notReduced}`, action: "retry" },
-  schema: { pill: "결과를 읽지 못함", title: "결과를 화면에 보여 드리지 못했어요", desc: `평가는 했지만 결과의 모양이 맞지 않았어요. 다시 눌러 주세요. ${U.notReduced}`, action: "retry" },
+const ERRORS: Record<EvalErrorKind, { title: string; desc: string; action?: "login" | "retry" }> = {
+  login: { title: "로그인하면 평가를 받을 수 있어요", desc: U.evalLoginDesc, action: "login" },
+  input: { title: "평가할 수 있는 길이를 넘었어요", desc: `칸마다 ${MAX_SLOT_CHARS}자까지 평가할 수 있어요. 글을 줄인 뒤에 다시 눌러 주세요.` },
+  limit: { title: U.evalLimitTitle, desc: U.evalLimitDesc },
+  auth: { title: "AI와 연결하지 못했어요", desc: `지금은 평가를 받을 수 없어요. 잠시 뒤에 다시 눌러 보시고, 계속되면 아클링스에 알려 주세요. ${U.notReduced}` },
+  busy: { title: "지금 요청이 몰려 있어요", desc: `잠시 뒤에 다시 눌러 주세요. ${U.notReduced}`, action: "retry" },
+  retry: { title: "평가를 마치지 못했어요", desc: `시간이 오래 걸리거나 일시적인 오류가 났어요. 다시 눌러 주세요. ${U.notReduced}`, action: "retry" },
+  schema: { title: "결과를 화면에 보여 드리지 못했어요", desc: `평가는 했지만 결과의 모양이 맞지 않았어요. 다시 눌러 주세요. ${U.notReduced}`, action: "retry" },
 };
 
 export function EvaluationPanel({
@@ -158,7 +158,7 @@ export function EvaluationPanel({
         <span className="ai-side">{allFilled ? (remaining !== null ? U.evalLeft(remaining) : "") : `비어 있는 칸: ${missing.join(", ")}`}</span>
       </div>
       <p className="ai-foot">평가는 참고용 제안이에요. 쓰신 글은 바뀌지 않아요.</p>
-      {err && <ErrorCard pill={err.pill} title={err.title} desc={err.desc} action={action} />}
+      {err && <ErrorCard title={err.title} desc={err.desc} action={action} />}
     </section>
   );
 }

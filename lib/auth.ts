@@ -39,6 +39,17 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   }
 });
 
+// 로그인한 사람의 닉네임(profiles.display_name). 읽지 못하면 빈 글자(화면은 열린다). 기획안 화면과 포트폴리오 등록 화면이 같이 쓴다.
+export async function readDisplayName(userId: string): Promise<string> {
+  try {
+    const sb = await createAuthClient();
+    const { data } = await sb.from("profiles").select("display_name").eq("id", userId).maybeSingle();
+    return data?.display_name ?? "";
+  } catch {
+    return "";
+  }
+}
+
 // 로그인이 필요한 화면의 맨 위에서 부른다. 로그인 전이면 로그인 화면으로 보내고, 끝나면 이 화면으로 돌아온다.
 export async function requireUser(returnPath: string): Promise<CurrentUser> {
   const user = await getCurrentUser();

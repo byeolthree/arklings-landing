@@ -15,6 +15,8 @@ import { getClientKey, isRateLimited, RateLimitUnavailable, recordAttempt } from
 import { BUCKET } from "@/lib/supabase";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createAuthClient } from "@/lib/supabase/server";
+import { HANDLE_RE } from "@/lib/creator-rules";
+import { EMAIL_RE } from "@/lib/utils";
 
 export type FormState = {
   errors?: FieldErrors;
@@ -28,7 +30,6 @@ const UNAVAILABLE = "지금은 저장할 수 없어요. 잠시 뒤에 다시 시
 // 개발 화면에서만 원인을 한 줄 덧붙인다(운영 화면에는 내부 오류 글을 내보내지 않는다).
 const devDetail = (e: unknown) => (process.env.NODE_ENV === "production" ? "" : ` [개발 화면 전용: ${e instanceof Error ? e.message : typeof e === "object" && e && "message" in e ? String((e as { message: unknown }).message) : String(e)}]`);
 const CREATOR_GONE = "이 크리에이터(작품)에게는 지금 신청할 수 없어요. 공개가 끝났거나 협업 신청을 받지 않는 중일 수 있어요.";
-const HANDLE_RE = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
 const PLAN_GONE = "이 기획안은 더 이상 공개되어 있지 않아 신청할 수 없어요. 포트폴리오에서 다른 기획안을 찾아 주세요.";
 
 // 기획안으로 들어온 신청의 받는 사람은 서버가 plan_id로 기획안을 찾아 정한다(화면에서 받는 사람 번호를 받지 않는다).
@@ -323,7 +324,6 @@ export async function deleteCollab(id: string): Promise<FormState> {
 // 받은 신청에 대한 답장·수락·거절. 로그인한 받는 사람 본인의 권한으로 읽고 바꾸므로 DB 규칙(RLS)이 남의 신청은 막는다.
 // 신청자가 로그인한 사람이면(applicant_id가 있으면) 답장을 사이트에도 저장하고, 신청자의 연락처가 이메일이면 메일도 보낸다.
 // 로그인 없이 보낸 신청은 저장하지 않고 이메일로만 보낸다(이메일이 아니면 사이트에서 보낼 수 없다).
-const MAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export async function replyCollab(id: string, _prev: FormState, fd: FormData): Promise<FormState> {
   const user = await getCurrentUser();
   if (!user) return { message: LOGIN_MESSAGE };
@@ -342,7 +342,7 @@ export async function replyCollab(id: string, _prev: FormState, fd: FormData): P
     const { data: row } = await sb.from("collab_requests").select("applicant_name, contact, applicant_id").eq("id", id).maybeSingle();
     if (!row) return { message: NOT_FOUND };
     const contact = String(row.contact).trim();
-    const canMail = MAIL_RE.test(contact);
+    const canMail = EMAIL_RE.test(contact);
     const onSite = !!row.applicant_id;
     if (decision === "send" && !canMail && !onSite) {
       return { message: "신청자의 연락처가 이메일이 아니고 로그인하지 않고 보낸 신청이라 사이트에서 답장을 보낼 수 없어요. 적힌 연락처로 직접 연락해 주세요.", values: { message: text } };

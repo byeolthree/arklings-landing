@@ -15,6 +15,8 @@ import type { ModelHandle } from "@/lib/ai/model";
 import { releaseAiUse, reserveAiUse } from "@/lib/ai/usage";
 import { LIBRARY_ASK_INSTRUCTIONS, buildLibraryPrompt } from "@/lib/prompts/library-ask";
 import { pickWikiItems, readPublicWiki } from "@/lib/wiki";
+import { isSameOrigin } from "@/lib/same-origin";
+import { FORBIDDEN_CHARS } from "@/lib/utils";
 
 export const ASK_MAX_BODY_CHARS = 40_000;
 export const ASK_MAX_MESSAGES = 12; // 보내 오는 대화 길이
@@ -32,7 +34,6 @@ type Code = "login" | "input" | "limit" | "busy" | "auth" | "retry";
 const STATUS: Record<Code, number> = { login: 401, input: 400, limit: 429, busy: 429, auth: 503, retry: 503 };
 const json = (code: Code, message: string, status = STATUS[code]) => Response.json({ code, message }, { status, headers: { "Cache-Control": "no-store" } });
 
-const FORBIDDEN_CHARS = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
 // 사용할 메시지 종류와 필드를 서버가 골라 읽는다: 사용자·도우미 메시지의 글 조각만. role: "system"이나 다른 조각(파일·도구 등)은 모두 거절한다(교재 10-2·10-3).
 const bodySchema = z.object({
   messages: z
@@ -46,20 +47,9 @@ const bodySchema = z.object({
     .max(ASK_MAX_MESSAGES),
 });
 
-function sameOrigin(req: Request): boolean {
-  const origin = req.headers.get("origin");
-  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
-  if (!origin || !host) return false;
-  try {
-    return new URL(origin).host === host;
-  } catch {
-    return false;
-  }
-}
-
 export async function handleLibraryAsk(req: Request, deps: AskDeps): Promise<Response> {
   // 1) 출처: 다른 사이트에서 몰래 보낸 요청은 막는다
-  if (!sameOrigin(req)) return new Response(null, { status: 403 });
+  if (!isSameOrigin(req)) return new Response(null, { status: 403 });
 
   // 2) 로그인·이메일 확인 (모델 호출 전에 거절)
   const user = await deps.getUser();

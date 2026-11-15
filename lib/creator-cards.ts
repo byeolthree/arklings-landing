@@ -8,7 +8,7 @@ const asKind = (k: string | null): WorkKind | null => ((WORK_KINDS as readonly s
 
 export function toWorkCard(w: Pick<WorkListItem, "id" | "title" | "logline" | "roles" | "genres" | "kind" | "form" | "publishedAt">, media: WorkMediaItem[] = [], isPublic?: boolean, rep?: Rep, formats?: Format[]): WorkCard {
   // 카드 왼쪽은 작품의 대표(repOf)를 따른다. 대표가 이미지·영상일 때만 이미지·영상을 건다.
-  return { id: w.id, title: w.title, logline: w.logline, roles: w.roles, genres: w.genres, kind: asKind(w.kind), form: w.form, publishedAt: w.publishedAt, slides: [], media, isPublic, rep, formats };
+  return { id: w.id, title: w.title, logline: w.logline, roles: w.roles, genres: w.genres, kind: asKind(w.kind), form: w.form, publishedAt: w.publishedAt, media, isPublic, rep, formats };
 }
 
 // 내 작품의 이미지·영상 요소를 카드에 걸 모양으로(위에서부터 순서대로).

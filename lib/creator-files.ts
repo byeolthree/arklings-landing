@@ -7,11 +7,10 @@
 // 파일 이름은 "임의 글자 20자-표식 15자"(36자, 0009의 경로 검사와 같은 모양)다. 표식은 (서버 비밀값, 주인 번호, 임의 글자)로 만든 서명이라
 // 다른 사람의 파일 이름을 자기 요소에 적어 넣어도(DB는 이름 모양만 본다) 서버가 그 파일을 지우거나 본인 것처럼 보여 주지 않는다.
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
-import { DOCUMENT_MAX_BYTES, HERO_VIDEO_MAX_BYTES, IMAGE_MAX_BYTES, type FileKind, type HeroFileKind } from "@/lib/creator-rules";
+import { CREATOR_BUCKET, DOCUMENT_MAX_BYTES, HERO_VIDEO_MAX_BYTES, IMAGE_MAX_BYTES, type FileKind, type HeroFileKind } from "@/lib/creator-rules";
 import { getSupabase } from "@/lib/supabase";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export const CREATOR_BUCKET = "creator-works";
 export const SIGNED_URL_SECONDS = 600; // 임시 주소 유효 시간(10분)
 
 type Sniffed = { kind: FileKind; type: "image/jpeg" | "image/png" | "image/webp" | "application/pdf" | "video/mp4"; ext: "jpg" | "png" | "webp" | "pdf" | "mp4" };

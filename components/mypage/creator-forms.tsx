@@ -507,7 +507,7 @@ const kstDate = (iso: string) => {
   return `${g("year")}.${g("month")}.${g("day")}`;
 };
 
-export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null, nickname = "", onOpenNew, onOpenEdit }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null; nickname?: string; onOpenNew?: () => void; onOpenEdit?: (id: string) => void }) {
+export function PortfolioManager({ works, usedBytes, hasProfile, openWorkId = null, onOpenNew, onOpenEdit }: { works: MyWork[]; usedBytes: number; hasProfile: boolean; openWorkId?: string | null; onOpenNew?: () => void; onOpenEdit?: (id: string) => void }) {
   const router = useRouter();
   // 기획안 화면의 「포트폴리오 작성하기」로 넘어오면(?work=) 그 작품의 편집 칸이 열려 있다.
   const [editing, setEditing] = useState<string | null>(openWorkId && works.some((w) => w.id === openWorkId) ? openWorkId : null);

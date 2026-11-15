@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LibraryPreview, type Next } from "./preview";
+import { one } from "@/lib/utils";
 
 // 디자인 확인용 샘플 미리보기(라이브러리 질의응답). 서버·AI·DB를 부르지 않는다. 상단 메뉴·랜딩에는 잇지 않았다. 디자인이 끝나면 지운다.
 export const metadata: Metadata = { title: "라이브러리 질의응답 샘플 미리보기", robots: { index: false, follow: false } };
@@ -8,7 +9,6 @@ export const metadata: Metadata = { title: "라이브러리 질의응답 샘플 
 const NEXT: Record<Next, string> = { normal: "정상 답", nomatch: "자료에 없음", cutoff: "답이 끊김", limit: "횟수 소진", busy: "요청 몰림", auth: "AI 연결 문제", retry: "일시 오류", input: "입력 오류" };
 const START: Record<string, string> = { none: "빈 대화", waiting: "기다리는 중", streaming: "작성 중", done: "답 완료", nomatch: "자료 없음", cutoff: "끊김" };
 type SP = Promise<Record<string, string | string[] | undefined>>;
-const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 export default async function LibraryPreviewPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
