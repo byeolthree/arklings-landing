@@ -2,7 +2,9 @@
 """파일 고치기 직전(Edit·Write·NotebookEdit)과 Bash 검사 훅."""
 import json, os, re, sys
 
-MSG = "해석과 고칠 파일을 먼저 보고하고 scope.json에 적은 뒤 승인을 받으세요"
+MSG = ("해석과 고칠 파일을 먼저 보고하세요. 고칠 파일은 답변 안에 ```scope 블록으로 한 줄에 하나씩 적습니다"
+       "(예: ```scope\\ndocs/a.md\\n```). 사용자가 「해」라고 답하면 훅이 그 블록으로 범위를 만듭니다. "
+       ".claude/state 안 파일은 직접 쓰지 마세요.")
 SED_MSG = "sed -i, perl -i처럼 파일을 직접 바꾸는 명령은 막혀 있습니다. Edit 도구를 쓰세요."
 
 def deny(reason):
