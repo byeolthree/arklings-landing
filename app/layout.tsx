@@ -1,6 +1,7 @@
 import { Noto_Sans_KR, Noto_Serif_KR } from "next/font/google";
 import type { Metadata } from "next";
-import { MeasureAnalytics } from "@/lib/measure/client";
+import { MeasureAnalytics, MeasureGtm, SpaPageReady } from "@/lib/measure/client";
+import { MeasureIdentity } from "@/lib/measure/server";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
@@ -36,6 +37,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SiteFooter />
         {/* 방문 통계(Vercel Web Analytics). 켜고 끄기는 lib/measure/config.ts */}
         <MeasureAnalytics />
+        {/* GA4는 GTM 한 길로만 보낸다. ID·키가 비어 있으면 아무것도 불러오지 않는다(lib/measure/config.ts) */}
+        <MeasureGtm />
+        <SpaPageReady />
+        <MeasureIdentity />
       </body>
     </html>
   );

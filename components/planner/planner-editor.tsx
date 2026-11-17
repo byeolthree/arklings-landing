@@ -350,6 +350,7 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, work
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    trackEvent("plan_pdf_download"); // 사용 기록: 내려받기 성공 때만
     setMsg({ text: "PDF를 내려받았어요." });
   }
 
@@ -362,6 +363,7 @@ export function PlannerEditor({ loggedIn, displayName, panel: initialPanel, work
       return setMsg({ text: r.error, err: true });
     }
     syncLogin();
+    trackEvent("plan_mail_send"); // 사용 기록: 메일 발송 성공 때만
     setMsg({ text: `${r.to} 로 PDF를 보냈어요. 안 보이면 스팸함도 확인해 주세요.` });
   }
 

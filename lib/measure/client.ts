@@ -3,4 +3,5 @@
 export { trackEvent } from "@/lib/measure/track";
 export { TrackOnMount } from "@/lib/measure/track-on-mount";
 export { MeasureAnalytics } from "@/lib/measure/analytics";
-export type { UsageEvent } from "@/lib/measure/events";
+export { MeasureGtm, SpaPageReady } from "@/lib/measure/client-parts";
+export type { UsageEvent, BrowserEvent } from "@/lib/measure/events";
