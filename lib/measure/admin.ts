@@ -15,6 +15,10 @@ export const USAGE_EVENT_LABELS: Record<UsageEvent, string> = {
   portfolio_start_click: "포트폴리오 작성하기 누르기",
   signup: "가입",
   login: "로그인",
+  plan_pdf_download: "기획안 PDF 내려받기",
+  plan_mail_send: "기획안 PDF 메일로 받기",
+  ai_evaluate_done: "AI 평가 결과 받기",
+  collab_submit: "협업 신청 완료",
 };
 export const USAGE_EVENT_KEYS = Object.keys(USAGE_EVENTS) as UsageEvent[];
 

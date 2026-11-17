@@ -11,9 +11,19 @@ export const USAGE_EVENTS = {
   portfolio_start_click: {}, // 포트폴리오 작성하기 누르기
   signup: { method: ["email"] }, // 가입(이메일 가입 요청)
   login: { method: ["email", "google", "kakao"] }, // 로그인
+  // 미션8(티켓 005): 성공을 확인한 뒤에만 남기는 행동 4개
+  plan_pdf_download: {}, // 기획안 PDF 내려받기 성공
+  plan_mail_send: {}, // 기획안 PDF 메일로 받기 성공
+  ai_evaluate_done: {}, // AI 평가 결과를 받음(서버가 성공을 확정)
+  collab_submit: {}, // 협업 신청 완료(서버가 저장 성공을 확정)
 } as const satisfies Record<string, Record<string, readonly string[]>>;
 
 export type UsageEvent = keyof typeof USAGE_EVENTS;
+
+// 서버가 성공을 확정하는 행동. 이 행동은 서버(lib/measure/server.ts의 trackServer)에서만 남기고, 브라우저에서 다시 보내지 않는다.
+export const SERVER_ONLY_EVENTS = ["signup", "login", "ai_evaluate_done", "collab_submit"] as const satisfies readonly UsageEvent[];
+export type ServerOnlyEvent = (typeof SERVER_ONLY_EVENTS)[number];
+export type BrowserEvent = Exclude<UsageEvent, ServerOnlyEvent>;
 export type UsageProps = Record<string, string>;
 
 // 브라우저가 만든 무작위 값을 담는 쿠키 이름과 모양

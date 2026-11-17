@@ -11,6 +11,7 @@ import { sendMail } from "@/lib/mail";
 import { applicantReply } from "@/lib/mail-templates";
 import { parseForm, UUID_RE, type FieldErrors } from "@/lib/collab";
 import { getOrigin } from "@/lib/origin";
+import { trackServer } from "@/lib/measure/server";
 import { getClientKey, isRateLimited, RateLimitUnavailable, recordAttempt } from "@/lib/ratelimit";
 import { BUCKET } from "@/lib/supabase";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -207,6 +208,9 @@ export async function createCollab(_prev: FormState, fd: FormData): Promise<Form
     console.error("[collab] 신청 저장 중 오류", e);
     return { message: UNAVAILABLE + devDetail(e), values };
   }
+
+  // 사용 기록: 저장이 끝난 뒤에만(실패·봇 방지로 걸러진 신청은 세지 않는다). 신청 내용은 보내지 않는다.
+  await trackServer(await createAuthClient(), "collab_submit", "/collab/new");
 
   // 6) 메일은 응답을 보낸 뒤에 보낸다. 받는 사람(기획안 주인 또는 아클링스)에게 알린다. 메일이 실패해도 접수는 이미 끝나 있다.
   const origin = await getOrigin();

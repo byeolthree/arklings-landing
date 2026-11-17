@@ -1,5 +1,7 @@
 # 측정 도구 들어내는 방법
 
+> 2026-11-17 티켓 005·006(미션8)으로 GA4(GTM 경유)와 Amplitude 연결이 더해졌다. 그 부분은 맨 아래 「7. GTM·Amplitude 연결 들어내기」에 따로 적었다. 아래 1~6번의 표는 2026-11-11 기준이라 새 파일(`lib/measure/` 안 새 파일들, `app/actions/ai.ts`, `app/actions/collab.ts`의 기록 줄)은 줄 번호 없이 7번에 있다.
+
 측정 도구는 두 가지다. ① **방문 통계**(Vercel Web Analytics, 패키지 `@vercel/analytics`) ② **사용 기록**(정해진 행동 7가지를 DB 표 `usage_events`에 남기는 것). 둘 다 코드는 `lib/measure/` 폴더 하나에 모여 있다. 화면과 서버는 그 폴더의 출입구 두 파일의 이름만 부른다.
 
 - 브라우저·화면 쪽 출입구: `lib/measure/client.ts` → `trackEvent`, `TrackOnMount`, `MeasureAnalytics`, 타입 `UsageEvent`
@@ -89,3 +91,39 @@ drop table if exists public.usage_events;
 
 - 사용 기록만 끄고 방문 통계는 두고 싶거나 그 반대인 경우는 스위치가 하나라서 안 된다. 나누려면 `config.ts`에 스위치를 하나 더 만들어야 한다(지금은 만들지 않았다).
 - 측정을 끄면 `lib/measure/events.ts`의 허용 목록과 DB 함수(`record_usage_event`)는 그대로 두어도 해가 없다. 다만 DB 함수는 로그인 없이도 부를 수 있게 열려 있으므로(분당 60건 한도), 오래 끌 거라면 4번으로 함수를 지우는 편이 좋다.
+
+## 7. GTM·Amplitude 연결 들어내기 (티켓 005·006)
+
+기록 한 번이 세 곳으로 간다: ① 자체 DB ② Amplitude(브라우저 SDK `@amplitude/analytics-browser`, 서버 HTTP API) ③ GTM의 dataLayer(GA4는 GTM 한 길). 출입구는 그대로 `lib/measure` 하나다.
+
+### 7-1. 잠깐 멈추기 (코드는 그대로)
+- `lib/measure/config.ts`의 `MEASURE_ENABLED`를 `false`로 바꾸면 앱 화면의 GTM·Amplitude·dataLayer 전송이 모두 멈춘다(GTM 스크립트도 불러오지 않는다).
+- 또는 Vercel 환경 변수 `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_AMPLITUDE_API_KEY`를 비운다(비면 그 도구로는 아무것도 보내지 않는다). 환경 변수 변경은 다시 배포해야 반영된다(`NEXT_PUBLIC_` 값은 빌드 때 코드에 들어간다).
+- **꺼지지 않는 것:** 홈(`public/landing.html`)의 GTM·Amplitude는 고정 HTML이라 위 스위치와 무관하다. 홈에서 멈추려면 7-3의 줄을 직접 지운다.
+
+### 7-2. 앱 쪽 접점
+| 파일 | 내용 | 들어낼 때 |
+|---|---|---|
+| `lib/measure/` 안 새 파일: `anon.ts`, `external.ts`, `first-utm.ts`, `client-parts.tsx`, `identity.tsx`, `amplitude-server.ts` | 브라우저·서버의 외부 전송, GTM 불러오기, `spa_page_ready`, 사용자 속성 | 폴더와 함께 지운다. 폴더를 남기고 연결만 들어내려면 이 6개를 지우고 아래 수정을 되돌린다 |
+| `lib/measure/track.ts` | `sendExternal` 호출 한 줄 | 그 줄과 import를 지운다 |
+| `lib/measure/record.ts` | `trackServer` 끝의 Amplitude 전송 블록(`after(...)`) | 블록과 import를 지운다 |
+| `lib/measure/config.ts` | `GTM_ID`, `AMPLITUDE_*`, `FIRST_UTM_KEY` | 지운다 |
+| `lib/measure/client.ts`, `server.ts` | `MeasureGtm`, `SpaPageReady`, `MeasureIdentity` 내보내기 | 세 줄을 지운다 |
+| `app/layout.tsx` | `<MeasureGtm />`, `<SpaPageReady />`, `<MeasureIdentity />`와 import | 지운다 |
+| `components/planner/planner-editor.tsx` | `plan_pdf_download`, `plan_mail_send` 기록 두 줄 | 지운다 |
+| `app/actions/ai.ts` | `ai_evaluate_done` 기록(`result.ok`일 때) | 지우고 원래의 `return evaluateLoglineFlow(...)`로 되돌린다 |
+| `app/actions/collab.ts` | `collab_submit` 기록 한 줄과 import | 지운다 |
+| `package.json`, `package-lock.json` | `@amplitude/analytics-browser`, `@next/third-parties` | `npm uninstall @amplitude/analytics-browser @next/third-parties`(패키지 변경이라 사용자 승인 후) |
+| `.env.example` | `NEXT_PUBLIC_GTM_ID`, `NEXT_PUBLIC_AMPLITUDE_API_KEY`, `NEXT_PUBLIC_AMPLITUDE_SERVER_ZONE` | 세 칸과 주석을 지운다 |
+| `lib/measure/privacy-text.ts` | GA4·Amplitude 문장, 새 행동 4개 설명 | 폴더와 함께 지워지거나, 해당 문장만 되돌린다 |
+| DB 허용 목록 | `0028_usage_events_mission8.sql`이 더한 새 행동 4개 | 0021을 통째로 들어낼 때(4번)만 함께 사라진다. 이 4개만 빼려면 새 번호 SQL로 허용 목록을 되돌린다 |
+
+### 7-3. 홈 쪽 접점 (티켓 006)
+`public/landing.html`에 더해진 GTM 불러오기, Amplitude 불러오기와 기록 코드, 기획안 버튼 id를 쓰는 클릭 기록, 처음 UTM 저장 코드를 지운다. 줄 번호는 티켓 006을 마친 뒤 이 표에 더한다.
+
+### 7-4. 지우는 순서
+1. 위 7-1로 먼저 멈추고 배포한다(전송이 멈춘 것을 확인).
+2. 7-2, 7-3의 코드를 지운다. `npx tsc --noEmit`, `npm run lint`, `npm run build`를 통과시킨다.
+3. Vercel 환경 변수 세 개를 지운다(사용자가 한다).
+4. GTM 컨테이너의 태그·Amplitude 프로젝트는 각 서비스 화면에서 사용자가 정리한다(이미 쌓인 데이터는 각 서비스에 남는다).
+5. `/privacy`의 GA4·Amplitude 문장을 지운다.
