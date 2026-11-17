@@ -1146,7 +1146,7 @@
       <h1 class="split" data-split>한국형 판타지를 만들고 싶은데<br />어떻게 시작해야 할까?</h1>
       <p class="lead reveal" data-delay="2"><span class="nb"><span class="nw">머릿속에만 머물던 그 아이디어,</span> <span class="nw">아클링스와 함께 정돈해보세요.</span></span><br /><span class="nb">근사한 시리즈IP가 탄생할 거예요!</span></p>
       <div class="ctas reveal" data-delay="3">
-        <a class="btn btn-primary" href="/planner">기획안 만들기 <span class="arrow">→</span></a>
+        <a class="btn btn-primary" id="ctaHero" href="/planner">기획안 만들기 <span class="arrow">→</span></a>
         <a class="btn btn-ghost" href="/collab/new">협업 문의 <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></a>
       </div>
     </div>
@@ -1215,7 +1215,7 @@
       </div>
 
       <div class="try-cta reveal">
-        <a class="btn btn-primary" href="/planner">기획안 만들기 <span class="arrow">→</span></a>
+        <a class="btn btn-primary" id="ctaTry" href="/planner">기획안 만들기 <span class="arrow">→</span></a>
       </div>
     </div>
   </section>
@@ -1405,7 +1405,7 @@
             <span class="pf-form" style="--c:var(--teal)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>아웃라인</span>
             <span class="pf-form" style="--c:var(--dusty)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>파일럿</span>
           </div>
-          <div class="ctas pf-ctas reveal" data-delay="4"><a class="btn btn-primary" href="/planner">기획안 만들기 <span class="arrow">→</span></a></div>
+          <div class="ctas pf-ctas reveal" data-delay="4"><a class="btn btn-primary" id="ctaPortfolio" href="/planner">기획안 만들기 <span class="arrow">→</span></a></div>
         </div>
         <div>
           <div class="panel pf-card reveal" data-delay="1">
@@ -1497,7 +1497,7 @@
   </div>
 </footer>
 
-<div class="mcta" id="mcta"><a class="btn btn-primary" href="/planner">기획안 만들기 <span class="arrow">→</span></a></div>
+<div class="mcta" id="mcta"><a class="btn btn-primary" id="ctaMobile" href="/planner">기획안 만들기 <span class="arrow">→</span></a></div>
 
 <script>
 (function () {
@@ -1771,6 +1771,96 @@
   document.addEventListener("click", function (e) { if (!m.contains(e.target)) set(false); });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") set(false); });
   window.addEventListener("resize", function () { if (window.innerWidth >= 900) set(false); });
+})();
+</script>
+
+<!-- 미션8 측정 연결(티켓 006). 앱(lib/measure)과 같은 규칙: GTM은 GA4로 가는 한 길, Amplitude는 코드로 보내는 한 길. 아래 두 값이 비어 있으면 아무것도 불러오거나 보내지 않는다.
+     값은 아키텍터가 Vercel에 넣은 값과 같은 것을 여기 따옴표 안에 직접 적는다(고정 HTML은 환경 변수를 읽지 못한다). 서버 위치는 "US" 또는 "EU".
+     끄는 방법·들어내는 방법: docs/measure-removal.md 7번. 이 홈의 측정은 lib/measure/config.ts의 MEASURE_ENABLED로 꺼지지 않는다. -->
+<script>
+(function () {
+  var GTM_ID = "";
+  var AMPLITUDE_API_KEY = "";
+  var AMPLITUDE_SERVER_ZONE = "US";
+  var AMPLITUDE_SDK = "https://cdn.amplitude.com/libs/analytics-browser-2.49.3-min.js.gz";
+  var UTM_KEY = "arklings_first_utm"; // 앱(lib/measure/config.ts FIRST_UTM_KEY)이 읽는 같은 이름
+  var ANON_COOKIE = "arklings_anon"; // 앱과 같은 브라우저 무작위 값(90일)
+  try {
+    if (navigator.doNotTrack === "1") return; // 「추적 안 함」을 켠 브라우저는 아무것도 보내지 않는다
+    var SAFE = /^[\w\s.+%:\-가-힣]{1,100}$/;
+
+    // 1) 처음 들어온 UTM을 브라우저에 남긴다(이미 있으면 덮어쓰지 않는다). 전체 주소가 아니라 네 값만 저장한다.
+    var q = new URLSearchParams(location.search), utm = {}, has = false;
+    ["source", "medium", "campaign", "content"].forEach(function (k) {
+      var v = q.get("utm_" + k);
+      if (v && SAFE.test(v)) { utm[k] = v; has = true; }
+    });
+    try {
+      if (has && !localStorage.getItem(UTM_KEY)) localStorage.setItem(UTM_KEY, JSON.stringify(utm));
+    } catch (e) {}
+    var first = {};
+    try { first = JSON.parse(localStorage.getItem(UTM_KEY) || "{}") || {}; } catch (e) {}
+
+    // 2) 브라우저 무작위 값(앱과 같은 쿠키)
+    var m = document.cookie.split("; ").filter(function (c) { return c.indexOf(ANON_COOKIE + "=") === 0; })[0];
+    var anon = m ? decodeURIComponent(m.slice(ANON_COOKIE.length + 1)) : "";
+    if (!/^[A-Za-z0-9_-]{16,64}$/.test(anon)) {
+      anon = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)).replace(/-/g, "");
+      document.cookie = ANON_COOKIE + "=" + anon + "; Max-Age=" + 90 * 86400 + "; Path=/; SameSite=Lax" + (location.protocol === "https:" ? "; Secure" : "");
+    }
+
+    // 3) GTM(GA4로 가는 한 길). 방문은 앱과 같은 신호(spa_page_ready)로 보내 GTM 태그가 한 가지 방식으로만 page_view를 만든다.
+    window.dataLayer = window.dataLayer || [];
+    function push(o) { if (/^GTM-[A-Z0-9]{4,12}$/.test(GTM_ID)) window.dataLayer.push(o); }
+    if (/^GTM-[A-Z0-9]{4,12}$/.test(GTM_ID)) {
+      window.dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });
+      var g = document.createElement("script");
+      g.async = true;
+      g.src = "https://www.googletagmanager.com/gtm.js?id=" + GTM_ID;
+      document.head.appendChild(g);
+    }
+
+    // 4) Amplitude(코드로 보내는 한 길). 자동 수집은 끄고, 불러오기 전에 생긴 기록은 모았다가 보낸다.
+    var queue = [], amp = null;
+    if (AMPLITUDE_API_KEY) {
+      var a = document.createElement("script");
+      a.async = true;
+      a.src = AMPLITUDE_SDK;
+      a.onload = function () {
+        try {
+          window.amplitude.init(AMPLITUDE_API_KEY, undefined, {
+            deviceId: anon,
+            serverZone: AMPLITUDE_SERVER_ZONE === "EU" ? "EU" : "US",
+            autocapture: false,
+            remoteConfig: { fetchRemoteConfig: false }
+          });
+          var id = new window.amplitude.Identify();
+          if (first.source) id.setOnce("initial_utm_source", first.source);
+          if (first.medium) id.setOnce("initial_utm_medium", first.medium);
+          if (first.campaign) id.setOnce("initial_utm_campaign", first.campaign);
+          if (first.content) id.setOnce("initial_utm_content", first.content);
+          window.amplitude.identify(id);
+          amp = window.amplitude;
+          queue.forEach(function (e) { amp.track(e[0], e[1]); });
+          queue = [];
+        } catch (e) {}
+      };
+      document.head.appendChild(a);
+    }
+    function send(event, props) {
+      push(Object.assign({ event: event }, props));
+      if (!AMPLITUDE_API_KEY) return;
+      if (amp) amp.track(event, props); else queue.push([event, props]);
+    }
+
+    // 5) 홈 방문, 그리고 기획안(/planner)으로 가는 버튼 5개(고정 id)
+    push({ event: "spa_page_ready", page_path: "/", page_title: document.title });
+    send("home_view", { page: "/" });
+    document.addEventListener("click", function (ev) {
+      var el = ev.target && ev.target.closest ? ev.target.closest('a[href="/planner"]') : null;
+      if (el && el.id) send("planner_cta_click", { button_id: el.id, page: "/" });
+    });
+  } catch (e) {}
 })();
 </script>
 
