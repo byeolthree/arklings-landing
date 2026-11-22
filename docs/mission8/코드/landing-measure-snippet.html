@@ -1,0 +1,22 @@
+function send(event, props) {
+      push(Object.assign({ event: event }, props));
+      if (!AMPLITUDE_API_KEY) return;
+      if (amp) amp.track(event, props); else queue.push([event, props]);
+    }
+
+    // 5) 홈 방문, 그리고 기획안(/planner)으로 가는 버튼 5개(고정 id)
+    push({ event: "spa_page_ready", page_path: "/", page_title: document.title });
+    send("home_view", { page: "/" });
+    document.addEventListener("click", function (ev) {
+      var el = ev.target && ev.target.closest ? ev.target.closest('a[href="/planner"]') : null;
+      if (el && el.id) send("planner_cta_click", { button_id: el.id, page: "/" });
+    });
+  } catch (e) {}
+})();
+</script>
+
+<!-- 방문 통계(Vercel Web Analytics). 대시보드에서 켜기 전에는 아무것도 모이지 않는다. -->
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+확인 시각: 2026-11-18 KST
+시험 유입 확인. 실제 홍보 아님.
+
+도착 주소: https://arklings-main-deploy.vercel.app/
+HTTP 응답: 200
+받은 홈 HTML의 GTM-PDST838C: 없음
+받은 홈 HTML의 home_view: 없음
+받은 홈 HTML의 initial_utm_source: 없음
+받은 홈 HTML의 Amplitude 관련 코드: 없음
+외부 script src: /_vercel/insights/script.js
+인라인 script 5개에서도 GTM/GA4/Amplitude/home_view 관련 문자열을 찾지 못함.
+
+확인용 주소: https://arklings-main-deploy-git-dev-chongaaa19-7825s-projects.vercel.app/
+HTTP 응답: 200
+받은 홈 HTML의 GTM-PDST838C: 있음
+받은 홈 HTML의 home_view: 있음
+받은 홈 HTML의 initial_utm_source: 있음
+받은 홈 HTML의 Amplitude 관련 코드: 있음
+
+GA4 실시간: 활성 사용자 0명, 첫 사용자 소스 데이터 없음.
+Amplitude 라이브 이벤트: 가장 최근 home_view는 2026-11-18 01:26:42 KST의 이전 방문. 새 세 채널 시험 수집을 확인하지 못함.
+결론: 홈이 열린 것과 측정 기록이 수집되는 것은 별개임. 도착 주소에 측정 코드가 없어 이 주소의 세 채널 시험을 완료로 처리할 수 없음. 설정 변경, 저장소 변경, 병합, 배포는 하지 않음.

@@ -1,0 +1,14 @@
+source,window,event_name,event_count,use_in_submission,note
+GA4 realtime overview,last 30 minutes,library_ask,3,yes,confirmed on screen 2026-11-18
+GA4 realtime overview,last 30 minutes,ai_evaluate_click,2,yes,confirmed on screen 2026-11-18
+GA4 realtime overview,last 30 minutes,plan_mail_send,1,yes,confirmed on screen 2026-11-18
+GA4 realtime overview,last 30 minutes,plan_pdf_download,1,yes,confirmed on screen 2026-11-18
+GA4 realtime overview,last 30 minutes,plan_save,1,yes,confirmed on screen 2026-11-18
+GA4 realtime overview,last 30 minutes,planner_open,1,yes,confirmed on screen 2026-11-18
+GA4 realtime overview,last 30 minutes,portfolio_start_click,1,yes,confirmed on screen 2026-11-18
+GA4 realtime overview,last 30 minutes,home_view,seen earlier today,yes,not in this 30-minute slice
+GA4 realtime overview,last 30 minutes,planner_cta_click,seen earlier today,yes,not in this 30-minute slice
+GA4 realtime overview,last 30 minutes,page_view,12,no,known double count; do not use as evidence
+GA4 realtime overview,last 30 minutes,user_engagement,5,no,automatic GA4 event
+GA4 realtime overview,last 30 minutes,form_start,4,no,automatic GA4 event
+GA4 realtime overview,last 30 minutes,scroll,4,no,automatic GA4 event

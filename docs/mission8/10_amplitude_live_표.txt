@@ -1,0 +1,21 @@
+source,ago,event_name,user_id,platform,country
+Amplitude live events,9분 전,library_ask,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,9분 전,collab_submit,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,10분 전,library_ask,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,11분 전,library_ask,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,11분 전,portfolio_start_click,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,11분 전,plan_mail_send,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,11분 전,plan_pdf_download,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,11분 전,plan_save,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,12분 전,ai_evaluate_done,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,12분 전,ai_evaluate_click,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,13분 전,planner_open,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,27분 전,ai_evaluate_done,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,27분 전,ai_evaluate_click,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,31분 전,plan_save,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,31분 전,planner_open,c4342fbd-1066-456b-8eda-4eb9a0748afc,Web,South Korea
+Amplitude live events,31분 전,planner_cta_click,anonymous,Web,South Korea
+Amplitude live events,31분 전,home_view,anonymous,Web,South Korea
+Amplitude live events,50분 전,home_view,anonymous,Web,South Korea
+Amplitude live events,51분 전,home_view,anonymous,Web,South Korea
+Amplitude live events,51분 전,home_view,anonymous,Web,South Korea

@@ -1,0 +1,54 @@
+indow.dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });
+      var g = document.createElement("script");
+      g.async = true;
+      g.src = "https://www.googletagmanager.com/gtm.js?id=" + GTM_ID;
+      document.head.appendChild(g);
+    }
+
+    // 4) Amplitude(코드로 보내는 한 길). 자동 수집은 끄고, 불러오기 전에 생긴 기록은 모았다가 보낸다.
+    var queue = [], amp = null;
+    if (AMPLITUDE_API_KEY) {
+      var a = document.createElement("script");
+      a.async = true;
+      a.src = AMPLITUDE_SDK;
+      a.onload = function () {
+        try {
+          window.amplitude.init(AMPLITUDE_API_KEY, undefined, {
+            deviceId: anon,
+            serverZone: AMPLITUDE_SERVER_ZONE === "EU" ? "EU" : "US",
+            autocapture: false,
+            remoteConfig: { fetchRemoteConfig: false }
+          });
+          var id = new window.amplitude.Identify();
+          if (first.source) id.setOnce("initial_utm_source", first.source);
+          if (first.medium) id.setOnce("initial_utm_medium", first.medium);
+          if (first.campaign) id.setOnce("initial_utm_campaign", first.campaign);
+          if (first.content) id.setOnce("initial_utm_content", first.content);
+          window.amplitude.identify(id);
+          amp = window.amplitude;
+          queue.forEach(function (e) { amp.track(e[0], e[1]); });
+          queue = [];
+        } catch (e) {}
+      };
+      document.head.appendChild(a);
+    }
+    function send(event, props) {
+      push(Object.assign({ event: event }, props));
+      if (!AMPLITUDE_API_KEY) return;
+      if (amp) amp.track(event, props); else queue.push([event, props]);
+    }
+
+    // 5) 홈 방문, 그리고 기획안(/planner)으로 가는 버튼 5개(고정 id)
+    push({ event: "spa_page_ready", page_path: "/", page_title: document.title });
+    send("home_view", { page: "/" });
+    document.addEventListener("click", function (ev) {
+      var el = ev.target && ev.target.closest ? ev.target.closest('a[href="/planner"]') : null;
+      if (el && el.id) send("planner_cta_click", { button_id: el.id, page: "/" });
+    });
+  } catch (e) {}
+})();
+</script>
+
+<!-- 방문 통계(Vercel Web Analytics). 대시보드에서 켜기 전에는 아무것도 모이지 않는다. -->
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
