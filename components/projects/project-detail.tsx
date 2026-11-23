@@ -3,27 +3,42 @@ import { ROLES } from "@/lib/collab";
 import { ROLE_TONE } from "../creators/role-tone";
 import "../creators/creators.css";
 import "./projects.css";
-import { BookmarkButton, ProjectCard, StatusBadge } from "./project-card";
+import { BookmarkButton } from "./bookmark-button";
+import { ProjectCard, StatusBadge } from "./project-card";
 import { daysUntil, dday, monthDay, rewardText } from "./filter";
 import { SOURCE_LABEL, type Project } from "./types";
 
-// 「지원하기」: 모양만 둔다. 지원 처리(DB·함수)는 다음 단계에서 만든다.
-function ApplyButton({ className }: { className: string }) {
+// 「지원하기」: 모집 중이면 지원 화면(예시)으로 가고, 지원서를 보낸 뒤(?applied=1)에는 「지원 완료」, 모집 전·마감이면 눌리지 않는다. 실제 저장은 다음 단계.
+function ApplyButton({ className, p, applied }: { className: string; p: Project; applied: boolean }) {
+  if (applied) {
+    return (
+      <button type="button" className={className} disabled>
+        지원 완료 <span aria-hidden="true">✓</span>
+      </button>
+    );
+  }
+  if (p.status !== "open") {
+    return (
+      <button type="button" className={className} disabled>
+        {p.status === "soon" ? "모집 전" : "모집 마감"}
+      </button>
+    );
+  }
   return (
-    <button type="button" className={className}>
+    <Link href={`/projects/${p.id}/apply`} className={className}>
       지원하기 <span aria-hidden="true">→</span>
-    </button>
+    </Link>
   );
 }
 
 const ymd = (s: string) => `${parseInt(s.slice(5, 7), 10)}월 ${parseInt(s.slice(8, 10), 10)}일`;
 
 // 프로젝트 상세. 위에서 아래로: 대표 칸 → 정보 카드 → 하는 일 → 일정 띠 → 연결 작품 → 지원 띠 → 추천 프로젝트
-export function ProjectDetail({ p, related, today }: { p: Project; related: Project[]; today: string }) {
+export function ProjectDetail({ p, related, today, applied = false }: { p: Project; related: Project[]; today: string; applied?: boolean }) {
   const days = daysUntil(p.deadline, today);
   const deadlineBig = p.status === "open" ? dday(days) : p.status === "soon" ? "모집 전" : "마감";
   const deadlineSub = p.status === "soon" ? `${monthDay(p.opensAt)} 모집 시작` : monthDay(p.deadline);
-  const ctaNote = p.status === "open" ? `${monthDay(p.deadline)}까지 받습니다. 지원서에는 포트폴리오를 함께 고릅니다.` : p.status === "soon" ? `${monthDay(p.opensAt)}부터 받습니다.` : "모집이 마감되었습니다.";
+  const ctaNote = applied ? "지원서를 받았어요. 예시 화면이라 실제로는 저장되지 않아요." : p.status === "open" ? `${monthDay(p.deadline)}까지 받습니다. 지원서에는 포트폴리오를 함께 고릅니다.` : p.status === "soon" ? `${monthDay(p.opensAt)}부터 받습니다.` : "모집이 마감되었습니다.";
 
   return (
     <div className="cr pj">
@@ -59,8 +74,8 @@ export function ProjectDetail({ p, related, today }: { p: Project; related: Proj
               </ul>
             </div>
             <div className="pj-hero-act">
-              <ApplyButton className="btn btn-primary" />
-              <BookmarkButton onDark />
+              <ApplyButton className="btn btn-primary" p={p} applied={applied} />
+              <BookmarkButton onDark title={p.title} />
             </div>
           </div>
         </div>
@@ -86,7 +101,7 @@ export function ProjectDetail({ p, related, today }: { p: Project; related: Proj
           </div>
           <div>
             <dt>지원자</dt>
-            <dd>{p.status === "soon" ? "모집 전" : `${p.applicants}명`}</dd>
+            <dd>{p.status === "soon" ? "모집 전" : `${p.applicants + (applied ? 1 : 0)}명`}</dd>
             <span>선정 {p.selected}명</span>
           </div>
         </dl>
@@ -151,7 +166,7 @@ export function ProjectDetail({ p, related, today }: { p: Project; related: Proj
             <h2 className="pj-h2">「{p.work.title}」</h2>
             <p className="pj-body sm">{p.work.blurb}</p>
             <div>
-              <Link href="/creators" className="btn btn-ghost">
+              <Link href={`/projects/works/${p.work.id}?from=${p.id}`} className="btn btn-ghost">
                 작품 보기 <span className="arrow">→</span>
               </Link>
             </div>
@@ -171,10 +186,10 @@ export function ProjectDetail({ p, related, today }: { p: Project; related: Proj
       <section className="wrap pj-ctawrap">
         <div className="pj-cta">
           <div>
-            <b>{p.status === "closed" ? "이 프로젝트는 모집이 끝났어요" : "이 프로젝트에 지원하시겠어요?"}</b>
+            <b>{applied ? "지원서를 보냈어요" : p.status === "closed" ? "이 프로젝트는 모집이 끝났어요" : "이 프로젝트에 지원하시겠어요?"}</b>
             <span>{ctaNote}</span>
           </div>
-          <ApplyButton className="pj-cta-btn" />
+          <ApplyButton className="pj-cta-btn" p={p} applied={applied} />
         </div>
       </section>
 

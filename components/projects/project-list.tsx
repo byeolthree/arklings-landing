@@ -15,6 +15,7 @@ export function ProjectList({
   filter,
   today,
   isAdmin,
+  postedTitle,
 }: {
   items: Project[];
   total: number;
@@ -23,6 +24,7 @@ export function ProjectList({
   filter: ProjectFilter;
   today: string;
   isAdmin: boolean;
+  postedTitle?: string; // 공고 올리기(예시)를 마치고 돌아왔을 때 안내에 쓰는 제목
 }) {
   const filtered = hasFilter(filter);
   const nFilters = activeCount(filter);
@@ -103,14 +105,20 @@ export function ProjectList({
                   </div>
                 </div>
               </details>
-              {/* 운영자에게만 보인다(isAdminUser). 이동할 화면은 다음 단계에서 만들어서 지금은 누르면 아무 일도 없다 */}
+              {/* 운영자에게만 보인다(isAdminUser). 예시 공고 올리기 화면으로 간다 */}
               {isAdmin && (
-                <button type="button" className="btn btn-primary pj-post">
+                <Link href="/projects/new" className="btn btn-primary pj-post">
                   공고 올리기 <span aria-hidden="true">＋</span>
-                </button>
+                </Link>
               )}
             </div>
           </div>
+
+          {postedTitle !== undefined && (
+            <p className="pj-posted" role="status">
+              {postedTitle ? <b>{postedTitle}</b> : null} 공고를 올렸어요. 예시 화면이라 저장되지 않아서 목록에는 나타나지 않아요.
+            </p>
+          )}
 
           <div className="pj-meta">
             <p className="pj-count">

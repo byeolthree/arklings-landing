@@ -146,4 +146,34 @@
 .cr .pj-rec-head h2 { font-size: 18px; line-height: 1.3; font-weight: 700; }
 @media (min-width: 768px) { .cr .pj-rec-head h2 { font-size: 24px; } }
 
+/* 눌렀을 때 바뀌는 모습 */
+.cr .pj-bm.on { border-color: var(--jaju); background: var(--tint); }
+.cr .pj-bm.on-dark.on { border-color: #fff; background: #fff; color: var(--jaju); }
+.cr .pj-hero-act .btn[disabled], .cr .pj-cta-btn[disabled] { opacity: .75; cursor: default; transform: none; box-shadow: none; }
+.cr .pj-hero-act .btn[disabled]:hover, .cr .pj-cta-btn[disabled]:hover { transform: none; }
+.cr a.pj-cta-btn { text-decoration: none; }
+.cr .pj-posted { margin: 0 0 16px; padding: 12px 16px; border-radius: 12px; background: var(--tint); color: var(--title); font-size: 14px; }
+
+/* 새 화면(지원서·공고 올리기·작품): 한 줄 폭의 단순한 화면 */
+.cr .pj-formwrap { max-width: 760px; padding-top: 24px; display: flex; flex-direction: column; gap: 16px; }
+@media (min-width: 768px) { .cr .pj-formwrap { padding-top: 48px; } }
+.cr .pj-form-title { font-size: 22px; line-height: 1.3; font-weight: 700; }
+@media (min-width: 768px) { .cr .pj-form-title { font-size: 28px; } }
+.cr .pj-form-title.serif { font-family: var(--font-noto-serif), serif; }
+.cr .pj-form-sub { font-size: 14px; color: var(--body); }
+.cr .pj-note { padding: 10px 14px; border-radius: 10px; background: color-mix(in srgb, var(--gold) 14%, #fff); color: var(--title); font-size: 13px; }
+.cr .pj-form { display: flex; flex-direction: column; gap: 20px; padding: 24px 20px; overflow: visible; }
+@media (min-width: 768px) { .cr .pj-form { padding: 32px; } }
+.cr .pj-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.cr .pj-field label { font-size: 12px; font-weight: 500; color: var(--title); }
+.cr .pj-field input, .cr .pj-field select, .cr .pj-field textarea { width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid var(--line); border-radius: 6px; background: #fff; font: inherit; font-size: 14px; color: var(--title); }
+.cr .pj-field input, .cr .pj-field select { min-height: 48px; }
+.cr .pj-field textarea { resize: vertical; line-height: 1.6; }
+.cr .pj-field input:focus, .cr .pj-field select:focus, .cr .pj-field textarea:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 18%, transparent); }
+.cr .pj-field-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.cr .pj-form-act { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; }
+.cr .pj-workwrap { max-width: 1040px; }
+.cr .pj-rec-title { margin-top: 16px; font-size: 18px; font-weight: 700; }
+@media (min-width: 768px) { .cr .pj-rec-title { font-size: 24px; } }
+
 @media (prefers-reduced-motion: reduce) { .cr .pj-cta-btn { transition: none; } }

@@ -7,11 +7,11 @@ export const projectsClosed = () => process.env.VERCEL_ENV === "production";
 const steps = (a: [string, string], b: [string, string], c: [string, string], d: [string, string]): ProjectStep[] =>
   [a, b, c, d].map(([label, range]) => ({ label, range }));
 
-const SADAHAM = { title: "사다함의 꿈", blurb: "삼한일통 3부작의 두 번째 이야기입니다. 이 공고의 결과물은 작품 포트폴리오에 함께 올라갑니다.", logline: "열다섯 화랑 사다함이 첫 출정에서 죽음 앞에 선 벗을 구하려다, 약속과 나라 사이에서 선택을 강요받는다." };
-const AKUI = { title: "악의 꽃", blurb: "삼한일통 3부작의 첫 이야기입니다. 이 공고의 결과물은 작품 포트폴리오에 함께 올라갑니다.", logline: "금관가야의 마지막 밤, 철을 다루던 소녀가 나라를 삼킨 저주의 꽃을 키워 낸 자가 누구인지 쫓는다." };
-const DANHANA = { title: "단 하나의 꿈", blurb: "삼한일통 3부작의 마지막 이야기입니다. 이 공고의 결과물은 작품 포트폴리오에 함께 올라갑니다.", logline: "세 나라가 하나가 되는 날, 단 하나의 꿈을 지키려는 이들이 각자의 방식으로 마지막 선택을 한다." };
-const MUSEUM = { title: "박물관 협업 숏폼", blurb: "지역 박물관과 함께 만드는 유물 소개 숏폼 시리즈입니다. 결과물은 시리즈 포트폴리오에 함께 올라갑니다.", logline: "잠든 유물이 1분 안에 제 이야기를 들려준다. 소장품 하나가 한 편이 되는 숏폼 시리즈." };
-const STUDIO = { title: "아클링스 스튜디오", blurb: "아클링스 전체 홍보에 쓰이는 작업입니다. 결과물은 스튜디오 소개에 쓰입니다.", logline: "한국 고대사를 여러 크리에이터가 함께 만드는 참여형 제작 스튜디오, 아클링스." };
+const SADAHAM = { id: "sadaham", title: "사다함의 꿈", blurb: "삼한일통 3부작의 두 번째 이야기입니다. 이 공고의 결과물은 작품 포트폴리오에 함께 올라갑니다.", logline: "열다섯 화랑 사다함이 첫 출정에서 죽음 앞에 선 벗을 구하려다, 약속과 나라 사이에서 선택을 강요받는다." };
+const AKUI = { id: "akui", title: "악의 꽃", blurb: "삼한일통 3부작의 첫 이야기입니다. 이 공고의 결과물은 작품 포트폴리오에 함께 올라갑니다.", logline: "금관가야의 마지막 밤, 철을 다루던 소녀가 나라를 삼킨 저주의 꽃을 키워 낸 자가 누구인지 쫓는다." };
+const DANHANA = { id: "danhana", title: "단 하나의 꿈", blurb: "삼한일통 3부작의 마지막 이야기입니다. 이 공고의 결과물은 작품 포트폴리오에 함께 올라갑니다.", logline: "세 나라가 하나가 되는 날, 단 하나의 꿈을 지키려는 이들이 각자의 방식으로 마지막 선택을 한다." };
+const MUSEUM = { id: "museum", title: "박물관 협업 숏폼", blurb: "지역 박물관과 함께 만드는 유물 소개 숏폼 시리즈입니다. 결과물은 시리즈 포트폴리오에 함께 올라갑니다.", logline: "잠든 유물이 1분 안에 제 이야기를 들려준다. 소장품 하나가 한 편이 되는 숏폼 시리즈." };
+const STUDIO = { id: "studio", title: "아클링스 스튜디오", blurb: "아클링스 전체 홍보에 쓰이는 작업입니다. 결과물은 스튜디오 소개에 쓰입니다.", logline: "한국 고대사를 여러 크리에이터가 함께 만드는 참여형 제작 스튜디오, 아클링스." };
 
 export const SAMPLE_PROJECTS: Project[] = [
   {
@@ -57,7 +57,7 @@ export const SAMPLE_PROJECTS: Project[] = [
     heroNote: "삼한일통 세계관 대표 이미지 자리",
     intro: { heading: "흩어진 설정을\n한 권으로 묶습니다", body: "문서·대화·이미지에 흩어진 삼한일통 설정 자료를 인물·국가·연표 단위로 모아 세계관 바이블 한 권으로 만듭니다. 이후 모든 크리에이터가 같은 기준으로 작업할 수 있게 하는 일입니다." },
     scope: [{ title: "자료 수집·분류", text: "기존 자료를 읽고 항목별로 분류합니다." }, { title: "바이블 집필", text: "인물·국가·연표 세 부로 정리합니다." }, { title: "검수와 수정", text: "아클링스 검수 후 2회 고칩니다." }],
-    steps: steps(["모집", "11월 12일 ~ 12월 20일"], ["지원자 검토 · 선정", "12월 21일 ~ 12월 26일"], ["바이블 작업", "1월 5일 ~ 2월 13일"], ["내부 공개", "2월 말"]), currentStep: 0, work: { ...DANHANA, title: "삼한일통 3부작", blurb: "세 작품이 함께 쓰는 설정 기준 문서입니다. 결과물은 작품 포트폴리오에 함께 올라갑니다." },
+    steps: steps(["모집", "11월 12일 ~ 12월 20일"], ["지원자 검토 · 선정", "12월 21일 ~ 12월 26일"], ["바이블 작업", "1월 5일 ~ 2월 13일"], ["내부 공개", "2월 말"]), currentStep: 0, work: { ...DANHANA, id: "samhan", title: "삼한일통 3부작", blurb: "세 작품이 함께 쓰는 설정 기준 문서입니다. 결과물은 작품 포트폴리오에 함께 올라갑니다." },
   },
   {
     id: "p-sadaham-poster", title: "「사다함의 꿈」 포스터 일러스트", summary: "1화 공개에 맞춘 세로형 포스터 일러스트 1장을 그립니다.",
@@ -125,3 +125,10 @@ export const SAMPLE_PROJECTS: Project[] = [
 ];
 
 export const getSampleProject = (id: string) => SAMPLE_PROJECTS.find((p) => p.id === id);
+
+// 작품 화면(예시): 공고에 붙은 작품 정보를 모으고, 그 작품에 연결된 공고를 찾는다.
+export const getSampleWork = (workId: string) => SAMPLE_PROJECTS.find((p) => p.work.id === workId)?.work;
+export const projectsOfWork = (workId: string) => SAMPLE_PROJECTS.filter((p) => p.work.id === workId);
+
+// 지원 화면(예시)에서 고르는 포트폴리오. 실제 연결 때는 내 포트폴리오를 읽는다.
+export const SAMPLE_PORTFOLIOS = ["단편 「달빛 아래 화랑」 콘티집", "삼한 신화 일러스트 모음", "역사 다큐 숏폼 대본 3편"];

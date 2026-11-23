@@ -38,5 +38,5 @@ export type Project = {
   scope: { title: string; text: string }[];
   steps: ProjectStep[];
   currentStep: number; // 일정 4단계 중 지금 단계(0부터)
-  work: { title: string; blurb: string; logline: string };
+  work: { id: string; title: string; blurb: string; logline: string };
 };

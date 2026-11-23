@@ -21,5 +21,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: SP 
   const pages = Math.max(1, Math.ceil(all.length / PROJECT_PAGE_SIZE));
   const items = all.slice((requested - 1) * PROJECT_PAGE_SIZE, requested * PROJECT_PAGE_SIZE);
   const isAdmin = await isAdminUser();
-  return <ProjectList items={items} total={all.length} page={requested} pages={pages} filter={filter} today={todayKst()} isAdmin={isAdmin} />;
+  // 공고 올리기(예시)에서 돌아왔을 때만 안내를 띄운다(저장은 하지 않는다)
+  const postedTitle = one(sp.posted) === "1" ? (one(sp.title) ?? "").replace(/\s+/g, " ").trim().slice(0, 60) : undefined;
+  return <ProjectList items={items} total={all.length} page={requested} pages={pages} filter={filter} today={todayKst()} isAdmin={isAdmin} postedTitle={postedTitle} />;
 }

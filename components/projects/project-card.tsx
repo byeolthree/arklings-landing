@@ -1,22 +1,12 @@
 import Link from "next/link";
 import { RoleTags } from "@/components/creators/role-tags";
+import { BookmarkButton } from "./bookmark-button";
 import { dday, daysUntil, monthDay, rewardText } from "./filter";
 import { SOURCE_LABEL, STATUS_LABEL, type Project } from "./types";
 
 // 모집 상태 배지: 모집 중=자주 채움·흰 글자, 모집 예정=자주 외곽선, 모집 마감=테두리색 바탕(시안)
 export function StatusBadge({ status }: { status: Project["status"] }) {
   return <span className={`pj-badge ${status}`}>{STATUS_LABEL[status]}</span>;
-}
-
-// 북마크 버튼. 이번 단계는 모양만이라 눌러도 저장하지 않는다(저장은 다음 단계).
-export function BookmarkButton({ onDark = false }: { onDark?: boolean }) {
-  return (
-    <button type="button" className={`pj-bm${onDark ? " on-dark" : ""}`} aria-label="북마크" aria-pressed="false">
-      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M7 4h10v16l-5-3.6L7 20V4Z" />
-      </svg>
-    </button>
-  );
 }
 
 // 카드 아래줄의 마감·모집 시작 글자
@@ -36,7 +26,7 @@ export function ProjectCard({ p, today }: { p: Project; today: string }) {
         <StatusBadge status={p.status} />
         <span className="pj-source">{SOURCE_LABEL[p.source]}</span>
         <div className="pj-card-bm">
-          <BookmarkButton />
+          <BookmarkButton title={p.title} />
         </div>
       </div>
       <Link href={`/projects/${p.id}`} className="pj-card-link">
