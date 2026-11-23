@@ -8,10 +8,10 @@ import { signOut } from "@/app/actions/auth";
 // 랜딩(public/landing.html)의 상단 메뉴와 같은 모양. 가운데 메뉴 글자 중 연결된 화면이 있는 것만 링크(「크리에이터」「라이브러리」), 나머지는 글자로만 둔다.
 const MENU: { label: string; href?: string }[] = [
   { label: "킹덤" },
+  { label: "프로젝트" },
   { label: "스튜디오" },
   { label: "크리에이터", href: "/creators" },
   { label: "라이브러리", href: "/library" },
-  { label: "커뮤니티" },
 ];
 
 // ＋가 가는 곳: 메뉴에서 맨 위에 있는 화면. 지금은 크리에이터(/creators)다.
@@ -151,7 +151,7 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false, plusHref
               </Link>
               {drop === "plus" && (
                 <div className="lk-drop" role="menu" aria-label="등록할 곳">
-                  {MENU.map((m) =>
+                  {MENU.filter((m) => m.label !== "프로젝트").map((m) =>
                     m.href ? (
                       <Link key={m.label} role="menuitem" href={m.href === "/creators" ? "/portfolio/new" : m.href} onClick={shut} aria-current={(m.href === "/library" ? onLibrary : onCreators) ? "page" : undefined}>
                         {m.label}
