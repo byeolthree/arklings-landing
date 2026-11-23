@@ -75,7 +75,7 @@
   .logo { font-weight: 700; font-size: 22px; color: var(--jaju); text-decoration: none; letter-spacing: -0.02em; }
   .nav-links { display: none; gap: 22px; font-size: 15px; }
   .nav-links span { color: var(--body); }
-  .nav-links a.nav-creators, .nav-links a.nav-library { color: var(--body); text-decoration: none; transition: color .2s; }
+  .nav-links a.nav-projects, .nav-links a.nav-creators, .nav-links a.nav-library { color: var(--body); text-decoration: none; transition: color .2s; }
   /* 상단 메뉴: 올리면 주색, 누르면 주색에 굵은 글씨(다른 페이지에서 선택한 메뉴와 같은 모양, 네모 틀 없음). 글자 위치는 그대로 두려고 여백만큼 왼쪽으로 당긴다 */
   .nav-links { gap: 6px; margin-left: -8px; }
   .nav-links span, .nav-links a { padding: 7px 8px; border-radius: 10px; transition: color .2s, background .2s, box-shadow .2s, transform .12s; }
@@ -1121,7 +1121,7 @@
     <button class="nav-burger" id="navBurger" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="navMenu"><i></i><i></i><i></i></button>
     <a class="logo" href="#top">Arklings</a>
     <nav class="nav-links" aria-label="주요 메뉴">
-      <span>킹덤</span><span>프로젝트</span><span>스튜디오</span><a class="nav-creators" href="/creators">크리에이터</a><a class="nav-library" href="/library">라이브러리</a>
+      <span>킹덤</span><a class="nav-projects" href="/projects">프로젝트</a><span>스튜디오</span><a class="nav-creators" href="/creators">크리에이터</a><a class="nav-library" href="/library">라이브러리</a>
     </nav>
     <div class="nav-right">
       <span class="nav-icons">
@@ -1134,7 +1134,7 @@
     </div>
   </div>
   <nav class="nav-menu" id="navMenu" aria-label="모바일 메뉴">
-    <span>킹덤</span><span>프로젝트</span><span>스튜디오</span><a class="nav-creators" href="/creators">크리에이터</a><a class="nav-library" href="/library">라이브러리</a>
+    <span>킹덤</span><a class="nav-projects" href="/projects">프로젝트</a><span>스튜디오</span><a class="nav-creators" href="/creators">크리에이터</a><a class="nav-library" href="/library">라이브러리</a>
   </nav>
 </header>
 

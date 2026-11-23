@@ -8,14 +8,14 @@ import { signOut } from "@/app/actions/auth";
 // 랜딩(public/landing.html)의 상단 메뉴와 같은 모양. 가운데 메뉴 글자 중 연결된 화면이 있는 것만 링크(「크리에이터」「라이브러리」), 나머지는 글자로만 둔다.
 const MENU: { label: string; href?: string }[] = [
   { label: "킹덤" },
-  { label: "프로젝트" },
+  { label: "프로젝트", href: "/projects" },
   { label: "스튜디오" },
   { label: "크리에이터", href: "/creators" },
   { label: "라이브러리", href: "/library" },
 ];
 
 // ＋가 가는 곳: 메뉴에서 맨 위에 있는 화면. 지금은 크리에이터(/creators)다.
-const PLUS_HREF = MENU.find((m) => m.href)?.href ?? "/";
+const PLUS_HREF = "/creators";
 
 export type NavNotice = { id: string; text: string; when: string };
 
@@ -53,6 +53,8 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false, plusHref
   // 크리에이터 목록·프로필과 그 사람의 기획안 상세에 있을 때 메뉴의 「크리에이터」를 현재 위치로 보여 준다.
   const onCreators = pathname.startsWith("/creators") || pathname.startsWith("/portfolio") || pathname.startsWith("/dev-preview/creators") || pathname.startsWith("/dev-preview/portfolio/");
   const onLibrary = pathname.startsWith("/library") || pathname.startsWith("/dev-preview/library");
+  const onProjects = pathname.startsWith("/projects");
+  const isOn = (href: string) => (href === "/library" ? onLibrary : href === "/projects" ? onProjects : onCreators);
   const hrefOf = (href: string) => href;
 
   // 랜딩처럼 아래로 내리면 메뉴 아래에 옅은 선이 생긴다.
@@ -133,7 +135,7 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false, plusHref
         <nav className="lk-nav-links" aria-label="주요 메뉴">
           {MENU.map((m) =>
             m.href ? (
-              <Link key={m.label} href={hrefOf(m.href)} aria-current={(m.href === "/library" ? onLibrary : onCreators) ? "page" : undefined}>
+              <Link key={m.label} href={hrefOf(m.href)} aria-current={isOn(m.href) ? "page" : undefined}>
                 {m.label}
               </Link>
             ) : (
@@ -153,7 +155,7 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false, plusHref
                 <div className="lk-drop" role="menu" aria-label="등록할 곳">
                   {MENU.filter((m) => m.label !== "프로젝트").map((m) =>
                     m.href ? (
-                      <Link key={m.label} role="menuitem" href={m.href === "/creators" ? "/portfolio/new" : m.href} onClick={shut} aria-current={(m.href === "/library" ? onLibrary : onCreators) ? "page" : undefined}>
+                      <Link key={m.label} role="menuitem" href={m.href === "/creators" ? "/portfolio/new" : m.href} onClick={shut} aria-current={isOn(m.href) ? "page" : undefined}>
                         {m.label}
                       </Link>
                     ) : (
@@ -251,7 +253,7 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false, plusHref
       <nav className={`lk-menu${open ? " open" : ""}`} id="lk-menu" aria-label="모바일 메뉴" aria-hidden={!open}>
         {MENU.map((m) =>
           m.href ? (
-            <Link key={m.label} href={hrefOf(m.href)} onClick={close} tabIndex={open ? 0 : -1} aria-current={(m.href === "/library" ? onLibrary : onCreators) ? "page" : undefined}>
+            <Link key={m.label} href={hrefOf(m.href)} onClick={close} tabIndex={open ? 0 : -1} aria-current={isOn(m.href) ? "page" : undefined}>
               {m.label}
             </Link>
           ) : (
