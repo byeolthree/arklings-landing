@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isAdminUser } from "@/lib/admin-collab";
 import { getCurrentUser } from "@/lib/auth";
 import { countNewCollab, listNewCollab } from "@/lib/collab-count";
+import { bellCount, countUnreadNotifications } from "@/lib/notifications";
 import { toNotices } from "@/lib/nav-notices";
 
 export const dynamic = "force-dynamic";
@@ -12,6 +13,7 @@ export async function GET() {
   const user = await getCurrentUser();
   const headers = { "Cache-Control": "no-store" };
   if (user === null) return NextResponse.json({ loggedIn: false }, { headers });
-  const [isAdmin, newCount, list] = await Promise.all([isAdminUser(), countNewCollab(), listNewCollab(5)]);
-  return NextResponse.json({ loggedIn: true, isAdmin, newCount, notices: toNotices(list) }, { headers });
+  const [isAdmin, collabCount, list, unread] = await Promise.all([isAdminUser(), countNewCollab(), listNewCollab(5), countUnreadNotifications()]);
+  // 종 아이콘 개수 = 접수 상태 협업 신청 수 + 읽지 않은 알림 수(한쪽을 못 세면 0으로 보고, 둘 다 못 세면 null)
+  return NextResponse.json({ loggedIn: true, isAdmin, newCount: bellCount(collabCount, unread), notices: toNotices(list) }, { headers });
 }

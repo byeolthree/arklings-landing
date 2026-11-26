@@ -41,7 +41,7 @@ const BellIcon = () => (
 );
 
 // 로그인하면 아이콘 셋(＋ · 사람 · 종), 아니면 ＋와 사람 둘. 종의 개수와 목록은 서버가 읽은 새 협업 신청(SiteHeader)이다.
-export function SiteNav({ loggedIn, newCount, notices, isAdmin = false, plusHref }: { loggedIn: boolean; newCount: number | null; notices: NavNotice[]; isAdmin?: boolean; plusHref?: string }) {
+export function SiteNav({ loggedIn, newCount, unreadNotifications = 0, notices, isAdmin = false, plusHref }: { loggedIn: boolean; newCount: number | null; unreadNotifications?: number; notices: NavNotice[]; isAdmin?: boolean; plusHref?: string }) {
   const [open, setOpen] = useState(false);
   const [drop, setDrop] = useState<Drop>(null);
   const [scrolled, setScrolled] = useState(false);
@@ -231,6 +231,9 @@ export function SiteNav({ loggedIn, newCount, notices, isAdmin = false, plusHref
                 <div className="lk-drop lk-drop-bell" role="menu" aria-label="알림">
                   <p className="lk-drop-title">알림</p>
                   {notices.length === 0 && <p className="lk-drop-empty">새 협업 신청이 없어요.</p>}
+                  <Link role="menuitem" className="lk-drop-all" href="/notifications" onClick={shut}>
+                    {unreadNotifications > 0 ? `읽지 않은 알림 ${unreadNotifications}개 보기` : "알림 보기"}
+                  </Link>
                   <ul>
                     {notices.map((n) => (
                       <li key={n.id}>

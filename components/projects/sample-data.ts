@@ -1,4 +1,4 @@
-import type { Project, ProjectStep } from "./types";
+import type { Project, ProjectStep, SampleProject } from "./types";
 
 // 프로젝트 공고 예시 데이터(2026-11-23). 이번 단계는 화면만 만들어서 DB 대신 이 파일을 읽는다.
 // 실제 사이트(VERCEL_ENV=production)에서는 /projects가 404다(AGENTS.md 「화면·기능을 덧붙일 때」 1·3번). 테이블·지원 처리는 다음 단계에서 정한다.
@@ -13,7 +13,7 @@ const DANHANA = { id: "danhana", title: "단 하나의 꿈", blurb: "삼한일�
 const MUSEUM = { id: "museum", title: "박물관 협업 숏폼", blurb: "지역 박물관과 함께 만드는 유물 소개 숏폼 시리즈입니다. 결과물은 시리즈 포트폴리오에 함께 올라갑니다.", logline: "잠든 유물이 1분 안에 제 이야기를 들려준다. 소장품 하나가 한 편이 되는 숏폼 시리즈." };
 const STUDIO = { id: "studio", title: "아클링스 스튜디오", blurb: "아클링스 전체 홍보에 쓰이는 작업입니다. 결과물은 스튜디오 소개에 쓰입니다.", logline: "한국 고대사를 여러 크리에이터가 함께 만드는 참여형 제작 스튜디오, 아클링스." };
 
-export const SAMPLE_PROJECTS: Project[] = [
+export const SAMPLE_PROJECTS: SampleProject[] = [
   {
     id: "p-sadaham-conti", title: "「사다함의 꿈」 1화 콘티", summary: "신라 화랑 사다함의 첫 출정을 다룬 1화 대본을 장면별 콘티로 옮깁니다. 약 60컷 분량입니다.",
     status: "open", source: "arklings", roles: ["art_director"], genres: ["사극", "판타지"], rewardMin: 250, rewardMax: 400,
@@ -130,5 +130,11 @@ export const getSampleProject = (id: string) => SAMPLE_PROJECTS.find((p) => p.id
 export const getSampleWork = (workId: string) => SAMPLE_PROJECTS.find((p) => p.work.id === workId)?.work;
 export const projectsOfWork = (workId: string) => SAMPLE_PROJECTS.filter((p) => p.work.id === workId);
 
-// 지원 화면(예시)에서 고르는 포트폴리오. 실제 연결 때는 내 포트폴리오를 읽는다.
-export const SAMPLE_PORTFOLIOS = ["단편 「달빛 아래 화랑」 콘티집", "삼한 신화 일러스트 모음", "역사 다큐 숏폼 대본 3편"];
+// 예시 공고를 화면이 쓰는 공고 모양으로 바꾼다(예시 작품 화면이 카드를 그릴 때만 쓴다).
+export function sampleToProject(s: SampleProject): Project {
+  return {
+    id: s.id, title: s.title, summary: s.summary, description: s.intro.body, status: s.status, source: s.source, roles: s.roles, genres: s.genres,
+    rewardMin: s.rewardMin, rewardMax: s.rewardMax, negotiable: false, postedAt: s.postedAt, opensAt: s.opensAt, deadline: s.deadline,
+    workStartsOn: null, workEndsOn: null, applicants: s.applicants, selected: s.selected, work: { id: s.work.id, title: s.work.title },
+  };
+}

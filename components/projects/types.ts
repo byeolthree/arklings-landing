@@ -16,7 +16,32 @@ export const SORT_LABEL: Record<ProjectSort, string> = { latest: "최신순", de
 
 export type ProjectStep = { label: string; range: string };
 
+// 화면이 쓰는 공고 한 건. DB 보기 projects_public(0030)을 lib/projects.ts가 이 모양으로 바꿔 준다.
+// 보상은 둘 다 비면 「협의」(negotiable)이고, 그때 rewardMin·rewardMax는 0이다(보상 구간 거르기에서는 빠진다).
 export type Project = {
+  id: string;
+  title: string;
+  summary: string;
+  description: string;
+  status: ProjectStatus;
+  source: ProjectSource;
+  roles: Role[]; // 맨 앞이 대표 역할
+  genres: string[];
+  rewardMin: number; // 만 원
+  rewardMax: number; // 만 원
+  negotiable: boolean;
+  postedAt: string; // YYYY-MM-DD (올린 날, 한국 시간)
+  opensAt: string; // YYYY-MM-DD (모집 시작)
+  deadline: string; // YYYY-MM-DD (모집 마감)
+  workStartsOn: string | null; // 작업 기간(선택)
+  workEndsOn: string | null;
+  applicants: number;
+  selected: number;
+  work: { id: string; title: string }; // 연결 작품(source_works). 없으면 id·title이 빈 글자
+};
+
+// 예시 데이터(sample-data.ts) 전용 모양. 이어지는 화면이 없는 예시 작품 화면만 쓴다.
+export type SampleProject = {
   id: string;
   title: string;
   summary: string;

@@ -15,7 +15,9 @@ export function ProjectList({
   filter,
   today,
   isAdmin,
-  postedTitle,
+  loggedIn = false,
+  bookmarkedIds = [],
+  failed = false,
 }: {
   items: Project[];
   total: number;
@@ -24,8 +26,11 @@ export function ProjectList({
   filter: ProjectFilter;
   today: string;
   isAdmin: boolean;
-  postedTitle?: string; // 공고 올리기(예시)를 마치고 돌아왔을 때 안내에 쓰는 제목
+  loggedIn?: boolean; // 안 했으면 북마크를 누를 때 로그인 화면으로 보낸다
+  bookmarkedIds?: string[]; // 내 북마크한 공고 번호들
+  failed?: boolean; // 공고를 읽지 못했을 때
 }) {
+  const marked = new Set(bookmarkedIds);
   const filtered = hasFilter(filter);
   const nFilters = activeCount(filter);
   const href = (o: Partial<ProjectFilter> & { page?: number }) => projectsHref({ ...filter, ...o });
@@ -114,12 +119,6 @@ export function ProjectList({
             </div>
           </div>
 
-          {postedTitle !== undefined && (
-            <p className="pj-posted" role="status">
-              {postedTitle ? <b>{postedTitle}</b> : null} 공고를 올렸어요. 예시 화면이라 저장되지 않아서 목록에는 나타나지 않아요.
-            </p>
-          )}
-
           <div className="pj-meta">
             <p className="pj-count">
               공고 <b>{total}</b>건
@@ -150,7 +149,15 @@ export function ProjectList({
             </nav>
           </div>
 
-          {total === 0 ? (
+          {failed ? (
+            <div className="panel cr-state" role="alert">
+              <h2>공고를 불러오지 못했어요</h2>
+              <p>잠시 뒤에 다시 열어 주세요.</p>
+              <Link href="/projects" className="btn btn-ghost">
+                다시 열기
+              </Link>
+            </div>
+          ) : total === 0 ? (
             <div className="panel cr-state">
               <h2>{filtered ? "맞는 공고가 없어요" : "아직 모집 중인 공고가 없어요"}</h2>
               <p>{filtered ? "조건에 맞는 공고가 아직 없어요. 조건을 바꿔 보세요." : "새 공고가 올라오면 여기에 보여요."}</p>
@@ -173,7 +180,7 @@ export function ProjectList({
               <ul className="cr-grid">
                 {items.map((p) => (
                   <li key={p.id}>
-                    <ProjectCard p={p} today={today} />
+                    <ProjectCard p={p} today={today} bookmarked={marked.has(p.id)} loggedIn={loggedIn} />
                   </li>
                 ))}
               </ul>

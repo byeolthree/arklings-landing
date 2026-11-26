@@ -176,4 +176,59 @@
 .cr .pj-rec-title { margin-top: 16px; font-size: 18px; font-weight: 700; }
 @media (min-width: 768px) { .cr .pj-rec-title { font-size: 24px; } }
 
+/* ── 실제 데이터 연결(2026-11-26): 오류·검사 안내, 지원 상태 태그, 목록 줄, 알림, 지원자 관리 ── */
+.cr .pj-error { padding: 12px 16px; border-radius: 12px; background: #fbeaea; color: #c83a3a; font-size: 14px; }
+.cr .pj-field-error { font-size: 12px; color: #c83a3a; }
+.cr .pj-field input[aria-invalid="true"], .cr .pj-field select[aria-invalid="true"], .cr .pj-field textarea[aria-invalid="true"] { border-color: #c83a3a; }
+.cr .pj-intro-one { max-width: 760px; }
+.cr .pj-pre { white-space: pre-line; }
+.cr .pj-sec-tight { padding-top: 0; }
+.cr .pj-checks { border: 0; padding: 0; margin: 0; min-width: 0; }
+.cr .pj-checks legend { padding: 0; margin-bottom: 8px; font-size: 12px; font-weight: 500; color: var(--title); }
+.cr .pj-check-list { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.cr .pj-check { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--body); cursor: pointer; }
+.cr .pj-check input { width: 18px; height: 18px; min-height: 0; padding: 0; accent-color: var(--jaju); }
+.cr .pj-hero-manage { background: transparent; color: #fff; border-color: #fff; min-height: 44px; }
+.cr .pj-hero-manage:hover { background: rgba(255,255,255,.15); }
+
+/* 지원 상태 태그(접수·수락·거절): 협업 신청 상태 태그와 같은 색 */
+.cr .pj-astatus { display: inline-flex; align-items: center; padding: 3px 12px; border-radius: 999px; font-size: 12px; font-weight: 500; line-height: 1.5; white-space: nowrap; }
+.cr .pj-astatus.received { background: var(--body); color: #fff; border: 1px solid var(--body); }
+.cr .pj-astatus.accepted { background: var(--jaju); color: #fff; border: 1px solid var(--jaju); }
+.cr .pj-astatus.rejected { background: var(--line); color: var(--title); border: 1px solid #cfc4ca; }
+
+/* 내 지원 현황·알림 목록 줄 */
+.cr .pj-listwrap { max-width: 860px; }
+.cr .pj-rows { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.cr .pj-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; overflow: visible; }
+.cr .pj-row-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.cr .pj-row-title { font-family: var(--font-noto-serif), serif; font-size: 17px; font-weight: 700; color: var(--title); text-decoration: none; }
+.cr a.pj-row-title:hover { text-decoration: underline; }
+.cr .pj-row-sub { font-size: 12px; color: var(--body); }
+.cr .pj-noti-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.cr .pj-noti-form { overflow: visible; padding: 0; }
+.cr .pj-noti { display: flex; align-items: flex-start; gap: 12px; width: 100%; padding: 16px 20px; border: 0; border-radius: 22px; background: transparent; font: inherit; text-align: left; color: inherit; cursor: pointer; }
+.cr .pj-noti:hover { background: var(--tint); }
+.cr .pj-noti-dot { flex: none; width: 8px; height: 8px; margin-top: 8px; border-radius: 50%; background: transparent; }
+.cr .pj-noti.unread .pj-noti-dot { background: var(--jaju); }
+.cr .pj-noti-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.cr .pj-noti-text { font-size: 15px; color: var(--title); }
+.cr .pj-noti.unread .pj-noti-text { font-weight: 700; }
+
+/* 지원자 관리 */
+.cr .pj-managewrap { max-width: 960px; }
+.cr .pj-manage-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.cr .pj-manage-close { margin-left: auto; }
+.cr .pj-applicants { display: flex; flex-direction: column; gap: 16px; margin: 0; padding: 0; list-style: none; }
+.cr .pj-applicant { display: flex; flex-direction: column; gap: 14px; padding: 20px; overflow: visible; }
+@media (min-width: 768px) { .cr .pj-applicant { padding: 24px 28px; } }
+.cr .pj-applicant-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.cr .pj-applicant-name { font-size: 17px; color: var(--title); }
+.cr .pj-applicant-time { margin-left: auto; font-size: 12px; }
+.cr .pj-applicant-motive { font-size: 15px; line-height: 1.7; color: var(--title); }
+.cr .pj-applicant-meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 0; padding-top: 14px; border-top: 1px solid var(--line); }
+.cr .pj-applicant-meta dt { font-size: 12px; color: var(--body); }
+.cr .pj-applicant-meta dd { margin: 2px 0 0; font-size: 14px; color: var(--title); }
+.cr .pj-applicant-act { display: flex; justify-content: flex-end; gap: 12px; }
+
 @media (prefers-reduced-motion: reduce) { .cr .pj-cta-btn { transition: none; } }

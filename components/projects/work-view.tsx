@@ -2,10 +2,11 @@ import Link from "next/link";
 import "../creators/creators.css";
 import "./projects.css";
 import { ProjectCard } from "./project-card";
-import type { Project } from "./types";
+import { sampleToProject } from "./sample-data";
+import type { SampleProject } from "./types";
 
 // 작품 화면(예시): 작품 이름·소개·로그라인과, 그 작품에 연결된 공고 목록. 공고를 누르면 상세로 돌아간다.
-export function WorkView({ work, projects, today, fromId }: { work: Project["work"]; projects: Project[]; today: string; fromId?: string }) {
+export function WorkView({ work, projects, today, fromId }: { work: SampleProject["work"]; projects: SampleProject[]; today: string; fromId?: string }) {
   return (
     <div className="cr pj">
       <section className="cr-list">
@@ -31,7 +32,7 @@ export function WorkView({ work, projects, today, fromId }: { work: Project["wor
           <ul className="cr-grid">
             {projects.map((p) => (
               <li key={p.id}>
-                <ProjectCard p={p} today={today} />
+                <ProjectCard p={sampleToProject(p)} today={today} />
               </li>
             ))}
           </ul>

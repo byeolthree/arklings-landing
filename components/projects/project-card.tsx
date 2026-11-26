@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { RoleTags } from "@/components/creators/role-tags";
 import { BookmarkButton } from "./bookmark-button";
-import { dday, daysUntil, monthDay, rewardText } from "./filter";
+import { dday, daysUntil, monthDay } from "./filter";
+import { rewardLabel } from "@/lib/projects";
 import { SOURCE_LABEL, STATUS_LABEL, type Project } from "./types";
 
 // 모집 상태 배지: 모집 중=자주 채움·흰 글자, 모집 예정=자주 외곽선, 모집 마감=테두리색 바탕(시안)
@@ -19,14 +20,15 @@ export function dateLine(p: Project, today: string): string {
   return "모집 마감";
 }
 
-export function ProjectCard({ p, today }: { p: Project; today: string }) {
+// bookmarked: 내 북마크인지, loggedIn: 로그인했는지(안 했으면 북마크를 누를 때 로그인 화면으로 보낸다)
+export function ProjectCard({ p, today, bookmarked = false, loggedIn = false }: { p: Project; today: string; bookmarked?: boolean; loggedIn?: boolean }) {
   return (
     <article className="panel pj-card">
       <div className="pj-card-top">
         <StatusBadge status={p.status} />
         <span className="pj-source">{SOURCE_LABEL[p.source]}</span>
         <div className="pj-card-bm">
-          <BookmarkButton title={p.title} />
+          <BookmarkButton projectId={p.id} title={p.title} initial={bookmarked} loggedIn={loggedIn} />
         </div>
       </div>
       <Link href={`/projects/${p.id}`} className="pj-card-link">
@@ -44,7 +46,7 @@ export function ProjectCard({ p, today }: { p: Project; today: string }) {
         )}
       </div>
       <div className="pj-card-foot">
-        <b className="pj-reward">{rewardText(p)}</b>
+        <b className="pj-reward">{rewardLabel(p)}</b>
         <span className="pj-date">{dateLine(p, today)}</span>
         <span className="pj-apps">{p.status === "soon" ? "모집 전" : `지원 ${p.applicants}명`}</span>
       </div>
