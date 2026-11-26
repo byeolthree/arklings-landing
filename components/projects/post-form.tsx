@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import { createProject, type PostState } from "@/app/actions/projects";
+import { createProject, updateProject, type PostState } from "@/app/actions/projects";
 import { GENRES } from "../creators/genres";
 import { ROLES } from "@/lib/collab";
 import "../creators/creators.css";
@@ -11,10 +11,19 @@ import "./projects.css";
 const asList = (v: string | string[] | undefined) => (Array.isArray(v) ? v : v ? [v] : []);
 const asText = (v: string | string[] | undefined) => (Array.isArray(v) ? (v[0] ?? "") : (v ?? ""));
 
-// 공고 올리기 화면(운영자만). 「공고 올리기」는 createProject를 불러 projects 표에 저장하고, 성공하면 새 공고 상세로 이동한다.
-export function PostForm({ sourceWorks }: { sourceWorks: { id: string; title: string }[] }) {
-  const [state, action, pending] = useActionState<PostState, FormData>(createProject, {});
-  const v = state.values ?? {};
+// 공고 올리기·수정 화면(운영자만). 올리기는 createProject로 projects 표에 저장하고 새 공고 상세로 이동한다.
+// 수정(edit)은 같은 칸으로 updateProject를 부르고 그 공고 상세로 돌아간다. lockedFields면 보상·모집 마감일 칸을 잠근다(지원자가 있는 공고).
+export function PostForm({
+  sourceWorks,
+  edit,
+}: {
+  sourceWorks: { id: string; title: string }[];
+  edit?: { projectId: string; values: Record<string, string | string[]>; lockedFields: boolean };
+}) {
+  const [state, action, pending] = useActionState<PostState, FormData>(edit ? updateProject : createProject, {});
+  const v = state.values ?? edit?.values ?? {};
+  const lock = Boolean(edit?.lockedFields);
+  const backHref = edit ? `/projects/${edit.projectId}` : "/projects";
   const e = state.errors ?? {};
   const roles = asList(v.roles);
   const genres = asList(v.genres);
@@ -28,11 +37,17 @@ export function PostForm({ sourceWorks }: { sourceWorks: { id: string; title: st
     <div className="cr pj">
       <section className="cr-list">
         <div className="wrap pj-formwrap">
-          <Link href="/projects" className="cr-back">
-            ← 프로젝트 목록
+          <Link href={backHref} className="cr-back">
+            {edit ? "← 공고로 돌아가기" : "← 프로젝트 목록"}
           </Link>
-          <h1 className="pj-form-title">공고 올리기</h1>
+          <h1 className="pj-form-title">{edit ? "공고 수정" : "공고 올리기"}</h1>
           <form className="panel pj-form" action={action} noValidate>
+            {edit && <input type="hidden" name="project_id" value={edit.projectId} />}
+            {lock && (
+              <p className="pj-note" role="note">
+                지원자가 있는 공고는 보상과 모집 마감일을 바꿀 수 없어요.
+              </p>
+            )}
             {state.message && (
               <p className="pj-error" role="alert">
                 {state.message}
@@ -78,11 +93,11 @@ export function PostForm({ sourceWorks }: { sourceWorks: { id: string; title: st
             <div className="pj-field-row">
               <div className="pj-field">
                 <label htmlFor="pj-reward-min">보상 최소 (만 원)</label>
-                <input id="pj-reward-min" name="reward_min" type="text" inputMode="numeric" defaultValue={asText(v.reward_min)} placeholder="협의면 비워 두세요" aria-invalid={Boolean(e.reward)} aria-describedby={e.reward ? "pj-reward-error" : undefined} />
+                <input id="pj-reward-min" name="reward_min" type="text" inputMode="numeric" disabled={lock} defaultValue={asText(v.reward_min)} placeholder="협의면 비워 두세요" aria-invalid={Boolean(e.reward)} aria-describedby={e.reward ? "pj-reward-error" : undefined} />
               </div>
               <div className="pj-field">
                 <label htmlFor="pj-reward-max">보상 최대 (만 원)</label>
-                <input id="pj-reward-max" name="reward_max" type="text" inputMode="numeric" defaultValue={asText(v.reward_max)} placeholder="협의면 비워 두세요" aria-invalid={Boolean(e.reward)} aria-describedby={e.reward ? "pj-reward-error" : undefined} />
+                <input id="pj-reward-max" name="reward_max" type="text" inputMode="numeric" disabled={lock} defaultValue={asText(v.reward_max)} placeholder="협의면 비워 두세요" aria-invalid={Boolean(e.reward)} aria-describedby={e.reward ? "pj-reward-error" : undefined} />
               </div>
             </div>
             {err("reward")}
@@ -94,7 +109,7 @@ export function PostForm({ sourceWorks }: { sourceWorks: { id: string; title: st
               </div>
               <div className="pj-field">
                 <label htmlFor="pj-deadline">모집 마감일</label>
-                <input id="pj-deadline" name="deadline_on" type="date" defaultValue={asText(v.deadline_on)} aria-invalid={Boolean(e.deadline_on)} aria-describedby={e.deadline_on ? "pj-deadline_on-error" : undefined} />
+                <input id="pj-deadline" name="deadline_on" type="date" disabled={lock} defaultValue={asText(v.deadline_on)} aria-invalid={Boolean(e.deadline_on)} aria-describedby={e.deadline_on ? "pj-deadline_on-error" : undefined} />
                 {err("deadline_on")}
               </div>
             </div>
@@ -132,11 +147,11 @@ export function PostForm({ sourceWorks }: { sourceWorks: { id: string; title: st
               </div>
             </div>
             <div className="pj-form-act">
-              <Link href="/projects" className="btn btn-ghost">
+              <Link href={backHref} className="btn btn-ghost">
                 취소
               </Link>
               <button type="submit" className="btn btn-primary" disabled={pending} aria-busy={pending}>
-                {pending ? "올리는 중…" : "공고 올리기"} {!pending && <span aria-hidden="true">＋</span>}
+                {edit ? (pending ? "저장하는 중…" : "수정 저장") : pending ? "올리는 중…" : "공고 올리기"} {!pending && !edit && <span aria-hidden="true">＋</span>}
               </button>
             </div>
           </form>

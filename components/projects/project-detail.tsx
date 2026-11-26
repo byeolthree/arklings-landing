@@ -118,6 +118,11 @@ export function ProjectDetail({
                   지원자 관리
                 </Link>
               )}
+              {isAdmin && p.status !== "closed" && (
+                <Link href={`/projects/${p.id}/edit`} className="btn pj-hero-manage">
+                  수정
+                </Link>
+              )}
             </div>
           </div>
         </div>

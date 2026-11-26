@@ -116,6 +116,11 @@ export function ProjectList({
                   공고 올리기 <span aria-hidden="true">＋</span>
                 </Link>
               )}
+              {isAdmin && (
+                <Link href="/projects/mine" className="btn btn-ghost pj-post">
+                  내 프로젝트
+                </Link>
+              )}
             </div>
           </div>
 

@@ -217,6 +217,24 @@ export async function listSourceWorks(): Promise<{ id: string; title: string }[]
   }
 }
 
+// 내가 올린 공고(내 프로젝트). 올린 운영자 번호(posted_by)는 표를 직접 읽어야 알 수 있어서, 먼저 내 공고 번호를 표에서 읽고
+// 상태·지원자 수는 보기 projects_public에서 읽는다. 지워진 공고는 빠진다. 못 읽으면 null.
+export async function listMyPostedProjects(userId: string): Promise<Project[] | null> {
+  try {
+    const sb = await createAuthClient();
+    const { data, error } = await sb.from("projects").select("id").eq("posted_by", userId).is("deleted_at", null).order("created_at", { ascending: false }).limit(200);
+    if (error) return null;
+    const ids = ((data ?? []) as { id: string }[]).map((r) => r.id);
+    if (ids.length === 0) return [];
+    const [{ data: rows, error: e2 }, works] = await Promise.all([sb.from("projects_public").select(COLS).in("id", ids), workTitles(sb)]);
+    if (e2) return null;
+    const byId = new Map(((rows ?? []) as Row[]).map((r) => [r.id, toProject(r, works)]));
+    return ids.map((id) => byId.get(id)).filter((p): p is Project => Boolean(p));
+  } catch {
+    return null;
+  }
+}
+
 // ── 운영자: 지원자 관리 ───────────────────────────────────────────────────────────
 
 export type Applicant = {

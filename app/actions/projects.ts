@@ -7,6 +7,7 @@ import { projectsClosed } from "@/components/projects/sample-data";
 import { CONFIRM_FIRST_MESSAGE, getCurrentUser, isConfirmed, type CurrentUser } from "@/lib/auth";
 import { isAdminUser } from "@/lib/admin-collab";
 import { ROLES, type Role } from "@/lib/collab";
+import { getPublicProject } from "@/lib/projects";
 import { createAuthClient } from "@/lib/supabase/server";
 import { UUID_RE } from "@/lib/utils";
 
@@ -122,7 +123,25 @@ export type PostState = {
   values?: Record<string, string | string[]>;
 };
 
-export async function createProject(_prev: PostState, fd: FormData): Promise<PostState> {
+// 공고 올리기·수정이 같이 쓰는 입력 읽기와 검사. override는 잠긴 칸(저장된 값을 그대로 쓰는 칸)이다.
+type ProjectInput = {
+  title: string;
+  summary: string;
+  description: string;
+  roles: Role[];
+  genres: string[];
+  rewardMin: number | null;
+  rewardMax: number | null;
+  opensOn: string;
+  deadlineOn: string;
+  workStartsOn: string | null;
+  workEndsOn: string | null;
+  source: string;
+  sourceWorkId: string | null;
+};
+
+function readProjectForm(fd: FormData, override: Record<string, string> = {}): { values: Record<string, string | string[]>; errors: Record<string, string>; input: ProjectInput } {
+  const field = (key: string) => (key in override ? override[key] : text(fd, key).trim());
   const roles = fd.getAll("roles").map(String);
   const genres = fd.getAll("genres").map(String);
   const values: Record<string, string | string[]> = {
@@ -131,19 +150,15 @@ export async function createProject(_prev: PostState, fd: FormData): Promise<Pos
     description: text(fd, "description").trim(),
     roles,
     genres,
-    reward_min: text(fd, "reward_min").trim(),
-    reward_max: text(fd, "reward_max").trim(),
-    opens_on: text(fd, "opens_on").trim(),
-    deadline_on: text(fd, "deadline_on").trim(),
-    work_starts_on: text(fd, "work_starts_on").trim(),
-    work_ends_on: text(fd, "work_ends_on").trim(),
-    source: text(fd, "source").trim(),
-    source_work_id: text(fd, "source_work_id").trim(),
+    reward_min: field("reward_min"),
+    reward_max: field("reward_max"),
+    opens_on: field("opens_on"),
+    deadline_on: field("deadline_on"),
+    work_starts_on: field("work_starts_on"),
+    work_ends_on: field("work_ends_on"),
+    source: field("source"),
+    source_work_id: field("source_work_id"),
   };
-  if (projectsClosed()) return { message: CLOSED_MESSAGE, values };
-  const gate = await needAdmin();
-  if (!gate.ok) return { message: gate.message, values };
-
   const v = values as Record<string, string> & { roles: string[]; genres: string[] };
   const errors: Record<string, string> = {};
   if (v.title.length < 2 || v.title.length > 60 || hasBadChars(v.title)) errors.title = "제목은 2자 이상 60자 이하로 적어 주세요. (< > 글자는 쓸 수 없어요)";
@@ -173,6 +188,33 @@ export async function createProject(_prev: PostState, fd: FormData): Promise<Pos
   }
   if (v.source !== "arklings" && v.source !== "request") errors.source = "출처를 골라 주세요.";
   if (v.source_work_id !== "" && !UUID_RE.test(v.source_work_id)) errors.source_work_id = "연결 작품을 다시 골라 주세요.";
+
+  return {
+    values,
+    errors,
+    input: {
+      title: v.title,
+      summary: v.summary,
+      description: v.description,
+      roles: v.roles as Role[],
+      genres: v.genres,
+      rewardMin,
+      rewardMax,
+      opensOn: v.opens_on,
+      deadlineOn: v.deadline_on,
+      workStartsOn: hasStart ? v.work_starts_on : null,
+      workEndsOn: hasEnd ? v.work_ends_on : null,
+      source: v.source,
+      sourceWorkId: v.source_work_id === "" ? null : v.source_work_id,
+    },
+  };
+}
+
+export async function createProject(_prev: PostState, fd: FormData): Promise<PostState> {
+  const { values, errors, input } = readProjectForm(fd);
+  if (projectsClosed()) return { message: CLOSED_MESSAGE, values };
+  const gate = await needAdmin();
+  if (!gate.ok) return { message: gate.message, values };
   if (Object.keys(errors).length > 0) return { errors, values };
 
   let id: string | null = null;
@@ -181,19 +223,19 @@ export async function createProject(_prev: PostState, fd: FormData): Promise<Pos
     const { data, error } = await (await createAuthClient())
       .from("projects")
       .insert({
-        title: v.title,
-        summary: v.summary,
-        description: v.description,
-        roles: v.roles as Role[],
-        genres: v.genres,
-        reward_min: rewardMin,
-        reward_max: rewardMax,
-        opens_on: v.opens_on,
-        deadline_on: v.deadline_on,
-        work_starts_on: hasStart ? v.work_starts_on : null,
-        work_ends_on: hasEnd ? v.work_ends_on : null,
-        source: v.source,
-        source_work_id: v.source_work_id === "" ? null : v.source_work_id,
+        title: input.title,
+        summary: input.summary,
+        description: input.description,
+        roles: input.roles,
+        genres: input.genres,
+        reward_min: input.rewardMin,
+        reward_max: input.rewardMax,
+        opens_on: input.opensOn,
+        deadline_on: input.deadlineOn,
+        work_starts_on: input.workStartsOn,
+        work_ends_on: input.workEndsOn,
+        source: input.source,
+        source_work_id: input.sourceWorkId,
         posted_by: gate.user.id,
       })
       .select("id")
@@ -206,7 +248,97 @@ export async function createProject(_prev: PostState, fd: FormData): Promise<Pos
   if (failure || !id) return { message: failure ?? UNAVAILABLE, values };
 
   revalidatePath("/projects");
+  revalidatePath("/projects/mine");
   redirect(`/projects/${id}`);
+}
+
+// ── 공고 수정(운영자) ─────────────────────────────────────────────────────────
+
+const LOCKED_MESSAGE = "지원자가 있는 공고는 보상과 모집 마감일을 바꿀 수 없어요.";
+
+// 올리기 화면과 같은 칸·같은 검사. 마감된 공고는 수정할 수 없다. 지원자가 1명 이상이면 보상·모집 마감일은 저장된 값을 그대로 쓰고,
+// 화면이 잠가서 보내지 않는 칸이 다른 값으로 오면 막는다(서버가 저장된 값을 다시 읽어 판단한다).
+export async function updateProject(_prev: PostState, fd: FormData): Promise<PostState> {
+  const projectId = text(fd, "project_id");
+  const draft = readProjectForm(fd); // 잠긴 칸이 없을 때 돌려줄 입력값(검사는 아래에서 다시 한다)
+  if (projectsClosed()) return { message: CLOSED_MESSAGE, values: draft.values };
+  const gate = await needAdmin();
+  if (!gate.ok) return { message: gate.message, values: draft.values };
+  if (!UUID_RE.test(projectId)) return { message: FUNCTION_MESSAGES.project_not_found, values: draft.values };
+
+  const { project, failed } = await getPublicProject(projectId);
+  if (failed) return { message: UNAVAILABLE, values: draft.values };
+  if (!project) return { message: FUNCTION_MESSAGES.project_not_found, values: draft.values };
+  if (project.status === "closed") return { message: "마감된 공고는 수정할 수 없어요.", values: draft.values };
+
+  const locked = project.applicants >= 1;
+  const stored = { reward_min: project.negotiable ? "" : String(project.rewardMin), reward_max: project.negotiable ? "" : String(project.rewardMax), deadline_on: project.deadline };
+  if (locked) {
+    for (const key of ["reward_min", "reward_max", "deadline_on"] as const) {
+      if (fd.has(key) && text(fd, key).trim() !== stored[key]) return { message: LOCKED_MESSAGE, values: { ...draft.values, ...stored } };
+    }
+  }
+  const { values, errors, input } = readProjectForm(fd, locked ? stored : {});
+  if (Object.keys(errors).length > 0) return { errors, values };
+
+  let failure: string | null = null;
+  try {
+    const patch: Record<string, unknown> = {
+      title: input.title,
+      summary: input.summary,
+      description: input.description,
+      roles: input.roles,
+      genres: input.genres,
+      opens_on: input.opensOn,
+      work_starts_on: input.workStartsOn,
+      work_ends_on: input.workEndsOn,
+      source: input.source,
+      source_work_id: input.sourceWorkId,
+    };
+    if (!locked) {
+      patch.reward_min = input.rewardMin;
+      patch.reward_max = input.rewardMax;
+      patch.deadline_on = input.deadlineOn;
+    }
+    const { data, error } = await (await createAuthClient()).from("projects").update(patch).eq("id", projectId).is("deleted_at", null).select("id");
+    if (error) failure = error.code === "42501" ? FUNCTION_MESSAGES.not_admin : error.code === "23514" || error.code === "23503" ? "입력한 내용을 다시 확인해 주세요." : UNAVAILABLE;
+    else if (!data || data.length === 0) failure = FUNCTION_MESSAGES.project_not_found;
+  } catch {
+    failure = UNAVAILABLE;
+  }
+  if (failure) return { message: failure, values };
+
+  revalidatePath("/projects");
+  revalidatePath("/projects/mine");
+  revalidatePath(`/projects/${projectId}`);
+  redirect(`/projects/${projectId}`);
+}
+
+// ── 공고 삭제(운영자, 소프트 삭제) ─────────────────────────────────────────────────
+
+// 행은 지우지 않고 deleted_at만 찍는다. 접수 상태 지원이 남아 있으면 막는다(먼저 모집 마감을 하면 접수 지원이 거절 처리된다).
+export async function deleteProject(_prev: ManageState, fd: FormData): Promise<ManageState> {
+  if (projectsClosed()) return { message: CLOSED_MESSAGE };
+  const gate = await needAdmin();
+  if (!gate.ok) return { message: gate.message };
+  const projectId = text(fd, "project_id");
+  if (!UUID_RE.test(projectId)) return { message: FUNCTION_MESSAGES.project_not_found };
+  try {
+    const sb = await createAuthClient();
+    const { count, error: countError } = await sb.from("project_applications").select("id", { count: "exact", head: true }).eq("project_id", projectId).eq("status", "received");
+    if (countError) return { message: UNAVAILABLE };
+    if ((count ?? 0) > 0) return { message: "접수 상태인 지원이 남아 있어요. 먼저 모집 마감을 해 주세요." };
+    const { data, error } = await sb.from("projects").update({ deleted_at: new Date().toISOString() }).eq("id", projectId).is("deleted_at", null).select("id");
+    if (error) return { message: error.code === "42501" ? FUNCTION_MESSAGES.not_admin : UNAVAILABLE };
+    if (!data || data.length === 0) return { message: FUNCTION_MESSAGES.project_not_found };
+  } catch {
+    return { message: UNAVAILABLE };
+  }
+  revalidatePath("/projects");
+  revalidatePath("/projects/mine");
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath("/mypage/bookmarks");
+  return { ok: true, message: "공고를 삭제했어요." };
 }
 
 // ── 지원자 관리(운영자): 수락 · 거절 · 모집 마감 ─────────────────────────────────
