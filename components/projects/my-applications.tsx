@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CONTRACT_STATUS_LABEL } from "@/lib/contracts";
 import { APPLICATION_LABEL, type MyApplication } from "@/lib/projects";
 import { formatKst } from "@/lib/time";
 import "../creators/creators.css";
@@ -46,7 +47,14 @@ export function MyApplications({ rows }: { rows: MyApplication[] | null }) {
                       {r.decidedAt ? ` · 처리 ${formatKst(r.decidedAt)}` : ""}
                     </span>
                   </div>
-                  <span className={`pj-astatus ${r.status}`}>{APPLICATION_LABEL[r.status]}</span>
+                  <span className="ct-badges">
+                    {r.contract && (
+                      <Link href={`/contracts/${r.contract.id}`} className="btn btn-ghost ct-link">
+                        계약 보기 · {CONTRACT_STATUS_LABEL[r.contract.status]}
+                      </Link>
+                    )}
+                    <span className={`pj-astatus ${r.status}`}>{APPLICATION_LABEL[r.status]}</span>
+                  </span>
                 </li>
               ))}
             </ul>

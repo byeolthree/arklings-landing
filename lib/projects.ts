@@ -1,5 +1,7 @@
 import { applyFilter, type ProjectFilter } from "@/components/projects/filter";
+import { projectsClosed } from "@/components/projects/sample-data";
 import type { Project, ProjectSource, ProjectStatus } from "@/components/projects/types";
+import { listMyContractsByApplication, type ContractStatus } from "@/lib/contracts";
 import type { Role } from "@/lib/collab";
 import { createAuthClient } from "@/lib/supabase/server";
 import { kstIso } from "@/lib/time";
@@ -131,6 +133,7 @@ export type MyApplication = {
   decidedAt: string | null;
   projectId: string;
   projectTitle: string; // 내려간 공고면 빈 글자
+  contract: { id: string; status: ContractStatus } | null; // 이 지원에 붙은 계약(없으면 null). production에서는 읽지 않는다
 };
 
 export async function listMyApplications(userId: string): Promise<MyApplication[] | null> {
@@ -142,13 +145,16 @@ export async function listMyApplications(userId: string): Promise<MyApplication[
       .order("created_at", { ascending: false })
       .limit(100);
     if (error) return null;
-    return ((data ?? []) as unknown as { id: string; status: ApplicationStatus; created_at: string; decided_at: string | null; project_id: string; projects: { title: string } | null }[]).map((r) => ({
+    const list = (data ?? []) as unknown as { id: string; status: ApplicationStatus; created_at: string; decided_at: string | null; project_id: string; projects: { title: string } | null }[];
+    const contracts = projectsClosed() ? new Map<string, { id: string; status: ContractStatus }>() : await listMyContractsByApplication(list.map((r) => r.id));
+    return list.map((r) => ({
       id: r.id,
       status: r.status,
       createdAt: r.created_at,
       decidedAt: r.decided_at,
       projectId: r.project_id,
       projectTitle: r.projects?.title ?? "",
+      contract: contracts.get(r.id) ?? null,
     }));
   } catch {
     return null;

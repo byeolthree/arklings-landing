@@ -32,6 +32,7 @@ export default async function ManagePage({ params }: Props) {
     name: a.name,
     motive: a.motive,
     offer: a.offeredReward === null ? null : `${a.offeredReward.toLocaleString("ko-KR")}만 원`,
+    offerWon: a.offeredReward === null ? null : a.offeredReward * 10000, // 제안 보상(만 원) × 10000 = 원. 수락 입력 칸의 기본값
     period: a.availablePeriod,
     createdLabel: formatKst(a.createdAt),
     decidedLabel: a.decidedAt ? formatKst(a.decidedAt) : null,

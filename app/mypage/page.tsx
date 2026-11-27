@@ -118,6 +118,11 @@ export default async function MyPage({ searchParams }: { searchParams: Promise<R
               <Link href="/mypage/bookmarks" className="btn btn-ghost">
                 내 북마크
               </Link>
+              {process.env.VERCEL_ENV !== "production" && (
+                <Link href="/mypage/payments" className="btn btn-ghost">
+                  결제 내역
+                </Link>
+              )}
               <Link href="/notifications" className="btn btn-ghost">
                 알림
               </Link>

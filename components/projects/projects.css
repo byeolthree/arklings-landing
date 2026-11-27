@@ -249,3 +249,21 @@
 .cr .pj-est-note { margin: 0; font-size: 12px; color: var(--body); }
 .cr .pj-est-act { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .cr .pj-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ── 계약·결제 ─────────────────────────────────────────────── */
+.cr .ct-doc { display: grid; gap: 14px; padding: 20px; margin-bottom: 16px; }
+.cr .ct-doc-title { margin: 0; font-size: 16px; color: var(--title); }
+.cr .ct-dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin: 0; }
+.cr .ct-dl dt { font-size: 12px; color: var(--body); }
+.cr .ct-dl dd { margin: 2px 0 0; font-size: 14px; color: var(--title); }
+.cr .ct-sign { padding-top: 14px; border-top: 1px solid var(--line); }
+.cr .ct-fee { margin: 0; font-size: 13px; line-height: 1.6; color: var(--body); }
+.cr .ct-act { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 12px; }
+.cr .ct-agree { flex-basis: 100%; display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--title); }
+.cr .ct-pay { display: grid; gap: 8px; }
+.cr .ct-badges { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+.cr .ct-link { min-height: 36px; padding: 0 14px; font-size: 13px; }
+.cr .pj-badge.ct-offered, .cr .pj-badge.ct-signing { background: var(--gold); color: var(--title); }
+.cr .pj-badge.ct-active, .cr .pj-badge.ct-completed { background: var(--jaju); color: #fff; }
+.cr .pj-badge.ct-declined, .cr .pj-badge.ct-cancelled { background: var(--line); color: var(--title); }
+.cr .pj-offer { display: grid; gap: 12px; padding-top: 14px; border-top: 1px solid var(--line); }
