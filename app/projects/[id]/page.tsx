@@ -6,7 +6,7 @@ import { projectsClosed } from "@/components/projects/sample-data";
 import { NotFoundView } from "@/components/creators/state-views";
 import { isAdminUser } from "@/lib/admin-collab";
 import { getCurrentUser } from "@/lib/auth";
-import { getPublicProject, listPublicProjects, myApplicationStatus, myBookmarkIds } from "@/lib/projects";
+import { getPublicProject, listPublicProjects, myApplicationStatus, myBookmarkIds, pickSimilarProjects } from "@/lib/projects";
 
 export const dynamic = "force-dynamic"; // 마감까지 남은 날(D-day)·지원자 수·내 지원 상태를 열 때마다 새로 읽는다
 
@@ -35,10 +35,7 @@ export default async function ProjectPage({ params }: Props) {
     user ? myBookmarkIds(user.id) : Promise.resolve([]),
     user ? isAdminUser() : Promise.resolve(false),
   ]);
-  // 추천 3장: 모집 중인 다른 공고 중 같은 역할을 먼저, 모자라면 나머지 모집 중 공고로 채운다.
-  const others = (all ?? []).filter((p) => p.id !== id && p.status === "open");
-  const same = others.filter((p) => p.roles.some((r) => project.roles.includes(r)));
-  const related = [...same, ...others.filter((p) => !same.includes(p))].slice(0, 3);
-
+  // 「비슷한 프로젝트」 최대 3장: 모집 중인 다른 공고 중 역할·장르가 겹치는 것을 먼저(겹치는 개수 많은 순, 같으면 최신순), 모자라면 최신 모집 중 공고로 채운다.
+  const related = pickSimilarProjects(project, all ?? []);
   return <ProjectDetail p={project} related={related} today={todayKst()} myStatus={myStatus} bookmarked={bookmarkedIds.includes(id)} bookmarkedIds={bookmarkedIds} loggedIn={user !== null} isAdmin={isAdmin} />;
 }
