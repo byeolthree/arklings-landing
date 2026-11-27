@@ -86,7 +86,7 @@ export function ContractView({ contract: c, payment: p, role, tossClientKey }: {
         note = "결제가 끝났어요. 크리에이터가 납품하기를 기다리고 있어요.";
       } else {
         note = "크리에이터가 납품했어요. 확인한 뒤 정산해 주세요.";
-        buttons = btn({ key: "complete", label: "납품 확인하고 정산하기", confirm: `납품을 확인했나요? 수수료 ${won(fee)}를 뺀 ${won(payout)}을 크리에이터 정산으로 기록하고 계약을 끝내요(실제 이체는 없어요).`, run: () => approveCompletion(c.id) }, "primary");
+        buttons = btn({ key: "complete", label: "정산하기", confirm: `납품을 확인했나요? 수수료 ${won(fee)}를 뺀 ${won(payout)}을 크리에이터 정산으로 기록하고 계약을 끝내요(실제 이체는 없어요).`, run: () => approveCompletion(c.id) }, "primary");
       }
     } else if (!paid) {
       note = "계약이 체결되었어요. 운영자의 결제를 기다리고 있어요.";
