@@ -238,6 +238,7 @@
 .cr .pj-est-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
 .cr .pj-est-head b { color: var(--title); font-size: 15px; }
 .cr .pj-est-head p { margin: 4px 0 0; font-size: 13px; color: var(--body); }
+.cr .pj-est > *, .cr .pj-est-result { min-width: 0; }   /* 격자 칸이 표 너비만큼 늘어나 카드 밖으로 넘치지 않게 */
 .cr .pj-est-scroll { overflow-x: auto; }
 .cr .pj-est-table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 13px; line-height: 1.5; color: var(--body); }
 .cr .pj-est-table th, .cr .pj-est-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
