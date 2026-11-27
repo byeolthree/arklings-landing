@@ -40,8 +40,8 @@ export function PaymentList({ rows, isAdmin }: { rows: PaymentListRow[] | null; 
                     </span>
                     <span className="pj-row-sub">
                       {r.approvedAt ? `결제 ${formatKst(r.approvedAt)}` : "결제 전"}
-                      {r.deliveredAt ? ` · 납품 요청 ${formatKst(r.deliveredAt)}` : ""}
-                      {r.completedAt ? ` · 완료 ${formatKst(r.completedAt)}` : ""}
+                      {r.deliveredAt ? ` · 납품 ${formatKst(r.deliveredAt)}` : ""}
+                      {r.completedAt ? ` · 정산 ${formatKst(r.completedAt)}` : ""}
                     </span>
                   </div>
                   <span className="ct-badges">

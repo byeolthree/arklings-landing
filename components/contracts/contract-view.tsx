@@ -83,21 +83,21 @@ export function ContractView({ contract: c, payment: p, role, tossClientKey }: {
         note = "계약이 체결되었어요. 대금을 결제해 주세요(테스트 결제예요).";
         buttons = <PayButton contractId={c.id} orderName={c.projectTitle} clientKey={tossClientKey} />;
       } else if (!p?.deliveredAt) {
-        note = "결제가 끝났어요. 크리에이터의 납품 요청을 기다리고 있어요.";
+        note = "결제가 끝났어요. 크리에이터가 납품하기를 기다리고 있어요.";
       } else {
-        note = "크리에이터가 납품을 요청했어요. 확인한 뒤 완료를 승인해 주세요.";
-        buttons = btn({ key: "complete", label: "완료 승인", confirm: `완료를 승인할까요? 수수료 ${won(fee)}를 뺀 정산액 ${won(payout)}이 기록돼요(실제 이체는 없어요).`, run: () => approveCompletion(c.id) }, "primary");
+        note = "크리에이터가 납품했어요. 확인한 뒤 정산해 주세요.";
+        buttons = btn({ key: "complete", label: "납품 확인하고 정산하기", confirm: `납품을 확인했나요? 수수료 ${won(fee)}를 뺀 ${won(payout)}을 크리에이터 정산으로 기록하고 계약을 끝내요(실제 이체는 없어요).`, run: () => approveCompletion(c.id) }, "primary");
       }
     } else if (!paid) {
       note = "계약이 체결되었어요. 운영자의 결제를 기다리고 있어요.";
     } else if (!p?.deliveredAt) {
-      note = "결제가 끝났어요. 작업을 마쳤다면 납품을 요청해 주세요.";
-      buttons = btn({ key: "deliver", label: "납품 요청", confirm: "납품을 요청할까요? 운영자가 확인한 뒤 완료를 승인해요.", run: () => requestDelivery(c.id) }, "primary");
+      note = "결제가 끝났어요. 작업을 마쳤다면 납품해 주세요.";
+      buttons = btn({ key: "deliver", label: "납품하기", confirm: "납품할까요? 운영자가 확인하고 정산하면 계약이 끝나요.", run: () => requestDelivery(c.id) }, "primary");
     } else {
-      note = "납품을 요청했어요. 운영자의 완료 승인을 기다리고 있어요.";
+      note = "납품했어요. 운영자가 확인하고 정산하기를 기다리고 있어요.";
     }
   } else if (c.status === "completed") {
-    note = "완료가 승인되었어요.";
+    note = "정산이 기록되고 계약이 끝났어요.";
   } else {
     note = c.status === "declined" ? "크리에이터가 금액 제시를 거부했어요." : "계약이 취소되었어요.";
   }
@@ -189,11 +189,11 @@ export function ContractView({ contract: c, payment: p, role, tossClientKey }: {
                   <dd>{p.approvedAt ? formatKst(p.approvedAt) : "-"}</dd>
                 </div>
                 <div>
-                  <dt>납품 요청</dt>
+                  <dt>납품</dt>
                   <dd>{p.deliveredAt ? formatKst(p.deliveredAt) : "-"}</dd>
                 </div>
                 <div>
-                  <dt>완료 승인</dt>
+                  <dt>정산</dt>
                   <dd>{p.completedAt ? formatKst(p.completedAt) : "-"}</dd>
                 </div>
                 {p.status === "paid_out" && p.feeWon !== null && p.payoutWon !== null && (

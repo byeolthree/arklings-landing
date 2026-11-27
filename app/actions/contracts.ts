@@ -96,12 +96,12 @@ export async function cancelContract(contractId: string): Promise<ContractState>
   return run(contractId, false, (sb) => sb.rpc("cancel_contract", { p_contract: contractId }), "계약을 취소했어요. 공고는 다시 모집 중이 돼요.");
 }
 
-// 크리에이터: 결제된 계약의 납품을 요청한다.
+// 크리에이터: 결제된 계약을 납품한다.
 export async function requestDelivery(contractId: string): Promise<ContractState> {
-  return run(contractId, false, (sb) => sb.rpc("request_delivery", { p_contract: contractId }), "납품을 요청했어요. 운영자의 완료 승인을 기다려 주세요.");
+  return run(contractId, false, (sb) => sb.rpc("request_delivery", { p_contract: contractId }), "납품했어요. 운영자의 정산을 기다려 주세요.");
 }
 
-// 운영자: 납품을 확인하고 완료를 승인한다(수수료·정산액을 기록한다. 실제 이체는 없다).
+// 운영자: 납품을 확인하고 정산한다(수수료·정산액을 기록하고 계약을 끝낸다. 실제 이체는 없다).
 export async function approveCompletion(contractId: string): Promise<ContractState> {
-  return run(contractId, true, (sb) => sb.rpc("approve_completion", { p_contract: contractId }), "완료를 승인했어요. 수수료와 정산액을 기록했어요.");
+  return run(contractId, true, (sb) => sb.rpc("approve_completion", { p_contract: contractId }), "정산을 기록했어요. 계약이 끝났어요.");
 }

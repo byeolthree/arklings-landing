@@ -42,8 +42,8 @@ export const CONTRACT_MESSAGES: Record<string, string> = {
   order_not_ready: "이미 처리된 결제 주문이에요.",
   amount_mismatch: "결제 금액이 계약 금액과 달라요.",
   payment_key_invalid: "결제 정보가 올바르지 않아요.",
-  delivery_not_allowed: "결제가 끝난 계약에서만 납품을 요청할 수 있어요. 이미 요청했다면 승인을 기다려 주세요.",
-  completion_not_allowed: "납품 요청이 있는 결제 완료 계약만 승인할 수 있어요.",
+  delivery_not_allowed: "결제가 끝난 계약에서만 납품할 수 있어요. 이미 납품했다면 운영자의 정산을 기다려 주세요.",
+  completion_not_allowed: "납품이 있는 결제 완료 계약만 정산할 수 있어요.",
 };
 export const CONTRACT_UNAVAILABLE = "지금은 처리할 수 없어요. 잠시 뒤에 다시 시도해 주세요.";
 
