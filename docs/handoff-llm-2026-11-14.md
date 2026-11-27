@@ -67,7 +67,8 @@
 - 저장소: `byeolthree/arklings-landing`. 작업 가지는 `dev`다.
 - dev 주소: https://arklings-main-deploy-git-dev-chongaaa19-7825s-projects.vercel.app
 - 배포 확인: `gh api repos/byeolthree/arklings-landing/commits/<SHA>/status --jq .state`가 success가 될 때까지 본다.
-- Vercel 프로젝트 `arklings-main-deploy`(팀 `chongaaa19-7825s-projects`). Supabase 프로젝트 `arklings-seoul`(ref `xgtjgiiiygcapfbntfvn`)은 실서비스 DB다.
+- Vercel 프로젝트 `arklings-main-deploy`(팀 `chongaaa19-7825s-projects`). Supabase 프로젝트 `arklings-landing`(서울, ref `xgtjgiiiygcapfbntfvn`)은 실서비스 DB다.
+- 옛 도쿄 DB `arklings-tokyo`(ref `pvorekcfxkrdkinlpoum`)는 사이트가 쓰지 않는다.
 - 저장소에는 훅이 걸려 있다(티켓 001). 파일을 고치기 전에 해석과 고칠 파일을 보고한다. 고칠 파일은 답변 안에 ```scope 블록으로 한 줄에 하나씩 적는다. 아키텍터가 "해"라고 답하면 훅이 그 블록으로 범위를 만든다(티켓 003). `.claude/state` 안 파일은 모델이 직접 쓰지 않는다.
 
 ### LLM 코드 지도
