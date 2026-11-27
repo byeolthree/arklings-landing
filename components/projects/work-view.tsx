@@ -15,11 +15,11 @@ export function WorkView({ work, projects, today, fromId }: { work: SampleProjec
             {fromId ? "← 공고로 돌아가기" : "← 프로젝트 목록"}
           </Link>
           <p className="pj-eyebrow">작품</p>
-          <h1 className="pj-form-title serif">「{work.title}」</h1>
+          <h1 className="pj-form-title name">「{work.title}」</h1>
           <p className="pj-body sm">{work.blurb}</p>
           <div className="pj-logline">
             <p className="pj-logline-head">
-              <b className="pj-serif">{work.title}</b>
+              <b className="pj-name">{work.title}</b>
               <span aria-hidden="true">·</span>
               <b className="pj-kind">로그라인</b>
             </p>
