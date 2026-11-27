@@ -232,3 +232,20 @@
 .cr .pj-applicant-act { display: flex; justify-content: flex-end; gap: 12px; }
 
 @media (prefers-reduced-motion: reduce) { .cr .pj-cta-btn { transition: none; } }
+
+/* ── AI 단가 분석(공고 올리기·수정 화면) ─────────────────────── */
+.cr .pj-est { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+.cr .pj-est-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.cr .pj-est-head b { color: var(--title); font-size: 15px; }
+.cr .pj-est-head p { margin: 4px 0 0; font-size: 13px; color: var(--body); }
+.cr .pj-est-scroll { overflow-x: auto; }
+.cr .pj-est-table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: 13px; line-height: 1.5; color: var(--body); }
+.cr .pj-est-table th, .cr .pj-est-table td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.cr .pj-est-table thead th { font-size: 12px; font-weight: 500; color: var(--title); }
+.cr .pj-est-table tbody th { font-weight: 700; color: var(--title); }
+.cr .pj-est-table .num { text-align: right; white-space: nowrap; }
+.cr .pj-est-table tfoot th, .cr .pj-est-table tfoot td { border-bottom: 0; color: var(--title); }
+.cr .pj-est-flag { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--tint); color: var(--title); font-size: 11px; }
+.cr .pj-est-note { margin: 0; font-size: 12px; color: var(--body); }
+.cr .pj-est-act { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.cr .pj-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

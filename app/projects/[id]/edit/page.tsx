@@ -11,6 +11,7 @@ type Props = { params: Promise<{ id: string }> };
 
 export const metadata: Metadata = { title: "공고 수정 · 프로젝트", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic"; // 운영자 여부·지원자 수를 열 때마다 새로 확인한다
+export const maxDuration = 60; // AI 단가 분석(Server Action)이 모델을 최대 두 번 기다리는 시간의 서버 전체 상한(초)
 
 // 공고 수정 화면. 운영자만 열린다(아니면 404). 마감된 공고는 안내만 보인다. 저장은 updateProject가 하고, 서버가 다시 한 번 막는다.
 export default async function EditProjectPage({ params }: Props) {

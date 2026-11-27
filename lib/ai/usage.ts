@@ -3,7 +3,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { UUID_RE } from "@/lib/utils";
 
-export type AiFeature = "evaluate_logline" | "library_ask";
+export type AiFeature = "evaluate_logline" | "library_ask" | "estimate_project";
 export type Reserve = { ok: true; holdId: string } | { ok: false; reason: "limit" | "unavailable" };
 
 // 모델을 부르기 전에 부른다. 한도가 찼으면 limit, DB 함수가 없거나 오류이면 unavailable(조회 실패를 0으로 보고 통과시키지 않는다).

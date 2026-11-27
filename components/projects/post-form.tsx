@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { createProject, updateProject, type PostState } from "@/app/actions/projects";
 import { GENRES } from "../creators/genres";
 import { ROLES } from "@/lib/collab";
+import { EstimatePanel } from "./estimate-panel";
 import "../creators/creators.css";
 import "./projects.css";
 
@@ -146,6 +147,7 @@ export function PostForm({
                 {err("source_work_id")}
               </div>
             </div>
+            <EstimatePanel locked={lock} />
             <div className="pj-form-act">
               <Link href={backHref} className="btn btn-ghost">
                 취소

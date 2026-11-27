@@ -56,6 +56,14 @@ const FAKE_EVAL = {
     { label: "위험", status: "needs", reason: "[가짜 모델 고정 결과] 실패하면 잃는 것이 막연해요.", fix: "실패하면 주인공이 가장 아끼는 무엇을 잃나요?" },
   ],
 };
+const FAKE_ESTIMATE = {
+  items: [
+    { name: "콘티 작업", description: "[가짜 모델 고정 결과] 공고의 장면을 콘티로 옮기는 일이에요.", unitPrice: 1500000, basis: "제작·연출 외주 영상 완성품 시장가(1편 소규모 편집 100만~300만 원)의 중간값을 썼어요.", strength: "weak" },
+    { name: "원고 정리", description: "[가짜 모델 고정 결과] 대본 원고를 다듬는 일이에요.", unitPrice: 868000, basis: "웹툰 화당 평균 원고료 868,000원 × 1화로 계산했어요.", strength: "medium" },
+    { name: "연출 기준 정하기", description: "[가짜 모델 고정 결과] 단가표에 없는 작업이에요.", unitPrice: 0, basis: "기준 없음", strength: "none" },
+  ],
+  total: 2368000,
+};
 const FAKE_ANSWER = "이 답은 가짜 모델이 정해 둔 시험용 답이에요. 서버가 고른 자료 안에서만 답하는 흐름을 확인하려는 것이며, 실제 AI의 답이 아니에요.";
 
 function fakeModel() {
@@ -66,7 +74,16 @@ function fakeModel() {
       const text = lastUserText(options.prompt as unknown as PromptLike);
       const err = failFor(text);
       if (err) throw err;
-      const body = text.includes("형식 오류") ? '{"slots":[]}' : JSON.stringify(FAKE_EVAL);
+      const estimating = text.includes("[단가분석]"); // AI 단가 분석 요청이면 단가 분석용 고정 결과를 돌려준다
+      const body = estimating
+        ? text.includes("형식 오류")
+          ? '{"items":[]}'
+          : text.includes("합계 오류")
+            ? JSON.stringify({ ...FAKE_ESTIMATE, total: FAKE_ESTIMATE.total + 1 })
+            : JSON.stringify(FAKE_ESTIMATE)
+        : text.includes("형식 오류")
+          ? '{"slots":[]}'
+          : JSON.stringify(FAKE_EVAL);
       return { content: [{ type: "text" as const, text: body }], finishReason: { unified: "stop" as const, raw: undefined }, usage: usage(10, 20), warnings: [] };
     },
     doStream: async (options) => {

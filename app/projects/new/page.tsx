@@ -8,6 +8,7 @@ import { listSourceWorks } from "@/lib/projects";
 
 export const metadata: Metadata = { title: "공고 올리기 · 프로젝트", robots: { index: false } };
 export const dynamic = "force-dynamic"; // 운영자 여부를 열 때마다 새로 확인한다
+export const maxDuration = 60; // AI 단가 분석(Server Action)이 모델을 최대 두 번 기다리는 시간의 서버 전체 상한(초)
 
 // 공고 올리기 화면. 운영자만 열린다(아니면 404). 저장은 createProject가 projects 표에 한다.
 export default async function NewProjectPage() {
