@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { signOut } from "@/app/actions/auth";
+import { createBrowserSupabase } from "@/lib/supabase/browser";
 
 // 랜딩(public/landing.html)의 상단 메뉴와 같은 모양. 가운데 메뉴 글자 중 연결된 화면이 있는 것만 링크(「크리에이터」「라이브러리」), 나머지는 글자로만 둔다.
 const MENU: { label: string; href?: string }[] = [
@@ -41,14 +42,49 @@ const BellIcon = () => (
 );
 
 // 로그인하면 아이콘 셋(＋ · 사람 · 종), 아니면 ＋와 사람 둘. 종의 개수와 목록은 서버가 읽은 새 협업 신청(SiteHeader)이다.
-export function SiteNav({ loggedIn, newCount, unreadNotifications = 0, notices, isAdmin = false, plusHref }: { loggedIn: boolean; newCount: number | null; unreadNotifications?: number; notices: NavNotice[]; isAdmin?: boolean; plusHref?: string }) {
+export function SiteNav({ loggedIn, userId, newCount, unreadNotifications = 0, notices, isAdmin = false, plusHref }: { loggedIn: boolean; userId?: string; newCount: number | null; unreadNotifications?: number; notices: NavNotice[]; isAdmin?: boolean; plusHref?: string }) {
   const [open, setOpen] = useState(false);
   const [drop, setDrop] = useState<Drop>(null);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const navRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const isIn = loggedIn;
+
+  // 실시간 알림: 로그인한 사람의 notifications INSERT(내 것만, 0036·RLS)를 받으면 서버가 종 개수와 목록을 다시 읽게 한다(router.refresh).
+  // 로그아웃 상태에서는 구독하지 않고, 화면을 떠나거나 로그아웃하면 구독을 끈다. 연결이 안 되거나 끊겨도 메뉴는 지금처럼 동작한다(알림은 새로고침하면 보인다).
+  useEffect(() => {
+    if (!loggedIn || !userId) return;
+    const supabase = createBrowserSupabase();
+    if (!supabase) return;
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    const refreshSoon = () => {
+      if (timer) clearTimeout(timer); // 알림이 몰려 와도 새로고침은 한 번만
+      timer = setTimeout(() => router.refresh(), 300);
+    };
+    void (async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (stopped || !data.session) return;
+        await supabase.realtime.setAuth(data.session.access_token); // 내 로그인으로 받아야 RLS(본인 알림만)가 적용된다
+        if (stopped) return;
+        channel = supabase
+          .channel(`nav-notifications-${userId}`)
+          .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, refreshSoon)
+          .subscribe();
+      } catch {
+        // 실시간만 안 될 뿐 메뉴는 그대로 쓴다
+      }
+    })();
+    return () => {
+      stopped = true;
+      if (timer) clearTimeout(timer);
+      if (channel) void supabase.removeChannel(channel);
+    };
+  }, [loggedIn, userId, router]);
 
   // 크리에이터 목록·프로필과 그 사람의 기획안 상세에 있을 때 메뉴의 「크리에이터」를 현재 위치로 보여 준다.
   const onCreators = pathname.startsWith("/creators") || pathname.startsWith("/portfolio") || pathname.startsWith("/dev-preview/creators") || pathname.startsWith("/dev-preview/portfolio/");

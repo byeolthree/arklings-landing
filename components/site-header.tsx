@@ -24,5 +24,5 @@ export async function SiteHeader() {
     }
   }
   // 종 아이콘 개수 = 접수 상태 협업 신청 수 + 읽지 않은 알림 수
-  return <SiteNav loggedIn={user !== null} newCount={bellCount(count, unread)} unreadNotifications={unread ?? 0} notices={notices} isAdmin={admin} plusHref={plusHref} />;
+  return <SiteNav loggedIn={user !== null} userId={user?.id} newCount={bellCount(count, unread)} unreadNotifications={unread ?? 0} notices={notices} isAdmin={admin} plusHref={plusHref} />;
 }
