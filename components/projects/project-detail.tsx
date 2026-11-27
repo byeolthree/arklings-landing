@@ -45,7 +45,7 @@ function periodCell(p: Project): { big: string; sub: string } {
   return { big: "협의", sub: "지원 때 조율해요" };
 }
 
-// 프로젝트 상세. 위에서 아래로: 대표 칸 → 정보 카드 → 하는 일 → 연결 작품 → 지원 띠 → 추천 프로젝트
+// 프로젝트 상세. 위에서 아래로: 대표 칸 → 정보 카드 → 하는 일 → 연결 작품 → 지원 띠 → 비슷한 프로젝트
 // (DB에 칸이 없는 「작업 범위」·「일정 4단계」·연결 작품의 소개·로그라인·대표 이미지는 화면에서 뺐다. 2026-11-26)
 export function ProjectDetail({
   p,
@@ -188,12 +188,12 @@ export function ProjectDetail({
         </div>
       </section>
 
-      {/* (사) 추천 프로젝트 카드 3장 */}
+      {/* (사) 비슷한 프로젝트 카드 최대 3장(목록의 ProjectCard 그대로). 한 건도 없으면 구역을 숨긴다 */}
       {related.length > 0 && (
         <section className="pj-rec">
           <div className="wrap">
             <div className="pj-rec-head">
-              <h2>추천 프로젝트</h2>
+              <h2>비슷한 프로젝트</h2>
               <Link href="/projects" className="cr-clear">
                 전체 보기
               </Link>

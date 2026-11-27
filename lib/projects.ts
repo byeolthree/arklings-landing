@@ -95,6 +95,19 @@ export async function getPublicProject(id: string): Promise<{ project: Project |
   }
 }
 
+// 「비슷한 프로젝트」: 모집 중인 다른 공고 중 찾는 역할·장르가 겹치는 것을 먼저, 겹치는 개수가 많은 순서(같으면 최신순)로 최대 limit건.
+// 겹치는 것이 모자라면 나머지 모집 중 공고를 최신순으로 채운다. 읽어 온 공고 전체(listPublicProjects는 최신순으로 오므로 순서 번호가 작을수록 최신)에서 고르므로 DB를 더 부르지 않는다.
+export function pickSimilarProjects(current: Project, all: Project[], limit = 3): Project[] {
+  const roles = new Set<string>(current.roles);
+  const genres = new Set(current.genres);
+  const open = all.filter((p) => p.id !== current.id && p.status === "open");
+  const overlap = (p: Project) => p.roles.filter((r) => roles.has(r)).length + p.genres.filter((g) => genres.has(g)).length;
+  const scored = open.map((p, i) => ({ p, i, n: overlap(p) }));
+  const similar = scored.filter((s) => s.n > 0).sort((a, b) => b.n - a.n || a.i - b.i);
+  const rest = scored.filter((s) => s.n === 0);
+  return [...similar, ...rest].slice(0, limit).map((s) => s.p);
+}
+
 // 목록 거르기·정렬. 보상이 「협의」인 공고는 보상 구간을 고르면 빠지고, 보상 높은순에서는 맨 뒤로 간다.
 export function applyProjectFilter(all: Project[], f: ProjectFilter): Project[] {
   const list = applyFilter(f.reward ? all.filter((p) => !p.negotiable) : [...all], f);
