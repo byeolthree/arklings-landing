@@ -341,7 +341,7 @@ export async function deleteProject(_prev: ManageState, fd: FormData): Promise<M
   return { ok: true, message: "공고를 삭제했어요." };
 }
 
-// ── 지원자 관리(운영자): 수락 · 거절 · 모집 마감 ─────────────────────────────────
+// ── 지원자 관리(운영자): 거절 · 모집 마감 (수락은 금액·기간을 함께 제시하는 acceptWithOffer, app/actions/contracts.ts) ─────────────────────────────────
 
 export type ManageState = { ok?: boolean; message?: string };
 
@@ -350,24 +350,6 @@ function refreshManage(projectId: string) {
   revalidatePath(`/projects/${projectId}`);
   revalidatePath("/projects");
   revalidatePath("/", "layout"); // 상단 종 아이콘 개수
-}
-
-export async function acceptApplication(_prev: ManageState, fd: FormData): Promise<ManageState> {
-  if (projectsClosed()) return { message: CLOSED_MESSAGE };
-  const gate = await needAdmin();
-  if (!gate.ok) return { message: gate.message };
-  const applicationId = text(fd, "application_id");
-  const projectId = text(fd, "project_id");
-  if (!UUID_RE.test(applicationId) || !UUID_RE.test(projectId)) return { message: FUNCTION_MESSAGES.application_not_found };
-  try {
-    const { data, error } = await (await createAuthClient()).rpc("accept_application", { p_application: applicationId });
-    if (error) return { message: functionMessage(error) };
-    refreshManage(projectId);
-    const n = typeof data === "number" ? data : 0;
-    return { ok: true, message: `수락했어요. 나머지 접수 지원 ${n}건은 자동으로 거절되었고, 공고는 마감되었어요.` };
-  } catch {
-    return { message: UNAVAILABLE };
-  }
 }
 
 export async function rejectApplication(_prev: ManageState, fd: FormData): Promise<ManageState> {

@@ -4,7 +4,20 @@ import { safeNext } from "@/lib/safe-next";
 // 알림(0032 notifications). 읽기는 로그인한 본인의 권한(RLS)으로만 하고, 내 알림만 돌아온다. 쓰기는 DB 함수만 한다
 // (알림은 DB 함수 안에서만 들어가고, 읽음 처리는 mark_notifications_read 함수로만 한다).
 
-export type NotificationKind = "project_new_application" | "project_accepted" | "project_auto_rejected" | "project_rejected" | "project_closed";
+export type NotificationKind =
+  | "project_new_application"
+  | "project_accepted"
+  | "project_auto_rejected"
+  | "project_rejected"
+  | "project_closed"
+  | "contract_offered"
+  | "contract_agreed"
+  | "contract_declined"
+  | "contract_signed"
+  | "contract_cancelled"
+  | "payment_paid"
+  | "delivery_requested"
+  | "work_completed";
 
 export type NotificationRow = { id: string; kind: NotificationKind; href: string; body: string; readAt: string | null; createdAt: string };
 
