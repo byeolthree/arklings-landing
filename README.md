@@ -110,22 +110,6 @@ Next.js(App Router, Server Actions) + Supabase(DB·Storage·로그인) + Vercel.
 | 평가 기준 문항 | `components/planner/questions.ts` |
 | DB | `supabase/migrations/0017_ai_usage.sql`(하루 횟수), `0018_plan_evaluations.sql`(평가 결과), `0019_library_wiki.sql`(위키), `0020_ai_usage_remaining.sql`(남은 횟수), `0022`·`0024`(한도 숫자) |
 
-## 팀 미션 (WorkBridge 기준, 2026-11)
-
-부트캠프 팀 미션 공고(외주 매칭 플랫폼)를 아클링스에 맞춰 적용했습니다. 운영자가 「프로젝트」 공고를 올리고, 크리에이터가 지원합니다.
-
-| 문서 | 내용 |
-|---|---|
-| [`docs/team-mission-erd.md`](docs/team-mission-erd.md) | 표 관계도(ERD)와 상태 흐름 |
-| [`docs/team-mission-api.md`](docs/team-mission-api.md) | 서버 인터페이스 명세서(입력·출력·인증·권한·부수 효과) |
-| [`docs/estimate-rates.md`](docs/estimate-rates.md) | AI 단가 분석의 기준 단가표 |
-| [`docs/screen-contract.md`](docs/screen-contract.md) | 화면별 처리 함수·칸 이름·이동 주소 |
-
-- DB: `supabase/migrations/0029`~`0035`(공고·지원·처리 함수·알림·북마크·예약 마감·AI 기능 이름·계약·결제)를 번호 순서대로 실행합니다.
-- 시연용 데이터: [`supabase/seed/team-mission-demo.sql`](supabase/seed/team-mission-demo.sql)을 SQL Editor에서 실행하면 「[시연]」 공고 4개(모집 중 3, 마감 1)와 지원서가 들어갑니다. 여러 번 실행해도 겹치지 않고, 파일 맨 위에 숨기는 방법이 있습니다. 계약·결제는 시연 때 화면에서 직접 만듭니다.
-- 환경 변수(이름만): `NEXT_TOSS_CLIENT_KEY`(토스 클라이언트 키), `TOSS_SECRET_KEY`(토스 시크릿 키, 서버 전용, `test_` 키만 승인 API를 부릅니다), `OPENAI_API_KEY`.
-- 결제는 토스페이먼츠 테스트 결제입니다. 실제 돈은 나가지 않고, 정산은 기록만 합니다(수수료 10%, 1원 단위 버림).
-
 ## 테이블 구조
 
 - 처음 구조: [`supabase/schema.sql`](supabase/schema.sql) — `source_works`(작품 3개), `collab_requests`(협업 신청)
